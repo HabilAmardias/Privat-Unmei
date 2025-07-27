@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privat Unmei - Low Fidelity Wireframes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .wireframe-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border: 2px solid #333;
+            margin-bottom: 40px;
+            padding: 20px;
+        }
+
+        .wireframe-title {
+            background: #333;
+            color: white;
+            padding: 10px;
+            margin: -20px -20px 20px -20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .nav-tabs {
+            display: flex;
+            border-bottom: 2px solid #333;
+            margin-bottom: 20px;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border: 1px solid #333;
+            border-bottom: none;
+            cursor: pointer;
+            margin-right: 2px;
+        }
+
+        .nav-tab.active {
+            background: white;
+            border-bottom: 2px solid white;
+            margin-bottom: -2px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .wireframe-section {
+            border: 1px solid #666;
+            margin: 10px 0;
+            padding: 15px;
+            background: #fafafa;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #333;
+            background: #e9e9e9;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            width: 120px;
+            height: 40px;
+            border: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+        }
+
+        .search-bar {
+            width: 300px;
+            height: 35px;
+            border: 1px solid #333;
+            background: white;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .avatar {
+            width: 35px;
+            height: 35px;
+            border: 1px solid #333;
+            border-radius: 50%;
+            background: white;
+        }
+
+        .cart-icon {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #333;
+            background: white;
+            position: relative;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 15px;
+            height: 15px;
+            background: #333;
+            color: white;
+            border-radius: 50%;
+            font-size: 10px;
+            text-align: center;
+            line-height: 15px;
+        }
+
+        .filters-section {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            border: 1px solid #666;
+            margin-bottom: 20px;
+            background: #f9f9f9;
+        }
+
+        .filter-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 5px 12px;
+            border: 1px solid #333;
+            background: white;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .tag.active {
+            background: #333;
+            color: white;
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .course-card {
+            border: 1px solid #333;
+            padding: 15px;
+            background: white;
+            height: 200px;
+        }
+
+        .course-image {
+            width: 100%;
+            height: 80px;
+            border: 1px solid #666;
+            background: #f0f0f0;
+            margin-bottom: 10px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .page-selector {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .course-detail-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        .course-main {
+            border: 1px solid #333;
+            padding: 20px;
+        }
+
+        .course-sidebar {
+            border: 1px solid #333;
+            padding: 20px;
+        }
+
+        .tabs {
+            border-top: 1px solid #333;
+            margin-top: 20px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            border-bottom: 1px solid #333;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            border-right: 1px solid #333;
+            background: #f0f0f0;
+            cursor: pointer;
+        }
+
+        .tab-button.active {
+            background: white;
+        }
+
+        .calendar {
+            border: 1px solid #333;
+            padding: 15px;
+            margin: 15px 0;
+            height: 200px;
+            background: white;
+        }
+
+        .chat-widget {
+            border: 1px solid #333;
+            margin-top: 20px;
+            height: 150px;
+        }
+
+        .chat-header {
+            background: #333;
+            color: white;
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+
+        .chat-messages {
+            height: 80px;
+            border-bottom: 1px solid #333;
+            background: #f9f9f9;
+        }
+
+        .chat-input {
+            height: 40px;
+            display: flex;
+        }
+
+        .chat-input input {
+            flex: 1;
+            border: none;
+            padding: 10px;
+        }
+
+        .chat-input button {
+            width: 60px;
+            border: none;
+            background: #333;
+            color: white;
+        }
+
+        .form-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 40px;
+            border: 2px solid #333;
+            background: white;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            height: 40px;
+            border: 1px solid #333;
+            padding: 10px;
+        }
+
+        .btn {
+            width: 100%;
+            height: 40px;
+            background: #333;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #333;
+            border: 1px solid #333;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-card {
+            border: 1px solid #333;
+            padding: 20px;
+            background: white;
+            text-align: center;
+            height: 100px;
+        }
+
+        .sidebar {
+            width: 200px;
+            border: 1px solid #333;
+            padding: 15px;
+            background: #f9f9f9;
+        }
+
+        .main-content {
+            flex: 1;
+            border: 1px solid #333;
+            padding: 20px;
+            margin-left: 20px;
+        }
+
+        .dashboard-layout {
+            display: flex;
+        }
+
+        .status-timeline {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .status-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+        }
+
+        .status-circle {
+            width: 30px;
+            height: 30px;
+            border: 2px solid #333;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .status-circle.completed {
+            background: #333;
+            color: white;
+        }
+
+        .status-line {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            right: -50%;
+            height: 2px;
+            background: #ccc;
+            z-index: -1;
+        }
+
+        .status-step:last-child .status-line {
+            display: none;
+        }
+
+        .status-line.completed {
+            background: #333;
+        }
+
+        .cart-items {
+            border: 1px solid #333;
+            margin-bottom: 20px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-summary {
+            border: 1px solid #333;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+        <div class="nav-tab active" onclick="showTab('homepage')">Homepage</div>
+        <div class="nav-tab" onclick="showTab('course-detail')">Course Detail</div>
+        <div class="nav-tab" onclick="showTab('auth')">Authentication</div>
+        <div class="nav-tab" onclick="showTab('user-dashboard')">User Dashboard</div>
+        <div class="nav-tab" onclick="showTab('cart')">Cart</div>
+        <div class="nav-tab" onclick="showTab('order-detail')">Order Detail</div>
+        <div class="nav-tab" onclick="showTab('admin-dashboard')">Admin Dashboard</div>
+        <div class="nav-tab" onclick="showTab('mentor-dashboard')">Mentor Dashboard</div>
+        <div class="nav-tab" onclick="showTab('messaging')">Messaging System</div>
+    </div>
+
+    <!-- Homepage -->
+    <div id="homepage" class="tab-content active">
+        <div class="wireframe-container">
+            <div class="wireframe-title">Homepage - User View</div>
+            
+            <!-- Header -->
+            <div class="header">
+                <div class="logo">PRIVAT UNMEI</div>
+                <div class="search-bar">Search courses and mentors...</div>
+                <div class="user-menu">
+                    <div class="cart-icon">
+                        🛒
+                        <div class="cart-badge">3</div>
+                    </div>
+                    <div class="avatar">👤</div>
+                </div>
+            </div>
+
+            <!-- Filters Section -->
+            <div class="filters-section">
+                <div>
+                    <strong>Categories:</strong>
+                    <div class="filter-tags">
+                        <div class="tag active">All</div>
+                        <div class="tag">Mathematics</div>
+                        <div class="tag">Physics</div>
+                        <div class="tag">Chemistry</div>
+                        <div class="tag">Biology</div>
+                        <div class="tag">Computer Science</div>
+                    </div>
+                </div>
+                <div>
+                    <strong>Method:</strong>
+                    <div class="filter-tags">
+                        <div class="tag active">All</div>
+                        <div class="tag">Online</div>
+                        <div class="tag">Offline</div>
+                        <div class="tag">Hybrid</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Courses Grid -->
+            <div class="courses-grid">
+                <div class="course-card">
+                    <div class="course-image">[Course Image]</div>
+                    <strong>Calculus Fundamentals</strong><br>
+                    <small>By: Dr. Smith</small><br>
+                    <small>Price: $50 | Duration: 7 days</small><br>
+                    <small>⭐ 4.8 (120 reviews)</small>
+                </div>
+                <div class="course-card">
+                    <div class="course-image">[Course Image]</div>
+                    <strong>Linear Algebra</strong><br>
+                    <small>By: Prof. Johnson</small><br>
+                    <small>Price: $75 | Duration: 10 days</small><br>
+                    <small>⭐ 4.9 (89 reviews)</small>
+                </div>
+                <div class="course-card">
+                    <div class="course-image">[Course Image]</div>
+                    <strong>Organic Chemistry</strong><br>
+                    <small>By: Dr. Wilson</small><br>
+                    <small>Price: $60 | Duration: 14 days</small><br>
+                    <small>⭐ 4.7 (156 reviews)</small>
+                </div>
+                <div class="course-card">
+                    <div class="course-image">[Course Image]</div>
+                    <strong>Python Programming</strong><br>
+                    <small>By: Mr. Davis</small><br>
+                    <small>Price: $80 | Duration: 21 days</small><br>
+                    <small>⭐ 4.9 (203 reviews)</small>
+                </div>
+                <div class="course-card">
+                    <div class="course-image">[Course Image]</div>
+                    <strong>Statistics & Probability</strong><br>
+                    <small>By: Dr. Brown</small><br>
+                    <small>Price: $55 | Duration: 12 days</small><br>
+                    <small>⭐ 4.6 (98 reviews)</small>
+                </div>
+                <div class="course-card">
+                    <div class="course-image">[Course Image]</div>
+                    <strong>Quantum Physics</strong><br>
+                    <small>By: Prof. Lee</small><br>
+                    <small>Price: $90 | Duration: 18 days</small><br>
+                    <small>⭐ 4.8 (67 reviews)</small>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button>&lt; Previous</button>
+                <div class="page-selector">
+                    Show: 
+                    <select>
+                        <option>15</option>
+                        <option selected>25</option>
+                        <option>35</option>
+                    </select>
+                    per page
+                </div>
+                <span>Page 1 of 5</span>
+                <button>Next &gt;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Detail -->
+    <div id="course-detail" class="tab-content">
+        <div class="wireframe-container">
+            <div class="wireframe-title">Course Detail Page</div>
+            
+            <!-- Header (same as homepage) -->
+            <div class="header">
+                <div class="logo">PRIVAT UNMEI</div>
+                <div class="search-bar">Search courses and mentors...</div>
+                <div class="user-menu">
+                    <div class="cart-icon">
+                        🛒
+                        <div class="cart-badge">3</div>
+                    </div>
+                    <div class="avatar">👤</div>
+                </div>
+            </div>
+
+            <div class="course-detail-layout">
+                <div class="course-main">
+                    <h2>Calculus Fundamentals</h2>
+                    <p><strong>Mentor:</strong> Dr. Smith</p>
+                    <p><strong>Location:</strong> Jakarta, Indonesia</p>
+                    <p><strong>Method:</strong> Hybrid (Online & Offline)</p>
+                    <p><strong>Price:</strong> $50</p>
+                    <p><strong>Duration:</strong> 7 days</p>
+                    <p><strong>Categories:</strong> Mathematics, Calculus</p>
+                    <p><strong>Rating:</strong> ⭐ 4.8 (120 reviews)</p>
+
+                    <div class="wireframe-section">
+                        <h4>Course Description</h4>
+                        <p>[Course description content would go here. This is a comprehensive course covering fundamental concepts of calculus including limits, derivatives, and integrals.]</p>
+                    </div>
+
+                    <div class="wireframe-section">
+                        <h4>Schedule Selection</h4>
+                        <div class="calendar">
+                            [Interactive Calendar Component]<br>
+                            Available slots:<br>
+                            • Mon-Wed-Fri: 2:00 PM - 4:00 PM<br>
+                            • Tue-Thu: 6:00 PM - 8:00 PM<br>
+                            • Saturday: 10:00 AM - 12:00 PM
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <strong>Selected Schedule:</strong> Mon-Wed-Fri 2:00-4:00 PM<br>
+                            <strong>Course End Date:</strong> 
+                            <input type="date" style="margin-left: 10px;">
+                        </div>
+                    </div>
+
+                    <!-- Tabs for Course Topics -->
+                    <div class="tabs">
+                        <div class="tab-buttons">
+                            <div class="tab-button active">Course Topics</div>
+                            <div class="tab-button">Reviews</div>
+                        </div>
+                        <div style="padding: 20px; border: 1px solid #333; border-top: none;">
+                            <div class="tab-panel active">
+                                <h4>Topics Covered:</h4>
+                                <ul>
+                                    <li>Introduction to Limits</li>
+                                    <li>Derivatives and Applications</li>
+                                    <li>Integration Techniques</li>
+                                    <li>Fundamental Theorem of Calculus</li>
+                                    <li>Applications in Real World</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px; text-align: center;">
+                        <button class="btn" style="width: auto; padding: 10px 20px; margin-right: 10px;">Add to Cart</button>
+                        <button class="btn btn-secondary" style="width: auto; padding: 10px 20px;">Message Mentor</button>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Authentication -->
+    <div id="auth" class="tab-content">
+        <div class="wireframe-container">
+            <div class="wireframe-title">Authentication Pages</div>
+            
+            <div style="display: flex; gap: 40px; justify-content: center;">
+                <!-- Login State -->
+                <div>
+                    <h3 style="text-align: center; margin-bottom: 20px;">Login State</h3>
+                    <div class="form-container">
+                        <h2 style="text-align: center; margin-bottom: 30px;">Welcome Back</h2>
+                        
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" placeholder="Enter your email">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" placeholder="Enter your password">
+                        </div>
+                        
+                        <button class="btn">Login</button>
+                        
+                        <div style="text-align: center; margin: 15px 0;">
+                            <a href="#" style="font-size: 14px;">Forgot Password?</a>
+                        </div>
+                        
+                        <div style="text-align: center; margin: 20px 0; font-size: 14px;">
+                            OR
+                        </div>
+                        
+                        <button class="btn btn-secondary">Login with Google</button>
+                        
+                        <div style="text-align: center; margin-top: 20px;">
+                            <p>Don't have an account?</p>
+                            <button class="btn btn-secondary">Register</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Register State -->
+                <div>
+                    <h3 style="text-align: center; margin-bottom: 20px;">Register State</h3>
+                    <div class="form-container">
+                        <h2 style="text-align: center; margin-bottom: 30px;">Create Account</h2>
+                        
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" placeholder="Enter your full name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" placeholder="Enter your email">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" placeholder="Create a password">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Confirm Password</label>
+                            <input type="password" placeholder="Confirm your password">
+                        </div>
+                        
+                        <button class="btn">Register</button>
+                        
+                        <div style="text-align: center; margin: 20px 0; font-size: 14px;">
+                            OR
+                        </div>
+                        
+                        <button class="btn btn-secondary">Register with Google</button>
+                        
+                        <div style="text-align: center; margin-top: 20px;">
+                            <p>Already have an account?</p>
+                            <button class="btn btn-secondary">Login</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Dashboard -->
+    <div id="user-dashboard" class="tab-content">
+        <div class="wireframe-container">
+            <div class="wireframe-title">User Dashboard</div>
+            
+            <!-- Header -->
+            <div class="header">
+                <div class="logo">PRIVAT UNMEI</div>
+                <div class="search-bar">Search courses and mentors...</div>
+                <div class="user-menu">
+                    <div class="cart-icon">
+                        🛒
+                        <div class="cart-badge">3</div>
+                    </div>
+                    <div class="avatar">👤</div>
+                </div>
+            </div>
+
+            <div class="dashboard-layout">
+                <div class="sidebar">
+                    <h4>Dashboard Menu</h4>
+                    <ul style="list-style: none; margin-top: 15px;">
+                        <li style="padding: 8px 0; border-bottom: 1px solid #ccc;"><a href="#">Profile</a></li>
+                        <li style="padding: 8px 0; border-bottom: 1px solid #ccc;"><a href="#">My Orders</a></li>
+                        <li style="padding: 8px 0; border-bottom: 1px solid #ccc;"><a href="#" style="font-weight: bold; color: #007bff;">💬 Messages (3)</a></li>
+                        <li style="padding: 8px 0; border-bottom: 1px solid #ccc;"><a href="#">Reviews</a></li>
+                        <li style="padding: 8px 0;"><a href="#">Settings</a></li>
+                    </ul>
+                </div>
+
+                <div class="main-content">
+                    <h2>My Profile</h2>
+                    
+                    <div class="wireframe-section">
+                        <div style="display: flex; gap: 30px;">
+                            <div>
+                                <div style="width: 100px; height: 100px; border: 1px solid #333; margin-bottom: 10px;">[Profile Photo]</div>
+                                <button class="btn" style="width: 100px; height: 30px; font-size: 12px;">Change Photo</button>
+                            </div>
+                            <div style="flex: 1;">
+                                <div class="form-group">
+                                    <label>Full Name</label>
+                                    <input type="text" value="John Doe">
+                                </div>
+                                <div class="form-group">
+                                    <label>Email Address</label>
+                                    <input type="email" value="john.doe@email.com" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Phone Number</label>
+                                    <input type="tel" value="+1234567890">
+                                </div>
+                                <button class="btn" style="width: 150px;">Update Profile</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wireframe-section">
+                        <h4>Recent Orders</h4>
+                        <div style="border: 1px solid #ccc; padding: 15px; margin-top: 10px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span><strong>Calculus Fundamentals</strong></span>
+                                <span class="tag">In Progress</span>
+                            </div>
+                            <p>Mentor: Dr. Smith | Started: 2024-01-15</p>
+                        </div>
+                        <div style="border: 1px solid #ccc; padding: 15px; margin-top: 10px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span><strong>Linear Algebra</strong></span>
+                                <span class="tag">Pending Payment</span>
+                            </div>
+                            <p>Mentor: Prof. Johnson | Ordered: 2024-01-18</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart -->
+    <div id="cart" class="tab-content">
+        <div class="wireframe-container">
+            <div class="wireframe-title">Shopping Cart</div>
+            
+            <!-- Header -->
+            <div class="header">
+                <div class="logo">PRIVAT UNMEI</div>
+                <div class="search-bar">Search courses and mentors...</div>
+                <div class="user-menu">
+                    <div class="cart-icon">
+                        🛒
+                        <div class="cart-badge">3</div>
+                    </div>
+                    <div class="avatar">👤</div>
+                </div>
+            </div>
+
+            <h2 style="margin-bottom: 20px;">My Cart (3 items)</h2>
+
+            <div style="display: flex; gap: 30px;">
+                <div style="flex: 2;">
+                    <div class="cart-items">
+                        <div class="cart-item">
+                            <div style="display: flex; gap: 15px; align-items: center;">
+                                <div style="width: 60px; height: 60px; border: 1px solid #333;">[IMG]</div>
+                                <div>
+                                    <h4>Calculus Fundamentals</h4>
+                                    <p>Mentor: Dr. Smith</p>
+                                    <p>Schedule: Mon-Wed-Fri 2:00-4:00 PM</p>
+                                    <p>Duration: 7 days</p>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <p><strong>$50</strong></p>
+                                <button style="background: none; border: 1px solid #333; padding: 5px 10px; cursor: pointer;">Remove</button>
+                            </div>
+                        </div>
+                        
+                        <div class="cart-item">
+                            <div style="display: flex; gap: 15px; align-items: center;">
+                                <div style="width: 60px; height: 60px; border: 1px solid #333;">[IMG]</div>
+                                <div>
+                                    <h4>Linear Algebra</h4>
+                                    <p>Mentor: Prof. Johnson</p>
+                                    <p>Schedule: Tue-Thu 6:00-8:00 PM</p>
+                                    <p>Duration: 10 days</p>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <p><strong>$75</strong></p>
+                                <button style="background: none; border: 1px solid #333; padding: 5px 10px; cursor: pointer;">Remove</button>
+                            </div>
+                        </div>
+                        
+                        <div class="cart-item">
+                            <div style="display: flex; gap: 15px; align-items: center;">
+                                <div style="width: 60px; height: 60px; border: 1px solid #333;">[IMG]</div>
+                                <div>
+                                    <h4>Python Programming</h4>
+                                    <p>Mentor: Mr. Davis</p>
+                                    <p>Schedule: Saturday 10:00-12:00 PM</p>
+                                    <p>Duration: 21 days</p>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <p><strong>$80</strong></p>
+                                <button style="background: none; border: 1px solid #333; padding: 5px 10px; cursor: pointer;">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: left; margin-top: 20px;">
+                        <button class="btn btn-secondary" style="width: auto; padding: 10px 20px;">Continue Shopping</button>
+                    </div>
+                </div>
+
+                <div style="flex: 1;">
+                    <div class="cart-summary">
+                        <h3 style="margin-bottom: 20px;">Order Summary</h3>
+                        
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Subtotal (3 items):</span>
+                            <span>$205</span>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Platform Fee:</span>
+                            <span>$10</span>
+                        </div>
+                        
+                        <hr style="margin: 15px 0;">
+                        
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; font-size: 18px;">
+                            <span>Total:</span>
+                            <span>$215</span>
+                        </div>
+                        
+                        <button class="btn" style="height: 50px; font-size: 16px;">Proceed to Checkout</button>
+                        
+                        <div style="text-align: center; margin-top: 15px; font-size: 12px; color: #666;">
+                            <p>🔒 Secure SSL encryption</p>
+                            <p>💯 Money-back guarantee</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Detail -->
+    <div id="order-detail" class="tab-content">
+        <div class="wireframe-container">
+            <div class="wireframe-title">Order Detail & Status Timeline</div>
+            
+            <!-- Header -->
+            <div class="header">
+                <div class="logo">PRIVAT UNMEI</div>
+                <div class="search-bar">Search courses and mentors...</div>
+                <div class="user-menu">
+                    <div class="cart-icon">
+                        🛒
+                        <div class="cart-badge">3</div>
+                    </div>
+                    <div class="avatar">👤</div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 30px;">
+                <div style="flex: 2;">
+                    <h2>Order #ORD-2024-001</h2>
+                    <p style="margin-bottom: 30px;">Placed on January 15, 2024</p>
+
+                    <!-- Status Timeline -->
+                    <div class="wireframe-section">
+                        <h3 style="margin-bottom: 20px;">Order Status</h3>
+                        <div class="status-timeline">
+                            <div class="status-step">
+                                <div class="status-circle completed">✓</div>
+                                <div class="status-line completed"></div>
+                                <span style="font-size: 12px; text-align: center;">Pending<br>Mentor</span>
+                                <small style="color: #666; margin-top: 5px;">Jan 15, 2:30 PM</small>
+                            </div>
+                            <div class="status-step">
+                                <div class="status-circle completed">✓</div>
+                                <div class="status-line completed"></div>
+                                <span style="font-size: 12px; text-align: center;">Pending<br>Payment</span>
+                                <small style="color: #666; margin-top: 5px;">Jan 15, 4:15 PM</small>
+                            </div>
+                            <div class="status-step">
+                                <div class="status-circle completed">✓</div>
+                                <div class="status-line"></div>
+                                <span style="font-size: 12px; text-align: center;">In<br>Progress</span>
+                                <small style="color: #666; margin-top: 5px;">Jan 15, 5:00 PM</small>
+                            </div>
+                            <div class="status-step">
+                                <div class="status-circle">4</div>
+                                <div class="status-line"></div>
+                                <span style="font-size: 12px; text-align: center;">Awaiting<br>Confirmation</span>
+                                <small style="color: #666; margin-top: 5px;">Pending</small>
+                            </div>
+                            <div class="status-step">
+                                <div class="status-circle">5</div>
+                                <span style="font-size: 12px; text-align: center;">Completed</span>
+                                <small style="color: #666; margin-top: 5px;">Pending</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Course Details -->
+                    <div class="wireframe-section">
+                        <h3>Course Details</h3>
+                        <div style="display: flex; gap: 20px; margin-top: 15px;">
+                            <div style="width: 80px; height: 80px; border: 1px solid #333;">[IMG]</div>
+                            <div>
+                                <h4>Calculus Fundamentals</h4>
+                                <p><strong>Mentor:</strong> Dr. Smith</p>
+                                <p><strong>Schedule:</strong> Mon-Wed-Fri 2:00-4:00 PM</p>
+                                <p><strong>Duration:</strong> 7 days</p>
+                                <p><strong>Start Date:</strong> January 16, 2024</p>
+                                <p><strong>End Date:</strong> January 24, 2024</p>
+                                <p><strong>Method:</strong> Hybrid (Online & Offline)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mentor Reports (if in progress) -->
+                    <div class="wireframe-section">
+                        <h3>Daily Reports</h3>
+                        <div style="border: 1px solid #ccc; padding: 15px; margin-top: 10px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <strong>Day 1 - January 16, 2024</strong>
+                                <span style="color: green;">✓ Completed</span>
+                            </div>
+                            <p><strong>Topic Covered:</strong> Introduction to Limits</p>
+                            <p><strong>Materials:</strong> <a href="#">lecture_day1.pdf</a></p>
+                        </div>
+                        <div style="border: 1px solid #ccc; padding: 15px; margin-top: 10px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <strong>Day 2 - January 18, 2024</strong>
+                                <span style="color: green;">✓ Completed</span>
+                            </div>
+                            <p><strong>Topic Covered:</strong> Limit Laws and Continuity</p>
+                            <p><strong>Materials:</strong> <a href="#">lecture_day2.pdf</a>, <a href="#">exercises.pdf</a></p>
+                        </div>
+                        <div style="border: 1px solid #ccc; padding: 15px; margin-top: 10px; background: #f9f9f9;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <strong>Day 3 - January 20, 2024</strong>
+                                <span style="color: orange;">📅 Scheduled</span>
+                            </div>
+                            <p><em>Session scheduled for today at 2:00 PM</em></p>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div style="margin-top: 30px; text-align: center;">
+                        <button class="btn btn-secondary" style="width: auto; padding: 10px 20px; margin-right: 10px;">💬 Message Mentor</button>
+                        <button class="btn" style="width: auto; padding: 10px 20px;">Confirm Completion</button>
+                    </div>
+                </div>
+
+                <!-- Order Summary Sidebar -->
+                <div style="flex: 1;">
+                    <div class="cart-summary">
+                        <h3 style="margin-bottom: 20px;">Payment Summary</h3>
+                        
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Course Fee:</span>
+                            <span>$50.00</span>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Platform Fee:</span>
+                            <span>$5.00</span>
+                        </div>
+                        
+                        <hr style="margin: 15px 0;">
+                        
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold;">
+                            <span>Total Paid:</span>
+                            <span>$55.00</span>
+                        </div>
+                        
+                        <div style="font-size: 12px; color: #666;">
+                            <p><strong>Payment Method:</strong> Credit Card</p>
+                            <p><strong>Transaction ID:</strong> TXN-789456123</p>
+                            <p><strong>Paid on:</strong> Jan 15, 2024 5:00 PM</p>
+                        </div>
+                    </div>
+
+                    <!-- Complaint Section (if applicable) -->
+                    <div class="cart-summary" style="margin-top: 20px;">
+                        <h4 style="margin-bottom: 15px;">Need Help?</h4>
+                        <p style="font-size: 12px; margin-bottom: 15px;">If you have any issues with this course, you can submit a complaint within 48 hours after completion.</p>
+                        <button class="btn btn-secondary" style="height: 35px; font-size: 14px;">Submit Complaint</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="admin-dashboard" class="tab-content">
+        <div class="wireframe-container">
+            <div class="wireframe-title">Admin Dashboard</div>
+            
+            <!-- Admin Header -->
+            <div class="header">
+                <div class="logo">PRIVAT UNMEI - ADMIN</div>
+                <div></div>
+                <div class="user-menu">
+                    <span style="margin-right: 15px;">Admin User</span>
+                    <div class="avatar">👤</div>
+                </div>
+            </div>
+
+            <div class="dashboard-layout">
+                <div class="sidebar">
+                    <h4>Admin Menu</h4>
+                    <ul style="list-style: none; margin-top: 15px;">
+                        <li style="padding: 8px 0; border-bottom: 1px solid #ccc;"><a href="#">Dashboard</a></li>
+                        <li style="padding: 8px 0; border-bottom: 1px solid #ccc;"><a href="#">User Management</a></li>
+                        <li style="padding: 8px 0; border-bottom: 1px solid #ccc;"><a href="#">Mentor Management</a></li>
+                        <li style="padding: 8px 0; border-bottom: 1px solid #ccc;"><a href="#">Course Categories</a></li>
+                        <li style="padding: 8px 0; border-bottom: 1px solid #ccc;"><a href="#">Order Management</a></li>
+                        <li style="padding: 8px 0;"><a href="#">Reports</a></li>
+                    </ul>
+                </div>
+
+                <div class="main-content">
+                    <h2>Dashboard Overview</h2>
+                    
+                    <!-- Dashboard Cards -->
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card">
+                            <h3>1,234</h3>
+                            <p>Total Users</p>
+                            <small style="color: green;">↑ +5% this month</small>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3>89</h3>
+                            <p>Active Mentors</p>
+                            <small style="color: green;">↑ +2% this month</small>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3>456</h3>
+                            <p>Total Courses</p>
+                            <small style="color: blue;">→ No change</small>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3>23</h3>
+                            <p>Pending Complaints</p>
+                            <small style="color: red;">⚠ Needs attention</small>
+                        </div>
+                    </div>
+
+                    <!-- User List Section -->
+                    <div class="wireframe-section">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3>Recent Users</h3>
+                            <button class="btn" style="width: auto; padding: 8px 15px; height: auto;">View All Users</button>
+                        </div>
+                        <div style="border: 1px solid #ccc;">
+                            <div style="display: flex; background: #f0f0f0; padding: 10px; font-weight: bold; border-bottom: 1px solid #ccc;">
+                                <div style="flex: 1;">Name</div>
+                                <div style="flex: 1;">Email</div>
+                                <div style="flex: 1;">Join Date</div>
+                                <div style="flex: 1;">Status</div>
+                                <div style="width: 100px;">Actions</div>
+                            </div>
+                            <div style="display: flex; padding: 10px; border-bottom: 1px solid #eee;">
+                                <div style="flex: 1;">John Doe</div>
+                                <div style="flex: 1;">john@email.com</div>
+                                <div style="flex: 1;">Jan 20, 2024</div>
+                                <div style="flex: 1;"><span class="tag" style="background: green; color: white;">Verified</span></div>
+                                <div style="width: 100px;"><button style="font-size: 12px; padding: 3px 8px;">View</button></div>
+                            </div>
+                            <div style="display: flex; padding: 10px; border-bottom: 1px solid #eee;">
+                                <div style="flex: 1;">Jane Smith</div>
+                                <div style="flex: 1;">jane@email.com</div>
+                                <div style="flex: 1;">Jan 19, 2024</div>
+                                <div style="flex: 1;"><span class="tag" style="background: orange; color: white;">Pending</span></div>
+                                <div style="width: 100px;"><button style="font-size: 12px; padding: 3px 8px;">View</button></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mentor Management Section -->
+                    <div class="wireframe-section">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3>Mentor Management</h3>
+                            <button class="btn" style="width: auto; padding: 8px 15px; height: auto;">Create New Mentor</button>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <input type="text" placeholder="Search mentors..." style="flex: 1; height: 35px; padding: 8px;">
+                            <select style="width: 150px; height: 35px;">
+                                <option>Sort by Experience</option>
+                                <option>Newest First</option>
+                                <option>Most Experienced</option>
+                            </select>
+                        </div>
+                        <div style="border: 1px solid #ccc;">
+                            <div style="display: flex; background: #f0f0f0; padding: 10px; font-weight: bold; border-bottom: 1px solid #ccc;">
+                                <div style="flex: 1;">Name</div>
+                                <div style="flex: 1;">Email</div>
+                                <div style="flex: 1;">WhatsApp</div>
+                                <div style="flex: 1;">Experience</div>
+                                <div style="width: 120px;">Actions</div>
+                            </div>
+                            <div style="display: flex; padding: 10px; border-bottom: 1px solid #eee;">
+                                <div style="flex: 1;">Dr. Smith</div>
+                                <div style="flex: 1;">smith@email.com</div>
+                                <div style="flex: 1;">+1234567890</div>
+                                <div style="flex: 1;">8 years</div>
+                                <div style="width: 120px;">
+                                    <button style="font-size: 11px; padding: 2px 6px; margin-right: 3px;">Edit</button>
+                                    <button style="font-size: 11px; padding: 2px 6px;">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cancel Requests Section -->
+                    <div class="wireframe-section">
+                        <h3>Pending Cancel Requests</h3>
+                        <div style="border: 1px solid #ccc; margin-top: 15px;">
+                            <div style="padding: 15px; border-bottom: 1px solid #eee;">
+                                <div style="display: flex; justify-content: between; margin-bottom: 10px;">
+                                    <strong>Order #ORD-2024-045</strong>
+                                    <span style="color: red; font-size: 12px;">⏰ 12 hours left</span>
+                                </div>
+                                <p><strong>User:</strong> Alice Johnson</p>
+                                <p><strong>Course:</strong> Physics Fundamentals</p>
+                                <p><strong>Reason:</strong> Mentor didn't follow the schedule</p>
+                                <p><strong>Proof:</strong> <a href="#">complaint_evidence.pdf</a></p>
+                                <div style="margin-top: 10px;">
+                                    <button class="btn" style="width: auto; padding: 5px 15px; height: auto; margin-right: 10px; background: green;">Approve Refund</button>
+                                    <button class="btn btn-secondary" style="width: auto; padding: 5px 15px; height: auto;">Reject Complaint</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mentor Dashboard -->
+    <div id="mentor-dashboard" class="tab-content">
+        <div class="wireframe-container">
+            <div class="wireframe-title">Mentor Dashboard</div>
+            
+            <!-- Mentor Header -->
+            <div class="header">
+                <div class="logo">PRIVAT UNMEI - MENTOR</div>
+                <div></div>
+                <div class="user-menu">
+                    <span style="margin-right: 15px;">Dr. Smith</span>
+                    <div class="avatar">👤</div>
+                </div>
+            </div>
+
+            <div class="dashboard-layout">
+                <div class="sidebar">
+                    <h4>Mentor Menu</h4>
+                    <ul style="list-style: none; margin-top: 15px;">
+                        <li style="padding: 8px 0; border-bottom: 1px solid #ccc;"><a href="#">Dashboard</a></li>
+                        <li style="padding: 8px 0; border-bottom: 1px solid #ccc;"><a href="#">My Courses</a></li>
+                        <li style="padding: 8px 0; border-bottom: 1px solid #ccc;"><a href="#">Orders</a></li>
+                        <li style="padding: 8px 0; border-bottom: 1px solid #ccc;"><a href="#" style="font-weight: bold; color: #007bff;">💬 Messages (5)</a></li>
+                        <li style="padding: 8px 0; border-bottom: 1px solid #ccc;"><a href="#">Reports</a></li>
+                        <li style="padding: 8px 0;"><a href="#">Profile</a></li>
+                    </ul>
+                </div>
+
+                <div class="main-content">
+                    <h2>Mentor Dashboard</h2>
+                    
+                    <!-- Dashboard Cards -->
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card">
+                            <h3>12</h3>
+                            <p>My Courses</p>
+                            <small style="color: blue;">↑ +1 this month</small>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3>5</h3>
+                            <p>Pending Requests</p>
+                            <small style="color: orange;">⚠ Need response</small>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3>3</h3>
+                            <p>In Progress</p>
+                            <small style="color: green;">→ Active sessions</small>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3>$1,250</h3>
+                            <p>This Month Earnings</p>
+                            <small style="color: green;">↑ +15% vs last month</small>
+                        </div>
+                    </div>
+
+                    <!-- My Courses Section -->
+                    <div class="wireframe-section">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3>My Courses</h3>
+                            <button class="btn" style="width: auto; padding: 8px 15px; height: auto;">Create New Course</button>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <input type="text" placeholder="Search courses..." style="flex: 1; height: 35px; padding: 8px;">
+                            <select style="width: 150px; height: 35px;">
+                                <option>All Categories</option>
+                                <option>Mathematics</option>
+                                <option>Physics</option>
+                                <option>Chemistry</option>
+                            </select>
+                        </div>
+                        <div style="border: 1px solid #ccc;">
+                            <div style="display: flex; background: #f0f0f0; padding: 10px; font-weight: bold; border-bottom: 1px solid #ccc;">
+                                <div style="flex: 2;">Course Name</div>
+                                <div style="flex: 1;">Category</div>
+                                <div style="flex: 1;">Price</div>
+                                <div style="flex: 1;">Students</div>
+                                <div style="width: 120px;">Actions</div>
+                            </div>
+                            <div style="display: flex; padding: 10px; border-bottom: 1px solid #eee;">
+                                <div style="flex: 2;">Calculus Fundamentals</div>
+                                <div style="flex: 1;">Mathematics</div>
+                                <div style="flex: 1;">$50</div>
+                                <div style="flex: 1;">25 students</div>
+                                <div style="width: 120px;">
+                                    <button style="font-size: 11px; padding: 2px 6px; margin-right: 3px;">Edit</button>
+                                    <button style="font-size: 11px; padding: 2px 6px;">Delete</button>
+                                </div>
+                            </div>
+                            <div style="display: flex; padding: 10px; border-bottom: 1px solid #eee;">
+                                <div style="flex: 2;">Linear Algebra</div>
+                                <div style="flex: 1;">Mathematics</div>
+                                <div style="flex: 1;">$75</div>
+                                <div style="flex: 1;">18 students</div>
+                                <div style="width: 120px;">
+                                    <button style="font-size: 11px; padding: 2px 6px; margin-right: 3px;">Edit</button>
+                                    <button style="font-size: 11px; padding: 2px 6px;">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pending Requests Section -->
+                    <div class="wireframe-section">
+                        <h3>Pending Student Requests</h3>
+                        <div style="border: 1px solid #ccc; margin-top: 15px;">
+                            <div style="padding: 15px; border-bottom: 1px solid #eee;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <strong>Calculus Fundamentals</strong>
+                                    <span style="color: orange; font-size: 12px;">⏰ 24 hours left</span>
+                                </div>
+                                <p><strong>Student:</strong> John Doe</p>
+                                <p><strong>Schedule:</strong> Mon-Wed-Fri 2:00-4:00 PM</p>
+                                <p><strong>Start Date:</strong> January 25, 2024</p>
+                                <p><strong>Requested:</strong> January 20, 2024 3:30 PM</p>
+                                <div style="margin-top: 10px;">
+                                    <button class="btn" style="width: auto; padding: 5px 15px; height: auto; margin-right: 10px; background: green;">Accept</button>
+                                    <button class="btn btn-secondary" style="width: auto; padding: 5px 15px; height: auto; margin-right: 10px;">Reject</button>
+                                    <button class="btn btn-secondary" style="width: auto; padding: 5px 15px; height: auto;">Message Student</button>
+                                </div>
+                            </div>
+                            <div style="padding: 15px; border-bottom: 1px solid #eee;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <strong>Linear Algebra</strong>
+                                    <span style="color: orange; font-size: 12px;">⏰ 36 hours left</span>
+                                </div>
+                                <p><strong>Student:</strong> Sarah Wilson</p>
+                                <p><strong>Schedule:</strong> Tue-Thu 6:00-8:00 PM</p>
+                                <p><strong>Start Date:</strong> January 28, 2024</p>
+                                <p><strong>Requested:</strong> January 19, 2024 1:15 PM</p>
+                                <div style="margin-top: 10px;">
+                                    <button class="btn" style="width: auto; padding: 5px 15px; height: auto; margin-right: 10px; background: green;">Accept</button>
+                                    <button class="btn btn-secondary" style="width: auto; padding: 5px 15px; height: auto; margin-right: 10px;">Reject</button>
+                                    <button class="btn btn-secondary" style="width: auto; padding: 5px 15px; height: auto;">Message Student</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- In Progress Courses -->
+                    <div class="wireframe-section">
+                        <h3>Courses In Progress</h3>
+                        <div style="border: 1px solid #ccc; margin-top: 15px;">
+                            <div style="padding: 15px; border-bottom: 1px solid #eee;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <strong>Physics Fundamentals - Alice Johnson</strong>
+                                    <span style="color: green; font-size: 12px;">📚 Day 5 of 10</span>
+                                </div>
+                                <p><strong>Schedule:</strong> Mon-Wed-Fri 10:00-12:00 PM</p>
+                                <p><strong>Next Session:</strong> Tomorrow 10:00 AM</p>
+                                <p><strong>Progress:</strong> 50% Complete</p>
+                                <div style="margin-top: 10px;">
+                                    <button class="btn" style="width: auto; padding: 5px 15px; height: auto; margin-right: 10px;">Add Daily Report</button>
+                                    <button class="btn btn-secondary" style="width: auto; padding: 5px 15px; height: auto;">Message Student</button>
+                                </div>
+                            </div>
+                            <div style="padding: 15px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <strong>Chemistry Basics - Mark Thompson</strong>
+                                    <span style="color: green; font-size: 12px;">📚 Day 2 of 8</span>
+                                </div>
+                                <p><strong>Schedule:</strong> Tue-Thu 2:00-4:00 PM</p>
+                                <p><strong>Next Session:</strong> Today 2:00 PM</p>
+                                <p><strong>Progress:</strong> 25% Complete</p>
+                                <div style="margin-top: 10px;">
+                                    <button class="btn" style="width: auto; padding: 5px 15px; height: auto; margin-right: 10px;">Add Daily Report</button>
+                                    <button class="btn btn-secondary" style="width: auto; padding: 5px 15px; height: auto;">Message Student</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messaging System -->
+    <div id="messaging" class="tab-content">
+        <div class="wireframe-container">
+            <div class="wireframe-title">Messaging System</div>
+            
+            <!-- Header -->
+            <div class="header">
+                <div class="logo">PRIVAT UNMEI</div>
+                <div class="search-bar">Search conversations...</div>
+                <div class="user-menu">
+                    <div class="cart-icon">
+                        🛒
+                        <div class="cart-badge">3</div>
+                    </div>
+                    <div class="avatar">👤</div>
+                </div>
+            </div>
+
+            <div style="display: flex; height: 600px; border: 1px solid #333;">
+                <!-- Conversation List Sidebar -->
+                <div style="width: 350px; border-right: 1px solid #333; background: #f9f9f9;">
+                    <div style="padding: 15px; border-bottom: 1px solid #333; background: #e9e9e9;">
+                        <h3>Messages</h3>
+                        <div style="margin-top: 10px;">
+                            <input type="text" placeholder="Search conversations..." style="width: 100%; height: 30px; padding: 5px;">
+                        </div>
+                    </div>
+                    
+                    <!-- Conversation List -->
+                    <div style="overflow-y: auto; height: calc(100% - 80px);">
+                        <!-- Active Conversation -->
+                        <div style="padding: 15px; border-bottom: 1px solid #ddd; background: white; cursor: pointer;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 40px; height: 40px; border: 1px solid #333; border-radius: 50%; background: #f0f0f0;"></div>
+                                <div style="flex: 1;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <strong>Dr. Smith</strong>
+                                        <small style="color: #666;">2 min ago</small>
+                                    </div>
+                                    <p style="font-size: 13px; color: #666; margin-top: 3px;">Sure, we can adjust the schedule...</p>
+                                    <small style="color: #007bff; font-size: 11px;">📚 Calculus Fundamentals</small>
+                                </div>
+                                <div style="width: 8px; height: 8px; background: #007bff; border-radius: 50%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Other Conversations -->
+                        <div style="padding: 15px; border-bottom: 1px solid #ddd; cursor: pointer;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 40px; height: 40px; border: 1px solid #333; border-radius: 50%; background: #f0f0f0;"></div>
+                                <div style="flex: 1;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <strong style="color: #666;">Prof. Johnson</strong>
+                                        <small style="color: #666;">1 hour ago</small>
+                                    </div>
+                                    <p style="font-size: 13px; color: #666; margin-top: 3px;">Thank you for your interest in...</p>
+                                    <small style="color: #007bff; font-size: 11px;">📚 Linear Algebra</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="padding: 15px; border-bottom: 1px solid #ddd; cursor: pointer;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 40px; height: 40px; border: 1px solid #333; border-radius: 50%; background: #f0f0f0;"></div>
+                                <div style="flex: 1;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <strong style="color: #666;">Mr. Davis</strong>
+                                        <small style="color: #666;">Yesterday</small>
+                                    </div>
+                                    <p style="font-size: 13px; color: #666; margin-top: 3px;">The Python course materials are...</p>
+                                    <small style="color: #007bff; font-size: 11px;">📚 Python Programming</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="padding: 15px; border-bottom: 1px solid #ddd; cursor: pointer;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 40px; height: 40px; border: 1px solid #333; border-radius: 50%; background: #f0f0f0;"></div>
+                                <div style="flex: 1;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <strong style="color: #666;">Dr. Wilson</strong>
+                                        <small style="color: #666;">2 days ago</small>
+                                    </div>
+                                    <p style="font-size: 13px; color: #666; margin-top: 3px;">Looking forward to our session...</p>
+                                    <small style="color: #007bff; font-size: 11px;">📚 Organic Chemistry</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Area -->
+                <div style="flex: 1; display: flex; flex-direction: column;">
+                    <!-- Chat Header -->
+                    <div style="padding: 15px; border-bottom: 1px solid #333; background: #e9e9e9;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 40px; height: 40px; border: 1px solid #333; border-radius: 50%; background: white;"></div>
+                            <div>
+                                <h4>Dr. Smith</h4>
+                                <small style="color: #666;">📚 Calculus Fundamentals • Online now</small>
+                            </div>
+                            <div style="margin-left: auto;">
+                                <button style="padding: 5px 10px; border: 1px solid #333; background: white; margin-right: 5px;">📞 Call</button>
+                                <button style="padding: 5px 10px; border: 1px solid #333; background: white;">🎥 Video</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Messages Area -->
+                    <div style="flex: 1; padding: 15px; background: white; overflow-y: auto;">
+                        <!-- Message bubbles -->
+                        <div style="margin-bottom: 15px;">
+                            <div style="display: flex; align-items: flex-start; gap: 8px;">
+                                <div style="width: 30px; height: 30px; border: 1px solid #333; border-radius: 50%; background: #f0f0f0;"></div>
+                                <div>
+                                    <div style="background: #f1f1f1; padding: 10px; border-radius: 15px; max-width: 300px;">
+                                        <p style="margin: 0; font-size: 14px;">Hello! I'm interested in your Calculus Fundamentals course. Can we discuss the schedule?</p>
+                                    </div>
+                                    <small style="color: #666; margin-left: 10px;">10:30 AM</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: flex-end;">
+                                <div>
+                                    <div style="background: #007bff; color: white; padding: 10px; border-radius: 15px; max-width: 300px;">
+                                        <p style="margin: 0; font-size: 14px;">Hi! Of course, I'd be happy to discuss the schedule with you. What times work best for you?</p>
+                                    </div>
+                                    <small style="color: #666; margin-right: 10px; float: right;">10:32 AM</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 15px;">
+                            <div style="display: flex; align-items: flex-start; gap: 8px;">
+                                <div style="width: 30px; height: 30px; border: 1px solid #333; border-radius: 50%; background: #f0f0f0;"></div>
+                                <div>
+                                    <div style="background: #f1f1f1; padding: 10px; border-radius: 15px; max-width: 300px;">
+                                        <p style="margin: 0; font-size: 14px;">I'm available Monday, Wednesday, and Friday afternoons. Would 2:00-4:00 PM work?</p>
+                                    </div>
+                                    <small style="color: #666; margin-left: 10px;">10:35 AM</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: flex-end;">
+                                <div>
+                                    <div style="background: #007bff; color: white; padding: 10px; border-radius: 15px; max-width: 300px;">
+                                        <p style="margin: 0; font-size: 14px;">Perfect! That schedule works great for me. I can do Mon-Wed-Fri 2:00-4:00 PM. Should we proceed with the course booking?</p>
+                                    </div>
+                                    <small style="color: #666; margin-right: 10px; float: right;">10:38 AM</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 15px;">
+                            <div style="display: flex; align-items: flex-start; gap: 8px;">
+                                <div style="width: 30px; height: 30px; border: 1px solid #333; border-radius: 50%; background: #f0f0f0;"></div>
+                                <div>
+                                    <div style="background: #f1f1f1; padding: 10px; border-radius: 15px; max-width: 300px;">
+                                        <p style="margin: 0; font-size: 14px;">Sure, we can adjust the schedule if needed once you book the course. Looking forward to teaching you!</p>
+                                    </div>
+                                    <small style="color: #666; margin-left: 10px;">Just now</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Typing indicator -->
+                        <div style="display: flex; align-items: center; gap: 8px; opacity: 0.6;">
+                            <div style="width: 30px; height: 30px; border: 1px solid #333; border-radius: 50%; background: #f0f0f0;"></div>
+                            <div style="background: #f1f1f1; padding: 8px 12px; border-radius: 15px;">
+                                <span style="font-size: 14px;">Dr. Smith is typing...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Message Input -->
+                    <div style="padding: 15px; border-top: 1px solid #333; background: #f9f9f9;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <button style="width: 35px; height: 35px; border: 1px solid #333; background: white; border-radius: 50%;">📎</button>
+                            <input type="text" placeholder="Type a message..." style="flex: 1; height: 35px; padding: 10px; border: 1px solid #333; border-radius: 20px;">
+                            <button style="width: 35px; height: 35px; border: 1px solid #333; background: white; border-radius: 50%;">😊</button>
+                            <button style="width: 35px; height: 35px; border: none; background: #007bff; color: white; border-radius: 50%;">➤</button>
+                        </div>
+                        <div style="margin-top: 8px; text-align: center;">
+                            <small style="color: #666;">💡 Discuss course details, schedules, and ask questions</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions Bar -->
+            <div style="margin-top: 15px; padding: 10px; background: #f9f9f9; border: 1px solid #ddd; text-align: center;">
+                <button class="btn btn-secondary" style="width: auto; padding: 8px 15px; height: auto; margin-right: 10px;">📚 View Course Details</button>
+                <button class="btn btn-secondary" style="width: auto; padding: 8px 15px; height: auto; margin-right: 10px;">📅 Check Schedule</button>
+                <button class="btn" style="width: auto; padding: 8px 15px; height: auto;">🛒 Add to Cart</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        // Add some basic interactivity for demonstration
+        document.addEventListener('DOMContentLoaded', function() {
+            // Simulate tag filtering
+            const tags = document.querySelectorAll('.tag');
+            tags.forEach(tag => {
+                tag.addEventListener('click', function() {
+                    // Remove active from siblings
+                    this.parentNode.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+                    // Add active to clicked tag
+                    this.classList.add('active');
+                });
+            });
+
+            // Simulate course card interactions
+            const courseCards = document.querySelectorAll('.course-card');
+            courseCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                });
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = 'none';
+                });
+            });
+
+            // Simulate form state switching
+            const authButtons = document.querySelectorAll('.btn-secondary');
+            authButtons.forEach(button => {
+                if (button.textContent === 'Register' || button.textContent === 'Login') {
+                    button.addEventListener('click', function() {
+                        alert('This would switch between Login and Register forms');
+                    });
+                }
+            });
+
+            // Add hover effects to buttons
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', function() {
+                    this.style.opacity = '0.9';
+                    this.style.transform = 'translateY(-1px)';
+                });
+                button.addEventListener('mouseleave', function() {
+                    this.style.opacity = '1';
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Simulate dashboard card hover effects
+            const dashboardCards = document.querySelectorAll('.dashboard-card');
+            dashboardCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-3px)';
+                    this.style.boxShadow = '0 6px 12px rgba(0,0,0,0.1)';
+                });
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = 'none';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
