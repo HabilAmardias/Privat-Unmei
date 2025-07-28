@@ -1,0 +1,9 @@
+CREATE TABLE topics (
+    id BIGSERIAL PRIMARY KEY,
+    course_id BIGINT REFERENCES courses(id),
+    title TEXT NOT NULL,
+    description TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMPTZ
+);
