@@ -3,6 +3,8 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 )
 
@@ -30,7 +32,11 @@ func (mr *MentorRepository) AddNewMentor(ctx context.Context, mentor *entity.Men
 		mentor.Campus,
 	)
 	if err != nil {
-		return err
+		return customerrors.NewError(
+			errors.New("failed to create account"),
+			err,
+			customerrors.DatabaseExecutionError,
+		)
 	}
 	return nil
 }

@@ -10,6 +10,7 @@ type (
 		Password     string
 		Bio          *string
 		ProfileImage *string
+		Status       string
 		CreatedAt    time.Time
 		UpdatedAt    time.Time
 		DeletedAt    *time.Time
