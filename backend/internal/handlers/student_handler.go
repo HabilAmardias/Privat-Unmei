@@ -20,7 +20,7 @@ type StudentHandlerImpl struct {
 func (sh *StudentHandlerImpl) Register(ctx *gin.Context) {
 	var req dtos.RegisterStudentReq
 
-	if err := ctx.Bind(&req); err != nil {
+	if err := ctx.ShouldBind(&req); err != nil {
 		ctx.Error(customerrors.NewError(
 			errors.New("failed to register"),
 			err,

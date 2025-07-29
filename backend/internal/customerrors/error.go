@@ -25,6 +25,10 @@ func (c *CustomError) Error() string {
 	return c.ErrUser.Error()
 }
 
+func (c *CustomError) GetStatusCode() int {
+	return c.ErrCode / 10
+}
+
 func NewError(userErr error, logErr error, code int) error {
 	return &CustomError{
 		ErrUser: userErr,
