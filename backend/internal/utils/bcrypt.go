@@ -1,6 +1,11 @@
 package utils
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"errors"
+	"privat-unmei/internal/customerrors"
+
+	"golang.org/x/crypto/bcrypt"
+)
 
 type BcryptUtil struct{}
 
@@ -8,7 +13,11 @@ func (bu *BcryptUtil) HashPassword(plainPass string) (string, error) {
 	strBytes := []byte(plainPass)
 	hashed, err := bcrypt.GenerateFromPassword(strBytes, bcrypt.DefaultCost)
 	if err != nil {
-		return "", err
+		return "", customerrors.NewError(
+			errors.New("failed to save password"),
+			err,
+			customerrors.CommonErr,
+		)
 	}
 	return string(hashed), nil
 }
