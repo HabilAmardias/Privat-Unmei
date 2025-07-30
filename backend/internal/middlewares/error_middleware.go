@@ -14,6 +14,7 @@ import (
 
 func ErrorMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		ctx.Next()
 		if len(ctx.Errors) == 0 {
 			return
 		}
