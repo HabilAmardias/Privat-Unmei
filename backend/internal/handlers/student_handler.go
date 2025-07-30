@@ -22,7 +22,7 @@ func (sh *StudentHandlerImpl) Register(ctx *gin.Context) {
 
 	if err := ctx.ShouldBind(&req); err != nil {
 		ctx.Error(customerrors.NewError(
-			errors.New("failed to register"),
+			"failed to register",
 			err,
 			customerrors.InvalidAction,
 		))
@@ -32,7 +32,7 @@ func (sh *StudentHandlerImpl) Register(ctx *gin.Context) {
 	fileReq, err := ctx.FormFile("file")
 	if err != nil {
 		ctx.Error(customerrors.NewError(
-			errors.New("invalid image profile"),
+			"invalid image file",
 			err,
 			customerrors.InvalidAction,
 		))
@@ -43,7 +43,7 @@ func (sh *StudentHandlerImpl) Register(ctx *gin.Context) {
 	if err != nil {
 		ctx.Error(
 			customerrors.NewError(
-				errors.New("failed to upload file"),
+				"failed to upload file",
 				err,
 				customerrors.InvalidAction,
 			),
@@ -56,7 +56,7 @@ func (sh *StudentHandlerImpl) Register(ctx *gin.Context) {
 	if _, err := file.Read(buff); err != nil {
 		ctx.Error(
 			customerrors.NewError(
-				errors.New("failed to upload file"),
+				"failed to upload file",
 				err,
 				customerrors.InvalidAction,
 			),
@@ -69,7 +69,7 @@ func (sh *StudentHandlerImpl) Register(ctx *gin.Context) {
 	if fileType != constants.PNGType && fileType != constants.JPGType {
 		ctx.Error(
 			customerrors.NewError(
-				errors.New("uploaded file must be .png or .jpg"),
+				"uploaded file must be .png or .jpg",
 				errors.New("uploaded file must be .png or .jpg"),
 				customerrors.InvalidAction,
 			),

@@ -2,7 +2,6 @@ package utils
 
 import (
 	"context"
-	"errors"
 	"log"
 	"mime/multipart"
 	"os"
@@ -28,7 +27,7 @@ func (cu *CloudinaryUtil) UploadFile(ctx context.Context, file multipart.File) (
 	res, err := cu.cld.Upload.Upload(ctx, file, uploader.UploadParams{})
 	if err != nil {
 		return nil, customerrors.NewError(
-			errors.New("failed to upload file"),
+			"failed to upload file",
 			err,
 			customerrors.CommonErr,
 		)

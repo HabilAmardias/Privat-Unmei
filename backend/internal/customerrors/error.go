@@ -16,20 +16,20 @@ var (
 )
 
 type CustomError struct {
-	ErrUser error
+	ErrUser string
 	ErrLog  error
 	ErrCode int
 }
 
 func (c *CustomError) Error() string {
-	return c.ErrUser.Error()
+	return c.ErrUser
 }
 
 func (c *CustomError) GetStatusCode() int {
 	return c.ErrCode / 10
 }
 
-func NewError(userErr error, logErr error, code int) error {
+func NewError(userErr string, logErr error, code int) error {
 	return &CustomError{
 		ErrUser: userErr,
 		ErrLog:  logErr,

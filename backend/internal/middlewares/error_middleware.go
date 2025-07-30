@@ -42,7 +42,7 @@ func ErrorMiddleware() gin.HandlerFunc {
 			ctx.JSON(ce.GetStatusCode(), dtos.Response{
 				Success: false,
 				Data: dtos.MessageResponse{
-					Message: ce.ErrUser.Error(),
+					Message: ce.ErrUser,
 				},
 			})
 			return

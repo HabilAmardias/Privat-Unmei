@@ -30,7 +30,7 @@ func (us *StudentServiceImpl) Register(ctx context.Context, param entity.Student
 			}
 		} else {
 			return customerrors.NewError(
-				customerrors.ErrItemAlreadyExist,
+				"user already exist",
 				customerrors.ErrItemAlreadyExist,
 				customerrors.ItemAlreadyExist,
 			)

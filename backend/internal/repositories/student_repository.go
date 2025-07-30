@@ -3,7 +3,6 @@ package repositories
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 )
@@ -26,7 +25,7 @@ func (sr *StudentRepository) AddNewStudent(ctx context.Context, student *entity.
 	_, err := driver.Exec(query, student.ID)
 	if err != nil {
 		return customerrors.NewError(
-			errors.New("failed to create account"),
+			"failed to create account",
 			err,
 			customerrors.DatabaseExecutionError,
 		)

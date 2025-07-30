@@ -34,7 +34,7 @@ func (ur *UserRepositoryImpl) AddNewUser(ctx context.Context, user *entity.User)
 
 	if err := row.Scan(user.ID); err != nil {
 		return customerrors.NewError(
-			errors.New("failed to create account"),
+			"failed to create account",
 			err,
 			customerrors.DatabaseExecutionError,
 		)
@@ -68,13 +68,13 @@ func (ur *UserRepositoryImpl) FindByEmail(ctx context.Context, email string, use
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return customerrors.NewError(
-				customerrors.ErrRecordNotFound,
+				"record not found",
 				err,
 				customerrors.ItemNotExist,
 			)
 		}
 		return customerrors.NewError(
-			errors.New("failed to get user data"),
+			"failed to get user data",
 			err,
 			customerrors.DatabaseExecutionError,
 		)
