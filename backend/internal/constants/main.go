@@ -12,6 +12,18 @@ const (
 	PDFType           = "application/pdf"
 	UnverifiedStatus  = "unverified"
 	VerifiedStatus    = "verified"
+	DefaultAvatar     = "https://res.cloudinary.com/dk8rlicon/image/upload/v1753881263/default-avatar-icon-of-social-media-user-vector_j8obqd.jpg"
+)
+
+const (
+	StudentRole = 1
+	AdminRole   = 2
+	MentorRole  = 3
+)
+
+const (
+	ForVerification = 1
+	ForReset        = 2
 )
 
 func VerificationEmailBody(id string) string {

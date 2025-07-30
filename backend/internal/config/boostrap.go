@@ -19,8 +19,9 @@ func Bootstrap(db *sql.DB, app *gin.Engine) {
 	bcryptUtil := utils.CreateBcryptUtil()
 	gomailUtil := utils.CreateGomailUtil()
 	cloudinaryUtil := utils.CreateCloudinaryUtil()
+	jwtUtil := utils.CreateJWTUtil()
 
-	studentService := services.CreateStudentService(userRepo, studentRepo, transactionManager, bcryptUtil, gomailUtil, cloudinaryUtil)
+	studentService := services.CreateStudentService(userRepo, studentRepo, transactionManager, bcryptUtil, gomailUtil, cloudinaryUtil, jwtUtil)
 
 	studentHandler := handlers.CreateStudentHandler(studentService)
 	cfg := routers.RouteConfig{

@@ -17,6 +17,7 @@ type StudentServiceImpl struct {
 	bu  *utils.BcryptUtil
 	gu  *utils.GomailUtil
 	cu  *utils.CloudinaryUtil
+	ju  *utils.JWTUtil
 }
 
 func CreateStudentService(
@@ -26,8 +27,9 @@ func CreateStudentService(
 	bu *utils.BcryptUtil,
 	gu *utils.GomailUtil,
 	cu *utils.CloudinaryUtil,
+	ju *utils.JWTUtil,
 ) *StudentServiceImpl {
-	return &StudentServiceImpl{ur, sr, tmr, bu, gu, cu}
+	return &StudentServiceImpl{ur, sr, tmr, bu, gu, cu, ju}
 }
 
 func (us *StudentServiceImpl) Register(ctx context.Context, param entity.StudentRegisterParam) error {
@@ -51,12 +53,7 @@ func (us *StudentServiceImpl) Register(ctx context.Context, param entity.Student
 		user.Email = param.Email
 		user.Name = param.Name
 		user.Status = param.Status
-
-		uploadRes, err := us.cu.UploadFile(ctx, param.File)
-		if err != nil {
-			return err
-		}
-		user.ProfileImage = uploadRes.URL
+		user.ProfileImage = constants.DefaultAvatar
 
 		hashed, err := us.bu.HashPassword(param.Password)
 		if err != nil {
@@ -66,7 +63,12 @@ func (us *StudentServiceImpl) Register(ctx context.Context, param entity.Student
 		if err := us.ur.AddNewUser(ctx, user); err != nil {
 			return err
 		}
+		token, err := us.ju.GenerateJWT(user.ID, constants.StudentRole, constants.ForVerification)
+		if err != nil {
+			return err
+		}
 		student.ID = user.ID
+		student.VerifyToken = &token
 		if err := us.sr.AddNewStudent(ctx, student); err != nil {
 			return err
 		}
@@ -76,7 +78,7 @@ func (us *StudentServiceImpl) Register(ctx context.Context, param entity.Student
 			param := entity.SendEmailParams{
 				Receiver:  param.Email,
 				Subject:   "Verify your account",
-				EmailBody: constants.VerificationEmailBody(student.ID),
+				EmailBody: constants.VerificationEmailBody(token),
 			}
 			if err := us.gu.SendEmail(param); err != nil {
 				log.Println(err.Error())

@@ -2,9 +2,9 @@ package dtos
 
 type (
 	RegisterStudentReq struct {
-		Name     string `form:"name" binding:"required"`
-		Email    string `form:"email" binding:"required,email"`
-		Password string `form:"password" binding:"required"`
-		Bio      string `form:"bio" binding:"required"`
+		Name     string `json:"name" binding:"required"`
+		Email    string `json:"email" binding:"required,email"`
+		Password string `json:"password" binding:"required,containsany=!@#?,min=8"`
+		Bio      string `json:"bio" binding:"required"`
 	}
 )
