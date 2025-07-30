@@ -10,6 +10,10 @@ const (
 	InvalidAction          int = 4002
 )
 
+const (
+	UserNotFound = "user not found"
+)
+
 var (
 	ErrRecordNotFound   = errors.New("record not found")
 	ErrItemAlreadyExist = errors.New("item already exist")
