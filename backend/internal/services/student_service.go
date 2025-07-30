@@ -36,7 +36,7 @@ func (us *StudentServiceImpl) Register(ctx context.Context, param entity.Student
 
 	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := us.ur.FindByEmail(ctx, param.Email, user); err != nil {
-			if err.Error() != customerrors.ErrRecordNotFound.Error() {
+			if err.Error() != customerrors.UserNotFound {
 				return err
 			}
 		} else {
