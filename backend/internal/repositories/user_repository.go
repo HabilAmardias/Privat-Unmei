@@ -74,7 +74,7 @@ func (ur *UserRepositoryImpl) FindByEmail(ctx context.Context, email string, use
 			)
 		}
 		return customerrors.NewError(
-			customerrors.ErrRecordNotFound,
+			errors.New("failed to get user data"),
 			err,
 			customerrors.DatabaseExecutionError,
 		)
