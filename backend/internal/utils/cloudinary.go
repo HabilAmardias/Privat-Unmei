@@ -11,7 +11,7 @@ import (
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 )
 
-func NewCloudinaryUtil() *CloudinaryUtil {
+func CreateCloudinaryUtil() *CloudinaryUtil {
 	cld, err := cloudinary.NewFromParams("dk8rlicon", os.Getenv("CLOUDINARY_KEY"), os.Getenv("CLOUDINARY_SECRET"))
 	if err != nil {
 		log.Fatalln(err.Error())

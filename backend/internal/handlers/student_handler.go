@@ -17,6 +17,10 @@ type StudentHandlerImpl struct {
 	ss *services.StudentServiceImpl
 }
 
+func CreateStudentHandler(ss *services.StudentServiceImpl) *StudentHandlerImpl {
+	return &StudentHandlerImpl{ss}
+}
+
 func (sh *StudentHandlerImpl) Register(ctx *gin.Context) {
 	var req dtos.RegisterStudentReq
 

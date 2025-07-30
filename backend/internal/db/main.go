@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	_ "github.com/jackc/pgx/v5"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func ConnectDB() (*sql.DB, error) {
@@ -19,7 +19,7 @@ func ConnectDB() (*sql.DB, error) {
 		"password=%s dbname=%s sslmode=disable",
 		dbHost, dbPort, dbUser, dbPass, dbName)
 
-	conn, err := sql.Open("postgres", connString)
+	conn, err := sql.Open("pgx", connString)
 	if err != nil {
 		return nil, err
 	}

@@ -7,11 +7,15 @@ import (
 	"privat-unmei/internal/entity"
 )
 
-type StudentRepository struct {
+type StudentRepositoryImpl struct {
 	DB *sql.DB
 }
 
-func (sr *StudentRepository) AddNewStudent(ctx context.Context, student *entity.Student) error {
+func CreateStudentRepository(db *sql.DB) *StudentRepositoryImpl {
+	return &StudentRepositoryImpl{db}
+}
+
+func (sr *StudentRepositoryImpl) AddNewStudent(ctx context.Context, student *entity.Student) error {
 	var driver RepoDriver
 	driver = sr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {

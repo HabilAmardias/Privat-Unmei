@@ -7,11 +7,15 @@ import (
 	"privat-unmei/internal/entity"
 )
 
-type MentorRepository struct {
+type MentorRepositoryImpl struct {
 	DB *sql.DB
 }
 
-func (mr *MentorRepository) AddNewMentor(ctx context.Context, mentor *entity.Mentor) error {
+func CreateMentorRepositoryImpl(db *sql.DB) *MentorRepositoryImpl {
+	return &MentorRepositoryImpl{db}
+}
+
+func (mr *MentorRepositoryImpl) AddNewMentor(ctx context.Context, mentor *entity.Mentor) error {
 	var driver RepoDriver
 	driver = mr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {

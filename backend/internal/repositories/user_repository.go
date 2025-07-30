@@ -12,6 +12,10 @@ type UserRepositoryImpl struct {
 	DB *sql.DB
 }
 
+func CreateUserRepository(db *sql.DB) *UserRepositoryImpl {
+	return &UserRepositoryImpl{db}
+}
+
 func (ur *UserRepositoryImpl) AddNewUser(ctx context.Context, user *entity.User) error {
 	var driver RepoDriver
 	driver = ur.DB
@@ -68,7 +72,7 @@ func (ur *UserRepositoryImpl) FindByEmail(ctx context.Context, email string, use
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return customerrors.NewError(
-				"record not found",
+				"user not found",
 				err,
 				customerrors.ItemNotExist,
 			)

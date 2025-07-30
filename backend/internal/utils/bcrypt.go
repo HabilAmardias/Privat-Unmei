@@ -8,6 +8,10 @@ import (
 
 type BcryptUtil struct{}
 
+func CreateBcryptUtil() *BcryptUtil {
+	return &BcryptUtil{}
+}
+
 func (bu *BcryptUtil) HashPassword(plainPass string) (string, error) {
 	strBytes := []byte(plainPass)
 	hashed, err := bcrypt.GenerateFromPassword(strBytes, bcrypt.DefaultCost)

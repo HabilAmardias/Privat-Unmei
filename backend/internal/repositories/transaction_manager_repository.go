@@ -26,6 +26,10 @@ type TransactionManagerRepositories struct {
 	DB *sql.DB
 }
 
+func CreateTransactionManager(db *sql.DB) *TransactionManagerRepositories {
+	return &TransactionManagerRepositories{db}
+}
+
 func (tr *TransactionManagerRepositories) WithTransaction(ctx context.Context, callable func(ctx context.Context) error) error {
 	tx, err := tr.DB.Begin()
 	if err != nil {

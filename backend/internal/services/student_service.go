@@ -12,11 +12,22 @@ import (
 
 type StudentServiceImpl struct {
 	ur  *repositories.UserRepositoryImpl
-	sr  *repositories.StudentRepository
+	sr  *repositories.StudentRepositoryImpl
 	tmr *repositories.TransactionManagerRepositories
 	bu  *utils.BcryptUtil
 	gu  *utils.GomailUtil
 	cu  *utils.CloudinaryUtil
+}
+
+func CreateStudentService(
+	ur *repositories.UserRepositoryImpl,
+	sr *repositories.StudentRepositoryImpl,
+	tmr *repositories.TransactionManagerRepositories,
+	bu *utils.BcryptUtil,
+	gu *utils.GomailUtil,
+	cu *utils.CloudinaryUtil,
+) *StudentServiceImpl {
+	return &StudentServiceImpl{ur, sr, tmr, bu, gu, cu}
 }
 
 func (us *StudentServiceImpl) Register(ctx context.Context, param entity.StudentRegisterParam) error {
