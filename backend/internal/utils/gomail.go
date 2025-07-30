@@ -10,6 +10,7 @@ import (
 
 type GomailUtil struct{}
 
+// TODO: Create account for sending email
 func (gu GomailUtil) SendEmail(email entity.SendEmailParams) error {
 	m := gomail.NewMessage()
 	m.SetHeader("From", os.Getenv("SENDER"))

@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"log"
+	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/repositories"
@@ -15,6 +16,7 @@ type StudentServiceImpl struct {
 	tmr *repositories.TransactionManagerRepositories
 	bu  *utils.BcryptUtil
 	gu  *utils.GomailUtil
+	cu  *utils.CloudinaryUtil
 }
 
 func (us *StudentServiceImpl) Register(ctx context.Context, param entity.StudentRegisterParam) error {
@@ -39,7 +41,11 @@ func (us *StudentServiceImpl) Register(ctx context.Context, param entity.Student
 		user.Name = param.Name
 		user.Status = param.Status
 
-		//TODO: Add upload profile photo logic (still thinking on where to save all files uploaded to the platform)
+		uploadRes, err := us.cu.UploadFile(ctx, param.File)
+		if err != nil {
+			return err
+		}
+		user.ProfileImage = uploadRes.URL
 
 		hashed, err := us.bu.HashPassword(param.Password)
 		if err != nil {
@@ -54,13 +60,12 @@ func (us *StudentServiceImpl) Register(ctx context.Context, param entity.Student
 			return err
 		}
 
-		// wrapped in go func to make other request does not get blocked by this
-		// TODO: Create Email Body Template
+		// wrapped this with go func to make other request does not get blocked by this
 		go func() {
 			param := entity.SendEmailParams{
 				Receiver:  param.Email,
-				Subject:   "Verify account",
-				EmailBody: "",
+				Subject:   "Verify your account",
+				EmailBody: constants.VerificationEmailBody(student.ID),
 			}
 			if err := us.gu.SendEmail(param); err != nil {
 				log.Println(err.Error())
@@ -68,6 +73,7 @@ func (us *StudentServiceImpl) Register(ctx context.Context, param entity.Student
 			}
 			log.Println("Send Email Success")
 		}()
+
 		return nil
 	})
 }

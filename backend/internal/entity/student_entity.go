@@ -16,7 +16,7 @@ type (
 		Name        string
 		Email       string
 		Password    string
-		Bio         *string
+		Bio         string
 		File        multipart.File
 		ContentType string
 		Status      string

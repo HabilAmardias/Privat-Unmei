@@ -8,8 +8,8 @@ type (
 		Name         string
 		Email        string
 		Password     string
-		Bio          *string
-		ProfileImage *string
+		Bio          string
+		ProfileImage string
 		Status       string
 		CreatedAt    time.Time
 		UpdatedAt    time.Time
