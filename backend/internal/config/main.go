@@ -23,6 +23,7 @@ func Run() {
 	defer driver.Close()
 
 	app := gin.New()
+	app.ContextWithFallback = true
 	Bootstrap(driver, app)
 
 	port := ":" + os.Getenv("SERVER_PORT")
