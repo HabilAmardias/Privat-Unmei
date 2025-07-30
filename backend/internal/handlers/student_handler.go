@@ -81,11 +81,13 @@ func (sh *StudentHandlerImpl) Register(ctx *gin.Context) {
 		return
 	}
 	param := entity.StudentRegisterParam{
-		Name:     req.Name,
-		Email:    req.Email,
-		Password: req.Password,
-		Bio:      req.Bio,
-		Status:   constants.UnverifiedStatus,
+		Name:        req.Name,
+		Email:       req.Email,
+		Password:    req.Password,
+		Bio:         req.Bio,
+		Status:      constants.UnverifiedStatus,
+		File:        file,
+		ContentType: fileType,
 	}
 	if err := sh.ss.Register(ctx, param); err != nil {
 		ctx.Error(err)
