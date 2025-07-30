@@ -36,7 +36,7 @@ func (ur *UserRepositoryImpl) AddNewUser(ctx context.Context, user *entity.User)
 		user.ProfileImage,
 		user.Status)
 
-	if err := row.Scan(user.ID); err != nil {
+	if err := row.Scan(&user.ID); err != nil {
 		return customerrors.NewError(
 			"failed to create account",
 			err,
@@ -59,20 +59,20 @@ func (ur *UserRepositoryImpl) FindByEmail(ctx context.Context, email string, use
 	`
 	row := driver.QueryRow(query, email)
 	if err := row.Scan(
-		user.ID,
-		user.Name,
-		user.Email,
-		user.Password,
-		user.Bio,
-		user.ProfileImage,
-		user.Status,
-		user.CreatedAt,
-		user.UpdatedAt,
-		user.DeletedAt,
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&user.Password,
+		&user.Bio,
+		&user.ProfileImage,
+		&user.Status,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.DeletedAt,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return customerrors.NewError(
-				"user not found",
+				customerrors.UserNotFound,
 				err,
 				customerrors.ItemNotExist,
 			)
