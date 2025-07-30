@@ -35,7 +35,7 @@ func (tr *TransactionManagerRepositories) WithTransaction(ctx context.Context, c
 	if err != nil {
 		return err
 	}
-	defer tx.Commit()
+	defer tx.Rollback()
 
 	newCtx := context.WithValue(ctx, TxKey{}, tx)
 
@@ -43,5 +43,5 @@ func (tr *TransactionManagerRepositories) WithTransaction(ctx context.Context, c
 	if err != nil {
 		return err
 	}
-	return nil
+	return tx.Commit()
 }
