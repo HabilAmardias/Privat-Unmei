@@ -18,6 +18,29 @@ func CreateStudentHandler(ss *services.StudentServiceImpl) *StudentHandlerImpl {
 	return &StudentHandlerImpl{ss}
 }
 
+func (sh *StudentHandlerImpl) Login(ctx *gin.Context) {
+	var req dtos.LoginStudentReq
+	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.StudentLoginParam{
+		Email:    req.Email,
+		Password: req.Password,
+	}
+	token, err := sh.ss.Login(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.LoginStudentRes{
+			Token: token,
+		},
+	})
+}
+
 func (sh *StudentHandlerImpl) Register(ctx *gin.Context) {
 	var req dtos.RegisterStudentReq
 

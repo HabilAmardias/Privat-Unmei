@@ -36,4 +36,5 @@ func (c *RouteConfig) SetupPublicRoute() {
 		})
 	})
 	v1.POST("/register", c.StudentHandler.Register)
+	v1.POST("/login", c.StudentHandler.Login)
 }

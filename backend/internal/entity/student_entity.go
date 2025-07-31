@@ -20,4 +20,8 @@ type (
 		Bio      string
 		Status   string
 	}
+	StudentLoginParam struct {
+		Email    string
+		Password string
+	}
 )

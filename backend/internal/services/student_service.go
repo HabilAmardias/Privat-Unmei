@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"log"
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
@@ -30,6 +31,35 @@ func CreateStudentService(
 	ju *utils.JWTUtil,
 ) *StudentServiceImpl {
 	return &StudentServiceImpl{ur, sr, tmr, bu, gu, cu, ju}
+}
+
+func (us *StudentServiceImpl) Login(ctx context.Context, param entity.StudentLoginParam) (string, error) {
+	user := new(entity.User)
+	student := new(entity.Student)
+	token := new(string)
+
+	if err := us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := us.ur.FindByEmail(ctx, param.Email, user); err != nil {
+			return err
+		}
+		if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
+			return err
+		}
+		if match := us.bu.ComparePassword(param.Password, user.Password); !match {
+			return customerrors.NewError("invalid email or password", errors.New("invalid email or password"), customerrors.InvalidAction)
+		}
+		jwt, err := us.ju.GenerateJWT(student.ID, constants.StudentRole, constants.ForLogin, user.Status)
+		if err != nil {
+			return err
+		}
+		*token = jwt
+
+		return nil
+
+	}); err != nil {
+		return "", err
+	}
+	return *token, nil
 }
 
 func (us *StudentServiceImpl) Register(ctx context.Context, param entity.StudentRegisterParam) error {
@@ -63,7 +93,7 @@ func (us *StudentServiceImpl) Register(ctx context.Context, param entity.Student
 		if err := us.ur.AddNewUser(ctx, user); err != nil {
 			return err
 		}
-		token, err := us.ju.GenerateJWT(user.ID, constants.StudentRole, constants.ForVerification)
+		token, err := us.ju.GenerateJWT(user.ID, constants.StudentRole, constants.ForVerification, user.Status)
 		if err != nil {
 			return err
 		}

@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"flag"
 	"log"
 	"net/http"
 	"os"
@@ -21,6 +22,14 @@ func Run() {
 		log.Fatalln(err.Error())
 	}
 	defer driver.Close()
+
+	// add production environment option
+	var isProd bool
+	flag.BoolVar(&isProd, "release", false, "Run production environemnt")
+	flag.Parse()
+	if isProd {
+		gin.SetMode(gin.ReleaseMode)
+	}
 
 	app := gin.New()
 	app.ContextWithFallback = true

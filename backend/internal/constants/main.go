@@ -24,6 +24,7 @@ const (
 const (
 	ForVerification = 1
 	ForReset        = 2
+	ForLogin        = 3
 )
 
 func VerificationEmailBody(id string) string {

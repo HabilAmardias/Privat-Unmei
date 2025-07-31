@@ -15,17 +15,18 @@ func CreateJWTUtil() *JWTUtil {
 	return &JWTUtil{}
 }
 
-func (ju *JWTUtil) GenerateJWT(id string, role int, usedFor int) (string, error) {
+func (ju *JWTUtil) GenerateJWT(id string, role int, usedFor int, status string) (string, error) {
 	secret := os.Getenv("JWT_SECRET")
 	claim := entity.CustomClaim{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   id,
 			Issuer:    "privat-unmei",
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(3 * 24 * time.Hour)),
 		},
-		Role: role,
-		For:  usedFor,
+		Role:   role,
+		For:    usedFor,
+		Status: status,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
