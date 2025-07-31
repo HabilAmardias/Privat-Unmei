@@ -55,7 +55,7 @@ func (us *StudentServiceImpl) ResetPassword(ctx context.Context, param entity.Re
 				customerrors.InvalidAction,
 			)
 		}
-		if student.ResetToken != &param.Token {
+		if student.ResetToken == nil || *student.ResetToken != param.Token {
 			return customerrors.NewError("wrong credentials", errors.New("reset token does not match"), customerrors.Unauthenticate)
 		}
 		newHashedPass, err := us.bu.HashPassword(param.NewPassword)
