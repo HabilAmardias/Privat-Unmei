@@ -8,6 +8,7 @@ const (
 	DatabaseExecutionError int = 5001
 	CommonErr              int = 5002
 	InvalidAction          int = 4002
+	Unauthenticate         int = 4011
 )
 
 const (

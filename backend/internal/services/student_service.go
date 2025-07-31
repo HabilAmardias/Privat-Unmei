@@ -33,6 +33,109 @@ func CreateStudentService(
 	return &StudentServiceImpl{ur, sr, tmr, bu, gu, cu, ju}
 }
 
+func (us *StudentServiceImpl) ResetPassword(ctx context.Context, param entity.ResetPasswordParam) error {
+	user := new(entity.User)
+	student := new(entity.Student)
+
+	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		claim, err := us.ju.VerifyJWT(param.Token, constants.ForReset, constants.StudentRole)
+		if err != nil {
+			return err
+		}
+		if err := us.ur.FindByID(ctx, claim.Subject, user); err != nil {
+			return err
+		}
+		if err := us.sr.FindByID(ctx, claim.Subject, student); err != nil {
+			return err
+		}
+		if us.bu.ComparePassword(param.NewPassword, user.Password) {
+			return customerrors.NewError(
+				"cannot update to same password",
+				errors.New("old password and new password is the same"),
+				customerrors.InvalidAction,
+			)
+		}
+		if student.ResetToken != &param.Token {
+			return customerrors.NewError("wrong credentials", errors.New("reset token does not match"), customerrors.Unauthenticate)
+		}
+		newHashedPass, err := us.bu.HashPassword(param.NewPassword)
+		if err != nil {
+			return err
+		}
+		if err := us.ur.UpdateUserPassword(ctx, newHashedPass, user.ID); err != nil {
+			return err
+		}
+		if err := us.sr.UpdateResetToken(ctx, student.ID, nil); err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
+func (us *StudentServiceImpl) SendResetTokenEmail(ctx context.Context, email string) error {
+	user := new(entity.User)
+	student := new(entity.Student)
+
+	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := us.ur.FindByEmail(ctx, email, user); err != nil {
+			return err
+		}
+		if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
+			return err
+		}
+		resetToken, err := us.ju.GenerateJWT(student.ID, constants.StudentRole, constants.ForReset, user.Status)
+		if err != nil {
+			return err
+		}
+		// keep it to test reset password feature
+		log.Println(resetToken)
+		if err := us.sr.UpdateResetToken(ctx, student.ID, &resetToken); err != nil {
+			return err
+		}
+
+		param := entity.SendEmailParams{
+			Receiver:  user.Email,
+			Subject:   "Reset Password",
+			EmailBody: constants.ResetEmailBody(resetToken),
+		}
+		if err := us.gu.SendEmail(param); err != nil {
+			return customerrors.NewError("failed to send email", err, customerrors.CommonErr)
+		}
+		return nil
+	})
+}
+
+func (us *StudentServiceImpl) Verify(ctx context.Context, token string) error {
+	user := new(entity.User)
+	student := new(entity.Student)
+	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		claim, err := us.ju.VerifyJWT(token, constants.ForVerification, constants.StudentRole)
+		if err != nil {
+			return err
+		}
+		if err := us.ur.FindByID(ctx, claim.Subject, user); err != nil {
+			return err
+		}
+		if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
+			return err
+		}
+		if student.VerifyToken == nil || token != *student.VerifyToken {
+			return customerrors.NewError(
+				"invalid credential",
+				errors.New("invalid verify token"),
+				customerrors.Unauthenticate,
+			)
+		}
+		if err := us.ur.UpdateUserStatus(ctx, constants.VerifiedStatus, user.ID); err != nil {
+			return err
+		}
+		if err := us.sr.UpdateVerifyToken(ctx, student.ID, nil); err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
 func (us *StudentServiceImpl) Login(ctx context.Context, param entity.StudentLoginParam) (string, error) {
 	user := new(entity.User)
 	student := new(entity.Student)
@@ -97,13 +200,15 @@ func (us *StudentServiceImpl) Register(ctx context.Context, param entity.Student
 		if err != nil {
 			return err
 		}
+		// keep it for testing verify functionality
+		log.Println(token)
 		student.ID = user.ID
 		student.VerifyToken = &token
 		if err := us.sr.AddNewStudent(ctx, student); err != nil {
 			return err
 		}
 
-		// wrapped this with go func to make other request does not get blocked by this
+		// wrapped this with go func to make other request does not get blocked when this func running
 		go func() {
 			param := entity.SendEmailParams{
 				Receiver:  param.Email,

@@ -37,4 +37,7 @@ func (c *RouteConfig) SetupPublicRoute() {
 	})
 	v1.POST("/register", c.StudentHandler.Register)
 	v1.POST("/login", c.StudentHandler.Login)
+	v1.POST("/verify", c.StudentHandler.Verify)
+	v1.POST("/reset-password/send", c.StudentHandler.SendResetTokenEmail)
+	v1.POST("/reset-password/reset", c.StudentHandler.ResetPassword)
 }

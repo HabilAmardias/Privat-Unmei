@@ -24,4 +24,8 @@ type (
 		Email    string
 		Password string
 	}
+	ResetPasswordParam struct {
+		NewPassword string
+		Token       string
+	}
 )

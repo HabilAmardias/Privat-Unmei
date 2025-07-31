@@ -16,6 +16,46 @@ func CreateUserRepository(db *sql.DB) *UserRepositoryImpl {
 	return &UserRepositoryImpl{db}
 }
 
+func (ur *UserRepositoryImpl) UpdateUserPassword(ctx context.Context, password string, id string) error {
+	var driver RepoDriver
+	driver = ur.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, password, id)
+	if err != nil {
+		return customerrors.NewError(
+			"Failed to update user password",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (ur *UserRepositoryImpl) UpdateUserStatus(ctx context.Context, status string, id string) error {
+	var driver RepoDriver
+	driver = ur.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE users SET status = $1, updated_at = NOW() WHERE id = $2 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, status, id)
+	if err != nil {
+		return customerrors.NewError(
+			"Failed to update user status",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (ur *UserRepositoryImpl) AddNewUser(ctx context.Context, user *entity.User) error {
 	var driver RepoDriver
 	driver = ur.DB
@@ -47,6 +87,45 @@ func (ur *UserRepositoryImpl) AddNewUser(ctx context.Context, user *entity.User)
 	return nil
 }
 
+func (ur *UserRepositoryImpl) FindByID(ctx context.Context, id string, user *entity.User) error {
+	var driver RepoDriver
+	driver = ur.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	SELECT id, name, email, password_hash, bio, profile_image, status, created_at, updated_at, deleted_at FROM users
+	WHERE id = $1 AND deleted_at IS NULL
+	`
+	row := driver.QueryRow(query, id)
+	if err := row.Scan(
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&user.Password,
+		&user.Bio,
+		&user.ProfileImage,
+		&user.Status,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.DeletedAt,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return customerrors.NewError(
+				customerrors.UserNotFound,
+				err,
+				customerrors.ItemNotExist,
+			)
+		}
+		return customerrors.NewError(
+			"failed to get user data",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (ur *UserRepositoryImpl) FindByEmail(ctx context.Context, email string, user *entity.User) error {
 	var driver RepoDriver
 	driver = ur.DB
@@ -55,7 +134,7 @@ func (ur *UserRepositoryImpl) FindByEmail(ctx context.Context, email string, use
 	}
 	query := `
 	SELECT id, name, email, password_hash, bio, profile_image, status, created_at, updated_at, deleted_at FROM users
-	WHERE email = $1
+	WHERE email = $1 AND deleted_at IS NULL
 	`
 	row := driver.QueryRow(query, email)
 	if err := row.Scan(

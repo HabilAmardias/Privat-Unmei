@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 	"privat-unmei/internal/constants"
+	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/services"
@@ -16,6 +18,73 @@ type StudentHandlerImpl struct {
 
 func CreateStudentHandler(ss *services.StudentServiceImpl) *StudentHandlerImpl {
 	return &StudentHandlerImpl{ss}
+}
+
+func (sh *StudentHandlerImpl) ResetPassword(ctx *gin.Context) {
+	token := GetJWT(ctx)
+	if token == nil {
+		ctx.Error(customerrors.NewError(
+			"not authorized",
+			errors.New("no valid JWT given"),
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	var req dtos.ResetPasswordReq
+	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.ResetPasswordParam{
+		Token:       *token,
+		NewPassword: req.NewPassword,
+	}
+	if err := sh.ss.ResetPassword(ctx, param); err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.MessageResponse{
+			Message: "Sucessfully reset password",
+		},
+	})
+}
+
+func (sh *StudentHandlerImpl) SendResetTokenEmail(ctx *gin.Context) {
+	var req dtos.SendResetTokenEmailReq
+	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	if err := sh.ss.SendResetTokenEmail(ctx, req.Email); err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.MessageResponse{
+			Message: "Succesfully send reset password email",
+		},
+	})
+}
+
+func (sh *StudentHandlerImpl) Verify(ctx *gin.Context) {
+	var req dtos.VerifyStudentReq
+	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	if err := sh.ss.Verify(ctx, req.Token); err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.MessageResponse{
+			Message: "Successfully Verified",
+		},
+	})
 }
 
 func (sh *StudentHandlerImpl) Login(ctx *gin.Context) {
