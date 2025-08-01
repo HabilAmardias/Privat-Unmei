@@ -23,5 +23,6 @@ type (
 	}
 	ResetPasswordReq struct {
 		NewPassword string `json:"new_password" binding:"required,containsany=!@#?,min=8"`
+		Token       string `json:"token"`
 	}
 )

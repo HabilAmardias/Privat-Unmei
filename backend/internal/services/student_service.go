@@ -45,7 +45,7 @@ func (us *StudentServiceImpl) ResetPassword(ctx context.Context, param entity.Re
 		if err := us.ur.FindByID(ctx, claim.Subject, user); err != nil {
 			return err
 		}
-		if err := us.sr.FindByID(ctx, claim.Subject, student); err != nil {
+		if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
 			return err
 		}
 		if us.bu.ComparePassword(param.NewPassword, user.Password) {

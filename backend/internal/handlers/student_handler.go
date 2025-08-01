@@ -1,10 +1,8 @@
 package handlers
 
 import (
-	"errors"
 	"net/http"
 	"privat-unmei/internal/constants"
-	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/services"
@@ -21,22 +19,13 @@ func CreateStudentHandler(ss *services.StudentServiceImpl) *StudentHandlerImpl {
 }
 
 func (sh *StudentHandlerImpl) ResetPassword(ctx *gin.Context) {
-	token := GetJWT(ctx)
-	if token == nil {
-		ctx.Error(customerrors.NewError(
-			"not authorized",
-			errors.New("no valid JWT given"),
-			customerrors.InvalidAction,
-		))
-		return
-	}
 	var req dtos.ResetPasswordReq
 	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
 		ctx.Error(err)
 		return
 	}
 	param := entity.ResetPasswordParam{
-		Token:       *token,
+		Token:       req.Token,
 		NewPassword: req.NewPassword,
 	}
 	if err := sh.ss.ResetPassword(ctx, param); err != nil {
