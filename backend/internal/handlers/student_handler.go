@@ -18,6 +18,24 @@ func CreateStudentHandler(ss *services.StudentServiceImpl) *StudentHandlerImpl {
 	return &StudentHandlerImpl{ss}
 }
 
+func (sh *StudentHandlerImpl) SendVerificationEmail(ctx *gin.Context) {
+	claims, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	if err := sh.ss.SendVerificationEmail(ctx, claims.Subject); err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.MessageResponse{
+			Message: "Successfully sent verification email",
+		},
+	})
+}
+
 func (sh *StudentHandlerImpl) ResetPassword(ctx *gin.Context) {
 	var req dtos.ResetPasswordReq
 	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {

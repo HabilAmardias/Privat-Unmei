@@ -27,6 +27,7 @@ func Bootstrap(db *sql.DB, app *gin.Engine) {
 	cfg := routers.RouteConfig{
 		App:            app,
 		StudentHandler: studentHandler,
+		TokenUtil:      jwtUtil,
 	}
 	cfg.Setup()
 }

@@ -33,12 +33,49 @@ func CreateStudentService(
 	return &StudentServiceImpl{ur, sr, tmr, bu, gu, cu, ju}
 }
 
+func (us *StudentServiceImpl) SendVerificationEmail(ctx context.Context, id string) error {
+	user := new(entity.User)
+	student := new(entity.Student)
+	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := us.ur.FindByID(ctx, id, user); err != nil {
+			return err
+		}
+		if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
+			return err
+		}
+		if user.Status == constants.VerifiedStatus {
+			return customerrors.NewError(
+				"user already verified",
+				errors.New("user already verified"),
+				customerrors.InvalidAction,
+			)
+		}
+		jwt, err := us.ju.GenerateJWT(student.ID, constants.StudentRole, constants.ForVerification, user.Status)
+		if err != nil {
+			return err
+		}
+		if err := us.sr.UpdateVerifyToken(ctx, student.ID, &jwt); err != nil {
+			return err
+		}
+		emailParam := entity.SendEmailParams{
+			Receiver:  user.Email,
+			Subject:   "Verify your account",
+			EmailBody: constants.VerificationEmailBody(*student.VerifyToken),
+		}
+		if err := us.gu.SendEmail(emailParam); err != nil {
+			return err
+		}
+		log.Println(jwt)
+		return nil
+	})
+}
+
 func (us *StudentServiceImpl) ResetPassword(ctx context.Context, param entity.ResetPasswordParam) error {
 	user := new(entity.User)
 	student := new(entity.Student)
 
 	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		claim, err := us.ju.VerifyJWT(param.Token, constants.ForReset, constants.StudentRole)
+		claim, err := us.ju.VerifyJWT(param.Token, constants.ForReset)
 		if err != nil {
 			return err
 		}
@@ -109,7 +146,7 @@ func (us *StudentServiceImpl) Verify(ctx context.Context, token string) error {
 	user := new(entity.User)
 	student := new(entity.Student)
 	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		claim, err := us.ju.VerifyJWT(token, constants.ForVerification, constants.StudentRole)
+		claim, err := us.ju.VerifyJWT(token, constants.ForVerification)
 		if err != nil {
 			return err
 		}
@@ -202,6 +239,7 @@ func (us *StudentServiceImpl) Register(ctx context.Context, param entity.Student
 		}
 		// keep it for testing verify functionality
 		log.Println(token)
+
 		student.ID = user.ID
 		student.VerifyToken = &token
 		if err := us.sr.AddNewStudent(ctx, student); err != nil {

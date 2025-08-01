@@ -5,6 +5,7 @@ import (
 	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/handlers"
 	"privat-unmei/internal/middlewares"
+	"privat-unmei/internal/utils"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -13,6 +14,7 @@ import (
 type RouteConfig struct {
 	App            *gin.Engine
 	StudentHandler *handlers.StudentHandlerImpl
+	TokenUtil      *utils.JWTUtil
 }
 
 func (c *RouteConfig) Setup() {
@@ -25,6 +27,7 @@ func (c *RouteConfig) Setup() {
 	c.App.Use(middlewares.ErrorMiddleware())
 
 	c.SetupPublicRoute()
+	c.SetupPrivateRoute()
 }
 
 func (c *RouteConfig) SetupPublicRoute() {
@@ -40,4 +43,11 @@ func (c *RouteConfig) SetupPublicRoute() {
 	v1.POST("/verify", c.StudentHandler.Verify)
 	v1.POST("/reset-password/send", c.StudentHandler.SendResetTokenEmail)
 	v1.POST("/reset-password/reset", c.StudentHandler.ResetPassword)
+}
+
+func (c *RouteConfig) SetupPrivateRoute() {
+	v1 := c.App.Group("/api/v1")
+	v1.Use(middlewares.AuthenticationMiddleware(c.TokenUtil))
+
+	v1.GET("/verify/send", c.StudentHandler.SendVerificationEmail)
 }

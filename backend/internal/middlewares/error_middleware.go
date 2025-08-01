@@ -52,7 +52,7 @@ func ErrorMiddleware() gin.HandlerFunc {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, dtos.Response{
 			Success: false,
 			Data: dtos.MessageResponse{
-				Message: "Server Error",
+				Message: "Something went wrong",
 			},
 		})
 	}

@@ -80,7 +80,7 @@ func VerificationEmailBody(id string) string {
                             <div style="margin: 30px 0; padding: 20px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px;">
                                 <h3 style="color: #856404; margin: 0 0 10px 0; font-size: 16px;">Important Information:</h3>
                                 <ul style="color: #856404; font-size: 14px; margin: 0; padding-left: 20px;">
-                                    <li>This verification link will expire in <strong>24 hours</strong></li>
+                                    <li>This verification link will expire in <strong>72 hours</strong></li>
                                     <li>If you didn't create an account with us, please ignore this email</li>
                                     <li>For security reasons, do not share this verification link with anyone</li>
                                 </ul>
@@ -140,7 +140,7 @@ func ResetEmailBody(token string) string {
                             <div style="margin: 30px 0; padding: 20px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px;">
                                 <h3 style="color: #856404; margin: 0 0 10px 0; font-size: 16px;">Important Security Information:</h3>
                                 <ul style="color: #856404; font-size: 14px; margin: 0; padding-left: 20px;">
-                                    <li>This password reset link will expire in <strong>1 hour</strong></li>
+                                    <li>This password reset link will expire in <strong>72 hours</strong></li>
                                     <li>If you didn't request a password reset, please ignore this email</li>
                                     <li>Your password will remain unchanged if you don't click the link</li>
                                     <li>For security reasons, do not share this reset link with anyone</li>

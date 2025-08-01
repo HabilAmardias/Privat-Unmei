@@ -2,59 +2,31 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
+	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
-	"strings"
+	"privat-unmei/internal/entity"
 
 	"github.com/gin-gonic/gin"
 )
 
-const (
-	authorizationHeaderKey  = "authorization"
-	authorizationTypeBearer = "bearer"
-)
+func getAuthenticationPayload(ctx *gin.Context) (*entity.CustomClaim, error) {
 
-func GetJWT(ctx *gin.Context) *string {
-	authorizationHeader := ctx.GetHeader(authorizationHeaderKey)
-
-	if len(authorizationHeader) == 0 {
-		err := errors.New("authorization header is not provided")
-
-		ctx.Error(customerrors.NewError(
-			"authorization header not found",
-			err,
-			customerrors.Unauthenticate,
-		))
-		ctx.Abort()
-		return nil
+	claims, ok := ctx.Get(constants.CTX_AUTH_PAYLOAD_KEY)
+	if !ok {
+		return nil, customerrors.NewError(
+			"user credential identification failed",
+			errors.New("cannot find authentication claim"),
+			customerrors.CommonErr,
+		)
 	}
 
-	fields := strings.Fields(authorizationHeader)
-	if len(fields) != 2 {
-		err := errors.New("invalid token format")
-
-		ctx.Error(customerrors.NewError(
-			"invalid authorization header format",
-			err,
-			customerrors.Unauthenticate,
-		))
-		ctx.Abort()
-		return nil
+	customClaims, ok := claims.(*entity.CustomClaim)
+	if !ok {
+		return nil, customerrors.NewError(
+			"user credential identification failed",
+			errors.New("cannot parse authentication claim"),
+			customerrors.CommonErr,
+		)
 	}
-
-	authorizationType := strings.ToLower(fields[0])
-	if authorizationType != authorizationTypeBearer {
-		err := fmt.Errorf("unsupported authorization type %s", authorizationType)
-
-		ctx.Error(customerrors.NewError(
-			"unsupported authorization type",
-			err,
-			customerrors.Unauthenticate,
-		))
-		ctx.Abort()
-		return nil
-	}
-
-	accessToken := fields[1]
-	return &accessToken
+	return customClaims, nil
 }

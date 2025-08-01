@@ -16,7 +16,7 @@ func CreateJWTUtil() *JWTUtil {
 	return &JWTUtil{}
 }
 
-func (ju *JWTUtil) VerifyJWT(tokenStr string, usedFor int, role int) (*entity.CustomClaim, error) {
+func (ju *JWTUtil) VerifyJWT(tokenStr string, usedFor int) (*entity.CustomClaim, error) {
 	jwtSecret := os.Getenv("JWT_SECRET")
 	custClaim := new(entity.CustomClaim)
 
@@ -77,13 +77,6 @@ func (ju *JWTUtil) VerifyJWT(tokenStr string, usedFor int, role int) (*entity.Cu
 		return nil, customerrors.NewError(
 			"Failed to authorize",
 			fmt.Errorf("wrong token usage"),
-			customerrors.Unauthenticate,
-		)
-	}
-	if claim.Role != role {
-		return nil, customerrors.NewError(
-			"Failed to authorize",
-			fmt.Errorf("wrong user role"),
 			customerrors.Unauthenticate,
 		)
 	}

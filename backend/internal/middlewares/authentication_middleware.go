@@ -16,7 +16,7 @@ const (
 	authorizationTypeBearer = "bearer"
 )
 
-func AuthenticateMiddleware(token *utils.JWTUtil, role int) gin.HandlerFunc {
+func AuthenticationMiddleware(tokenUtil *utils.JWTUtil) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authorizationHeader := ctx.GetHeader(authorizationHeaderKey)
 
@@ -24,7 +24,7 @@ func AuthenticateMiddleware(token *utils.JWTUtil, role int) gin.HandlerFunc {
 			err := errors.New("authorization header is not provided")
 
 			ctx.Error(customerrors.NewError(
-				"authorization header not found",
+				"user credential does not exist",
 				err,
 				customerrors.Unauthenticate,
 			))
@@ -37,7 +37,7 @@ func AuthenticateMiddleware(token *utils.JWTUtil, role int) gin.HandlerFunc {
 			err := errors.New("invalid token format")
 
 			ctx.Error(customerrors.NewError(
-				"invalid authorization header format",
+				"invalid credential",
 				err,
 				customerrors.Unauthenticate,
 			))
@@ -50,7 +50,7 @@ func AuthenticateMiddleware(token *utils.JWTUtil, role int) gin.HandlerFunc {
 			err := fmt.Errorf("unsupported authorization type %s", authorizationType)
 
 			ctx.Error(customerrors.NewError(
-				"unsupported authorization type",
+				"invalid credential",
 				err,
 				customerrors.Unauthenticate,
 			))
@@ -59,7 +59,7 @@ func AuthenticateMiddleware(token *utils.JWTUtil, role int) gin.HandlerFunc {
 		}
 
 		accessToken := fields[1]
-		payload, err := token.VerifyJWT(accessToken, constants.ForLogin, role)
+		payload, err := tokenUtil.VerifyJWT(accessToken, constants.ForLogin)
 		if err != nil {
 			ctx.Error(err)
 			ctx.Abort()
