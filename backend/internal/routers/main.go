@@ -14,6 +14,7 @@ import (
 type RouteConfig struct {
 	App            *gin.Engine
 	StudentHandler *handlers.StudentHandlerImpl
+	AdminHandler   *handlers.AdminHandlerImpl
 	TokenUtil      *utils.JWTUtil
 }
 
@@ -43,6 +44,7 @@ func (c *RouteConfig) SetupPublicRoute() {
 	v1.POST("/verify", c.StudentHandler.Verify)
 	v1.POST("/reset-password/send", c.StudentHandler.SendResetTokenEmail)
 	v1.POST("/reset-password/reset", c.StudentHandler.ResetPassword)
+	v1.POST("/admin/login", c.AdminHandler.Login)
 }
 
 func (c *RouteConfig) SetupPrivateRoute() {

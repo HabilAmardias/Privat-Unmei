@@ -18,10 +18,10 @@ func main() {
 	}
 	log.Println("migrations applied successfully")
 
-	// if !isDown {
-	// 	if err := dbcommand.RunSeeder(); err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	log.Println("seeds applied successfully")
-	// }
+	if !isDown {
+		if err := dbcommand.RunSeeder(); err != nil {
+			log.Fatal(err)
+		}
+		log.Println("seeds applied successfully")
+	}
 }
