@@ -17,15 +17,29 @@ const (
 )
 
 const (
-	StudentRole = 1
-	AdminRole   = 2
-	MentorRole  = 3
+	StudentRole = iota + 1 // 1
+	AdminRole              // 2
+	MentorRole             // 3
 )
 
 const (
-	ForVerification = 1
-	ForReset        = 2
-	ForLogin        = 3
+	ForVerification = iota + 1 // 1
+	ForReset
+	ForLogin
+)
+
+const (
+	StudentResource = iota + 1 // 1
+)
+
+const (
+	CreatePermission = iota + 1 // 1
+	ReadOwnPermission
+	ReadAllPermission
+	UpdateOwnPermission
+	UpdateAllPermission
+	DeleteOwnPermission
+	DeleteAllPermission
 )
 
 func VerificationEmailBody(id string) string {
