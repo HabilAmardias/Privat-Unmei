@@ -49,4 +49,16 @@ type (
 	DeleteMentorParam struct {
 		ID string
 	}
+	ListMentorQuery struct {
+		ID                string
+		Name              string
+		Email             string
+		WhatsappNumber    string
+		YearsOfExperience int
+	}
+	ListMentorParam struct {
+		PaginatedParam
+		Search               *string
+		SortYearOfExperience *bool
+	}
 )

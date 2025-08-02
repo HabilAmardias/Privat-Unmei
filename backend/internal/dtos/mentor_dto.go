@@ -22,4 +22,16 @@ type (
 	UpdateMentorForAdminRes struct {
 		ID string `json:"id"`
 	}
+	ListMentorReq struct {
+		PaginatedReq
+		Search               *string `form:"search"`
+		SortYearOfExperience *bool   `form:"sort_year_of_experience"`
+	}
+	ListMentorRes struct {
+		ID                string `json:"id"`
+		Name              string `json:"name"`
+		Email             string `json:"email"`
+		WhatsappNumber    string `json:"whatsapp_number"`
+		YearsOfExperience int    `json:"years_of_experience"`
+	}
 )

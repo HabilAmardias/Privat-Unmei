@@ -32,6 +32,15 @@ func CreateMentorService(
 	return &MentorServiceImpl{tmr, ur, mr, bu, ju, cu, gu}
 }
 
+func (ms *MentorServiceImpl) GetMentorList(ctx context.Context, param entity.ListMentorParam) (*[]entity.ListMentorQuery, *int64, error) {
+	mentors := new([]entity.ListMentorQuery)
+	totalRow := new(int64)
+	if err := ms.mr.GetMentorList(ctx, mentors, totalRow, param); err != nil {
+		return nil, nil, err
+	}
+	return mentors, totalRow, nil
+}
+
 func (ms *MentorServiceImpl) DeleteMentor(ctx context.Context, param entity.DeleteMentorParam) error {
 	user := new(entity.User)
 	mentor := new(entity.Mentor)

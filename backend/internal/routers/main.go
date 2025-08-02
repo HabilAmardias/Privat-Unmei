@@ -60,6 +60,11 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.StudentResource,
 		c.RBACRepository,
 	), c.AdminHandler.GetStudentList)
+	v1.GET("/mentors", middlewares.AuthorizationMiddleware(
+		constants.ReadAllPermission,
+		constants.MentorResource,
+		c.RBACRepository,
+	), c.AdminHandler.GetMentorList)
 	v1.POST("/mentors", middlewares.AuthorizationMiddleware(
 		constants.CreatePermission,
 		constants.MentorResource,

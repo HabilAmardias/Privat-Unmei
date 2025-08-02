@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 )
@@ -14,6 +15,105 @@ type MentorRepositoryImpl struct {
 
 func CreateMentorRepositoryImpl(db *sql.DB) *MentorRepositoryImpl {
 	return &MentorRepositoryImpl{db}
+}
+
+func (mr *MentorRepositoryImpl) GetMentorList(ctx context.Context, mentors *[]entity.ListMentorQuery, totalRow *int64, param entity.ListMentorParam) error {
+	var driver RepoDriver
+	driver = mr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	args := []any{}
+	countArgs := []any{}
+	query := `
+	SELECT
+		m.id,
+		u.name,
+		u.email,
+		m.whatsapp_number,
+		m.years_of_experience
+	FROM users u
+	JOIN mentors m ON m.id = u.id
+	WHERE
+		m.deleted_at IS NULL AND
+		u.deleted_at IS NULL
+	`
+	countQuery := `
+	SELECT
+		count(*)
+	FROM users u
+	JOIN mentors m ON m.id = u.id
+	WHERE
+		m.deleted_at IS NULL AND
+		u.deleted_at IS NULL
+	`
+	if param.Search != nil {
+		query += " AND "
+		countQuery += " AND "
+		query += "u.name ILIKE $1 AND u.email ILIKE $1"
+		countQuery += "u.name ILIKE $1 AND u.email ILIKE $1"
+		args = append(args, "%"+*param.Search+"%")
+		countArgs = append(countArgs, "%"+*param.Search+"%")
+	}
+	if param.SortYearOfExperience != nil {
+		query += " ORDER BY years_of_experience"
+		if *param.SortYearOfExperience {
+			query += " ASC"
+		} else {
+			query += " DESC"
+		}
+	}
+	if param.Limit > 0 {
+		query += ` 
+		LIMIT $2
+		OFFSET $3
+		`
+		args = append(args, param.Limit)
+		args = append(args, param.Limit*(param.Page-1))
+	}
+	row := driver.QueryRow(countQuery, countArgs...)
+	if err := row.Scan(totalRow); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return customerrors.NewError(
+				customerrors.UserNotFound,
+				err,
+				customerrors.ItemNotExist,
+			)
+		}
+		return customerrors.NewError(
+			"failed to get mentor list",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	log.Println(query)
+	rows, err := driver.Query(query, args...)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to get mentor list",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var mentor entity.ListMentorQuery
+		if err := rows.Scan(
+			&mentor.ID,
+			&mentor.Name,
+			&mentor.Email,
+			&mentor.WhatsappNumber,
+			&mentor.YearsOfExperience,
+		); err != nil {
+			return customerrors.NewError(
+				"failed to get mentor list",
+				err,
+				customerrors.DatabaseExecutionError,
+			)
+		}
+		*mentors = append(*mentors, mentor)
+	}
+	return nil
 }
 
 func (mr *MentorRepositoryImpl) FindByID(ctx context.Context, id string, mentor *entity.Mentor) error {
