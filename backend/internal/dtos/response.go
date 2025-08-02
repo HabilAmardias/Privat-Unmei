@@ -12,4 +12,23 @@ type (
 		Title   string `json:"field"`
 		Message string `json:"message"`
 	}
+	SortInfo struct {
+		Name string `json:"name"`
+		ASC  bool   `json:"asc"`
+	}
+	FilterInfo struct {
+		Name  string `json:"name"`
+		Value any    `json:"value"`
+	}
+	PaginatedInfo struct {
+		Page     int          `json:"page"`
+		Limit    int          `json:"limit"`
+		TotalRow int64        `json:"total_row"`
+		SortBy   []SortInfo   `json:"sort_by,omitempty"`
+		FilterBy []FilterInfo `json:"filter_by,omitempty"`
+	}
+	PaginatedResponse[T interface{}] struct {
+		Entries  []T           `json:"entries"`
+		PageInfo PaginatedInfo `json:"page_info"`
+	}
 )

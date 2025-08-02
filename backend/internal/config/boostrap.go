@@ -14,19 +14,25 @@ import (
 func Bootstrap(db *sql.DB, app *gin.Engine) {
 	userRepo := repositories.CreateUserRepository(db)
 	studentRepo := repositories.CreateStudentRepository(db)
+	adminRepo := repositories.CreateAdminRepository(db)
 	transactionManager := repositories.CreateTransactionManager(db)
+	rbacRepo := repositories.CreateRBACRepository(db)
 
 	bcryptUtil := utils.CreateBcryptUtil()
 	gomailUtil := utils.CreateGomailUtil()
 	cloudinaryUtil := utils.CreateCloudinaryUtil()
 	jwtUtil := utils.CreateJWTUtil()
 
+	adminService := services.CreateAdminService(userRepo, adminRepo, studentRepo, transactionManager, bcryptUtil, jwtUtil, gomailUtil)
 	studentService := services.CreateStudentService(userRepo, studentRepo, transactionManager, bcryptUtil, gomailUtil, cloudinaryUtil, jwtUtil)
 
 	studentHandler := handlers.CreateStudentHandler(studentService)
+	adminHandler := handlers.CreateAdminHandler(adminService)
 	cfg := routers.RouteConfig{
 		App:            app,
 		StudentHandler: studentHandler,
+		AdminHandler:   adminHandler,
+		RBACRepository: rbacRepo,
 		TokenUtil:      jwtUtil,
 	}
 	cfg.Setup()
