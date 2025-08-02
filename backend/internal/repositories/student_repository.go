@@ -16,6 +16,84 @@ func CreateStudentRepository(db *sql.DB) *StudentRepositoryImpl {
 	return &StudentRepositoryImpl{db}
 }
 
+func (sr *StudentRepositoryImpl) GetStudentList(ctx context.Context, totalRow *int64, limit int, page int, students *[]entity.ListStudentQuery) error {
+	var driver RepoDriver
+	driver = sr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	countQuery := `
+	SELECT count(*)
+	FROM users u
+	JOIN students s ON s.id = u.id
+	WHERE u.deleted_at IS NULL AND s.deleted_at IS NULL
+	`
+	query := `
+	SELECT
+		s.id, 
+		u.name, 
+		u.email, 
+		u.bio, 
+		u.profile_image, 
+		u.status
+	FROM users u
+	JOIN students s ON s.id = u.id
+	WHERE u.deleted_at IS NULL AND s.deleted_at IS NULL
+	`
+	row := driver.QueryRow(countQuery)
+	if err := row.Scan(totalRow); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return customerrors.NewError(
+				customerrors.UserNotFound,
+				err,
+				customerrors.ItemNotExist,
+			)
+		}
+		return customerrors.NewError(
+			"failed to get student list",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	args := []any{}
+	if limit > 0 {
+		args = append(args, limit)
+		args = append(args, limit*(page-1))
+		query += ` 
+		LIMIT $1
+		OFFSET $2
+		`
+	}
+	rows, err := driver.Query(query, args...)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to get student list",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var student entity.ListStudentQuery
+		if err := rows.Scan(
+			&student.ID,
+			&student.Name,
+			&student.Email,
+			&student.Bio,
+			&student.ProfileImage,
+			&student.Status,
+		); err != nil {
+			return customerrors.NewError(
+				"failed to get student list",
+				err,
+				customerrors.DatabaseExecutionError,
+			)
+		}
+		*students = append(*students, student)
+	}
+	return nil
+}
+
 func (sr *StudentRepositoryImpl) UpdateResetToken(ctx context.Context, id string, token *string) error {
 	var driver RepoDriver
 	driver = sr.DB

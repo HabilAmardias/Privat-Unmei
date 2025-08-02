@@ -13,6 +13,7 @@ import (
 type AdminServiceImpl struct {
 	ur  *repositories.UserRepositoryImpl
 	ar  *repositories.AdminRepositoryImpl
+	sr  *repositories.StudentRepositoryImpl
 	tmr *repositories.TransactionManagerRepositories
 	bu  *utils.BcryptUtil
 	ju  *utils.JWTUtil
@@ -22,12 +23,23 @@ type AdminServiceImpl struct {
 func CreateAdminService(
 	ur *repositories.UserRepositoryImpl,
 	ar *repositories.AdminRepositoryImpl,
+	sr *repositories.StudentRepositoryImpl,
 	tmr *repositories.TransactionManagerRepositories,
 	bu *utils.BcryptUtil,
 	ju *utils.JWTUtil,
 	gu *utils.GomailUtil,
 ) *AdminServiceImpl {
-	return &AdminServiceImpl{ur, ar, tmr, bu, ju, gu}
+	return &AdminServiceImpl{ur, ar, sr, tmr, bu, ju, gu}
+}
+
+func (as *AdminServiceImpl) GetStudentList(ctx context.Context, param entity.ListStudentParam) (*[]entity.ListStudentQuery, *int64, error) {
+	students := new([]entity.ListStudentQuery)
+	totalRow := new(int64)
+
+	if err := as.sr.GetStudentList(ctx, totalRow, param.Limit, param.Page, students); err != nil {
+		return nil, nil, err
+	}
+	return students, totalRow, nil
 }
 
 func (as *AdminServiceImpl) Login(ctx context.Context, param entity.AdminLoginParam) (string, error) {

@@ -8,4 +8,7 @@ type (
 	AdminLoginRes struct {
 		Token string `json:"token"`
 	}
+	GetStudentListReq struct {
+		PaginatedReq
+	}
 )

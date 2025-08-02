@@ -2,9 +2,11 @@ package routers
 
 import (
 	"net/http"
+	"privat-unmei/internal/constants"
 	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/handlers"
 	"privat-unmei/internal/middlewares"
+	"privat-unmei/internal/repositories"
 	"privat-unmei/internal/utils"
 
 	"github.com/gin-contrib/cors"
@@ -15,6 +17,7 @@ type RouteConfig struct {
 	App            *gin.Engine
 	StudentHandler *handlers.StudentHandlerImpl
 	AdminHandler   *handlers.AdminHandlerImpl
+	RBACRepository *repositories.RBACRepository
 	TokenUtil      *utils.JWTUtil
 }
 
@@ -52,4 +55,9 @@ func (c *RouteConfig) SetupPrivateRoute() {
 	v1.Use(middlewares.AuthenticationMiddleware(c.TokenUtil))
 
 	v1.GET("/verify/send", c.StudentHandler.SendVerificationEmail)
+	v1.GET("/students", middlewares.AuthorizationMiddleware(
+		constants.ReadAllPermission,
+		constants.StudentResource,
+		c.RBACRepository,
+	), c.AdminHandler.GetStudentList)
 }

@@ -23,13 +23,13 @@ func (rr *RBACRepository) CheckRoleAccess(ctx context.Context, rbac *entity.Rbac
 		driver = tx
 	}
 	query := `
-	SELECT id, role_id, permission_id, resource_id, created_at, updated_at, deleted_at
+	SELECT id
 	FROM rbac
 	WHERE role_id = $1 AND permission_id = $2 AND resource_id = $3 AND deleted_at IS NULL
 	`
 
 	row := driver.QueryRow(query, role, permission, resource)
-	if err := row.Scan(); err != nil {
+	if err := row.Scan(&rbac.ID); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return customerrors.NewError("user does not have access", err, customerrors.ItemNotExist)
 		}

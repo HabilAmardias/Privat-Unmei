@@ -17,9 +17,14 @@ const (
 )
 
 const (
-	StudentRole = iota + 1 // 1
-	AdminRole              // 2
-	MentorRole             // 3
+	AdminRole   = iota + 1 // 1
+	MentorRole             // 2
+	StudentRole            // 3
+)
+
+const (
+	DefaultLimit = 15
+	DefaultPage  = 1
 )
 
 const (

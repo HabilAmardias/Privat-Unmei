@@ -28,4 +28,15 @@ type (
 		NewPassword string
 		Token       string
 	}
+	ListStudentQuery struct {
+		ID           string
+		Name         string
+		Email        string
+		Bio          string
+		ProfileImage string
+		Status       string
+	}
+	ListStudentParam struct {
+		PaginatedParam
+	}
 )
