@@ -15,9 +15,12 @@ type (
 		UpdatedAt    time.Time
 		DeletedAt    *time.Time
 	}
-	UpdateUserParam struct {
-		Status    string
-		CreatedAt time.Time
-		UpdatedAt time.Time
+	UpdateUserQuery struct {
+		Name         *string
+		Email        *string
+		Password     *string
+		Bio          *string
+		ProfileImage *string
+		Status       *string
 	}
 )

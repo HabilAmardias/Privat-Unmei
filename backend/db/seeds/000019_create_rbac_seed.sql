@@ -16,8 +16,12 @@ VALUES
 
 INSERT INTO resources(id, name, description)
 VALUES
-(1, 'student', 'registered student data');
+(1, 'student', 'registered student data'),
+(2, 'mentor', 'course manager data');
 
 INSERT INTO rbac(role_id, permission_id, resource_id)
 VALUES
-(1, 3, 1); -- admin can read all student's data
+(1, 3, 1), -- admin can read all student's data
+(1, 5, 2), -- admin can update all mentor data
+(1, 7, 2), -- admin can delete all mentor data
+(1, 1, 2); -- admin can create mentor data

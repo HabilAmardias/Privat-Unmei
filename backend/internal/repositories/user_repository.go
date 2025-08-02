@@ -164,3 +164,23 @@ func (ur *UserRepositoryImpl) FindByEmail(ctx context.Context, email string, use
 	}
 	return nil
 }
+
+func (ar *UserRepositoryImpl) DeleteUser(ctx context.Context, id string) error {
+	var driver RepoDriver
+	driver = ar.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE users
+	SET
+		deleted_at = NOW(),
+		updated_at = NOW()
+	WHERE id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, id)
+	if err != nil {
+		return customerrors.NewError("failed to delete user", err, customerrors.DatabaseExecutionError)
+	}
+	return nil
+}

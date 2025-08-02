@@ -135,7 +135,7 @@ func (sh *StudentHandlerImpl) Register(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	ctx.JSON(http.StatusOK, dtos.Response{
+	ctx.JSON(http.StatusCreated, dtos.Response{
 		Success: true,
 		Data: dtos.MessageResponse{
 			Message: "Successfully Registered",

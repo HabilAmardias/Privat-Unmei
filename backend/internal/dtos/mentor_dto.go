@@ -1,0 +1,25 @@
+package dtos
+
+type (
+	AddNewMentorReq struct {
+		Name              string `form:"name" binding:"required"`
+		Email             string `form:"email" binding:"required,email"`
+		Bio               string `form:"bio" binding:"required"`
+		Password          string `form:"password" binding:"required,containsany=!@#?,min=8"`
+		YearsOfExperience int    `form:"years_of_experience" binding:"required,min=0"`
+		WhatsappNumber    string `form:"whatsapp_number" binding:"required"`
+		Degree            string `form:"degree" binding:"required"`
+		Major             string `form:"major" binding:"required"`
+		Campus            string `form:"campus" binding:"required"`
+	}
+	GeneratePasswordRes struct {
+		Password string `json:"password"`
+	}
+	UpdateMentorForAdminReq struct {
+		WhatsappNumber    *string `json:"whatsapp_number"`
+		YearsOfExperience *int    `json:"years_of_experience"`
+	}
+	UpdateMentorForAdminRes struct {
+		ID string `json:"id"`
+	}
+)

@@ -1,8 +1,12 @@
 package handlers
 
 import (
+	"errors"
+	"fmt"
+	"io"
 	"net/http"
 	"privat-unmei/internal/constants"
+	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/services"
@@ -12,10 +16,190 @@ import (
 
 type AdminHandlerImpl struct {
 	as *services.AdminServiceImpl
+	ms *services.MentorServiceImpl
 }
 
-func CreateAdminHandler(as *services.AdminServiceImpl) *AdminHandlerImpl {
-	return &AdminHandlerImpl{as}
+func CreateAdminHandler(as *services.AdminServiceImpl, ms *services.MentorServiceImpl) *AdminHandlerImpl {
+	return &AdminHandlerImpl{as, ms}
+}
+func (ah *AdminHandlerImpl) DeleteMentor(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		ctx.Error(customerrors.NewError(
+			"no mentor id given",
+			errors.New("no mentor id given"),
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	param := entity.DeleteMentorParam{
+		ID: id,
+	}
+	if err := ah.ms.DeleteMentor(ctx, param); err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.UpdateMentorForAdminRes{
+			ID: id,
+		},
+	})
+}
+func (ah *AdminHandlerImpl) UpdateMentor(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		ctx.Error(customerrors.NewError(
+			"no mentor id given",
+			errors.New("no mentor id given"),
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	var req dtos.UpdateMentorForAdminReq
+	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	if req.WhatsappNumber != nil && !ValidatePhoneNumber(*req.WhatsappNumber) {
+		ctx.Error(customerrors.NewError(
+			"invalid whatsapp number",
+			errors.New("invalid whatsapp number"),
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	param := entity.UpdateMentorParam{
+		ID: id,
+		UpdateMentorQuery: entity.UpdateMentorQuery{
+			WhatsappNumber:    req.WhatsappNumber,
+			YearsOfExperience: req.YearsOfExperience,
+		},
+	}
+	if err := ah.ms.UpdateMentorForAdmin(ctx, param); err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.UpdateMentorForAdminRes{
+			ID: param.ID,
+		},
+	})
+}
+func (ah *AdminHandlerImpl) GenerateRandomPassword(ctx *gin.Context) {
+	pass, err := ah.as.GenerateRandomPassword()
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusCreated, dtos.Response{
+		Success: true,
+		Data: dtos.GeneratePasswordRes{
+			Password: pass,
+		},
+	})
+}
+
+func (ah *AdminHandlerImpl) AddNewMentor(ctx *gin.Context) {
+	var req dtos.AddNewMentorReq
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	if !ValidateDegree(req.Degree) {
+		ctx.Error(customerrors.NewError(
+			"invalid degree",
+			errors.New("degree given is invalid"),
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	if !ValidatePhoneNumber(req.WhatsappNumber) {
+		ctx.Error(customerrors.NewError(
+			"invalid whatsapp number",
+			errors.New("whatsapp number given is invalid"),
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	headerFile, err := ctx.FormFile("file")
+	if err != nil {
+		ctx.Error(
+			customerrors.NewError(
+				"Failed to upload pharmacy logo",
+				err,
+				customerrors.InvalidAction,
+			),
+		)
+		return
+	}
+	if headerFile.Size > constants.FileSizeThreshold {
+		ctx.Error(customerrors.NewError(
+			"File size is too large",
+			fmt.Errorf("file size is too large"),
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	file, err := headerFile.Open()
+	if err != nil {
+		ctx.Error(
+			customerrors.NewError(
+				"Failed to upload file",
+				err,
+				customerrors.InvalidAction,
+			),
+		)
+		return
+	}
+	defer file.Close()
+
+	buff := make([]byte, 512)
+	if _, err := file.Read(buff); err != nil {
+		ctx.Error(
+			customerrors.NewError(
+				"Failed to upload file",
+				err,
+				customerrors.InvalidAction,
+			),
+		)
+		return
+	}
+
+	file.Seek(0, io.SeekStart)
+	if fileType := http.DetectContentType(buff); fileType != constants.PDFType {
+		ctx.Error(
+			customerrors.NewError(
+				"Uploaded file must be .pdf",
+				err,
+				customerrors.InvalidAction,
+			),
+		)
+		return
+	}
+	param := entity.AddNewMentorParam{
+		Name:              req.Name,
+		Email:             req.Email,
+		Password:          req.Password,
+		ResumeFile:        file,
+		Bio:               req.Bio,
+		YearsOfExperience: req.YearsOfExperience,
+		WhatsappNumber:    req.WhatsappNumber,
+		Degree:            req.Degree,
+		Major:             req.Major,
+		Campus:            req.Campus,
+	}
+	if err := ah.ms.AddNewMentor(ctx, param); err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusCreated, dtos.Response{
+		Success: true,
+		Data: dtos.MessageResponse{
+			Message: "Succesfully create mentor account",
+		},
+	})
 }
 
 func (ah *AdminHandlerImpl) GetStudentList(ctx *gin.Context) {
