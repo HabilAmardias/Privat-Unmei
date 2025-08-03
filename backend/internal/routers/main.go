@@ -14,11 +14,13 @@ import (
 )
 
 type RouteConfig struct {
-	App            *gin.Engine
-	StudentHandler *handlers.StudentHandlerImpl
-	AdminHandler   *handlers.AdminHandlerImpl
-	RBACRepository *repositories.RBACRepository
-	TokenUtil      *utils.JWTUtil
+	App                   *gin.Engine
+	StudentHandler        *handlers.StudentHandlerImpl
+	AdminHandler          *handlers.AdminHandlerImpl
+	CourseCategoryHandler *handlers.CourseCategoryHandlerImpl
+	MentorHandler         *handlers.MentorHandlerImpl
+	RBACRepository        *repositories.RBACRepository
+	TokenUtil             *utils.JWTUtil
 }
 
 func (c *RouteConfig) Setup() {
@@ -48,6 +50,7 @@ func (c *RouteConfig) SetupPublicRoute() {
 	v1.POST("/reset-password/send", c.StudentHandler.SendResetTokenEmail)
 	v1.POST("/reset-password/reset", c.StudentHandler.ResetPassword)
 	v1.POST("/admin/login", c.AdminHandler.Login)
+	v1.GET("/courses/categories", c.CourseCategoryHandler.GetCategoriesList)
 }
 
 func (c *RouteConfig) SetupPrivateRoute() {
@@ -59,5 +62,30 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.ReadAllPermission,
 		constants.StudentResource,
 		c.RBACRepository,
-	), c.AdminHandler.GetStudentList)
+	), c.StudentHandler.GetStudentList)
+	v1.GET("/mentors", middlewares.AuthorizationMiddleware(
+		constants.ReadAllPermission,
+		constants.MentorResource,
+		c.RBACRepository,
+	), c.MentorHandler.GetMentorList)
+	v1.POST("/mentors", middlewares.AuthorizationMiddleware(
+		constants.CreatePermission,
+		constants.MentorResource,
+		c.RBACRepository,
+	), c.MentorHandler.AddNewMentor)
+	v1.GET("/mentors/password", middlewares.AuthorizationMiddleware(
+		constants.CreatePermission,
+		constants.MentorResource,
+		c.RBACRepository,
+	), c.AdminHandler.GenerateRandomPassword)
+	v1.PATCH("/admin/mentors/:id", middlewares.AuthorizationMiddleware(
+		constants.UpdateAllPermission,
+		constants.MentorResource,
+		c.RBACRepository,
+	), c.MentorHandler.UpdateMentor)
+	v1.DELETE("/mentors/:id", middlewares.AuthorizationMiddleware(
+		constants.DeleteAllPermission,
+		constants.MentorResource,
+		c.RBACRepository,
+	), c.MentorHandler.DeleteMentor)
 }

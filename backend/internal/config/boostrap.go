@@ -15,25 +15,34 @@ func Bootstrap(db *sql.DB, app *gin.Engine) {
 	userRepo := repositories.CreateUserRepository(db)
 	studentRepo := repositories.CreateStudentRepository(db)
 	adminRepo := repositories.CreateAdminRepository(db)
+	mentorRepo := repositories.CreateMentorRepositoryImpl(db)
 	transactionManager := repositories.CreateTransactionManager(db)
 	rbacRepo := repositories.CreateRBACRepository(db)
+	courseCategoryRepo := repositories.CreateCourseCategoryRepository(db)
 
 	bcryptUtil := utils.CreateBcryptUtil()
 	gomailUtil := utils.CreateGomailUtil()
 	cloudinaryUtil := utils.CreateCloudinaryUtil()
 	jwtUtil := utils.CreateJWTUtil()
 
-	adminService := services.CreateAdminService(userRepo, adminRepo, studentRepo, transactionManager, bcryptUtil, jwtUtil, gomailUtil)
+	mentorService := services.CreateMentorService(transactionManager, userRepo, mentorRepo, bcryptUtil, jwtUtil, cloudinaryUtil, gomailUtil)
+	adminService := services.CreateAdminService(userRepo, adminRepo, studentRepo, mentorRepo, transactionManager, cloudinaryUtil, bcryptUtil, jwtUtil, gomailUtil)
 	studentService := services.CreateStudentService(userRepo, studentRepo, transactionManager, bcryptUtil, gomailUtil, cloudinaryUtil, jwtUtil)
+	courseCategoryService := services.CreateCourseCategoryService(courseCategoryRepo, transactionManager)
 
 	studentHandler := handlers.CreateStudentHandler(studentService)
 	adminHandler := handlers.CreateAdminHandler(adminService)
+	mentorHandler := handlers.CreateMentorHandler(mentorService)
+	courseCategoryHandler := handlers.CreateCourseCategoryHandler(courseCategoryService)
+
 	cfg := routers.RouteConfig{
-		App:            app,
-		StudentHandler: studentHandler,
-		AdminHandler:   adminHandler,
-		RBACRepository: rbacRepo,
-		TokenUtil:      jwtUtil,
+		App:                   app,
+		StudentHandler:        studentHandler,
+		AdminHandler:          adminHandler,
+		CourseCategoryHandler: courseCategoryHandler,
+		MentorHandler:         mentorHandler,
+		RBACRepository:        rbacRepo,
+		TokenUtil:             jwtUtil,
 	}
 	cfg.Setup()
 }

@@ -33,6 +33,16 @@ func CreateStudentService(
 	return &StudentServiceImpl{ur, sr, tmr, bu, gu, cu, ju}
 }
 
+func (us *StudentServiceImpl) GetStudentList(ctx context.Context, param entity.ListStudentParam) (*[]entity.ListStudentQuery, *int64, error) {
+	students := new([]entity.ListStudentQuery)
+	totalRow := new(int64)
+
+	if err := us.sr.GetStudentList(ctx, totalRow, param.Limit, param.Page, students); err != nil {
+		return nil, nil, err
+	}
+	return students, totalRow, nil
+}
+
 func (us *StudentServiceImpl) SendVerificationEmail(ctx context.Context, id string) error {
 	user := new(entity.User)
 	student := new(entity.Student)
