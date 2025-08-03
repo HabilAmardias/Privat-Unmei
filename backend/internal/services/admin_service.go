@@ -44,16 +44,6 @@ func (as *AdminServiceImpl) GenerateRandomPassword() (string, error) {
 	return pass, nil
 }
 
-func (as *AdminServiceImpl) GetStudentList(ctx context.Context, param entity.ListStudentParam) (*[]entity.ListStudentQuery, *int64, error) {
-	students := new([]entity.ListStudentQuery)
-	totalRow := new(int64)
-
-	if err := as.sr.GetStudentList(ctx, totalRow, param.Limit, param.Page, students); err != nil {
-		return nil, nil, err
-	}
-	return students, totalRow, nil
-}
-
 func (as *AdminServiceImpl) Login(ctx context.Context, param entity.AdminLoginParam) (string, error) {
 	user := new(entity.User)
 	admin := new(entity.Admin)
