@@ -5,8 +5,13 @@ import (
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
+	"regexp"
 
 	"github.com/gin-gonic/gin"
+)
+
+var (
+	degreelist = []string{"bachelor", "diploma", "high school", "master", "professor"}
 )
 
 func getAuthenticationPayload(ctx *gin.Context) (*entity.CustomClaim, error) {
@@ -29,4 +34,22 @@ func getAuthenticationPayload(ctx *gin.Context) (*entity.CustomClaim, error) {
 		)
 	}
 	return customClaims, nil
+}
+
+func ValidateDegree(degree string) bool {
+	for _, item := range degreelist {
+		if degree == item {
+			return true
+		}
+	}
+	return false
+}
+
+func ValidatePhoneNumber(phoneNumber string) bool {
+
+	pattern := `^0\d{9,12}$`
+
+	regex := regexp.MustCompile(pattern)
+
+	return regex.MatchString(phoneNumber)
 }
