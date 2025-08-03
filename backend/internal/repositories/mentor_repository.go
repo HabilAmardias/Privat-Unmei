@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
@@ -50,8 +51,8 @@ func (mr *MentorRepositoryImpl) GetMentorList(ctx context.Context, mentors *[]en
 	if param.Search != nil {
 		query += " AND "
 		countQuery += " AND "
-		query += "u.name ILIKE $1 AND u.email ILIKE $1"
-		countQuery += "u.name ILIKE $1 AND u.email ILIKE $1"
+		query += fmt.Sprintf("u.name ILIKE $1 AND u.email ILIKE $%d", len(args)+1)
+		countQuery += fmt.Sprintf("u.name ILIKE $1 AND u.email ILIKE $%d", len(countArgs)+1)
 		args = append(args, "%"+*param.Search+"%")
 		countArgs = append(countArgs, "%"+*param.Search+"%")
 	}
@@ -63,14 +64,13 @@ func (mr *MentorRepositoryImpl) GetMentorList(ctx context.Context, mentors *[]en
 			query += " DESC"
 		}
 	}
-	if param.Limit > 0 {
-		query += ` 
-		LIMIT $2
-		OFFSET $3
-		`
-		args = append(args, param.Limit)
-		args = append(args, param.Limit*(param.Page-1))
-	}
+	query += fmt.Sprintf(` 
+		LIMIT $%d
+		OFFSET $%d
+		`, len(args)+1, len(args)+2)
+	args = append(args, param.Limit)
+	args = append(args, param.Limit*(param.Page-1))
+
 	row := driver.QueryRow(countQuery, countArgs...)
 	if err := row.Scan(totalRow); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
