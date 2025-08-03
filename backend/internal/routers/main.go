@@ -99,4 +99,9 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.CourseCategoryResource,
 		c.RBACRepository,
 	), c.CourseCategoryHandler.UpdateCategory)
+	v1.POST("/mentors/me/change-password", middlewares.AuthorizationMiddleware(
+		constants.UpdateOwnPermission,
+		constants.MentorResource,
+		c.RBACRepository,
+	), c.MentorHandler.ChangePassword)
 }

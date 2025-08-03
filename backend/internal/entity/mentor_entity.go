@@ -65,4 +65,8 @@ type (
 		Email    string
 		Password string
 	}
+	MentorChangePasswordParam struct {
+		ID          string
+		NewPassword string
+	}
 )

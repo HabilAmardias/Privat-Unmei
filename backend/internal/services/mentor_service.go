@@ -33,6 +33,40 @@ func CreateMentorService(
 	return &MentorServiceImpl{tmr, ur, mr, bu, ju, cu, gu}
 }
 
+func (ms *MentorServiceImpl) ChangePassword(ctx context.Context, param entity.MentorChangePasswordParam) error {
+	user := new(entity.User)
+	mentor := new(entity.Mentor)
+
+	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := ms.ur.FindByID(ctx, param.ID, user); err != nil {
+			return err
+		}
+		if err := ms.mr.FindByID(ctx, param.ID, mentor); err != nil {
+			return err
+		}
+		if match := ms.bu.ComparePassword(param.NewPassword, user.Password); match {
+			return customerrors.NewError(
+				"cannot change into same password",
+				errors.New("new password same as previous password"),
+				customerrors.InvalidAction,
+			)
+		}
+		hashedPass, err := ms.bu.HashPassword(param.NewPassword)
+		if err != nil {
+			return err
+		}
+		if err := ms.ur.UpdateUserPassword(ctx, hashedPass, param.ID); err != nil {
+			return err
+		}
+		if user.Status != constants.VerifiedStatus {
+			if err := ms.ur.UpdateUserStatus(ctx, constants.VerifiedStatus, param.ID); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
 func (ms *MentorServiceImpl) Login(ctx context.Context, param entity.LoginMentorParam) (string, error) {
 	user := new(entity.User)
 	mentor := new(entity.Mentor)

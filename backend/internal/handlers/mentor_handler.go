@@ -22,6 +22,33 @@ func CreateMentorHandler(ms *services.MentorServiceImpl) *MentorHandlerImpl {
 	return &MentorHandlerImpl{ms}
 }
 
+func (mh *MentorHandlerImpl) ChangePassword(ctx *gin.Context) {
+	var req dtos.MentorChangePasswordReq
+	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.MentorChangePasswordParam{
+		ID:          claim.Subject,
+		NewPassword: req.NewPassword,
+	}
+	if err := mh.ms.ChangePassword(ctx, param); err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.MessageResponse{
+			Message: "Succesfully change password",
+		},
+	})
+}
+
 func (mh *MentorHandlerImpl) Login(ctx *gin.Context) {
 	var req dtos.LoginMentorReq
 	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {

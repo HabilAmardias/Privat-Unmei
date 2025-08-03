@@ -28,4 +28,5 @@ VALUES
 (1, 3, 2), -- admin can read all mentor data
 (1, 1, 3), -- admin can create course category data
 (1, 5, 3), -- admin can update all course category data
+(2, 4, 2), -- mentor can update their own data
 (1, 1, 2); -- admin can create mentor data

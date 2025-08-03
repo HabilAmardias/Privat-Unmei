@@ -41,4 +41,7 @@ type (
 	LoginMentorRes struct {
 		Token string `json:"token"`
 	}
+	MentorChangePasswordReq struct {
+		NewPassword string `json:"password" binding:"required,containsany=!@#?,min=8"`
+	}
 )
