@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 )
@@ -56,14 +57,14 @@ func (sr *StudentRepositoryImpl) GetStudentList(ctx context.Context, totalRow *i
 		)
 	}
 	args := []any{}
-	if limit > 0 {
-		args = append(args, limit)
-		args = append(args, limit*(page-1))
-		query += ` 
+	args = append(args, limit)
+	args = append(args, limit*(page-1))
+	query += ` 
 		LIMIT $1
 		OFFSET $2
-		`
-	}
+	`
+
+	log.Println(query)
 	rows, err := driver.Query(query, args...)
 	if err != nil {
 		return customerrors.NewError(
