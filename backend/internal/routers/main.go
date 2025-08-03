@@ -88,4 +88,14 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.MentorResource,
 		c.RBACRepository,
 	), c.MentorHandler.DeleteMentor)
+	v1.POST("/courses/categories", middlewares.AuthorizationMiddleware(
+		constants.CreatePermission,
+		constants.CourseCategoryResource,
+		c.RBACRepository,
+	), c.CourseCategoryHandler.CreateCategory)
+	v1.PATCH("/courses/categories/:id", middlewares.AuthorizationMiddleware(
+		constants.UpdateAllPermission,
+		constants.CourseCategoryResource,
+		c.RBACRepository,
+	), c.CourseCategoryHandler.UpdateCategory)
 }
