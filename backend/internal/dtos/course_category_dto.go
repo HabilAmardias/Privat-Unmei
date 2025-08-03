@@ -9,4 +9,11 @@ type (
 		ID   int    `json:"id"`
 		Name string `json:"name"`
 	}
+	CreateCategoryReq struct {
+		Name string `json:"name" binding:"required"`
+	}
+	CreateCategoryRes struct {
+		ID   int    `json:"id"`
+		Name string `json:"name"`
+	}
 )

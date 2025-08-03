@@ -18,6 +18,29 @@ func CreateCourseCategoryHandler(ccs *services.CourseCategoryServiceImpl) *Cours
 	return &CourseCategoryHandlerImpl{ccs}
 }
 
+func (cch *CourseCategoryHandlerImpl) CreateCategory(ctx *gin.Context) {
+	var req dtos.CreateCategoryReq
+	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.CreateCategoryParam{
+		Name: req.Name,
+	}
+	newCategory, err := cch.ccs.CreateCategory(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusCreated, dtos.Response{
+		Success: true,
+		Data: dtos.CreateCategoryRes{
+			ID:   newCategory.ID,
+			Name: newCategory.Name,
+		},
+	})
+}
+
 func (cch *CourseCategoryHandlerImpl) GetCategoriesList(ctx *gin.Context) {
 	var req dtos.ListCourseCategoryReq
 	if err := ctx.ShouldBind(&req); err != nil {

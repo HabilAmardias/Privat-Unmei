@@ -25,4 +25,11 @@ type (
 		ID   int
 		Name string
 	}
+	CreateCategoryQuery struct {
+		ID   int
+		Name string
+	}
+	CreateCategoryParam struct {
+		Name string
+	}
 )

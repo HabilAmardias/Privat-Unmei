@@ -18,6 +18,67 @@ func CreateCourseCategoryRepository(db *sql.DB) *CourseCategoryRepositoryImpl {
 	return &CourseCategoryRepositoryImpl{db}
 }
 
+func (ccr *CourseCategoryRepositoryImpl) FindByName(ctx context.Context, name string, category *entity.CourseCategory) error {
+	var driver RepoDriver
+	driver = ccr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	SELECT id, name, created_at, updated_at, deleted_at
+	FROM course_categories
+	WHERE LOWER(name) = LOWER($1)
+	`
+	row := driver.QueryRow(query, name)
+	if err := row.Scan(
+		&category.ID,
+		&category.Name,
+		&category.CreatedAt,
+		&category.UpdatedAt,
+		&category.DeletedAt,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return customerrors.NewError(
+				"category does not exist",
+				err,
+				customerrors.ItemNotExist,
+			)
+		}
+		return customerrors.NewError(
+			"failed to get category",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (ccr *CourseCategoryRepositoryImpl) CreateCategory(ctx context.Context, category *entity.CreateCategoryQuery) error {
+	var driver RepoDriver
+	driver = ccr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	INSERT INTO course_categories (name)
+	VALUES
+	($1)
+	RETURNING id, name
+	`
+	row := driver.QueryRow(query, category.Name)
+	if err := row.Scan(
+		&category.ID,
+		&category.Name,
+	); err != nil {
+		return customerrors.NewError(
+			"failed to create categories",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (ccr *CourseCategoryRepositoryImpl) GetCourseCategoryList(
 	ctx context.Context,
 	categories *[]entity.ListCourseCategoryQuery,
