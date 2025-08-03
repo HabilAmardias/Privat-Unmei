@@ -32,4 +32,8 @@ type (
 	CreateCategoryParam struct {
 		Name string
 	}
+	UpdateCategoryParam struct {
+		ID   int
+		Name *string
+	}
 )

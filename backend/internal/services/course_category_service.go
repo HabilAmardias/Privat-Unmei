@@ -52,3 +52,30 @@ func (ccs *CourseCategoryServiceImpl) CreateCategory(ctx context.Context, param 
 	}
 	return newCategory, nil
 }
+
+func (ccs *CourseCategoryServiceImpl) UpdateCategory(ctx context.Context, param entity.UpdateCategoryParam) error {
+	category := new(entity.CourseCategory)
+	if param.Name == nil {
+		return nil
+	}
+	return ccs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := ccs.ccr.FindByID(ctx, param.ID, category); err != nil {
+			return err
+		}
+		if err := ccs.ccr.FindByName(ctx, *param.Name, category); err != nil {
+			if err.Error() != "category does not exist" {
+				return err
+			}
+		} else {
+			return customerrors.NewError(
+				"category already exist",
+				errors.New("category already exist"),
+				customerrors.ItemAlreadyExist,
+			)
+		}
+		if err := ccs.ccr.UpdateCategory(ctx, param); err != nil {
+			return err
+		}
+		return nil
+	})
+}

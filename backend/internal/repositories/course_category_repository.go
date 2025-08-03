@@ -18,6 +18,41 @@ func CreateCourseCategoryRepository(db *sql.DB) *CourseCategoryRepositoryImpl {
 	return &CourseCategoryRepositoryImpl{db}
 }
 
+func (ccr *CourseCategoryRepositoryImpl) FindByID(ctx context.Context, id int, category *entity.CourseCategory) error {
+	var driver RepoDriver
+	driver = ccr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	SELECT id, name, created_at, updated_at, deleted_at
+	FROM course_categories
+	WHERE id = $1 AND deleted_at IS NULL
+	`
+	row := driver.QueryRow(query, id)
+	if err := row.Scan(
+		&category.ID,
+		&category.Name,
+		&category.CreatedAt,
+		&category.UpdatedAt,
+		&category.DeletedAt,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return customerrors.NewError(
+				"category does not exist",
+				err,
+				customerrors.ItemNotExist,
+			)
+		}
+		return customerrors.NewError(
+			"failed to get category",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (ccr *CourseCategoryRepositoryImpl) FindByName(ctx context.Context, name string, category *entity.CourseCategory) error {
 	var driver RepoDriver
 	driver = ccr.DB
@@ -27,7 +62,7 @@ func (ccr *CourseCategoryRepositoryImpl) FindByName(ctx context.Context, name st
 	query := `
 	SELECT id, name, created_at, updated_at, deleted_at
 	FROM course_categories
-	WHERE LOWER(name) = LOWER($1)
+	WHERE LOWER(name) = LOWER($1) AND deleted_at IS NULL
 	`
 	row := driver.QueryRow(query, name)
 	if err := row.Scan(
@@ -46,6 +81,28 @@ func (ccr *CourseCategoryRepositoryImpl) FindByName(ctx context.Context, name st
 		}
 		return customerrors.NewError(
 			"failed to get category",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (ccr *CourseCategoryRepositoryImpl) UpdateCategory(ctx context.Context, param entity.UpdateCategoryParam) error {
+	var driver RepoDriver
+	driver = ccr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE course_categories
+	SET name = COALESCE($1, name), updated_at = NOW()
+	WHERE id = $2 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, param.Name, param.ID)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to update category",
 			err,
 			customerrors.DatabaseExecutionError,
 		)

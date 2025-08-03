@@ -16,4 +16,10 @@ type (
 		ID   int    `json:"id"`
 		Name string `json:"name"`
 	}
+	UpdateCategoryReq struct {
+		Name *string `json:"name"`
+	}
+	UpdateCategoryRes struct {
+		ID int `json:"id"`
+	}
 )

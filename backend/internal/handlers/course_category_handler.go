@@ -3,9 +3,11 @@ package handlers
 import (
 	"net/http"
 	"privat-unmei/internal/constants"
+	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/services"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,6 +18,38 @@ type CourseCategoryHandlerImpl struct {
 
 func CreateCourseCategoryHandler(ccs *services.CourseCategoryServiceImpl) *CourseCategoryHandlerImpl {
 	return &CourseCategoryHandlerImpl{ccs}
+}
+
+func (cch *CourseCategoryHandlerImpl) UpdateCategory(ctx *gin.Context) {
+	var req dtos.UpdateCategoryReq
+	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	idStr := ctx.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		ctx.Error(customerrors.NewError(
+			"invalid category",
+			err,
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	param := entity.UpdateCategoryParam{
+		ID:   id,
+		Name: req.Name,
+	}
+	if err := cch.ccs.UpdateCategory(ctx, param); err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.UpdateCategoryRes{
+			ID: id,
+		},
+	})
 }
 
 func (cch *CourseCategoryHandlerImpl) CreateCategory(ctx *gin.Context) {
