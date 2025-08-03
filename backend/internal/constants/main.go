@@ -25,8 +25,9 @@ const (
 )
 
 const (
-	DefaultLimit = 15
-	DefaultPage  = 1
+	DefaultLimit  = 15
+	DefaultPage   = 1
+	DefaultLastID = 15
 )
 
 const (
@@ -38,6 +39,7 @@ const (
 const (
 	StudentResource = iota + 1 // 1
 	MentorResource
+	CourseCategoryResource
 )
 
 const (

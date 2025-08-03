@@ -5,4 +5,8 @@ type (
 		Page  int `form:"page" binding:"omitempty"`
 		Limit int `form:"limit" binding:"omitempty"`
 	}
+	SeekPaginatedReq struct {
+		Limit  int `form:"limit" binding:"omitempty"`
+		LastID int `form:"last_id" binding:"omitempty"`
+	}
 )

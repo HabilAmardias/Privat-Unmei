@@ -5,4 +5,8 @@ type (
 		Limit int
 		Page  int
 	}
+	SeekPaginatedParam struct {
+		Limit  int
+		LastID int
+	}
 )
