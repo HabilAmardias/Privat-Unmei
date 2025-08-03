@@ -190,6 +190,14 @@ func (us *StudentServiceImpl) Login(ctx context.Context, param entity.StudentLog
 
 	if err := us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := us.ur.FindByEmail(ctx, param.Email, user); err != nil {
+			parsedErr := err.(*customerrors.CustomError)
+			if parsedErr.ErrUser == customerrors.UserNotFound {
+				return customerrors.NewError(
+					"invalid email or password",
+					errors.New("invalid email or password"),
+					customerrors.InvalidAction,
+				)
+			}
 			return err
 		}
 		if err := us.sr.FindByID(ctx, user.ID, student); err != nil {

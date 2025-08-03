@@ -61,4 +61,8 @@ type (
 		Search               *string
 		SortYearOfExperience *bool
 	}
+	LoginMentorParam struct {
+		Email    string
+		Password string
+	}
 )
