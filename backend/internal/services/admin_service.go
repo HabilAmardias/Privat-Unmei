@@ -51,6 +51,14 @@ func (as *AdminServiceImpl) Login(ctx context.Context, param entity.AdminLoginPa
 
 	if err := as.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := as.ur.FindByEmail(ctx, param.Email, user); err != nil {
+			parsedErr := err.(*customerrors.CustomError)
+			if parsedErr.ErrUser == customerrors.UserNotFound {
+				return customerrors.NewError(
+					"invalid email or password",
+					errors.New("invalid email or password"),
+					customerrors.InvalidAction,
+				)
+			}
 			return err
 		}
 		if err := as.ar.FindByID(ctx, user.ID, admin); err != nil {

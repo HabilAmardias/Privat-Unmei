@@ -34,4 +34,14 @@ type (
 		WhatsappNumber    string `json:"whatsapp_number"`
 		YearsOfExperience int    `json:"years_of_experience"`
 	}
+	LoginMentorReq struct {
+		Email    string `json:"email" binding:"required,email"`
+		Password string `json:"password" binding:"required,containsany=!@#?,min=8"`
+	}
+	LoginMentorRes struct {
+		Token string `json:"token"`
+	}
+	MentorChangePasswordReq struct {
+		NewPassword string `json:"password" binding:"required,containsany=!@#?,min=8"`
+	}
 )
