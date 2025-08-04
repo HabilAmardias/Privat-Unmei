@@ -33,4 +33,12 @@ type (
 		ProfileImage string `json:"profile_image"`
 		Status       string `json:"status"`
 	}
+	UpdateStudentReq struct {
+		Name     *string `form:"name"`
+		Password *string `form:"password" binding:"omitempty,containsany=!@#?,min=8"`
+		Bio      *string `form:"bio"`
+	}
+	UpdateStudentRes struct {
+		ID string `json:"id"`
+	}
 )

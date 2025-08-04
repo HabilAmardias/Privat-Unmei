@@ -29,4 +29,5 @@ VALUES
 (1, 1, 3), -- admin can create course category data
 (1, 5, 3), -- admin can update all course category data
 (2, 4, 2), -- mentor can update their own data
+(3, 4, 1), -- student can updat their own data
 (1, 1, 2); -- admin can create mentor data

@@ -104,4 +104,9 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.MentorResource,
 		c.RBACRepository,
 	), c.MentorHandler.ChangePassword)
+	v1.PATCH("/students/me", middlewares.AuthorizationMiddleware(
+		constants.UpdateOwnPermission,
+		constants.StudentResource,
+		c.RBACRepository,
+	), c.StudentHandler.UpdateStudentProfile)
 }

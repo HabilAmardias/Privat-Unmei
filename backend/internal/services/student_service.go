@@ -33,6 +33,52 @@ func CreateStudentService(
 	return &StudentServiceImpl{ur, sr, tmr, bu, gu, cu, ju}
 }
 
+func (us *StudentServiceImpl) UpdateStudentProfile(ctx context.Context, param entity.UpdateStudentParam) error {
+	user := new(entity.User)
+	student := new(entity.Student)
+	updateQuery := new(entity.UpdateUserQuery)
+
+	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := us.ur.FindByID(ctx, param.ID, user); err != nil {
+			return err
+		}
+		if err := us.sr.FindByID(ctx, param.ID, student); err != nil {
+			return err
+		}
+
+		updateQuery.Name = param.Name
+		updateQuery.Bio = param.Bio
+
+		if param.Password != nil {
+			if match := us.bu.ComparePassword(*param.Password, user.Password); match {
+				return customerrors.NewError(
+					"cannot change into same password",
+					errors.New("new password same as previous password"),
+					customerrors.InvalidAction,
+				)
+			}
+			hashedPass, err := us.bu.HashPassword(*param.Password)
+			if err != nil {
+				return err
+			}
+			updateQuery.Password = &hashedPass
+		}
+
+		if param.ProfileImage != nil {
+			filename := param.ID
+			res, err := us.cu.UploadFile(ctx, param.ProfileImage, filename, constants.AvatarFolder)
+			if err != nil {
+				return err
+			}
+			updateQuery.ProfileImage = &res.URL
+		}
+		if err := us.ur.UpdateUserProfile(ctx, updateQuery, param.ID); err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
 func (us *StudentServiceImpl) GetStudentList(ctx context.Context, param entity.ListStudentParam) (*[]entity.ListStudentQuery, *int64, error) {
 	students := new([]entity.ListStudentQuery)
 	totalRow := new(int64)
