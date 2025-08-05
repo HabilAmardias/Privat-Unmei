@@ -18,6 +18,7 @@ type RouteConfig struct {
 	StudentHandler        *handlers.StudentHandlerImpl
 	AdminHandler          *handlers.AdminHandlerImpl
 	CourseCategoryHandler *handlers.CourseCategoryHandlerImpl
+	CourseHandler         *handlers.CourseHandlerImpl
 	MentorHandler         *handlers.MentorHandlerImpl
 	RBACRepository        *repositories.RBACRepository
 	TokenUtil             *utils.JWTUtil
@@ -109,4 +110,9 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.StudentResource,
 		c.RBACRepository,
 	), c.StudentHandler.UpdateStudentProfile)
+	v1.POST("/courses", middlewares.AuthorizationMiddleware(
+		constants.CreatePermission,
+		constants.CourseResource,
+		c.RBACRepository,
+	), c.CourseHandler.AddNewCourse)
 }

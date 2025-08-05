@@ -40,6 +40,7 @@ const (
 	StudentResource = iota + 1 // 1
 	MentorResource
 	CourseCategoryResource
+	CourseResource
 )
 
 const (
