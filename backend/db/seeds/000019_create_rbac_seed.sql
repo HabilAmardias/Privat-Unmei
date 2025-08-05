@@ -18,7 +18,8 @@ INSERT INTO resources(id, name, description)
 VALUES
 (1, 'student', 'registered student data'),
 (2, 'mentor', 'course manager data'),
-(3, 'course_category', 'course category data');
+(3, 'course_category', 'course category data'),
+(4, 'course', 'course data');
 
 INSERT INTO rbac(role_id, permission_id, resource_id)
 VALUES
@@ -29,4 +30,6 @@ VALUES
 (1, 1, 3), -- admin can create course category data
 (1, 5, 3), -- admin can update all course category data
 (2, 4, 2), -- mentor can update their own data
+(3, 4, 1), -- student can update their own data
+(2, 1, 4), -- mentor can create course data
 (1, 1, 2); -- admin can create mentor data

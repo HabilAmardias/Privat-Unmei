@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"mime/multipart"
 	"time"
 )
 
@@ -38,5 +39,12 @@ type (
 	}
 	ListStudentParam struct {
 		PaginatedParam
+	}
+	UpdateStudentParam struct {
+		ID           string
+		Name         *string
+		Password     *string
+		Bio          *string
+		ProfileImage multipart.File
 	}
 )

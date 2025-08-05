@@ -16,6 +16,40 @@ func CreateUserRepository(db *sql.DB) *UserRepositoryImpl {
 	return &UserRepositoryImpl{db}
 }
 
+func (ur *UserRepositoryImpl) UpdateUserProfile(ctx context.Context, queryEntity *entity.UpdateUserQuery, id string) error {
+	var driver RepoDriver
+	driver = ur.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE users
+	SET
+		name = COALESCE($1, name),
+		password_hash = COALESCE($2, password_hash),
+		bio = COALESCE($3, bio),
+		profile_image = COALESCE($4, profile_image),
+		updated_at = NOW()
+	WHERE id = $5 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(
+		query,
+		queryEntity.Name,
+		queryEntity.Password,
+		queryEntity.Bio,
+		queryEntity.ProfileImage,
+		id,
+	)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to update profile",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (ur *UserRepositoryImpl) UpdateUserPassword(ctx context.Context, password string, id string) error {
 	var driver RepoDriver
 	driver = ur.DB
