@@ -25,6 +25,7 @@ func (cr *CourseRepositoryImpl) CreateCourse(
 	maxPrice float64,
 	minDuration int,
 	maxDuration int,
+	method string,
 	course *entity.Course,
 ) error {
 	var driver RepoDriver
@@ -33,12 +34,12 @@ func (cr *CourseRepositoryImpl) CreateCourse(
 		driver = tx
 	}
 	query := `
-	INSERT INTO courses (mentor_id, title, description, domicile, min_price, max_price, min_duration_days, max_duration_days)
+	INSERT INTO courses (mentor_id, title, description, domicile, min_price, max_price, min_duration_days, max_duration_days, method)
 	VALUES
-	($1, $2, $3, $4, $5, $6, $7, $8)
+	($1, $2, $3, $4, $5, $6, $7, $8, $9)
 	RETURNING id
 	`
-	row := driver.QueryRow(query, mentorID, title, description, domicile, minPrice, maxPrice, minDuration, maxDuration)
+	row := driver.QueryRow(query, mentorID, title, description, domicile, minPrice, maxPrice, minDuration, maxDuration, method)
 	if err := row.Scan(&course.ID); err != nil {
 		return customerrors.NewError(
 			"failed to create course",

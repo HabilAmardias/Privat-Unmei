@@ -53,6 +53,7 @@ func (ch *CourseHandlerImpl) AddNewCourse(ctx *gin.Context) {
 		Domicile:           req.Domicile,
 		MinPrice:           req.MinPrice,
 		MaxPrice:           req.MaxPrice,
+		Method:             req.Method,
 		MinDuration:        req.MinDuration,
 		MaxDuration:        req.MaxDuration,
 		CourseAvailability: []entity.CreateSchedule{},

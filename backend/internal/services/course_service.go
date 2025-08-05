@@ -38,6 +38,7 @@ func (cs *CourseServiceImpl) CreateCourse(ctx context.Context, param entity.Crea
 			param.MaxPrice,
 			param.MinDuration,
 			param.MaxDuration,
+			param.Method,
 			course,
 		); err != nil {
 			return err

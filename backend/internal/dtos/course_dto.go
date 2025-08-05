@@ -21,6 +21,7 @@ type (
 		Domicile           string           `json:"domicile" binding:"required"`
 		MinPrice           float64          `json:"min_price" binding:"required,min=1"`
 		MaxPrice           float64          `json:"max_price" binding:"required,min=1"`
+		Method             string           `json:"method" binding:"required"`
 		MinDuration        int              `json:"min_duration_days" binding:"required,min=1"`
 		MaxDuration        int              `json:"max_duration_days" binding:"required,min=1"`
 		CourseAvailability []CreateSchedule `json:"available_schedules" binding:"dive"`

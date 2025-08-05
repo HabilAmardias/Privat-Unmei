@@ -27,6 +27,7 @@ type (
 		MaxPrice         float64
 		MinDuration      int
 		MaxDuration      int
+		Method           string
 		TransactionCount int
 		CreatedAt        time.Time
 		UpdatedAt        time.Time
@@ -58,6 +59,7 @@ type (
 		Domicile           string
 		MinPrice           float64
 		MaxPrice           float64
+		Method             string
 		MinDuration        int
 		MaxDuration        int
 		CourseAvailability []CreateSchedule

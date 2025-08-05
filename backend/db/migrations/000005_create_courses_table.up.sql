@@ -7,6 +7,7 @@ CREATE TABLE courses (
     description TEXT NOT NULL,
     domicile VARCHAR NOT NULL,
     min_price NUMERIC NOT NULL,
+    method VARCHAR NOT NULL CHECK(method in ('offline', 'online', 'hybrid')),
     max_price NUMERIC NOT NULL,
     min_duration_days INT NOT NULL,
     max_duration_days INT NOT NULL,
