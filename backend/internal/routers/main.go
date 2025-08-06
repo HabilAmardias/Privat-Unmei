@@ -115,4 +115,9 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.CourseResource,
 		c.RBACRepository,
 	), c.CourseHandler.AddNewCourse)
+	v1.DELETE("/courses/:id", middlewares.AuthorizationMiddleware(
+		constants.DeleteOwnPermission,
+		constants.CourseResource,
+		c.RBACRepository,
+	), c.CourseHandler.DeleteCourse)
 }

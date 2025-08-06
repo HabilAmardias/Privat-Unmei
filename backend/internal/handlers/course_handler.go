@@ -7,6 +7,7 @@ import (
 	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/services"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,6 +18,48 @@ type CourseHandlerImpl struct {
 
 func CreateCourseHandler(cs *services.CourseServiceImpl) *CourseHandlerImpl {
 	return &CourseHandlerImpl{cs}
+}
+
+func (ch *CourseHandlerImpl) DeleteCourse(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	courseIDStr := ctx.Param("id")
+	if courseIDStr == "" {
+		ctx.Error(customerrors.NewError(
+			"no course has been selected",
+			errors.New("course id is empty"),
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	courseID, err := strconv.Atoi(courseIDStr)
+	if err != nil {
+		ctx.Error(customerrors.NewError(
+			"invalid course",
+			err,
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	param := entity.DeleteCourseParam{
+		MentorID: claim.Subject,
+		CourseID: courseID,
+	}
+
+	if err := ch.cs.DeleteCourse(ctx, param); err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.DeleteCourseRes{
+			ID: courseID,
+		},
+	})
 }
 
 func (ch *CourseHandlerImpl) AddNewCourse(ctx *gin.Context) {

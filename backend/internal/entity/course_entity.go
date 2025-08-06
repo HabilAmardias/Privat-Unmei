@@ -19,7 +19,7 @@ type (
 	}
 	Course struct {
 		ID               int
-		MentorID         int
+		MentorID         string
 		Title            string
 		Description      string
 		Domicile         string
@@ -64,5 +64,9 @@ type (
 		MaxDuration        int
 		CourseAvailability []CreateSchedule
 		Topics             []CreateTopic
+	}
+	DeleteCourseParam struct {
+		MentorID string
+		CourseID int
 	}
 )

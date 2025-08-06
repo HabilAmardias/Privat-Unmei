@@ -30,4 +30,7 @@ type (
 	CreateCourseRes struct {
 		ID int `json:"id"`
 	}
+	DeleteCourseRes struct {
+		ID int `json:"id"`
+	}
 )

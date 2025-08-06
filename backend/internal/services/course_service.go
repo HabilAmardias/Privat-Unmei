@@ -2,6 +2,8 @@ package services
 
 import (
 	"context"
+	"errors"
+	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/repositories"
 )
@@ -20,6 +22,39 @@ func CreateCourseService(
 	tmr *repositories.TransactionManagerRepositories,
 ) *CourseServiceImpl {
 	return &CourseServiceImpl{car, cr, tr, tmr}
+}
+
+func (cs *CourseServiceImpl) DeleteCourse(ctx context.Context, param entity.DeleteCourseParam) error {
+	course := new(entity.Course)
+	return cs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := cs.cr.FindByID(ctx, param.CourseID, course); err != nil {
+			return err
+		}
+		if param.MentorID != course.MentorID {
+			return customerrors.NewError(
+				"not authorized to delete",
+				errors.New("course mentor and mentor input is different"),
+				customerrors.Unauthenticate,
+			)
+		}
+		if course.TransactionCount > 0 {
+			return customerrors.NewError(
+				"course can only be deleted if no transaction relate to the course",
+				errors.New("transaction count is more than zero"),
+				customerrors.InvalidAction,
+			)
+		}
+		if err := cs.car.DeleteAvailability(ctx, param.CourseID); err != nil {
+			return err
+		}
+		if err := cs.tr.DeleteTopics(ctx, param.CourseID); err != nil {
+			return err
+		}
+		if err := cs.cr.DeleteCourse(ctx, param.CourseID); err != nil {
+			return err
+		}
+		return nil
+	})
 }
 
 func (cs *CourseServiceImpl) CreateCourse(ctx context.Context, param entity.CreateCourseParam) (int, error) {
