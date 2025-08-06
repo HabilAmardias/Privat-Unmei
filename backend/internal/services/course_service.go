@@ -24,6 +24,14 @@ func CreateCourseService(
 	return &CourseServiceImpl{car, cr, tr, tmr}
 }
 
+func (cs *CourseServiceImpl) MentorListCourse(ctx context.Context, param entity.MentorListCourseParam) (*[]entity.MentorListCourseQuery, error) {
+	query := new([]entity.MentorListCourseQuery)
+	if err := cs.cr.MentorListCourse(ctx, query, param); err != nil {
+		return nil, err
+	}
+	return query, nil
+}
+
 func (cs *CourseServiceImpl) DeleteCourse(ctx context.Context, param entity.DeleteCourseParam) error {
 	course := new(entity.Course)
 	return cs.tmr.WithTransaction(ctx, func(ctx context.Context) error {

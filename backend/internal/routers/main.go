@@ -120,4 +120,9 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.CourseResource,
 		c.RBACRepository,
 	), c.CourseHandler.DeleteCourse)
+	v1.GET("/mentor/courses", middlewares.AuthorizationMiddleware(
+		constants.ReadOwnPermission,
+		constants.CourseResource,
+		c.RBACRepository,
+	), c.CourseHandler.MentorListCourse)
 }

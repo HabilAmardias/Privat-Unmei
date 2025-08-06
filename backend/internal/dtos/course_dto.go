@@ -33,4 +33,20 @@ type (
 	DeleteCourseRes struct {
 		ID int `json:"id"`
 	}
+	MentorListCourseReq struct {
+		SeekPaginatedReq
+		Search         *string `form:"search"`
+		CourseCategory *int    `form:"course_category"`
+	}
+	MentorListCourseRes struct {
+		ID               int      `json:"id"`
+		Title            string   `json:"title"`
+		Domicile         string   `json:"domicile"`
+		Method           string   `json:"method"`
+		MinPrice         float64  `json:"min_price"`
+		MaxPrice         float64  `json:"max_price"`
+		MinDurationDays  int      `json:"min_duration_days"`
+		MaxDurationDays  int      `json:"max_duration_days"`
+		CourseCategories []string `json:"course_categories"`
+	}
 )

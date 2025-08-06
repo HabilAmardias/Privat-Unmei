@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 )
@@ -14,6 +15,96 @@ type CourseRepositoryImpl struct {
 
 func CreateCourseRepository(db *sql.DB) *CourseRepositoryImpl {
 	return &CourseRepositoryImpl{db}
+}
+
+func (cr *CourseRepositoryImpl) MentorListCourse(
+	ctx context.Context,
+	query *[]entity.MentorListCourseQuery,
+	param entity.MentorListCourseParam,
+) error {
+	var driver RepoDriver
+	driver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	args := []any{param.MentorID, param.LastID}
+	sqlQuery := `
+		SELECT DISTINCT
+		c.id,
+		c.title,
+		c.domicile,
+		c.min_price,
+		c.max_price,
+		c.method,
+		c.min_duration_days,
+		c.max_duration_days,
+		COALESCE(
+			(SELECT STRING_AGG(cc_all.name, ',') 
+			FROM course_category_assignments cca_all 
+			JOIN course_categories cc_all ON cca_all.category_id = cc_all.id 
+			WHERE cca_all.course_id = c.id 
+			AND cca_all.deleted_at IS NULL 
+			AND cc_all.deleted_at IS NULL), 
+			''
+		) AS categories
+	FROM courses c
+	LEFT JOIN course_category_assignments cca ON c.id = cca.course_id AND cca.deleted_at IS NULL
+	LEFT JOIN course_categories cc ON cca.category_id = cc.id AND cc.deleted_at IS NULL
+	WHERE c.mentor_id = $1 AND c.deleted_at IS NULL AND c.id < $2
+	`
+	if param.Search != nil {
+		sqlQuery += fmt.Sprintf(" AND c.title ILIKE $%d ", len(args)+1)
+		args = append(args, "%"+*param.Search+"%")
+	}
+	if param.CourseCategory != nil {
+		sqlQuery += fmt.Sprintf(` AND EXISTS (
+			SELECT 1 
+			FROM course_category_assignments cca_filter 
+			JOIN course_categories cc_filter ON cca_filter.category_id = cc_filter.id
+			WHERE cca_filter.course_id = c.id 
+			AND cca_filter.deleted_at IS NULL
+			AND cc_filter.deleted_at IS NULL
+			AND cc_filter.id = $%d
+		)`, len(args)+1)
+		args = append(args, *param.CourseCategory)
+	}
+	sqlQuery += " ORDER BY c.id DESC "
+	sqlQuery += fmt.Sprintf(" LIMIT $%d ", len(args)+1)
+	args = append(args, param.Limit)
+
+	rows, err := driver.Query(sqlQuery, args...)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to get courses list",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var item entity.MentorListCourseQuery
+		if err := rows.Scan(
+			&item.ID,
+			&item.Title,
+			&item.Domicile,
+			&item.MinPrice,
+			&item.MaxPrice,
+			&item.Method,
+			&item.MinDurationDays,
+			&item.MaxDurationDays,
+			&item.CourseCategories,
+		); err != nil {
+			return customerrors.NewError(
+				"failed to get course list",
+				err,
+				customerrors.DatabaseExecutionError,
+			)
+		}
+		*query = append(*query, item)
+	}
+
+	return nil
 }
 
 func (cr *CourseRepositoryImpl) FindByID(ctx context.Context, id int, course *entity.Course) error {

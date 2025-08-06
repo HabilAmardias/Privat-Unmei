@@ -1,6 +1,8 @@
 package entity
 
-import "time"
+import (
+	"time"
+)
 
 type (
 	TimeOnly struct {
@@ -68,5 +70,22 @@ type (
 	DeleteCourseParam struct {
 		MentorID string
 		CourseID int
+	}
+	MentorListCourseParam struct {
+		SeekPaginatedParam
+		MentorID       string
+		Search         *string
+		CourseCategory *int
+	}
+	MentorListCourseQuery struct {
+		ID               int
+		Title            string
+		Domicile         string
+		Method           string
+		MinPrice         float64
+		MaxPrice         float64
+		MinDurationDays  int
+		MaxDurationDays  int
+		CourseCategories string
 	}
 )
