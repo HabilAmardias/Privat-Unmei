@@ -66,6 +66,7 @@ type (
 		MaxDuration        int
 		CourseAvailability []CreateSchedule
 		Topics             []CreateTopic
+		Categories         []int
 	}
 	DeleteCourseParam struct {
 		MentorID string

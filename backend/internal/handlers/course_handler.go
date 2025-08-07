@@ -170,6 +170,16 @@ func (ch *CourseHandlerImpl) AddNewCourse(ctx *gin.Context) {
 		))
 		return
 	}
+	if len(req.Categories) <= 0 {
+		ctx.Error(
+			customerrors.NewError(
+				"mentor should at least enter one category for the course",
+				errors.New("no categories entered"),
+				customerrors.InvalidAction,
+			),
+		)
+		return
+	}
 	param := entity.CreateCourseParam{
 		MentorID:           claim.Subject,
 		Title:              req.Title,

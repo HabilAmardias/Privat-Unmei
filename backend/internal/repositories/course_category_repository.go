@@ -18,6 +18,104 @@ func CreateCourseCategoryRepository(db *sql.DB) *CourseCategoryRepositoryImpl {
 	return &CourseCategoryRepositoryImpl{db}
 }
 
+func (ccr *CourseCategoryRepositoryImpl) UnassignCategories(ctx context.Context, courseID int) error {
+	var driver RepoDriver
+	driver = ccr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE course_category_assignments
+	SET updated_at = NOW(), deleted_at = NOW()
+	WHERE course_id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, courseID)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to unassign course categories",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (ccr *CourseCategoryRepositoryImpl) FindByMultipleIDs(ctx context.Context, ids []int, categories *[]entity.CourseCategory) error {
+	var driver RepoDriver
+	driver = ccr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	args := []any{ids}
+	query := `
+	SELECT id, name, created_at, updated_at, deleted_at
+	FROM course_categories
+	WHERE id IN $1 and deleted_at IS NULL
+	`
+	rows, err := driver.Query(query, args...)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to find course category",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var item entity.CourseCategory
+		if err := rows.Scan(
+			&item.ID,
+			&item.Name,
+			&item.CreatedAt,
+			&item.UpdatedAt,
+			&item.DeletedAt,
+		); err != nil {
+			return customerrors.NewError(
+				"failed to find course category",
+				err,
+				customerrors.DatabaseExecutionError,
+			)
+		}
+		*categories = append(*categories, item)
+	}
+	return nil
+}
+
+func (ccr *CourseCategoryRepositoryImpl) AssignCategories(ctx context.Context, courseID int, categories []int) error {
+	var driver RepoDriver
+	driver = ccr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	args := []any{courseID}
+	query := `
+	INSERT INTO course_category_assignments (course_id, category_id)
+	VALUES
+	`
+	for i, cat := range categories {
+		if i != len(categories)-1 {
+			query += fmt.Sprintf(`
+			($1, $%d),
+			`, len(args)+1)
+		} else {
+			query += fmt.Sprintf(`
+			($1, $%d);
+			`, len(args)+1)
+		}
+		args = append(args, cat)
+	}
+	log.Println(query)
+	_, err := driver.Exec(query, args...)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to assign course category",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (ccr *CourseCategoryRepositoryImpl) FindByID(ctx context.Context, id int, category *entity.CourseCategory) error {
 	var driver RepoDriver
 	driver = ccr.DB

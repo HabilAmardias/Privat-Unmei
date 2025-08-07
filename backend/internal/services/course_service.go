@@ -11,6 +11,7 @@ import (
 type CourseServiceImpl struct {
 	car *repositories.CourseAvailabilityRepositoryImpl
 	cr  *repositories.CourseRepositoryImpl
+	ccr *repositories.CourseCategoryRepositoryImpl
 	tr  *repositories.TopicRepositoryImpl
 	tmr *repositories.TransactionManagerRepositories
 }
@@ -18,10 +19,11 @@ type CourseServiceImpl struct {
 func CreateCourseService(
 	car *repositories.CourseAvailabilityRepositoryImpl,
 	cr *repositories.CourseRepositoryImpl,
+	ccr *repositories.CourseCategoryRepositoryImpl,
 	tr *repositories.TopicRepositoryImpl,
 	tmr *repositories.TransactionManagerRepositories,
 ) *CourseServiceImpl {
-	return &CourseServiceImpl{car, cr, tr, tmr}
+	return &CourseServiceImpl{car, cr, ccr, tr, tmr}
 }
 
 func (cs *CourseServiceImpl) MentorListCourse(ctx context.Context, param entity.MentorListCourseParam) (*[]entity.MentorListCourseQuery, error) {
@@ -52,6 +54,9 @@ func (cs *CourseServiceImpl) DeleteCourse(ctx context.Context, param entity.Dele
 				customerrors.InvalidAction,
 			)
 		}
+		if err := cs.ccr.UnassignCategories(ctx, course.ID); err != nil {
+			return err
+		}
 		if err := cs.car.DeleteAvailability(ctx, param.CourseID); err != nil {
 			return err
 		}
@@ -69,6 +74,7 @@ func (cs *CourseServiceImpl) CreateCourse(ctx context.Context, param entity.Crea
 	course := new(entity.Course)
 	topics := new([]entity.CourseTopic)
 	schedules := new([]entity.CourseAvailability)
+	categories := new([]entity.CourseCategory)
 
 	err := cs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := cs.cr.CreateCourse(
@@ -92,6 +98,19 @@ func (cs *CourseServiceImpl) CreateCourse(ctx context.Context, param entity.Crea
 				Title:       topic.Title,
 				Description: topic.Description,
 			})
+		}
+		if err := cs.ccr.FindByMultipleIDs(ctx, param.Categories, categories); err != nil {
+			return err
+		}
+		if len(*categories) != len(param.Categories) {
+			return customerrors.NewError(
+				"invalid course categories",
+				errors.New("number of categories and number of ids does not match"),
+				customerrors.InvalidAction,
+			)
+		}
+		if err := cs.ccr.AssignCategories(ctx, course.ID, param.Categories); err != nil {
+			return err
 		}
 		if err := cs.tr.CreateTopics(ctx, topics); err != nil {
 			return err

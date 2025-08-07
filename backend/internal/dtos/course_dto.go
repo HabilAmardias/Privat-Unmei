@@ -26,6 +26,7 @@ type (
 		MaxDuration        int              `json:"max_duration_days" binding:"required,min=1"`
 		CourseAvailability []CreateSchedule `json:"available_schedules" binding:"dive"`
 		Topics             []CreateTopic    `json:"course_topics" binding:"dive"`
+		Categories         []int            `json:"course_categories"`
 	}
 	CreateCourseRes struct {
 		ID int `json:"id"`
