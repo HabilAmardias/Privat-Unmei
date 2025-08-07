@@ -20,6 +20,7 @@ func CreateCourseRepository(db *sql.DB) *CourseRepositoryImpl {
 func (cr *CourseRepositoryImpl) MentorListCourse(
 	ctx context.Context,
 	query *[]entity.MentorListCourseQuery,
+	totalRow *int64,
 	param entity.MentorListCourseParam,
 ) error {
 	var driver RepoDriver
@@ -27,6 +28,7 @@ func (cr *CourseRepositoryImpl) MentorListCourse(
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
 	}
+	countArgs := []any{param.MentorID, param.LastID}
 	args := []any{param.MentorID, param.LastID}
 	sqlQuery := `
 		SELECT
@@ -50,11 +52,27 @@ func (cr *CourseRepositoryImpl) MentorListCourse(
 	FROM courses c
 	WHERE c.mentor_id = $1 AND c.deleted_at IS NULL AND c.id < $2
 	`
+	countQuery := `
+	SELECT count(*)
+	FROM courses c
+	WHERE c.mentor_id = $1 AND c.deleted_at IS NULL AND c.id < $2
+	`
 	if param.Search != nil {
+		countQuery += fmt.Sprintf(" AND c.title ILIKE $%d ", len(countArgs)+1)
 		sqlQuery += fmt.Sprintf(" AND c.title ILIKE $%d ", len(args)+1)
 		args = append(args, "%"+*param.Search+"%")
+		countArgs = append(countArgs, "%"+*param.Search+"%")
 	}
 	if param.CourseCategory != nil {
+		countQuery += fmt.Sprintf(` AND EXISTS (
+			SELECT 1 
+			FROM course_category_assignments cca_filter 
+			JOIN course_categories cc_filter ON cca_filter.category_id = cc_filter.id
+			WHERE cca_filter.course_id = c.id 
+			AND cca_filter.deleted_at IS NULL
+			AND cc_filter.deleted_at IS NULL
+			AND cc_filter.id = $%d
+		)`, len(args)+1)
 		sqlQuery += fmt.Sprintf(` AND EXISTS (
 			SELECT 1 
 			FROM course_category_assignments cca_filter 
@@ -64,12 +82,20 @@ func (cr *CourseRepositoryImpl) MentorListCourse(
 			AND cc_filter.deleted_at IS NULL
 			AND cc_filter.id = $%d
 		)`, len(args)+1)
+		countArgs = append(countArgs, *param.CourseCategory)
 		args = append(args, *param.CourseCategory)
 	}
 	sqlQuery += " ORDER BY c.id DESC "
 	sqlQuery += fmt.Sprintf(" LIMIT $%d ", len(args)+1)
 	args = append(args, param.Limit)
-
+	row := driver.QueryRow(countQuery, countArgs...)
+	if err := row.Scan(totalRow); err != nil {
+		return customerrors.NewError(
+			"failed to get course list",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
 	rows, err := driver.Query(sqlQuery, args...)
 	if err != nil {
 		return customerrors.NewError(

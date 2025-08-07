@@ -30,7 +30,7 @@ type (
 	SeekPaginatedInfo struct {
 		LastID   int          `json:"last_id"`
 		Limit    int          `json:"limit"`
-		TotalRow *int64       `json:"total_row,omitempty"`
+		TotalRow int64        `json:"total_row"`
 		SortBy   []SortInfo   `json:"sort_by,omitempty"`
 		FilterBy []FilterInfo `json:"filter_by,omitempty"`
 	}

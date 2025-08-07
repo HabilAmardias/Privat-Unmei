@@ -48,7 +48,7 @@ func (ch *CourseHandlerImpl) MentorListCourse(ctx *gin.Context) {
 	if req.LastID <= 0 {
 		param.LastID = constants.DefaultLastID
 	}
-	res, err := ch.cs.MentorListCourse(ctx, param)
+	res, totalRow, err := ch.cs.MentorListCourse(ctx, param)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -96,6 +96,7 @@ func (ch *CourseHandlerImpl) MentorListCourse(ctx *gin.Context) {
 				LastID:   lastID,
 				FilterBy: filters,
 				Limit:    param.Limit,
+				TotalRow: *totalRow,
 			},
 		},
 	})
@@ -192,6 +193,7 @@ func (ch *CourseHandlerImpl) AddNewCourse(ctx *gin.Context) {
 		MaxDuration:        req.MaxDuration,
 		CourseAvailability: []entity.CreateSchedule{},
 		Topics:             []entity.CreateTopic{},
+		Categories:         req.Categories,
 	}
 	for _, topic := range req.Topics {
 		param.Topics = append(param.Topics, entity.CreateTopic(topic))

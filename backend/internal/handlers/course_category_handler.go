@@ -124,7 +124,7 @@ func (cch *CourseCategoryHandlerImpl) GetCategoriesList(ctx *gin.Context) {
 			PageInfo: dtos.SeekPaginatedInfo{
 				LastID:   lastID,
 				Limit:    param.Limit,
-				TotalRow: totalRow,
+				TotalRow: *totalRow,
 				FilterBy: filters,
 			},
 		},

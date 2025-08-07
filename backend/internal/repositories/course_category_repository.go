@@ -8,6 +8,8 @@ import (
 	"log"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
+
+	"github.com/lib/pq"
 )
 
 type CourseCategoryRepositoryImpl struct {
@@ -46,12 +48,13 @@ func (ccr *CourseCategoryRepositoryImpl) FindByMultipleIDs(ctx context.Context, 
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
 	}
-	args := []any{ids}
+	args := []any{pq.Array(ids)}
 	query := `
 	SELECT id, name, created_at, updated_at, deleted_at
 	FROM course_categories
-	WHERE id IN $1 and deleted_at IS NULL
+	WHERE id = ANY($1) AND deleted_at IS NULL
 	`
+	log.Println(query)
 	rows, err := driver.Query(query, args...)
 	if err != nil {
 		return customerrors.NewError(
