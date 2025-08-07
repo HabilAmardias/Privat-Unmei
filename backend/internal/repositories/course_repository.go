@@ -29,7 +29,7 @@ func (cr *CourseRepositoryImpl) MentorListCourse(
 	}
 	args := []any{param.MentorID, param.LastID}
 	sqlQuery := `
-		SELECT DISTINCT
+		SELECT
 		c.id,
 		c.title,
 		c.domicile,
@@ -48,8 +48,6 @@ func (cr *CourseRepositoryImpl) MentorListCourse(
 			''
 		) AS categories
 	FROM courses c
-	LEFT JOIN course_category_assignments cca ON c.id = cca.course_id AND cca.deleted_at IS NULL
-	LEFT JOIN course_categories cc ON cca.category_id = cc.id AND cc.deleted_at IS NULL
 	WHERE c.mentor_id = $1 AND c.deleted_at IS NULL AND c.id < $2
 	`
 	if param.Search != nil {
