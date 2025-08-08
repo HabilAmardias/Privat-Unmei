@@ -78,6 +78,20 @@ func (cs *CourseServiceImpl) CreateCourse(ctx context.Context, param entity.Crea
 	categories := new([]entity.CourseCategory)
 
 	err := cs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if param.MaxDuration < param.MinDuration {
+			return customerrors.NewError(
+				"invalid course duration",
+				errors.New("invalid course duration"),
+				customerrors.InvalidAction,
+			)
+		}
+		if param.MaxPrice < param.MinPrice {
+			return customerrors.NewError(
+				"invalid course price",
+				errors.New("invalid course price"),
+				customerrors.InvalidAction,
+			)
+		}
 		if err := cs.cr.CreateCourse(
 			ctx,
 			param.MentorID,
@@ -117,6 +131,13 @@ func (cs *CourseServiceImpl) CreateCourse(ctx context.Context, param entity.Crea
 			return err
 		}
 		for _, schedule := range param.CourseAvailability {
+			if schedule.EndTime.Hour < schedule.StartTime.Hour {
+				return customerrors.NewError(
+					"invalid schedule",
+					errors.New("invalid schedule"),
+					customerrors.InvalidAction,
+				)
+			}
 			*schedules = append(*schedules, entity.CourseAvailability{
 				CourseID:  course.ID,
 				DayOfWeek: schedule.DayOfWeek,
