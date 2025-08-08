@@ -42,6 +42,28 @@ func (ccr *CourseCategoryRepositoryImpl) UnassignCategories(ctx context.Context,
 	return nil
 }
 
+func (ccr *CourseCategoryRepositoryImpl) UnassignCategoriesMultipleCourse(ctx context.Context, courseIDs []int) error {
+	var driver RepoDriver
+	driver = ccr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE course_category_assignments
+	SET updated_at = NOW(), deleted_at = NOW()
+	WHERE course_id = ANY($1) AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, pq.Array(courseIDs))
+	if err != nil {
+		return customerrors.NewError(
+			"failed to unassign course categories",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (ccr *CourseCategoryRepositoryImpl) FindByMultipleIDs(ctx context.Context, ids []int, categories *[]entity.CourseCategory) error {
 	var driver RepoDriver
 	driver = ccr.DB

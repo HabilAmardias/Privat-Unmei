@@ -7,6 +7,8 @@ import (
 	"log"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
+
+	"github.com/lib/pq"
 )
 
 type CourseAvailabilityRepositoryImpl struct {
@@ -15,6 +17,28 @@ type CourseAvailabilityRepositoryImpl struct {
 
 func CreateCourseAvailabilityRepository(db *sql.DB) *CourseAvailabilityRepositoryImpl {
 	return &CourseAvailabilityRepositoryImpl{db}
+}
+
+func (car *CourseAvailabilityRepositoryImpl) DeleteAvailabilityMultipleCourses(ctx context.Context, courseIDs []int) error {
+	var driver RepoDriver
+	driver = car.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE course_availability
+	SET deleted_at = NOW(), updated_at = NOW()
+	WHERE course_id = ANY($1) AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, pq.Array(courseIDs))
+	if err != nil {
+		return customerrors.NewError(
+			"failed to delete course schedules",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
 }
 
 func (car *CourseAvailabilityRepositoryImpl) DeleteAvailability(ctx context.Context, courseID int) error {
