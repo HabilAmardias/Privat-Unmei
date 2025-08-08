@@ -17,6 +17,28 @@ func CreateCourseAvailabilityRepository(db *sql.DB) *CourseAvailabilityRepositor
 	return &CourseAvailabilityRepositoryImpl{db}
 }
 
+func (car *CourseAvailabilityRepositoryImpl) DeleteAvailability(ctx context.Context, courseID int) error {
+	var driver RepoDriver
+	driver = car.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE course_availability
+	SET deleted_at = NOW(), updated_at = NOW()
+	WHERE course_id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, courseID)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to delete course schedules",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (car *CourseAvailabilityRepositoryImpl) CreateAvailability(ctx context.Context, schedules *[]entity.CourseAvailability) error {
 	var driver RepoDriver
 	driver = car.DB

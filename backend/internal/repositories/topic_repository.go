@@ -17,6 +17,28 @@ func CreateTopicRepository(db *sql.DB) *TopicRepositoryImpl {
 	return &TopicRepositoryImpl{db}
 }
 
+func (tr *TopicRepositoryImpl) DeleteTopics(ctx context.Context, courseID int) error {
+	var driver RepoDriver
+	driver = tr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE topics
+	SET deleted_at = NOW(), updated_at = NOW()
+	WHERE course_id = $1 and deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, courseID)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to delete course topics",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (tr *TopicRepositoryImpl) CreateTopics(ctx context.Context, topics *[]entity.CourseTopic) error {
 	var driver RepoDriver
 	driver = tr.DB
