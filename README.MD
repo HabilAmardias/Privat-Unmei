@@ -1,6 +1,4 @@
 ### Environment
-[Database Environment Example](.env.example)
-
 [Backend Environment Example](backend/.env.example)
 
 ### Commands
