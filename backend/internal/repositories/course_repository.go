@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 )
@@ -17,6 +18,134 @@ func CreateCourseRepository(db *sql.DB) *CourseRepositoryImpl {
 	return &CourseRepositoryImpl{db}
 }
 
+func (cr *CourseRepositoryImpl) ListCourse(
+	ctx context.Context,
+	query *[]entity.CourseListQuery,
+	totalRow *int64,
+	param entity.ListCourseParam,
+) error {
+	var driver RepoDriver
+	driver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	countArgs := []any{param.LastID}
+	args := []any{param.LastID}
+	sqlQuery := `
+		SELECT
+		c.id,
+		c.mentor_id,
+		u.name,
+		u.email,
+		c.title,
+		c.domicile,
+		c.min_price,
+		c.max_price,
+		c.method,
+		c.min_duration_days,
+		c.max_duration_days,
+		COALESCE(
+			(SELECT STRING_AGG(cc_all.name, ',') 
+			FROM course_category_assignments cca_all 
+			JOIN course_categories cc_all ON cca_all.category_id = cc_all.id 
+			WHERE cca_all.course_id = c.id 
+			AND cca_all.deleted_at IS NULL 
+			AND cc_all.deleted_at IS NULL), 
+			''
+		) AS categories
+	FROM courses c
+	JOIN users u ON u.id = c.mentor_id
+	WHERE c.deleted_at IS NULL AND u.deleted_at IS NULL AND c.id < $1
+	`
+	countQuery := `
+	SELECT count(*)
+	FROM courses c
+	JOIN users u ON u.id = c.mentor_id
+	WHERE c.deleted_at IS NULL AND u.deleted_at IS NULL AND c.id < $1
+	`
+	if param.Search != nil {
+		countQuery += fmt.Sprintf(" AND (c.title ILIKE $%d OR u.name ILIKE $%d) ", len(countArgs)+1, len(countArgs)+1)
+		sqlQuery += fmt.Sprintf(" AND (c.title ILIKE $%d OR u.name ILIKE $%d) ", len(args)+1, len(args)+1)
+		args = append(args, "%"+*param.Search+"%")
+		countArgs = append(countArgs, "%"+*param.Search+"%")
+	}
+	if param.Method != nil {
+		countQuery += fmt.Sprintf(" AND c.method = $%d", len(countArgs)+1)
+		sqlQuery += fmt.Sprintf(" AND c.method = $%d", len(args)+1)
+		args = append(args, *param.Method)
+		countArgs = append(countArgs, *param.Method)
+	}
+	if param.CourseCategory != nil {
+		countQuery += fmt.Sprintf(` AND EXISTS (
+			SELECT 1 
+			FROM course_category_assignments cca_filter 
+			JOIN course_categories cc_filter ON cca_filter.category_id = cc_filter.id
+			WHERE cca_filter.course_id = c.id 
+			AND cca_filter.deleted_at IS NULL
+			AND cc_filter.deleted_at IS NULL
+			AND cc_filter.id = $%d
+		)`, len(args)+1)
+		sqlQuery += fmt.Sprintf(` AND EXISTS (
+			SELECT 1 
+			FROM course_category_assignments cca_filter 
+			JOIN course_categories cc_filter ON cca_filter.category_id = cc_filter.id
+			WHERE cca_filter.course_id = c.id 
+			AND cca_filter.deleted_at IS NULL
+			AND cc_filter.deleted_at IS NULL
+			AND cc_filter.id = $%d
+		)`, len(args)+1)
+		countArgs = append(countArgs, *param.CourseCategory)
+		args = append(args, *param.CourseCategory)
+	}
+	sqlQuery += " ORDER BY c.id DESC "
+	sqlQuery += fmt.Sprintf(" LIMIT $%d ", len(args)+1)
+	args = append(args, param.Limit)
+	row := driver.QueryRow(countQuery, countArgs...)
+	if err := row.Scan(totalRow); err != nil {
+		return customerrors.NewError(
+			"failed to get course list",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	log.Println(sqlQuery)
+	rows, err := driver.Query(sqlQuery, args...)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to get courses list",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var item entity.CourseListQuery
+		if err := rows.Scan(
+			&item.ID,
+			&item.MentorID,
+			&item.MentorName,
+			&item.MentorEmail,
+			&item.Title,
+			&item.Domicile,
+			&item.MinPrice,
+			&item.MaxPrice,
+			&item.Method,
+			&item.MinDurationDays,
+			&item.MaxDurationDays,
+			&item.CourseCategories,
+		); err != nil {
+			return customerrors.NewError(
+				"failed to get course list",
+				err,
+				customerrors.DatabaseExecutionError,
+			)
+		}
+		*query = append(*query, item)
+	}
+
+	return nil
+}
 func (cr *CourseRepositoryImpl) GetMostBoughtCourses(ctx context.Context, courses *[]entity.CourseListQuery) error {
 	var driver RepoDriver
 	driver = cr.DB

@@ -22,6 +22,94 @@ func CreateCourseHandler(cs *services.CourseServiceImpl) *CourseHandlerImpl {
 	return &CourseHandlerImpl{cs}
 }
 
+func (ch *CourseHandlerImpl) ListCourse(ctx *gin.Context) {
+	var req dtos.ListCourseReq
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.ListCourseParam{
+		SeekPaginatedParam: entity.SeekPaginatedParam{
+			Limit:  req.Limit,
+			LastID: req.LastID,
+		},
+		Search:         req.Search,
+		CourseCategory: req.CourseCategory,
+		Method:         req.Method,
+	}
+	if req.Limit <= 0 {
+		param.Limit = constants.DefaultLimit
+	}
+	if req.LastID <= 0 {
+		param.LastID = constants.DefaultLastID
+	}
+	res, totalRow, err := ch.cs.ListCourse(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	entries := []dtos.CourseListRes{}
+	for _, course := range *res {
+		item := dtos.CourseListRes{
+			MentorListCourseRes: dtos.MentorListCourseRes{
+				ID:               course.ID,
+				Title:            course.Title,
+				Domicile:         course.Domicile,
+				Method:           course.Method,
+				MinPrice:         course.MinPrice,
+				MaxPrice:         course.MaxPrice,
+				MinDurationDays:  course.MinDurationDays,
+				MaxDurationDays:  course.MaxDurationDays,
+				CourseCategories: strings.Split(course.CourseCategories, ","),
+			},
+			MentorID:    course.MentorID,
+			MentorName:  course.MentorName,
+			MentorEmail: course.MentorEmail,
+		}
+		entries = append(entries, item)
+	}
+	var filters []dtos.FilterInfo
+	if req.Search != nil {
+		filter := dtos.FilterInfo{
+			Name:  "Search",
+			Value: *req.Search,
+		}
+		filters = append(filters, filter)
+	}
+	if req.CourseCategory != nil {
+		filter := dtos.FilterInfo{
+			Name:  "Course Category",
+			Value: *req.CourseCategory,
+		}
+		filters = append(filters, filter)
+	}
+	if req.Method != nil {
+		filter := dtos.FilterInfo{
+			Name:  "Method",
+			Value: *req.Method,
+		}
+		filters = append(filters, filter)
+	}
+	var lastID int
+	if len(entries) > 0 {
+		lastID = entries[len(entries)-1].ID
+	} else {
+		lastID = 0
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.SeekPaginatedResponse[dtos.CourseListRes]{
+			Entries: entries,
+			PageInfo: dtos.SeekPaginatedInfo{
+				LastID:   lastID,
+				FilterBy: filters,
+				Limit:    param.Limit,
+				TotalRow: *totalRow,
+			},
+		},
+	})
+}
+
 func (ch *CourseHandlerImpl) MostBoughtCourses(ctx *gin.Context) {
 	res, err := ch.cs.MostBoughtCourses(ctx)
 	if err != nil {
