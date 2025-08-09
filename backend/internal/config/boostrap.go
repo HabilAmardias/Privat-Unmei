@@ -28,7 +28,7 @@ func Bootstrap(db *sql.DB, app *gin.Engine) {
 	cloudinaryUtil := utils.CreateCloudinaryUtil()
 	jwtUtil := utils.CreateJWTUtil()
 
-	mentorService := services.CreateMentorService(transactionManager, userRepo, mentorRepo, bcryptUtil, jwtUtil, cloudinaryUtil, gomailUtil)
+	mentorService := services.CreateMentorService(transactionManager, userRepo, mentorRepo, topicRepo, courseCategoryRepo, courseAvailabilityRepo, courseRepo, bcryptUtil, jwtUtil, cloudinaryUtil, gomailUtil)
 	adminService := services.CreateAdminService(userRepo, adminRepo, studentRepo, mentorRepo, transactionManager, cloudinaryUtil, bcryptUtil, jwtUtil, gomailUtil)
 	studentService := services.CreateStudentService(userRepo, studentRepo, transactionManager, bcryptUtil, gomailUtil, cloudinaryUtil, jwtUtil)
 	courseCategoryService := services.CreateCourseCategoryService(courseCategoryRepo, transactionManager)

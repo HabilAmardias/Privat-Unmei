@@ -17,6 +17,64 @@ func CreateCourseRepository(db *sql.DB) *CourseRepositoryImpl {
 	return &CourseRepositoryImpl{db}
 }
 
+func (cr *CourseRepositoryImpl) GetMaximumTransactionCount(ctx context.Context, transactionCount *int64, mentorID string) error {
+	var driver RepoDriver
+	driver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	SELECT MAX(transaction_count)
+	FROM courses
+	WHERE mentor_id = $1 AND deleted_at IS NULL
+	`
+	row := driver.QueryRow(query, mentorID)
+	if err := row.Scan(transactionCount); err != nil {
+		return customerrors.NewError(
+			"failed to get course transaction count",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (cr *CourseRepositoryImpl) FindByMentorID(ctx context.Context, mentorID string, courseIDs *[]int) error {
+	var driver RepoDriver
+	driver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	SELECT
+		id
+	FROM courses
+	WHERE mentor_id = $1 and deleted_at IS NULL
+	`
+	rows, err := driver.Query(query, mentorID)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to get mentor courses",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var id int
+		if err := rows.Scan(&id); err != nil {
+			return customerrors.NewError(
+				"failed to get courses",
+				err,
+				customerrors.DatabaseExecutionError,
+			)
+		}
+		*courseIDs = append(*courseIDs, id)
+	}
+	return nil
+}
+
 func (cr *CourseRepositoryImpl) MentorListCourse(
 	ctx context.Context,
 	query *[]entity.MentorListCourseQuery,
@@ -201,6 +259,28 @@ func (cr *CourseRepositoryImpl) DeleteCourse(ctx context.Context, id int) error 
 	WHERE id = $1 AND deleted_at IS NULL
 	`
 	_, err := driver.Exec(query, id)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to delete course",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (cr *CourseRepositoryImpl) DeleteMentorCourse(ctx context.Context, mentorID string) error {
+	var driver RepoDriver
+	driver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE courses
+	SET deleted_at = NOW(), updated_at = NOW()
+	WHERE mentor_id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, mentorID)
 	if err != nil {
 		return customerrors.NewError(
 			"failed to delete course",

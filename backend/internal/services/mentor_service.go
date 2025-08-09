@@ -15,6 +15,10 @@ type MentorServiceImpl struct {
 	tmr *repositories.TransactionManagerRepositories
 	ur  *repositories.UserRepositoryImpl
 	mr  *repositories.MentorRepositoryImpl
+	tr  *repositories.TopicRepositoryImpl
+	ccr *repositories.CourseCategoryRepositoryImpl
+	car *repositories.CourseAvailabilityRepositoryImpl
+	cr  *repositories.CourseRepositoryImpl
 	bu  *utils.BcryptUtil
 	ju  *utils.JWTUtil
 	cu  *utils.CloudinaryUtil
@@ -25,12 +29,16 @@ func CreateMentorService(
 	tmr *repositories.TransactionManagerRepositories,
 	ur *repositories.UserRepositoryImpl,
 	mr *repositories.MentorRepositoryImpl,
+	tr *repositories.TopicRepositoryImpl,
+	ccr *repositories.CourseCategoryRepositoryImpl,
+	car *repositories.CourseAvailabilityRepositoryImpl,
+	cr *repositories.CourseRepositoryImpl,
 	bu *utils.BcryptUtil,
 	ju *utils.JWTUtil,
 	cu *utils.CloudinaryUtil,
 	gu *utils.GomailUtil,
 ) *MentorServiceImpl {
-	return &MentorServiceImpl{tmr, ur, mr, bu, ju, cu, gu}
+	return &MentorServiceImpl{tmr, ur, mr, tr, ccr, car, cr, bu, ju, cu, gu}
 }
 
 func (ms *MentorServiceImpl) ChangePassword(ctx context.Context, param entity.MentorChangePasswordParam) error {
@@ -117,12 +125,43 @@ func (ms *MentorServiceImpl) GetMentorList(ctx context.Context, param entity.Lis
 func (ms *MentorServiceImpl) DeleteMentor(ctx context.Context, param entity.DeleteMentorParam) error {
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
+	maxTransactionCount := new(int64)
+	courseIDs := new([]int)
+
 	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := ms.ur.FindByID(ctx, param.ID, user); err != nil {
 			return err
 		}
 		if err := ms.mr.FindByID(ctx, user.ID, mentor); err != nil {
 			return err
+		}
+
+		if err := ms.cr.GetMaximumTransactionCount(ctx, maxTransactionCount, param.ID); err != nil {
+			return err
+		}
+		if *maxTransactionCount > 0 {
+			return customerrors.NewError(
+				"there are course that has been bought",
+				errors.New("max transaction count is more than zero"),
+				customerrors.InvalidAction,
+			)
+		}
+		if err := ms.cr.FindByMentorID(ctx, param.ID, courseIDs); err != nil {
+			return err
+		}
+		if len(*courseIDs) > 0 {
+			if err := ms.tr.DeleteTopicsMultipleCourse(ctx, *courseIDs); err != nil {
+				return err
+			}
+			if err := ms.ccr.UnassignCategoriesMultipleCourse(ctx, *courseIDs); err != nil {
+				return err
+			}
+			if err := ms.car.DeleteAvailabilityMultipleCourses(ctx, *courseIDs); err != nil {
+				return err
+			}
+			if err := ms.cr.DeleteMentorCourse(ctx, param.ID); err != nil {
+				return err
+			}
 		}
 		if err := ms.mr.DeleteMentor(ctx, mentor.ID); err != nil {
 			return err
@@ -156,6 +195,18 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 	mentor := new(entity.Mentor)
 
 	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		// to be honest idk how to make this clean enough but for now it should work
+		if err := ms.mr.FindByWhatsapp(ctx, param.WhatsappNumber, mentor); err != nil {
+			if err.Error() != customerrors.UserNotFound {
+				return err
+			}
+		} else {
+			return customerrors.NewError(
+				"user already exist",
+				customerrors.ErrItemAlreadyExist,
+				customerrors.ItemAlreadyExist,
+			)
+		}
 		if err := ms.ur.FindByEmail(ctx, param.Email, user); err != nil {
 			if err.Error() != customerrors.UserNotFound {
 				return err

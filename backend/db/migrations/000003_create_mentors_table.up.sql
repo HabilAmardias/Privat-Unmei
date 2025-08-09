@@ -4,7 +4,7 @@ CREATE TABLE mentors (
     rating_count INTEGER DEFAULT 0,
     resume_url VARCHAR NOT NULL,
     years_of_experience INT not null,
-    whatsapp_number VARCHAR not null unique,
+    whatsapp_number VARCHAR not null,
     degree VARCHAR NOT NULL CHECK(degree in ('bachelor','diploma','high school','master','professor')),
     major VARCHAR NOT NULL,
     campus VARCHAR NOT NULL,

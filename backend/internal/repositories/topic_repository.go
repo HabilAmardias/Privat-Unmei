@@ -7,6 +7,8 @@ import (
 	"log"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
+
+	"github.com/lib/pq"
 )
 
 type TopicRepositoryImpl struct {
@@ -15,6 +17,28 @@ type TopicRepositoryImpl struct {
 
 func CreateTopicRepository(db *sql.DB) *TopicRepositoryImpl {
 	return &TopicRepositoryImpl{db}
+}
+
+func (tr *TopicRepositoryImpl) DeleteTopicsMultipleCourse(ctx context.Context, courseIDs []int) error {
+	var driver RepoDriver
+	driver = tr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE topics
+	SET deleted_at = NOW(), updated_at = NOW()
+	WHERE course_id = ANY($1) and deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, pq.Array(courseIDs))
+	if err != nil {
+		return customerrors.NewError(
+			"failed to delete course topics",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
 }
 
 func (tr *TopicRepositoryImpl) DeleteTopics(ctx context.Context, courseID int) error {

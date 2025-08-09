@@ -173,6 +173,63 @@ func (mr *MentorRepositoryImpl) FindByID(ctx context.Context, id string, mentor 
 	return nil
 }
 
+func (mr *MentorRepositoryImpl) FindByWhatsapp(ctx context.Context, WhatsappNumber string, mentor *entity.Mentor) error {
+	var driver RepoDriver
+	driver = mr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	SELECT 
+		id, 
+		total_rating, 
+		rating_count, 
+		resume_url, 
+		years_of_experience, 
+		whatsapp_number, 
+		degree, 
+		major, 
+		campus, 
+		created_at,
+		updated_at,
+		deleted_at
+	FROM mentors
+	WHERE whatsapp_number = $1 and deleted_at IS NULL
+	`
+	row := driver.QueryRow(
+		query,
+		WhatsappNumber,
+	)
+	if err := row.Scan(
+		&mentor.ID,
+		&mentor.TotalRating,
+		&mentor.RatingCount,
+		&mentor.Resume,
+		&mentor.YearsOfExperience,
+		&mentor.WhatsappNumber,
+		&mentor.Degree,
+		&mentor.Major,
+		&mentor.Campus,
+		&mentor.CreatedAt,
+		&mentor.UpdatedAt,
+		&mentor.DeletedAt,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return customerrors.NewError(
+				customerrors.UserNotFound,
+				err,
+				customerrors.ItemNotExist,
+			)
+		}
+		return customerrors.NewError(
+			"failed to get user",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (mr *MentorRepositoryImpl) AddNewMentor(ctx context.Context, mentor *entity.Mentor) error {
 	var driver RepoDriver
 	driver = mr.DB

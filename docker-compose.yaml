@@ -2,7 +2,7 @@ services:
   database:
     image: postgres:16-alpine
     env_file:
-      - .env
+      - backend/.env
     volumes:
       - privat-unmei-data:/var/lib/postgresql/data
     ports:
