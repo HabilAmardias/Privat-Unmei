@@ -1,13 +1,8 @@
 package handlers
 
 import (
-	"errors"
-	"fmt"
-	"io"
-	"mime/multipart"
 	"net/http"
 	"privat-unmei/internal/constants"
-	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/services"
@@ -36,50 +31,11 @@ func (sh *StudentHandlerImpl) UpdateStudentProfile(ctx *gin.Context) {
 		return
 	}
 
-	fileReq, _ := ctx.FormFile("file")
-	var file multipart.File
-
-	if fileReq != nil {
-		if fileReq.Size > constants.FileSizeThreshold {
-			ctx.Error(customerrors.NewError(
-				"File size is too large",
-				fmt.Errorf("file size is too large"),
-				customerrors.InvalidAction,
-			))
-			return
-		}
-		file, err = fileReq.Open()
-		if err != nil {
-			ctx.Error(customerrors.NewError(
-				"failed to upload file",
-				err,
-				customerrors.CommonErr,
-			))
-			return
-		}
-		buff := make([]byte, 512)
-		if _, err := file.Read(buff); err != nil {
-			ctx.Error(
-				customerrors.NewError(
-					"Failed to upload file",
-					err,
-					customerrors.InvalidAction,
-				),
-			)
-			return
-		}
-		file.Seek(0, io.SeekStart)
-		fileType := http.DetectContentType(buff)
-		if fileType != constants.PNGType {
-			ctx.Error(
-				customerrors.NewError(
-					"Uploaded file must be .png",
-					errors.New("uploaded file must be .png"),
-					customerrors.InvalidAction,
-				),
-			)
-			return
-		}
+	headerFile, _ := ctx.FormFile("file")
+	file, err := ValidateFile(headerFile, constants.FileSizeThreshold, constants.PNGType)
+	if err != nil {
+		ctx.Error(err)
+		return
 	}
 	param := entity.UpdateStudentParam{
 		ID:           claim.Subject,

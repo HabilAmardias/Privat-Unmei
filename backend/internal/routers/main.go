@@ -53,6 +53,7 @@ func (c *RouteConfig) SetupPublicRoute() {
 	v1.POST("/admin/login", c.AdminHandler.Login)
 	v1.POST("/mentor/login", c.MentorHandler.Login)
 	v1.GET("/courses/categories", c.CourseCategoryHandler.GetCategoriesList)
+	v1.GET("/courses/most-bought", c.CourseHandler.MostBoughtCourses)
 }
 
 func (c *RouteConfig) SetupPrivateRoute() {
@@ -84,7 +85,7 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.UpdateAllPermission,
 		constants.MentorResource,
 		c.RBACRepository,
-	), c.MentorHandler.UpdateMentor)
+	), c.MentorHandler.UpdateMentorForAdmin)
 	v1.DELETE("/mentors/:id", middlewares.AuthorizationMiddleware(
 		constants.DeleteAllPermission,
 		constants.MentorResource,
@@ -125,4 +126,9 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.CourseResource,
 		c.RBACRepository,
 	), c.CourseHandler.MentorListCourse)
+	v1.PATCH("/mentors/me", middlewares.AuthorizationMiddleware(
+		constants.UpdateOwnPermission,
+		constants.MentorResource,
+		c.RBACRepository,
+	), c.MentorHandler.UpdateMentor)
 }

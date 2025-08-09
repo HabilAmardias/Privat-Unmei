@@ -173,9 +173,12 @@ func (ms *MentorServiceImpl) DeleteMentor(ctx context.Context, param entity.Dele
 	})
 }
 
-func (ms *MentorServiceImpl) UpdateMentorForAdmin(ctx context.Context, param entity.UpdateMentorParam) error {
+func (ms *MentorServiceImpl) UpdateMentorProfile(ctx context.Context, param entity.UpdateMentorParam) error {
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
+	mentorQuery := new(entity.UpdateMentorQuery)
+	userQuery := new(entity.UpdateUserQuery)
+
 	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := ms.ur.FindByID(ctx, param.ID, user); err != nil {
 			return err
@@ -183,7 +186,70 @@ func (ms *MentorServiceImpl) UpdateMentorForAdmin(ctx context.Context, param ent
 		if err := ms.mr.FindByID(ctx, user.ID, mentor); err != nil {
 			return err
 		}
-		if err := ms.mr.UpdateMentor(ctx, mentor.ID, &param.UpdateMentorQuery); err != nil {
+		userQuery.Name = param.Name
+		userQuery.Bio = param.Bio
+		if param.Password != nil {
+			if match := ms.bu.ComparePassword(*param.Password, user.Password); match {
+				return customerrors.NewError(
+					"cannot change into same password",
+					errors.New("new password same as previous password"),
+					customerrors.InvalidAction,
+				)
+			}
+			hashed, err := ms.bu.HashPassword(*param.Password)
+			if err != nil {
+				return err
+			}
+			userQuery.Password = &hashed
+		}
+		if param.ProfileImage != nil {
+			filename := mentor.ID
+			res, err := ms.cu.UploadFile(ctx, param.ProfileImage, filename, constants.AvatarFolder)
+			if err != nil {
+				return err
+			}
+			userQuery.ProfileImage = &res.URL
+		}
+
+		mentorQuery.Campus = param.Campus
+		mentorQuery.Degree = param.Degree
+		mentorQuery.Major = param.Major
+		mentorQuery.WhatsappNumber = param.WhatsappNumber
+		mentorQuery.YearsOfExperience = param.YearsOfExperience
+
+		if param.Resume != nil {
+			filename := mentor.ID
+			res, err := ms.cu.UploadFile(ctx, param.Resume, filename, constants.ResumeFolder)
+			if err != nil {
+				return err
+			}
+			mentorQuery.Resume = &res.URL
+		}
+		if err := ms.ur.UpdateUserProfile(ctx, userQuery, param.ID); err != nil {
+			return err
+		}
+		if err := ms.mr.UpdateMentor(ctx, param.ID, mentorQuery); err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
+func (ms *MentorServiceImpl) UpdateMentorForAdmin(ctx context.Context, param entity.UpdateMentorParam) error {
+	user := new(entity.User)
+	mentor := new(entity.Mentor)
+	query := new(entity.UpdateMentorQuery)
+
+	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := ms.ur.FindByID(ctx, param.ID, user); err != nil {
+			return err
+		}
+		if err := ms.mr.FindByID(ctx, user.ID, mentor); err != nil {
+			return err
+		}
+		query.WhatsappNumber = param.WhatsappNumber
+		query.YearsOfExperience = param.YearsOfExperience
+		if err := ms.mr.UpdateMentor(ctx, mentor.ID, query); err != nil {
 			return err
 		}
 		return nil

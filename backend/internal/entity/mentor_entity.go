@@ -33,12 +33,19 @@ type (
 		Campus            string
 	}
 	UpdateMentorParam struct {
-		ID string
-		UpdateMentorQuery
+		ID                string
+		Resume            multipart.File
+		ProfileImage      multipart.File
+		Name              *string
+		Password          *string
+		Bio               *string
+		YearsOfExperience *int
+		WhatsappNumber    *string
+		Degree            *string
+		Major             *string
+		Campus            *string
 	}
 	UpdateMentorQuery struct {
-		TotalRating       *float64
-		RatingCount       *int
 		Resume            *string
 		YearsOfExperience *int
 		WhatsappNumber    *string

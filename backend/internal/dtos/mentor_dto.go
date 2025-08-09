@@ -22,6 +22,19 @@ type (
 	UpdateMentorForAdminRes struct {
 		ID string `json:"id"`
 	}
+	UpdateMentorReq struct {
+		Name              *string `form:"name"`
+		Password          *string `form:"password" binding:"omitempty,containsany=!@#?,min=8"`
+		Bio               *string `form:"bio"`
+		YearsOfExperience *int    `form:"years_of_experience" binding:"omitempty,min=0"`
+		WhatsappNumber    *string `form:"whatsapp_number"`
+		Degree            *string `form:"degree"`
+		Major             *string `form:"major"`
+		Campus            *string `form:"campus"`
+	}
+	UpdateMentorRes struct {
+		ID string `json:"id"`
+	}
 	ListMentorReq struct {
 		PaginatedReq
 		Search               *string `form:"search"`
