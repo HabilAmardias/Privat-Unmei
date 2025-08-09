@@ -171,7 +171,7 @@ func (us *StudentServiceImpl) UpdateStudentProfile(ctx context.Context, param en
 			if err != nil {
 				return err
 			}
-			updateQuery.ProfileImage = &res.URL
+			updateQuery.ProfileImage = &res.SecureURL
 		}
 		if err := us.ur.UpdateUserProfile(ctx, updateQuery, param.ID); err != nil {
 			return err
