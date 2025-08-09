@@ -34,4 +34,5 @@ VALUES
 (2, 1, 4), -- mentor can create course data
 (2, 6, 4), -- mentor can delete his own course
 (2, 2, 4), -- mentor can read their own course
+(2, 4, 2), -- mentor can update their own data
 (1, 1, 2); -- admin can create mentor data

@@ -2,6 +2,9 @@ package handlers
 
 import (
 	"errors"
+	"io"
+	"mime/multipart"
+	"net/http"
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
@@ -52,4 +55,43 @@ func ValidatePhoneNumber(phoneNumber string) bool {
 	regex := regexp.MustCompile(pattern)
 
 	return regex.MatchString(phoneNumber)
+}
+
+func ValidateFile(headerFile *multipart.FileHeader, fileSizeThresh int64, fileType string) (multipart.File, error) {
+	if headerFile == nil {
+		return nil, nil
+	}
+	if headerFile.Size > fileSizeThresh {
+		return nil, customerrors.NewError(
+			"file size is too large",
+			errors.New("file size is too large"),
+			customerrors.InvalidAction,
+		)
+	}
+	file, err := headerFile.Open()
+	if err != nil {
+		return nil, customerrors.NewError(
+			"failed to upload file",
+			err,
+			customerrors.CommonErr,
+		)
+	}
+	defer file.Close()
+	buff := make([]byte, 512)
+	if _, err := file.Read(buff); err != nil {
+		return nil, customerrors.NewError(
+			"failed to upload file",
+			err,
+			customerrors.CommonErr,
+		)
+	}
+	file.Seek(0, io.SeekStart)
+	if fileExt := http.DetectContentType(buff); fileExt != fileType {
+		return nil, customerrors.NewError(
+			"invalid file format",
+			errors.New("invalid file format"),
+			customerrors.InvalidAction,
+		)
+	}
+	return file, nil
 }

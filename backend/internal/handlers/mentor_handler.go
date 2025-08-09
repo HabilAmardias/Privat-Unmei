@@ -2,8 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
-	"io"
 	"net/http"
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
@@ -158,7 +156,7 @@ func (mh *MentorHandlerImpl) DeleteMentor(ctx *gin.Context) {
 	})
 }
 
-func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
+func (mh *MentorHandlerImpl) UpdateMentorForAdmin(ctx *gin.Context) {
 	id := ctx.Param("id")
 	if id == "" {
 		ctx.Error(customerrors.NewError(
@@ -182,11 +180,9 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 		return
 	}
 	param := entity.UpdateMentorParam{
-		ID: id,
-		UpdateMentorQuery: entity.UpdateMentorQuery{
-			WhatsappNumber:    req.WhatsappNumber,
-			YearsOfExperience: req.YearsOfExperience,
-		},
+		ID:                id,
+		WhatsappNumber:    req.WhatsappNumber,
+		YearsOfExperience: req.YearsOfExperience,
 	}
 	if err := mh.ms.UpdateMentorForAdmin(ctx, param); err != nil {
 		ctx.Error(err)
@@ -196,6 +192,75 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 		Success: true,
 		Data: dtos.UpdateMentorForAdminRes{
 			ID: param.ID,
+		},
+	})
+}
+
+func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	var req dtos.UpdateMentorReq
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	resumeHeader, _ := ctx.FormFile("resume_file")
+	profileHeader, _ := ctx.FormFile("profile_image")
+
+	resumeFile, err := ValidateFile(resumeHeader, constants.FileSizeThreshold, constants.PDFType)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	profileImageFile, err := ValidateFile(profileHeader, constants.FileSizeThreshold, constants.PNGType)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	if req.WhatsappNumber != nil {
+		if !ValidatePhoneNumber(*req.WhatsappNumber) {
+			ctx.Error(customerrors.NewError(
+				"invalid phone number",
+				errors.New("invalid phone number"),
+				customerrors.InvalidAction,
+			))
+			return
+		}
+	}
+	if req.Degree != nil {
+		if !ValidateDegree(*req.Degree) {
+			ctx.Error(customerrors.NewError(
+				"invalid degree",
+				errors.New("invalid degree"),
+				customerrors.InvalidAction,
+			))
+			return
+		}
+	}
+	param := entity.UpdateMentorParam{
+		ID:                claim.Subject,
+		Resume:            resumeFile,
+		ProfileImage:      profileImageFile,
+		Name:              req.Name,
+		Password:          req.Password,
+		Bio:               req.Bio,
+		YearsOfExperience: req.YearsOfExperience,
+		WhatsappNumber:    req.WhatsappNumber,
+		Degree:            req.Degree,
+		Major:             req.Major,
+		Campus:            req.Campus,
+	}
+	if err := mh.ms.UpdateMentorProfile(ctx, param); err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.UpdateMentorRes{
+			ID: claim.Subject,
 		},
 	})
 }
@@ -233,48 +298,9 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 		)
 		return
 	}
-	if headerFile.Size > constants.FileSizeThreshold {
-		ctx.Error(customerrors.NewError(
-			"File size is too large",
-			fmt.Errorf("file size is too large"),
-			customerrors.InvalidAction,
-		))
-		return
-	}
-	file, err := headerFile.Open()
+	file, err := ValidateFile(headerFile, constants.FileSizeThreshold, constants.PDFType)
 	if err != nil {
-		ctx.Error(
-			customerrors.NewError(
-				"Failed to upload file",
-				err,
-				customerrors.InvalidAction,
-			),
-		)
-		return
-	}
-	defer file.Close()
-
-	buff := make([]byte, 512)
-	if _, err := file.Read(buff); err != nil {
-		ctx.Error(
-			customerrors.NewError(
-				"Failed to upload file",
-				err,
-				customerrors.InvalidAction,
-			),
-		)
-		return
-	}
-
-	file.Seek(0, io.SeekStart)
-	if fileType := http.DetectContentType(buff); fileType != constants.PDFType {
-		ctx.Error(
-			customerrors.NewError(
-				"Uploaded file must be .pdf",
-				err,
-				customerrors.InvalidAction,
-			),
-		)
+		ctx.Error(err)
 		return
 	}
 	param := entity.AddNewMentorParam{

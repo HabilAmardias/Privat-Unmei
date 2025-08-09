@@ -17,7 +17,6 @@ type (
 	}
 	UpdateUserQuery struct {
 		Name         *string
-		Email        *string
 		Password     *string
 		Bio          *string
 		ProfileImage *string
