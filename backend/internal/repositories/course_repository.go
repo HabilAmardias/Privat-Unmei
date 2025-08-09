@@ -17,6 +17,77 @@ func CreateCourseRepository(db *sql.DB) *CourseRepositoryImpl {
 	return &CourseRepositoryImpl{db}
 }
 
+func (cr *CourseRepositoryImpl) GetMostBoughtCourses(ctx context.Context, courses *[]entity.CourseListQuery) error {
+	var driver RepoDriver
+	driver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	sqlQuery := `
+		SELECT
+		c.id,
+		c.mentor_id,
+		u.name,
+		u.email,
+		c.title,
+		c.domicile,
+		c.min_price,
+		c.max_price,
+		c.method,
+		c.min_duration_days,
+		c.max_duration_days,
+		COALESCE(
+			(SELECT STRING_AGG(cc_all.name, ',') 
+			FROM course_category_assignments cca_all 
+			JOIN course_categories cc_all ON cca_all.category_id = cc_all.id 
+			WHERE cca_all.course_id = c.id 
+			AND cca_all.deleted_at IS NULL 
+			AND cc_all.deleted_at IS NULL), 
+			''
+		) AS categories
+	FROM courses c
+	JOIN users u ON u.id = c.mentor_id
+	WHERE c.deleted_at IS NULL AND u.deleted_at IS NULL
+	ORDER BY c.transaction_count DESC
+	LIMIT 10
+	`
+	rows, err := driver.Query(sqlQuery)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to get courses",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var item entity.CourseListQuery
+		if err := rows.Scan(
+			&item.ID,
+			&item.MentorID,
+			&item.MentorName,
+			&item.MentorEmail,
+			&item.Title,
+			&item.Domicile,
+			&item.MinPrice,
+			&item.MaxPrice,
+			&item.Method,
+			&item.MinDurationDays,
+			&item.MaxDurationDays,
+			&item.CourseCategories,
+		); err != nil {
+			return customerrors.NewError(
+				"failed to get courses",
+				err,
+				customerrors.DatabaseExecutionError,
+			)
+		}
+		*courses = append(*courses, item)
+	}
+	return nil
+}
+
 func (cr *CourseRepositoryImpl) GetMaximumTransactionCount(ctx context.Context, transactionCount *int64, mentorID string) error {
 	var driver RepoDriver
 	driver = cr.DB

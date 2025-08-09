@@ -53,6 +53,7 @@ func (c *RouteConfig) SetupPublicRoute() {
 	v1.POST("/admin/login", c.AdminHandler.Login)
 	v1.POST("/mentor/login", c.MentorHandler.Login)
 	v1.GET("/courses/categories", c.CourseCategoryHandler.GetCategoriesList)
+	v1.GET("/courses/most-bought", c.CourseHandler.MostBoughtCourses)
 }
 
 func (c *RouteConfig) SetupPrivateRoute() {

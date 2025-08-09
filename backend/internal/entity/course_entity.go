@@ -89,4 +89,10 @@ type (
 		MaxDurationDays  int
 		CourseCategories string
 	}
+	CourseListQuery struct {
+		MentorListCourseQuery
+		MentorID    string
+		MentorName  string
+		MentorEmail string
+	}
 )

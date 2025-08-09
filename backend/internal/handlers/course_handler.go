@@ -22,6 +22,38 @@ func CreateCourseHandler(cs *services.CourseServiceImpl) *CourseHandlerImpl {
 	return &CourseHandlerImpl{cs}
 }
 
+func (ch *CourseHandlerImpl) MostBoughtCourses(ctx *gin.Context) {
+	res, err := ch.cs.MostBoughtCourses(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	entries := []dtos.CourseListRes{}
+	for _, course := range *res {
+		item := dtos.CourseListRes{
+			MentorListCourseRes: dtos.MentorListCourseRes{
+				ID:               course.ID,
+				Title:            course.Title,
+				Domicile:         course.Domicile,
+				Method:           course.Method,
+				MinPrice:         course.MinPrice,
+				MaxPrice:         course.MaxPrice,
+				MinDurationDays:  course.MinDurationDays,
+				MaxDurationDays:  course.MaxDurationDays,
+				CourseCategories: strings.Split(course.CourseCategories, ","),
+			},
+			MentorID:    course.MentorID,
+			MentorName:  course.MentorName,
+			MentorEmail: course.MentorEmail,
+		}
+		entries = append(entries, item)
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data:    entries,
+	})
+}
+
 func (ch *CourseHandlerImpl) MentorListCourse(ctx *gin.Context) {
 	claim, err := getAuthenticationPayload(ctx)
 	if err != nil {

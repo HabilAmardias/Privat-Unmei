@@ -50,4 +50,10 @@ type (
 		MaxDurationDays  int      `json:"max_duration_days"`
 		CourseCategories []string `json:"course_categories"`
 	}
+	CourseListRes struct {
+		MentorListCourseRes
+		MentorID    string `json:"mentor_id"`
+		MentorName  string `json:"mentor_name"`
+		MentorEmail string `json:"mentor_email"`
+	}
 )
