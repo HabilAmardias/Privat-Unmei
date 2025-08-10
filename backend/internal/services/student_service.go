@@ -2,23 +2,28 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"io"
 	"log"
+	"net/http"
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/repositories"
 	"privat-unmei/internal/utils"
+	"strings"
 )
 
 type StudentServiceImpl struct {
-	ur  *repositories.UserRepositoryImpl
-	sr  *repositories.StudentRepositoryImpl
-	tmr *repositories.TransactionManagerRepositories
-	bu  *utils.BcryptUtil
-	gu  *utils.GomailUtil
-	cu  *utils.CloudinaryUtil
-	ju  *utils.JWTUtil
+	ur     *repositories.UserRepositoryImpl
+	sr     *repositories.StudentRepositoryImpl
+	tmr    *repositories.TransactionManagerRepositories
+	bu     *utils.BcryptUtil
+	gu     *utils.GomailUtil
+	cu     *utils.CloudinaryUtil
+	ju     *utils.JWTUtil
+	goauth *utils.GoogleOauth
 }
 
 func CreateStudentService(
@@ -29,8 +34,104 @@ func CreateStudentService(
 	gu *utils.GomailUtil,
 	cu *utils.CloudinaryUtil,
 	ju *utils.JWTUtil,
+	goauth *utils.GoogleOauth,
 ) *StudentServiceImpl {
-	return &StudentServiceImpl{ur, sr, tmr, bu, gu, cu, ju}
+	return &StudentServiceImpl{ur, sr, tmr, bu, gu, cu, ju, goauth}
+}
+
+func (us *StudentServiceImpl) GoogleLogin(oauthState string) string {
+	return us.goauth.Config.AuthCodeURL(oauthState)
+}
+
+func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code string) (string, error) {
+	oauthToken, err := us.goauth.Config.Exchange(context.Background(), code)
+	if err != nil {
+		return "", customerrors.NewError(
+			"failed to login",
+			err,
+			customerrors.CommonErr,
+		)
+	}
+	response, err := http.Get(us.goauth.UrlAPI + oauthToken.AccessToken)
+	if err != nil {
+		return "", customerrors.NewError(
+			"failed to login",
+			err,
+			customerrors.CommonErr,
+		)
+	}
+	defer response.Body.Close()
+
+	contents, err := io.ReadAll(response.Body)
+	if err != nil {
+		return "", customerrors.NewError(
+			"failed to login",
+			err,
+			customerrors.CommonErr,
+		)
+	}
+
+	var userInfo map[string]interface{}
+	if err := json.Unmarshal(contents, &userInfo); err != nil {
+		return "", customerrors.NewError(
+			"failed to login",
+			err,
+			customerrors.CommonErr,
+		)
+	}
+	email, ok := userInfo["email"].(string)
+	if !ok {
+		return "", customerrors.NewError(
+			"no email found",
+			errors.New("email not found in user info"),
+			customerrors.ItemNotExist,
+		)
+	}
+	user := new(entity.User)
+	student := new(entity.Student)
+	if err := us.ur.FindByEmail(ctx, email, user); err != nil {
+		if err.Error() == customerrors.UserNotFound {
+			pass, err := generateRandomPassword()
+			if err != nil {
+				return "", customerrors.NewError(
+					"error when creating account",
+					err,
+					customerrors.CommonErr,
+				)
+			}
+			hashed, err := us.bu.HashPassword(pass)
+			if err != nil {
+				return "", err
+			}
+			newUser := &entity.User{
+				Email:        email,
+				Name:         strings.TrimSuffix(email, "@"),
+				Status:       constants.VerifiedStatus,
+				Password:     hashed,
+				ProfileImage: constants.DefaultAvatar,
+			}
+			if err := us.ur.AddNewUser(ctx, newUser); err != nil {
+				return "", err
+			}
+			newStudent := &entity.Student{
+				ID: newUser.ID,
+			}
+			if err := us.sr.AddNewStudent(ctx, newStudent); err != nil {
+				return "", err
+			}
+			token, err := us.ju.GenerateJWT(newUser.ID, constants.StudentRole, constants.ForLogin, constants.VerifiedStatus)
+			if err != nil {
+				return "", err
+			}
+			return token, nil
+		}
+		return "", err
+	}
+	if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
+		return "", err
+	}
+	return us.ju.GenerateJWT(student.ID, constants.StudentRole, constants.ForLogin, constants.VerifiedStatus)
+
 }
 
 func (us *StudentServiceImpl) UpdateStudentProfile(ctx context.Context, param entity.UpdateStudentParam) error {
@@ -70,7 +171,7 @@ func (us *StudentServiceImpl) UpdateStudentProfile(ctx context.Context, param en
 			if err != nil {
 				return err
 			}
-			updateQuery.ProfileImage = &res.URL
+			updateQuery.ProfileImage = &res.SecureURL
 		}
 		if err := us.ur.UpdateUserProfile(ctx, updateQuery, param.ID); err != nil {
 			return err

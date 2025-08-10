@@ -1,11 +1,18 @@
 package handlers
 
 import (
+	"crypto/rand"
+	"encoding/base64"
+	"errors"
+	"log"
 	"net/http"
+	"os"
 	"privat-unmei/internal/constants"
+	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/services"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,6 +23,56 @@ type StudentHandlerImpl struct {
 
 func CreateStudentHandler(ss *services.StudentServiceImpl) *StudentHandlerImpl {
 	return &StudentHandlerImpl{ss}
+}
+
+func (sh *StudentHandlerImpl) GoogleLogin(ctx *gin.Context) {
+	expTime := time.Now().Add(30 * time.Minute)
+	b := make([]byte, 16)
+	rand.Read(b)
+	state := base64.URLEncoding.EncodeToString(b)
+	cookie := http.Cookie{Name: "oauthstate", Value: state, Expires: expTime}
+	http.SetCookie(ctx.Writer, &cookie)
+
+	url := sh.ss.GoogleLogin(state)
+
+	log.Println("Redirecting to: ", url)
+	ctx.Redirect(http.StatusTemporaryRedirect, url)
+}
+
+func (sh *StudentHandlerImpl) GoogleLoginCallback(ctx *gin.Context) {
+	state, err := ctx.Cookie("oauthstate")
+	if err != nil {
+		ctx.Error(customerrors.NewError(
+			"failed to login",
+			err,
+			customerrors.CommonErr,
+		))
+		return
+	}
+	if ctx.Query("state") != state {
+		ctx.Error(customerrors.NewError(
+			"invalid credential",
+			err,
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	code := ctx.Query("code")
+	if code == "" {
+		ctx.Error(customerrors.NewError(
+			"failed to login",
+			errors.New("missing code in query param"),
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	token, err := sh.ss.GoogleLoginCallback(ctx, code)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	clientURL := os.Getenv("CLIENT_DOMAIN")
+	ctx.Redirect(http.StatusTemporaryRedirect, clientURL+"/google-callback/"+token)
 }
 
 func (sh *StudentHandlerImpl) UpdateStudentProfile(ctx *gin.Context) {

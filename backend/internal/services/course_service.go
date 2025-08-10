@@ -26,6 +26,15 @@ func CreateCourseService(
 	return &CourseServiceImpl{car, cr, ccr, tr, tmr}
 }
 
+func (cs *CourseServiceImpl) ListCourse(ctx context.Context, param entity.ListCourseParam) (*[]entity.CourseListQuery, *int64, error) {
+	query := new([]entity.CourseListQuery)
+	totalRow := new(int64)
+	if err := cs.cr.ListCourse(ctx, query, totalRow, param); err != nil {
+		return nil, nil, err
+	}
+	return query, totalRow, nil
+}
+
 func (cs *CourseServiceImpl) MostBoughtCourses(ctx context.Context) (*[]entity.CourseListQuery, error) {
 	query := new([]entity.CourseListQuery)
 	if err := cs.cr.GetMostBoughtCourses(ctx, query); err != nil {

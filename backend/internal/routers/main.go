@@ -54,6 +54,9 @@ func (c *RouteConfig) SetupPublicRoute() {
 	v1.POST("/mentor/login", c.MentorHandler.Login)
 	v1.GET("/courses/categories", c.CourseCategoryHandler.GetCategoriesList)
 	v1.GET("/courses/most-bought", c.CourseHandler.MostBoughtCourses)
+	v1.GET("/auth/google", c.StudentHandler.GoogleLogin)
+	v1.GET("/auth/google/callback", c.StudentHandler.GoogleLoginCallback)
+	v1.GET("/courses", c.CourseHandler.ListCourse)
 }
 
 func (c *RouteConfig) SetupPrivateRoute() {

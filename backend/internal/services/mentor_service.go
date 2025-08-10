@@ -208,7 +208,7 @@ func (ms *MentorServiceImpl) UpdateMentorProfile(ctx context.Context, param enti
 			if err != nil {
 				return err
 			}
-			userQuery.ProfileImage = &res.URL
+			userQuery.ProfileImage = &res.SecureURL
 		}
 
 		mentorQuery.Campus = param.Campus
@@ -223,7 +223,7 @@ func (ms *MentorServiceImpl) UpdateMentorProfile(ctx context.Context, param enti
 			if err != nil {
 				return err
 			}
-			mentorQuery.Resume = &res.URL
+			mentorQuery.Resume = &res.SecureURL
 		}
 		if err := ms.ur.UpdateUserProfile(ctx, userQuery, param.ID); err != nil {
 			return err
@@ -315,7 +315,7 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 		if err != nil {
 			return err
 		}
-		mentor.Resume = uploadRes.URL
+		mentor.Resume = uploadRes.SecureURL
 		if err := ms.mr.AddNewMentor(ctx, mentor); err != nil {
 			return err
 		}

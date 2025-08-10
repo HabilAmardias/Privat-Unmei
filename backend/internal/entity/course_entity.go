@@ -78,6 +78,12 @@ type (
 		Search         *string
 		CourseCategory *int
 	}
+	ListCourseParam struct {
+		SeekPaginatedParam
+		Search         *string
+		CourseCategory *int
+		Method         *string
+	}
 	MentorListCourseQuery struct {
 		ID               int
 		Title            string

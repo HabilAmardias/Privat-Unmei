@@ -39,6 +39,12 @@ type (
 		Search         *string `form:"search"`
 		CourseCategory *int    `form:"course_category"`
 	}
+	ListCourseReq struct {
+		SeekPaginatedReq
+		Search         *string `form:"search"`
+		CourseCategory *int    `form:"course_category"`
+		Method         *string `form:"method"`
+	}
 	MentorListCourseRes struct {
 		ID               int      `json:"id"`
 		Title            string   `json:"title"`
