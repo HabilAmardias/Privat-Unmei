@@ -20,6 +20,7 @@ type RouteConfig struct {
 	CourseCategoryHandler *handlers.CourseCategoryHandlerImpl
 	CourseHandler         *handlers.CourseHandlerImpl
 	MentorHandler         *handlers.MentorHandlerImpl
+	CourseRatingHandler   *handlers.CourseRatingHandlerImpl
 	RBACRepository        *repositories.RBACRepository
 	TokenUtil             *utils.JWTUtil
 }
@@ -63,7 +64,7 @@ func (c *RouteConfig) SetupPublicRoute() {
 func (c *RouteConfig) SetupPrivateRoute() {
 	v1 := c.App.Group("/api/v1")
 	v1.Use(middlewares.AuthenticationMiddleware(c.TokenUtil))
-
+	v1.POST("/courses/:id/review", c.CourseRatingHandler.AddReview)
 	v1.GET("/verify/send", c.StudentHandler.SendVerificationEmail)
 	v1.GET("/students", middlewares.AuthorizationMiddleware(
 		constants.ReadAllPermission,

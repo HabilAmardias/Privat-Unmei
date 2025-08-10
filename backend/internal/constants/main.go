@@ -19,6 +19,14 @@ const (
 )
 
 const (
+	PendingMentorStatus = iota + 1
+	PendingPaymentStatus
+	InProgressStatus
+	ConfirmedStatus
+	CanceledStatus
+)
+
+const (
 	AdminRole   = iota + 1 // 1
 	MentorRole             // 2
 	StudentRole            // 3
