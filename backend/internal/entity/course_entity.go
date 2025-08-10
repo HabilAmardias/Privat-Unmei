@@ -101,4 +101,13 @@ type (
 		MentorName  string
 		MentorEmail string
 	}
+	CourseDetailQuery struct {
+		CourseListQuery
+		Description string
+		Topics      *[]CourseTopic
+		Schedules   *[]CourseAvailability
+	}
+	CourseDetailParam struct {
+		ID int
+	}
 )

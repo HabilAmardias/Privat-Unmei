@@ -19,6 +19,55 @@ func CreateTopicRepository(db *sql.DB) *TopicRepositoryImpl {
 	return &TopicRepositoryImpl{db}
 }
 
+func (tr *TopicRepositoryImpl) GetTopicsByCourseID(ctx context.Context, courseID int, topics *[]entity.CourseTopic) error {
+	var driver RepoDriver
+	driver = tr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	SELECT
+		id,
+		course_id,
+		title,
+		description,
+		created_at,
+		updated_at,
+		deleted_at
+	FROM topics
+	WHERE course_id = $1 AND deleted_at IS NULL
+	`
+	rows, err := driver.Query(query, courseID)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to get course topic",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var item entity.CourseTopic
+		if err := rows.Scan(
+			&item.ID,
+			&item.CourseID,
+			&item.Title,
+			&item.Description,
+			&item.CreatedAt,
+			&item.UpdatedAt,
+			&item.DeletedAt,
+		); err != nil {
+			return customerrors.NewError(
+				"failed to get course topic",
+				err,
+				customerrors.DatabaseExecutionError,
+			)
+		}
+		*topics = append(*topics, item)
+	}
+	return nil
+}
+
 func (tr *TopicRepositoryImpl) DeleteTopicsMultipleCourse(ctx context.Context, courseIDs []int) error {
 	var driver RepoDriver
 	driver = tr.DB

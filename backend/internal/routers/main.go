@@ -57,6 +57,7 @@ func (c *RouteConfig) SetupPublicRoute() {
 	v1.GET("/auth/google", c.StudentHandler.GoogleLogin)
 	v1.GET("/auth/google/callback", c.StudentHandler.GoogleLoginCallback)
 	v1.GET("/courses", c.CourseHandler.ListCourse)
+	v1.GET("/courses/:id", c.CourseHandler.CourseDetail)
 }
 
 func (c *RouteConfig) SetupPrivateRoute() {

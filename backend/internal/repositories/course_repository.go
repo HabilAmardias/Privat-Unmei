@@ -18,6 +18,72 @@ func CreateCourseRepository(db *sql.DB) *CourseRepositoryImpl {
 	return &CourseRepositoryImpl{db}
 }
 
+func (cr *CourseRepositoryImpl) CourseDetail(ctx context.Context, query *entity.CourseDetailQuery, courseID int) error {
+	var driver RepoDriver
+	driver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	sqlQuery := `
+		SELECT
+		c.id,
+		c.mentor_id,
+		u.name,
+		u.email,
+		c.title,
+		c.description,
+		c.domicile,
+		c.min_price,
+		c.max_price,
+		c.method,
+		c.min_duration_days,
+		c.max_duration_days,
+		COALESCE(
+			(SELECT STRING_AGG(cc_all.name, ',') 
+			FROM course_category_assignments cca_all 
+			JOIN course_categories cc_all ON cca_all.category_id = cc_all.id 
+			WHERE cca_all.course_id = c.id 
+			AND cca_all.deleted_at IS NULL 
+			AND cc_all.deleted_at IS NULL), 
+			''
+		) AS categories
+	FROM courses c
+	JOIN users u ON u.id = c.mentor_id
+	WHERE c.id = $1 AND c.deleted_at IS NULL AND u.deleted_at IS NULL
+	`
+	log.Println(sqlQuery)
+	row := driver.QueryRow(sqlQuery, courseID)
+	if err := row.Scan(
+		&query.ID,
+		&query.MentorID,
+		&query.MentorName,
+		&query.MentorEmail,
+		&query.Title,
+		&query.Description,
+		&query.Domicile,
+		&query.MinPrice,
+		&query.MaxPrice,
+		&query.Method,
+		&query.MinDurationDays,
+		&query.MaxDurationDays,
+		&query.CourseCategories,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return customerrors.NewError(
+				"course not found",
+				err,
+				customerrors.ItemNotExist,
+			)
+		}
+		return customerrors.NewError(
+			"failed to get course detail",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (cr *CourseRepositoryImpl) ListCourse(
 	ctx context.Context,
 	query *[]entity.CourseListQuery,

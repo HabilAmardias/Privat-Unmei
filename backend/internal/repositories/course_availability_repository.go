@@ -19,6 +19,65 @@ func CreateCourseAvailabilityRepository(db *sql.DB) *CourseAvailabilityRepositor
 	return &CourseAvailabilityRepositoryImpl{db}
 }
 
+func (car *CourseAvailabilityRepositoryImpl) GetAvailabilityByCourseID(ctx context.Context, courseID int, scheds *[]entity.CourseAvailability) error {
+	var driver RepoDriver
+	driver = car.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	SELECT
+		id,
+		course_id,
+		day_of_week,
+		CAST(EXTRACT(HOUR from start_time) AS INT),
+		CAST(EXTRACT(MINUTE from start_time) AS INT),
+		CAST(EXTRACT(SECOND from start_time) AS INT),
+		CAST(EXTRACT(HOUR from end_time) AS INT),
+		CAST(EXTRACT(MINUTE from end_time) AS INT),
+		CAST(EXTRACT(SECOND from end_time) AS INT),
+		created_at,
+		updated_at,
+		deleted_at
+	FROM course_availability
+	WHERE course_id = $1 AND deleted_at IS NULL
+	`
+	rows, err := driver.Query(query, courseID)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to get course schedules",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var item entity.CourseAvailability
+		if err := rows.Scan(
+			&item.ID,
+			&item.CourseID,
+			&item.DayOfWeek,
+			&item.StartTime.Hour,
+			&item.StartTime.Minute,
+			&item.StartTime.Second,
+			&item.EndTime.Hour,
+			&item.EndTime.Minute,
+			&item.EndTime.Second,
+			&item.CreatedAt,
+			&item.UpdatedAt,
+			&item.DeletedAt,
+		); err != nil {
+			return customerrors.NewError(
+				"failed to get course schedules",
+				err,
+				customerrors.DatabaseExecutionError,
+			)
+		}
+		*scheds = append(*scheds, item)
+	}
+	return nil
+}
+
 func (car *CourseAvailabilityRepositoryImpl) DeleteAvailabilityMultipleCourses(ctx context.Context, courseIDs []int) error {
 	var driver RepoDriver
 	driver = car.DB
