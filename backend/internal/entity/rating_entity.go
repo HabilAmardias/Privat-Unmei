@@ -19,4 +19,17 @@ type (
 		Rating    int
 		Feedback  *string
 	}
+	CourseRatingQuery struct {
+		ID          int
+		CourseID    int
+		StudentID   string
+		StudentName string
+		Rating      int
+		Feedback    *string
+		CreatedAt   time.Time
+	}
+	GetCourseRatingParam struct {
+		SeekPaginatedParam
+		CourseID int
+	}
 )

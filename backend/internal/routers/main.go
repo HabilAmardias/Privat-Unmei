@@ -59,12 +59,13 @@ func (c *RouteConfig) SetupPublicRoute() {
 	v1.GET("/auth/google/callback", c.StudentHandler.GoogleLoginCallback)
 	v1.GET("/courses", c.CourseHandler.ListCourse)
 	v1.GET("/courses/:id", c.CourseHandler.CourseDetail)
+	v1.GET("/courses/:id/reviews", c.CourseRatingHandler.GetCourseReview)
 }
 
 func (c *RouteConfig) SetupPrivateRoute() {
 	v1 := c.App.Group("/api/v1")
 	v1.Use(middlewares.AuthenticationMiddleware(c.TokenUtil))
-	v1.POST("/courses/:id/review", c.CourseRatingHandler.AddReview)
+	v1.POST("/courses/:id/reviews", c.CourseRatingHandler.AddReview)
 	v1.GET("/verify/send", c.StudentHandler.SendVerificationEmail)
 	v1.GET("/students", middlewares.AuthorizationMiddleware(
 		constants.ReadAllPermission,
