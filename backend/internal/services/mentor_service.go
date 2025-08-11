@@ -49,7 +49,7 @@ func (ms *MentorServiceImpl) ChangePassword(ctx context.Context, param entity.Me
 		if err := ms.ur.FindByID(ctx, param.ID, user); err != nil {
 			return err
 		}
-		if err := ms.mr.FindByID(ctx, param.ID, mentor); err != nil {
+		if err := ms.mr.FindByID(ctx, param.ID, mentor, false); err != nil {
 			return err
 		}
 		if match := ms.bu.ComparePassword(param.NewPassword, user.Password); match {
@@ -91,7 +91,7 @@ func (ms *MentorServiceImpl) Login(ctx context.Context, param entity.LoginMentor
 			}
 			return err
 		}
-		if err := ms.mr.FindByID(ctx, user.ID, mentor); err != nil {
+		if err := ms.mr.FindByID(ctx, user.ID, mentor, false); err != nil {
 			return err
 		}
 		if match := ms.bu.ComparePassword(param.Password, user.Password); !match {
@@ -132,7 +132,7 @@ func (ms *MentorServiceImpl) DeleteMentor(ctx context.Context, param entity.Dele
 		if err := ms.ur.FindByID(ctx, param.ID, user); err != nil {
 			return err
 		}
-		if err := ms.mr.FindByID(ctx, user.ID, mentor); err != nil {
+		if err := ms.mr.FindByID(ctx, user.ID, mentor, false); err != nil {
 			return err
 		}
 
@@ -183,7 +183,7 @@ func (ms *MentorServiceImpl) UpdateMentorProfile(ctx context.Context, param enti
 		if err := ms.ur.FindByID(ctx, param.ID, user); err != nil {
 			return err
 		}
-		if err := ms.mr.FindByID(ctx, user.ID, mentor); err != nil {
+		if err := ms.mr.FindByID(ctx, user.ID, mentor, false); err != nil {
 			return err
 		}
 		userQuery.Name = param.Name
@@ -244,7 +244,7 @@ func (ms *MentorServiceImpl) UpdateMentorForAdmin(ctx context.Context, param ent
 		if err := ms.ur.FindByID(ctx, param.ID, user); err != nil {
 			return err
 		}
-		if err := ms.mr.FindByID(ctx, user.ID, mentor); err != nil {
+		if err := ms.mr.FindByID(ctx, user.ID, mentor, false); err != nil {
 			return err
 		}
 		query.WhatsappNumber = param.WhatsappNumber

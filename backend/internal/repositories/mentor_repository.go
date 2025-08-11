@@ -116,7 +116,7 @@ func (mr *MentorRepositoryImpl) GetMentorList(ctx context.Context, mentors *[]en
 	return nil
 }
 
-func (mr *MentorRepositoryImpl) FindByID(ctx context.Context, id string, mentor *entity.Mentor) error {
+func (mr *MentorRepositoryImpl) FindByID(ctx context.Context, id string, mentor *entity.Mentor, lock bool) error {
 	var driver RepoDriver
 	driver = mr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
@@ -139,6 +139,11 @@ func (mr *MentorRepositoryImpl) FindByID(ctx context.Context, id string, mentor 
 	FROM mentors
 	WHERE id = $1 and deleted_at IS NULL
 	`
+	if lock {
+		query += `
+		FOR UPDATE
+		`
+	}
 	row := driver.QueryRow(
 		query,
 		id,
@@ -275,10 +280,23 @@ func (mr *MentorRepositoryImpl) UpdateMentor(ctx context.Context, id string, que
 		degree = COALESCE($4, degree),
 		major = COALESCE($5, major),
 		campus = COALESCE($6, campus),
+		total_rating = COALESCE($7, total_rating),
+		rating_count = COALESCE($8, rating_count),
 		updated_at = NOW()
-	WHERE id = $7 AND deleted_at IS NULL;
+	WHERE id = $9 AND deleted_at IS NULL;
 	`
-	_, err := driver.Exec(query, queryEntity.Resume, queryEntity.YearsOfExperience, queryEntity.WhatsappNumber, queryEntity.Degree, queryEntity.Major, queryEntity.Campus, id)
+	_, err := driver.Exec(
+		query,
+		queryEntity.Resume,
+		queryEntity.YearsOfExperience,
+		queryEntity.WhatsappNumber,
+		queryEntity.Degree,
+		queryEntity.Major,
+		queryEntity.Campus,
+		queryEntity.TotalRating,
+		queryEntity.RatingCount,
+		id,
+	)
 	if err != nil {
 		return customerrors.NewError("failed to update mentor", err, customerrors.DatabaseExecutionError)
 	}

@@ -26,6 +26,38 @@ func CreateCourseService(
 	return &CourseServiceImpl{car, cr, ccr, tr, tmr}
 }
 
+func (cs *CourseServiceImpl) CourseDetail(ctx context.Context, param entity.CourseDetailParam) (*entity.CourseDetailQuery, error) {
+	query := new(entity.CourseDetailQuery)
+	topics := new([]entity.CourseTopic)
+	scheds := new([]entity.CourseAvailability)
+	if err := cs.cr.CourseDetail(ctx, query, param.ID); err != nil {
+		return nil, err
+	}
+	if err := cs.tr.GetTopicsByCourseID(ctx, param.ID, topics); err != nil {
+		return nil, err
+	}
+	if len(*topics) == 0 {
+		return nil, customerrors.NewError(
+			"no course topic found",
+			errors.New("the course does not have a topic"),
+			customerrors.ItemNotExist,
+		)
+	}
+	query.Topics = topics
+	if err := cs.car.GetAvailabilityByCourseID(ctx, param.ID, scheds); err != nil {
+		return nil, err
+	}
+	if len(*scheds) == 0 {
+		return nil, customerrors.NewError(
+			"schedule availability for this course does not exist",
+			errors.New("schedule availability for this course does not exist"),
+			customerrors.ItemNotExist,
+		)
+	}
+	query.Schedules = scheds
+	return query, nil
+}
+
 func (cs *CourseServiceImpl) ListCourse(ctx context.Context, param entity.ListCourseParam) (*[]entity.CourseListQuery, *int64, error) {
 	query := new([]entity.CourseListQuery)
 	totalRow := new(int64)

@@ -22,6 +22,67 @@ func CreateCourseHandler(cs *services.CourseServiceImpl) *CourseHandlerImpl {
 	return &CourseHandlerImpl{cs}
 }
 
+func (ch *CourseHandlerImpl) CourseDetail(ctx *gin.Context) {
+	idStr := ctx.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		ctx.Error(customerrors.NewError(
+			"invalid course",
+			err,
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	param := entity.CourseDetailParam{
+		ID: id,
+	}
+	res, err := ch.cs.CourseDetail(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	entry := dtos.CourseDetailRes{
+		CourseListRes: dtos.CourseListRes{
+			MentorListCourseRes: dtos.MentorListCourseRes{
+				ID:               res.ID,
+				Title:            res.Title,
+				Domicile:         res.Domicile,
+				Method:           res.Method,
+				MinPrice:         res.MinPrice,
+				MaxPrice:         res.MaxPrice,
+				MinDurationDays:  res.MinDurationDays,
+				MaxDurationDays:  res.MaxDurationDays,
+				CourseCategories: strings.Split(res.CourseCategories, ","),
+			},
+			MentorID:    res.MentorID,
+			MentorName:  res.MentorName,
+			MentorEmail: res.MentorEmail,
+		},
+		Description:  res.Description,
+		Topics:       []dtos.CourseTopicRes{},
+		Availability: []dtos.CourseAvailabilityRes{},
+	}
+	for _, topic := range *res.Topics {
+		entry.Topics = append(entry.Topics, dtos.CourseTopicRes{
+			Title:       topic.Title,
+			Description: topic.Description,
+		})
+	}
+	for _, av := range *res.Schedules {
+		startTime := dtos.TimeOnly(av.StartTime)
+		endTime := dtos.TimeOnly(av.EndTime)
+		entry.Availability = append(entry.Availability, dtos.CourseAvailabilityRes{
+			DayOfWeek: av.DayOfWeek,
+			StartTime: startTime,
+			EndTime:   endTime,
+		})
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data:    entry,
+	})
+}
+
 func (ch *CourseHandlerImpl) ListCourse(ctx *gin.Context) {
 	var req dtos.ListCourseReq
 	if err := ctx.ShouldBind(&req); err != nil {

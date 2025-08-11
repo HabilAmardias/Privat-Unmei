@@ -20,6 +20,7 @@ type RouteConfig struct {
 	CourseCategoryHandler *handlers.CourseCategoryHandlerImpl
 	CourseHandler         *handlers.CourseHandlerImpl
 	MentorHandler         *handlers.MentorHandlerImpl
+	CourseRatingHandler   *handlers.CourseRatingHandlerImpl
 	RBACRepository        *repositories.RBACRepository
 	TokenUtil             *utils.JWTUtil
 }
@@ -57,12 +58,13 @@ func (c *RouteConfig) SetupPublicRoute() {
 	v1.GET("/auth/google", c.StudentHandler.GoogleLogin)
 	v1.GET("/auth/google/callback", c.StudentHandler.GoogleLoginCallback)
 	v1.GET("/courses", c.CourseHandler.ListCourse)
+	v1.GET("/courses/:id", c.CourseHandler.CourseDetail)
 }
 
 func (c *RouteConfig) SetupPrivateRoute() {
 	v1 := c.App.Group("/api/v1")
 	v1.Use(middlewares.AuthenticationMiddleware(c.TokenUtil))
-
+	v1.POST("/courses/:id/review", c.CourseRatingHandler.AddReview)
 	v1.GET("/verify/send", c.StudentHandler.SendVerificationEmail)
 	v1.GET("/students", middlewares.AuthorizationMiddleware(
 		constants.ReadAllPermission,
