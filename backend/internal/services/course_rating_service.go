@@ -12,6 +12,7 @@ type CourseRatingServiceImpl struct {
 	cr  *repositories.CourseRepositoryImpl
 	crr *repositories.CourseRatingRepositoryImpl
 	cor *repositories.CourseRequestRepositoryImpl
+	mr  *repositories.MentorRepositoryImpl
 	tmr *repositories.TransactionManagerRepositories
 }
 
@@ -19,15 +20,18 @@ func CreateCourseRatingService(
 	cr *repositories.CourseRepositoryImpl,
 	crr *repositories.CourseRatingRepositoryImpl,
 	cor *repositories.CourseRequestRepositoryImpl,
+	mr *repositories.MentorRepositoryImpl,
 	tmr *repositories.TransactionManagerRepositories,
 ) *CourseRatingServiceImpl {
-	return &CourseRatingServiceImpl{cr, crr, cor, tmr}
+	return &CourseRatingServiceImpl{cr, crr, cor, mr, tmr}
 }
 
 func (crs *CourseRatingServiceImpl) AddReview(ctx context.Context, param entity.CreateRatingParam) (int, error) {
 	course := new(entity.Course)
 	rating := new(entity.CourseRating)
 	orders := new([]entity.CourseOrder)
+	mentor := new(entity.Mentor)
+	updateMentor := new(entity.UpdateMentorQuery)
 
 	if err := crs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := crs.cr.FindByID(ctx, param.CourseID, course); err != nil {
@@ -54,6 +58,14 @@ func (crs *CourseRatingServiceImpl) AddReview(ctx context.Context, param entity.
 				errors.New("user already reviewed the course"),
 				customerrors.ItemAlreadyExist,
 			)
+		}
+		if err := crs.mr.FindByID(ctx, course.MentorID, mentor, true); err != nil {
+			return err
+		}
+		*updateMentor.RatingCount = mentor.RatingCount + 1
+		*updateMentor.TotalRating = float64(mentor.TotalRating) + float64(param.Rating)
+		if err := crs.mr.UpdateMentor(ctx, course.MentorID, updateMentor); err != nil {
+			return err
 		}
 		if err := crs.crr.CreateReview(ctx, param.CourseID, param.StudentID, param.Rating, param.Feedback, rating); err != nil {
 			return err

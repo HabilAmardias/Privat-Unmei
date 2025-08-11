@@ -46,6 +46,8 @@ type (
 		Campus            *string
 	}
 	UpdateMentorQuery struct {
+		TotalRating       *float64
+		RatingCount       *int
 		Resume            *string
 		YearsOfExperience *int
 		WhatsappNumber    *string
