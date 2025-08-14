@@ -95,3 +95,7 @@ func ValidateFile(headerFile *multipart.FileHeader, fileSizeThresh int64, fileTy
 	}
 	return file, nil
 }
+
+func ValidateMethod(method string) bool {
+	return method == "offline" || method == "online" || method == "hybrid"
+}

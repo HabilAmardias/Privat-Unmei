@@ -30,7 +30,7 @@ func (crs *CourseRatingServiceImpl) GetCourseReview(ctx context.Context, param e
 	reviews := new([]entity.CourseRatingQuery)
 	totalRow := new(int64)
 	course := new(entity.Course)
-	if err := crs.cr.FindByID(ctx, param.CourseID, course); err != nil {
+	if err := crs.cr.FindByID(ctx, param.CourseID, course, false); err != nil {
 		return nil, nil, err
 	}
 	if err := crs.crr.GetCourseReviews(ctx, param.CourseID, param.LastID, param.Limit, totalRow, reviews); err != nil {
@@ -47,7 +47,7 @@ func (crs *CourseRatingServiceImpl) AddReview(ctx context.Context, param entity.
 	updateMentor := new(entity.UpdateMentorQuery)
 
 	if err := crs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		if err := crs.cr.FindByID(ctx, param.CourseID, course); err != nil {
+		if err := crs.cr.FindByID(ctx, param.CourseID, course, false); err != nil {
 			return err
 		}
 		if err := crs.cor.FindCompletedByStudentIDAndCourseID(ctx, param.StudentID, param.CourseID, orders); err != nil {

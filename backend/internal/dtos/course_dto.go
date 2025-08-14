@@ -6,14 +6,23 @@ type (
 		Minute int `json:"minute" binding:"omitempty,min=0,max=60"`
 		Second int `json:"second" binding:"omitempty,min=0,max=60"`
 	}
-	CourseAvailabilityRes struct {
+	CourseAvailabilityReq struct {
 		DayOfWeek string   `json:"day_of_week" binding:"required"`
 		StartTime TimeOnly `json:"start_time" binding:"required"`
 		EndTime   TimeOnly `json:"end_time" binding:"required"`
 	}
-	CourseTopicRes struct {
+	CourseAvailabilityRes struct {
+		DayOfWeek string   `json:"day_of_week"`
+		StartTime TimeOnly `json:"start_time"`
+		EndTime   TimeOnly `json:"end_time"`
+	}
+	CourseTopicReq struct {
 		Title       string `json:"title" binding:"required"`
 		Description string `json:"description" binding:"required"`
+	}
+	CourseTopicRes struct {
+		Title       string `json:"title"`
+		Description string `json:"description"`
 	}
 	CreateCourseReq struct {
 		Title              string                  `json:"title" binding:"required"`
@@ -24,8 +33,8 @@ type (
 		Method             string                  `json:"method" binding:"required"`
 		MinDuration        int                     `json:"min_duration_days" binding:"required,min=1"`
 		MaxDuration        int                     `json:"max_duration_days" binding:"required,min=1"`
-		CourseAvailability []CourseAvailabilityRes `json:"available_schedules" binding:"dive"`
-		Topics             []CourseTopicRes        `json:"course_topics" binding:"dive"`
+		CourseAvailability []CourseAvailabilityReq `json:"available_schedules" binding:"dive"`
+		Topics             []CourseTopicReq        `json:"course_topics" binding:"dive"`
 		Categories         []int                   `json:"course_categories"`
 	}
 	CreateCourseRes struct {
@@ -67,5 +76,21 @@ type (
 		Description  string                  `json:"description"`
 		Topics       []CourseTopicRes        `json:"topics"`
 		Availability []CourseAvailabilityRes `json:"course_availability"`
+	}
+	UpdateCourseReq struct {
+		Title            *string                 `json:"title"`
+		Description      *string                 `json:"description"`
+		Domicile         *string                 `json:"domicile"`
+		MinPrice         *float64                `json:"min_price" binding:"omitempty,min=1"`
+		MaxPrice         *float64                `json:"max_price" binding:"omitempty,min=1"`
+		Method           *string                 `json:"method"`
+		MinDurationDays  *int                    `json:"min_duration_days" binding:"omitempty,min=1"`
+		MaxDurationDays  *int                    `json:"max_duration_days" binding:"omitempty,min=1"`
+		CourseSchedule   []CourseAvailabilityReq `json:"course_availabilities"`
+		CourseTopic      []CourseTopicReq        `json:"course_topics"`
+		CourseCategories []int                   `json:"course_categories"`
+	}
+	UpdateCourseRes struct {
+		ID int `json:"id"`
 	}
 )

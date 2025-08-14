@@ -18,6 +18,47 @@ func CreateCourseRepository(db *sql.DB) *CourseRepositoryImpl {
 	return &CourseRepositoryImpl{db}
 }
 
+func (cr *CourseRepositoryImpl) UpdateCourse(ctx context.Context, courseID int, updateQuery *entity.UpdateCourseQuery) error {
+	var driver RepoDriver
+	driver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE courses
+	SET
+		title = COALESCE($1, title),
+		description = COALESCE($2, description),
+		domicile = COALESCE($3, domicile),
+		min_price = COALESCE($4, min_price),
+		max_price = COALESCE($5, max_price),
+		method = COALESCE($6, method),
+		min_duration_days = COALESCE($7, min_duration_days),
+		max_duration_days = COALESCE($8, max_duration_days),
+		updated_at = NOW()
+	WHERE id = $9 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(
+		query,
+		updateQuery.Title,
+		updateQuery.Description,
+		updateQuery.Domicile,
+		updateQuery.MinPrice,
+		updateQuery.MaxPrice,
+		updateQuery.Method,
+		updateQuery.MinDurationDays,
+		updateQuery.MaxDurationDays,
+	)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to update course",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (cr *CourseRepositoryImpl) CourseDetail(ctx context.Context, query *entity.CourseDetailQuery, courseID int) error {
 	var driver RepoDriver
 	driver = cr.DB
@@ -455,7 +496,7 @@ func (cr *CourseRepositoryImpl) MentorListCourse(
 	return nil
 }
 
-func (cr *CourseRepositoryImpl) FindByID(ctx context.Context, id int, course *entity.Course) error {
+func (cr *CourseRepositoryImpl) FindByID(ctx context.Context, id int, course *entity.Course, lock bool) error {
 	var driver RepoDriver
 	driver = cr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
@@ -480,6 +521,11 @@ func (cr *CourseRepositoryImpl) FindByID(ctx context.Context, id int, course *en
 	FROM courses
 	WHERE id = $1 and deleted_at IS NULL
 	`
+	if lock {
+		query += `
+		FOR UPDATE
+		`
+	}
 	row := driver.QueryRow(query, id)
 	if err := row.Scan(
 		&course.ID,

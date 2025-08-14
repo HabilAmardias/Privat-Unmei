@@ -110,4 +110,22 @@ type (
 	CourseDetailParam struct {
 		ID int
 	}
+	UpdateCourseQuery struct {
+		Title           *string
+		Description     *string
+		Domicile        *string
+		MinPrice        *float64
+		MaxPrice        *float64
+		Method          *string
+		MinDurationDays *int
+		MaxDurationDays *int
+	}
+	UpdateCourseParam struct {
+		MentorID string
+		CourseID int
+		UpdateCourseQuery
+		CourseSchedule   []CreateSchedule
+		CourseTopic      []CreateTopic
+		CourseCategories []int
+	}
 )
