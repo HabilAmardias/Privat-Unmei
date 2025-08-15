@@ -14,6 +14,7 @@ type CourseServiceImpl struct {
 	ccr *repositories.CourseCategoryRepositoryImpl
 	tr  *repositories.TopicRepositoryImpl
 	tmr *repositories.TransactionManagerRepositories
+	cor *repositories.CourseRequestRepositoryImpl
 }
 
 func CreateCourseService(
@@ -22,8 +23,110 @@ func CreateCourseService(
 	ccr *repositories.CourseCategoryRepositoryImpl,
 	tr *repositories.TopicRepositoryImpl,
 	tmr *repositories.TransactionManagerRepositories,
+	cor *repositories.CourseRequestRepositoryImpl,
 ) *CourseServiceImpl {
-	return &CourseServiceImpl{car, cr, ccr, tr, tmr}
+	return &CourseServiceImpl{car, cr, ccr, tr, tmr, cor}
+}
+
+func (cs *CourseServiceImpl) UpdateCourse(ctx context.Context, param entity.UpdateCourseParam) error {
+	updateCourseQuery := new(entity.UpdateCourseQuery)
+	course := new(entity.Course)
+	scheds := new([]entity.CourseAvailability)
+	orders := new([]entity.CourseOrder)
+	categories := new([]entity.CourseCategory)
+	return cs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := cs.cr.FindByID(ctx, param.CourseID, course, true); err != nil {
+			return err
+		}
+		if course.MentorID != param.MentorID {
+			return customerrors.NewError(
+				"unauthorized access",
+				errors.New("different mentor"),
+				customerrors.InvalidAction,
+			)
+		}
+		if err := cs.cor.FindOngoingByCourseID(ctx, param.CourseID, orders); err != nil {
+			return err
+		}
+		if len(*orders) > 0 {
+			return customerrors.NewError(
+				"there is an ongoing order for this course",
+				errors.New("there is an ongoing order for this course"),
+				customerrors.InvalidAction,
+			)
+		}
+		if len(param.CourseTopic) > 0 {
+			if err := cs.tr.DeleteTopics(ctx, param.CourseID); err != nil {
+				return err
+			}
+			newTopics := new([]entity.CourseTopic)
+			for _, topic := range param.CourseTopic {
+				*newTopics = append(*newTopics, entity.CourseTopic{
+					CourseID:    course.ID,
+					Title:       topic.Title,
+					Description: topic.Description,
+				})
+			}
+			if err := cs.tr.CreateTopics(ctx, newTopics); err != nil {
+				return err
+			}
+		}
+		if len(param.CourseCategories) > 0 {
+			if err := cs.ccr.UnassignCategories(ctx, param.CourseID); err != nil {
+				return err
+			}
+			if err := cs.ccr.FindByMultipleIDs(ctx, param.CourseCategories, categories); err != nil {
+				return err
+			}
+			if len(*categories) != len(param.CourseCategories) {
+				return customerrors.NewError(
+					"invalid course categories",
+					errors.New("number of categories and number of ids does not match"),
+					customerrors.InvalidAction,
+				)
+			}
+			if err := cs.ccr.AssignCategories(ctx, course.ID, param.CourseCategories); err != nil {
+				return err
+			}
+		}
+		if len(param.CourseSchedule) > 0 {
+			if err := cs.car.DeleteAvailability(ctx, param.CourseID); err != nil {
+				return err
+			}
+			for _, schedule := range param.CourseSchedule {
+				if schedule.EndTime.Hour < schedule.StartTime.Hour {
+					return customerrors.NewError(
+						"invalid schedule",
+						errors.New("invalid schedule"),
+						customerrors.InvalidAction,
+					)
+				}
+				*scheds = append(*scheds, entity.CourseAvailability{
+					CourseID:  course.ID,
+					DayOfWeek: schedule.DayOfWeek,
+					StartTime: schedule.StartTime,
+					EndTime:   schedule.EndTime,
+				})
+			}
+			if err := cs.car.CreateAvailability(ctx, scheds); err != nil {
+				return err
+			}
+		}
+
+		updateCourseQuery.Title = param.Title
+		updateCourseQuery.Description = param.Description
+		updateCourseQuery.Domicile = param.Description
+		updateCourseQuery.MaxDurationDays = param.MaxDurationDays
+		updateCourseQuery.MaxPrice = param.MaxPrice
+		updateCourseQuery.Method = param.Method
+		updateCourseQuery.MinDurationDays = param.MinDurationDays
+		updateCourseQuery.MinPrice = param.MinPrice
+
+		if err := cs.cr.UpdateCourse(ctx, param.CourseID, updateCourseQuery); err != nil {
+			return err
+		}
+		return nil
+	})
 }
 
 func (cs *CourseServiceImpl) CourseDetail(ctx context.Context, param entity.CourseDetailParam) (*entity.CourseDetailQuery, error) {
@@ -87,7 +190,7 @@ func (cs *CourseServiceImpl) MentorListCourse(ctx context.Context, param entity.
 func (cs *CourseServiceImpl) DeleteCourse(ctx context.Context, param entity.DeleteCourseParam) error {
 	course := new(entity.Course)
 	return cs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		if err := cs.cr.FindByID(ctx, param.CourseID, course); err != nil {
+		if err := cs.cr.FindByID(ctx, param.CourseID, course, false); err != nil {
 			return err
 		}
 		if param.MentorID != course.MentorID {

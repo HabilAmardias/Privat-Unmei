@@ -22,6 +22,78 @@ func CreateCourseHandler(cs *services.CourseServiceImpl) *CourseHandlerImpl {
 	return &CourseHandlerImpl{cs}
 }
 
+func (ch *CourseHandlerImpl) UpdateCourse(ctx *gin.Context) {
+	idStr := ctx.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		ctx.Error(customerrors.NewError(
+			"invalid course",
+			err,
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	var req dtos.UpdateCourseReq
+	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	if req.Method != nil && !ValidateMethod(*req.Method) {
+		ctx.Error(customerrors.NewError(
+			"invalid course method",
+			errors.New("invalid course method"),
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	param := entity.UpdateCourseParam{
+		MentorID: claim.Subject,
+		CourseID: id,
+		UpdateCourseQuery: entity.UpdateCourseQuery{
+			Title:           req.Title,
+			Description:     req.Description,
+			Domicile:        req.Domicile,
+			MinPrice:        req.MinPrice,
+			MaxPrice:        req.MaxPrice,
+			Method:          req.Method,
+			MinDurationDays: req.MinDurationDays,
+			MaxDurationDays: req.MaxDurationDays,
+		},
+		CourseSchedule:   []entity.CreateSchedule{},
+		CourseTopic:      []entity.CreateTopic{},
+		CourseCategories: req.CourseCategories,
+	}
+	if len(req.CourseSchedule) > 0 {
+		for _, sched := range req.CourseSchedule {
+			param.CourseSchedule = append(param.CourseSchedule, entity.CreateSchedule{
+				DayOfWeek: sched.DayOfWeek,
+				StartTime: entity.TimeOnly(sched.StartTime),
+				EndTime:   entity.TimeOnly(sched.EndTime),
+			})
+		}
+	}
+	if len(req.CourseTopic) > 0 {
+		for _, t := range req.CourseTopic {
+			param.CourseTopic = append(param.CourseTopic, entity.CreateTopic(t))
+		}
+	}
+	if err := ch.cs.UpdateCourse(ctx, param); err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.UpdateCourseRes{
+			ID: id,
+		},
+	})
+}
+
 func (ch *CourseHandlerImpl) CourseDetail(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -334,6 +406,14 @@ func (ch *CourseHandlerImpl) AddNewCourse(ctx *gin.Context) {
 	var req dtos.CreateCourseReq
 	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
 		ctx.Error(err)
+		return
+	}
+	if !ValidateMethod(req.Method) {
+		ctx.Error(customerrors.NewError(
+			"invalid course method",
+			errors.New("invalid course method"),
+			customerrors.InvalidAction,
+		))
 		return
 	}
 	if len(req.CourseAvailability) <= 0 {

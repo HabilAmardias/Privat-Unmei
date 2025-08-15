@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/entity"
@@ -17,6 +18,63 @@ type CourseRatingHandlerImpl struct {
 
 func CreateCourseRatingHandler(crs *services.CourseRatingServiceImpl) *CourseRatingHandlerImpl {
 	return &CourseRatingHandlerImpl{crs}
+}
+
+func (crh *CourseRatingHandlerImpl) GetCourseReview(ctx *gin.Context) {
+	courseIDStr := ctx.Param("id")
+	courseID, err := strconv.Atoi(courseIDStr)
+	if err != nil {
+		ctx.Error(customerrors.NewError(
+			"invalid course credential",
+			err,
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	var req dtos.CourseRatingReq
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.GetCourseRatingParam{
+		SeekPaginatedParam: entity.SeekPaginatedParam{
+			Limit:  req.Limit,
+			LastID: req.LastID,
+		},
+		CourseID: courseID,
+	}
+	if req.Limit <= 0 {
+		param.Limit = constants.DefaultLimit
+	}
+	if req.LastID <= 0 {
+		param.LastID = constants.DefaultLastID
+	}
+	res, totalRow, err := crh.crs.GetCourseReview(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	entries := []dtos.CourseRatingRes{}
+	for _, course := range *res {
+		entries = append(entries, dtos.CourseRatingRes(course))
+	}
+	var lastID int
+	if len(entries) > 0 {
+		lastID = entries[len(entries)-1].ID
+	} else {
+		lastID = 0
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.SeekPaginatedResponse[dtos.CourseRatingRes]{
+			Entries: entries,
+			PageInfo: dtos.SeekPaginatedInfo{
+				LastID:   lastID,
+				Limit:    param.Limit,
+				TotalRow: *totalRow,
+			},
+		},
+	})
 }
 
 func (crh *CourseRatingHandlerImpl) AddReview(ctx *gin.Context) {
