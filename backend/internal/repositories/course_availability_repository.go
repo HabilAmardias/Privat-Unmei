@@ -11,15 +11,15 @@ import (
 	"github.com/lib/pq"
 )
 
-type CourseAvailabilityRepositoryImpl struct {
+type MentorAvailabilityRepositoryImpl struct {
 	DB *sql.DB
 }
 
-func CreateCourseAvailabilityRepository(db *sql.DB) *CourseAvailabilityRepositoryImpl {
-	return &CourseAvailabilityRepositoryImpl{db}
+func CreateCourseAvailabilityRepository(db *sql.DB) *MentorAvailabilityRepositoryImpl {
+	return &MentorAvailabilityRepositoryImpl{db}
 }
 
-func (car *CourseAvailabilityRepositoryImpl) GetAvailabilityByCourseID(ctx context.Context, courseID int, scheds *[]entity.CourseAvailability) error {
+func (car *MentorAvailabilityRepositoryImpl) GetAvailabilityByCourseID(ctx context.Context, courseID int, scheds *[]entity.MentorAvailability) error {
 	var driver RepoDriver
 	driver = car.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
@@ -39,7 +39,7 @@ func (car *CourseAvailabilityRepositoryImpl) GetAvailabilityByCourseID(ctx conte
 		created_at,
 		updated_at,
 		deleted_at
-	FROM course_availability
+	FROM mentor_availability
 	WHERE course_id = $1 AND deleted_at IS NULL
 	`
 	rows, err := driver.Query(query, courseID)
@@ -52,7 +52,7 @@ func (car *CourseAvailabilityRepositoryImpl) GetAvailabilityByCourseID(ctx conte
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var item entity.CourseAvailability
+		var item entity.MentorAvailability
 		if err := rows.Scan(
 			&item.ID,
 			&item.CourseID,
@@ -78,14 +78,14 @@ func (car *CourseAvailabilityRepositoryImpl) GetAvailabilityByCourseID(ctx conte
 	return nil
 }
 
-func (car *CourseAvailabilityRepositoryImpl) DeleteAvailabilityMultipleCourses(ctx context.Context, courseIDs []int) error {
+func (car *MentorAvailabilityRepositoryImpl) DeleteAvailabilityMultipleCourses(ctx context.Context, courseIDs []int) error {
 	var driver RepoDriver
 	driver = car.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
 	}
 	query := `
-	UPDATE course_availability
+	UPDATE mentor_availability
 	SET deleted_at = NOW(), updated_at = NOW()
 	WHERE course_id = ANY($1) AND deleted_at IS NULL
 	`
@@ -100,14 +100,14 @@ func (car *CourseAvailabilityRepositoryImpl) DeleteAvailabilityMultipleCourses(c
 	return nil
 }
 
-func (car *CourseAvailabilityRepositoryImpl) DeleteAvailability(ctx context.Context, courseID int) error {
+func (car *MentorAvailabilityRepositoryImpl) DeleteAvailability(ctx context.Context, courseID int) error {
 	var driver RepoDriver
 	driver = car.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
 	}
 	query := `
-	UPDATE course_availability
+	UPDATE mentor_availability
 	SET deleted_at = NOW(), updated_at = NOW()
 	WHERE course_id = $1 AND deleted_at IS NULL
 	`
@@ -122,14 +122,14 @@ func (car *CourseAvailabilityRepositoryImpl) DeleteAvailability(ctx context.Cont
 	return nil
 }
 
-func (car *CourseAvailabilityRepositoryImpl) CreateAvailability(ctx context.Context, schedules *[]entity.CourseAvailability) error {
+func (car *MentorAvailabilityRepositoryImpl) CreateAvailability(ctx context.Context, schedules *[]entity.MentorAvailability) error {
 	var driver RepoDriver
 	driver = car.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
 	}
 	query := `
-	INSERT INTO course_availability (course_id, day_of_week, start_time, end_time)
+	INSERT INTO mentor_availability (course_id, day_of_week, start_time, end_time)
 	VALUES
 	`
 	args := []any{}

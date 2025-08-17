@@ -64,18 +64,8 @@ func (ch *CourseHandlerImpl) UpdateCourse(ctx *gin.Context) {
 			MinDurationDays: req.MinDurationDays,
 			MaxDurationDays: req.MaxDurationDays,
 		},
-		CourseSchedule:   []entity.CreateSchedule{},
 		CourseTopic:      []entity.CreateTopic{},
 		CourseCategories: req.CourseCategories,
-	}
-	if len(req.CourseSchedule) > 0 {
-		for _, sched := range req.CourseSchedule {
-			param.CourseSchedule = append(param.CourseSchedule, entity.CreateSchedule{
-				DayOfWeek: sched.DayOfWeek,
-				StartTime: entity.TimeOnly(sched.StartTime),
-				EndTime:   entity.TimeOnly(sched.EndTime),
-			})
-		}
 	}
 	if len(req.CourseTopic) > 0 {
 		for _, t := range req.CourseTopic {
@@ -130,23 +120,13 @@ func (ch *CourseHandlerImpl) CourseDetail(ctx *gin.Context) {
 			MentorName:  res.MentorName,
 			MentorEmail: res.MentorEmail,
 		},
-		Description:  res.Description,
-		Topics:       []dtos.CourseTopicRes{},
-		Availability: []dtos.CourseAvailabilityRes{},
+		Description: res.Description,
+		Topics:      []dtos.CourseTopicRes{},
 	}
 	for _, topic := range *res.Topics {
 		entry.Topics = append(entry.Topics, dtos.CourseTopicRes{
 			Title:       topic.Title,
 			Description: topic.Description,
-		})
-	}
-	for _, av := range *res.Schedules {
-		startTime := dtos.TimeOnly(av.StartTime)
-		endTime := dtos.TimeOnly(av.EndTime)
-		entry.Availability = append(entry.Availability, dtos.CourseAvailabilityRes{
-			DayOfWeek: av.DayOfWeek,
-			StartTime: startTime,
-			EndTime:   endTime,
 		})
 	}
 	ctx.JSON(http.StatusOK, dtos.Response{
@@ -416,14 +396,6 @@ func (ch *CourseHandlerImpl) AddNewCourse(ctx *gin.Context) {
 		))
 		return
 	}
-	if len(req.CourseAvailability) <= 0 {
-		ctx.Error(customerrors.NewError(
-			"mentor should insert their schedule",
-			errors.New("mentor should insert their schedule"),
-			customerrors.InvalidAction,
-		))
-		return
-	}
 	if len(req.Topics) <= 0 {
 		ctx.Error(customerrors.NewError(
 			"mentor should enter course topic at least one",
@@ -443,31 +415,20 @@ func (ch *CourseHandlerImpl) AddNewCourse(ctx *gin.Context) {
 		return
 	}
 	param := entity.CreateCourseParam{
-		MentorID:           claim.Subject,
-		Title:              req.Title,
-		Description:        req.Description,
-		Domicile:           req.Domicile,
-		MinPrice:           req.MinPrice,
-		MaxPrice:           req.MaxPrice,
-		Method:             req.Method,
-		MinDuration:        req.MinDuration,
-		MaxDuration:        req.MaxDuration,
-		CourseAvailability: []entity.CreateSchedule{},
-		Topics:             []entity.CreateTopic{},
-		Categories:         req.Categories,
+		MentorID:    claim.Subject,
+		Title:       req.Title,
+		Description: req.Description,
+		Domicile:    req.Domicile,
+		MinPrice:    req.MinPrice,
+		MaxPrice:    req.MaxPrice,
+		Method:      req.Method,
+		MinDuration: req.MinDuration,
+		MaxDuration: req.MaxDuration,
+		Topics:      []entity.CreateTopic{},
+		Categories:  req.Categories,
 	}
 	for _, topic := range req.Topics {
 		param.Topics = append(param.Topics, entity.CreateTopic(topic))
-	}
-	for _, schedule := range req.CourseAvailability {
-		param.CourseAvailability = append(
-			param.CourseAvailability,
-			entity.CreateSchedule{
-				DayOfWeek: schedule.DayOfWeek,
-				StartTime: entity.TimeOnly(schedule.StartTime),
-				EndTime:   entity.TimeOnly(schedule.EndTime),
-			},
-		)
 	}
 	courseID, err := ch.cs.CreateCourse(ctx, param)
 	if err != nil {

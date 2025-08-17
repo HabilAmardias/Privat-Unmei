@@ -19,7 +19,7 @@ func Bootstrap(db *sql.DB, app *gin.Engine) {
 	transactionManager := repositories.CreateTransactionManager(db)
 	rbacRepo := repositories.CreateRBACRepository(db)
 	courseCategoryRepo := repositories.CreateCourseCategoryRepository(db)
-	courseAvailabilityRepo := repositories.CreateCourseAvailabilityRepository(db)
+	mentorAvailabilityRepo := repositories.CreateCourseAvailabilityRepository(db)
 	courseRepo := repositories.CreateCourseRepository(db)
 	topicRepo := repositories.CreateTopicRepository(db)
 	courseRequestRepo := repositories.CreateCourseRequestRepository(db)
@@ -31,11 +31,11 @@ func Bootstrap(db *sql.DB, app *gin.Engine) {
 	jwtUtil := utils.CreateJWTUtil()
 	googleUtil := utils.CreateGoogleUtil()
 
-	mentorService := services.CreateMentorService(transactionManager, userRepo, mentorRepo, topicRepo, courseCategoryRepo, courseAvailabilityRepo, courseRepo, bcryptUtil, jwtUtil, cloudinaryUtil, gomailUtil)
+	mentorService := services.CreateMentorService(transactionManager, userRepo, mentorRepo, topicRepo, courseCategoryRepo, mentorAvailabilityRepo, courseRepo, bcryptUtil, jwtUtil, cloudinaryUtil, gomailUtil)
 	adminService := services.CreateAdminService(userRepo, adminRepo, studentRepo, mentorRepo, transactionManager, cloudinaryUtil, bcryptUtil, jwtUtil, gomailUtil)
 	studentService := services.CreateStudentService(userRepo, studentRepo, transactionManager, bcryptUtil, gomailUtil, cloudinaryUtil, jwtUtil, googleUtil)
 	courseCategoryService := services.CreateCourseCategoryService(courseCategoryRepo, transactionManager)
-	courseService := services.CreateCourseService(courseAvailabilityRepo, courseRepo, courseCategoryRepo, topicRepo, transactionManager, courseRequestRepo)
+	courseService := services.CreateCourseService(courseRepo, courseCategoryRepo, topicRepo, transactionManager, courseRequestRepo)
 	courseRatingService := services.CreateCourseRatingService(courseRepo, courseRatingRepo, courseRequestRepo, mentorRepo, transactionManager)
 
 	studentHandler := handlers.CreateStudentHandler(studentService)

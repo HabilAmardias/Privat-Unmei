@@ -1,7 +1,7 @@
-CREATE TABLE course_availability (
+CREATE TABLE mentor_availability (
     id BIGSERIAL PRIMARY KEY,
-    course_id BIGINT REFERENCES courses(id),
-    day_of_week TEXT CHECK (day_of_week IN ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')) NOT NULL,
+    mentor_id UUID REFERENCES mentors(id),
+    day_of_week INT CHECK (day_of_week IN (1, 2, 3, 4, 5, 6, 7)) NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,

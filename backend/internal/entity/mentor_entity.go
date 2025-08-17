@@ -6,6 +6,16 @@ import (
 )
 
 type (
+	TimeOnly struct {
+		Hour   int
+		Minute int
+		Second int
+	}
+	MentorSchedule struct {
+		DayOfWeek string
+		StartTime TimeOnly
+		EndTime   TimeOnly
+	}
 	Mentor struct {
 		ID                string
 		TotalRating       float64
@@ -19,6 +29,16 @@ type (
 		CreatedAt         time.Time
 		UpdatedAt         time.Time
 		DeletedAt         *time.Time
+	}
+	MentorAvailability struct {
+		ID        int
+		CourseID  int
+		DayOfWeek string
+		StartTime TimeOnly
+		EndTime   TimeOnly
+		CreatedAt time.Time
+		UpdatedAt time.Time
+		DeletedAt *time.Time
 	}
 	AddNewMentorParam struct {
 		Name              string

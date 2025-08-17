@@ -17,7 +17,7 @@ type MentorServiceImpl struct {
 	mr  *repositories.MentorRepositoryImpl
 	tr  *repositories.TopicRepositoryImpl
 	ccr *repositories.CourseCategoryRepositoryImpl
-	car *repositories.CourseAvailabilityRepositoryImpl
+	car *repositories.MentorAvailabilityRepositoryImpl
 	cr  *repositories.CourseRepositoryImpl
 	bu  *utils.BcryptUtil
 	ju  *utils.JWTUtil
@@ -31,7 +31,7 @@ func CreateMentorService(
 	mr *repositories.MentorRepositoryImpl,
 	tr *repositories.TopicRepositoryImpl,
 	ccr *repositories.CourseCategoryRepositoryImpl,
-	car *repositories.CourseAvailabilityRepositoryImpl,
+	car *repositories.MentorAvailabilityRepositoryImpl,
 	cr *repositories.CourseRepositoryImpl,
 	bu *utils.BcryptUtil,
 	ju *utils.JWTUtil,
@@ -154,9 +154,6 @@ func (ms *MentorServiceImpl) DeleteMentor(ctx context.Context, param entity.Dele
 				return err
 			}
 			if err := ms.ccr.UnassignCategoriesMultipleCourse(ctx, *courseIDs); err != nil {
-				return err
-			}
-			if err := ms.car.DeleteAvailabilityMultipleCourses(ctx, *courseIDs); err != nil {
 				return err
 			}
 			if err := ms.cr.DeleteMentorCourse(ctx, param.ID); err != nil {

@@ -1,6 +1,21 @@
 package dtos
 
 type (
+	TimeOnly struct {
+		Hour   int `json:"hour" binding:"omitempty,min=0,max=24"`
+		Minute int `json:"minute" binding:"omitempty,min=0,max=60"`
+		Second int `json:"second" binding:"omitempty,min=0,max=60"`
+	}
+	MentorAvailabilityReq struct {
+		DayOfWeek string   `json:"day_of_week" binding:"required"`
+		StartTime TimeOnly `json:"start_time" binding:"required"`
+		EndTime   TimeOnly `json:"end_time" binding:"required"`
+	}
+	MentorAvailabilityRes struct {
+		DayOfWeek string   `json:"day_of_week"`
+		StartTime TimeOnly `json:"start_time"`
+		EndTime   TimeOnly `json:"end_time"`
+	}
 	AddNewMentorReq struct {
 		Name              string `form:"name" binding:"required"`
 		Email             string `form:"email" binding:"required,email"`
