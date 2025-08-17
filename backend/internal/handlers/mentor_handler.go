@@ -173,8 +173,8 @@ func (mh *MentorHandlerImpl) UpdateMentorForAdmin(ctx *gin.Context) {
 	}
 	if req.GopayNumber != nil && !ValidatePhoneNumber(*req.GopayNumber) {
 		ctx.Error(customerrors.NewError(
-			"invalid whatsapp number",
-			errors.New("invalid whatsapp number"),
+			"invalid gopay number",
+			errors.New("invalid gopay number"),
 			customerrors.InvalidAction,
 		))
 		return
@@ -281,8 +281,8 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 	}
 	if !ValidatePhoneNumber(req.GopayNumber) {
 		ctx.Error(customerrors.NewError(
-			"invalid whatsapp number",
-			errors.New("whatsapp number given is invalid"),
+			"invalid gopay number",
+			errors.New("gopay number given is invalid"),
 			customerrors.InvalidAction,
 		))
 		return
