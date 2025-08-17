@@ -48,6 +48,7 @@ func (cr *CourseRepositoryImpl) UpdateCourse(ctx context.Context, courseID int, 
 		updateQuery.Method,
 		updateQuery.MinDurationDays,
 		updateQuery.MaxDurationDays,
+		courseID,
 	)
 	if err != nil {
 		return customerrors.NewError(

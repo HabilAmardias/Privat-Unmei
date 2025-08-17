@@ -124,11 +124,19 @@ func (ccr *CourseCategoryRepositoryImpl) AssignCategories(ctx context.Context, c
 			`, len(args)+1)
 		} else {
 			query += fmt.Sprintf(`
-			($1, $%d);
+			($1, $%d)
 			`, len(args)+1)
 		}
 		args = append(args, cat)
 	}
+	query += `
+	ON CONFLICT(course_id, category_id)
+	DO UPDATE SET
+		course_id = EXCLUDED.course_id,
+		category_id = EXCLUDED.category_id,
+		deleted_at = NULL,
+		updated_at = NOW();
+	`
 	log.Println(query)
 	_, err := driver.Exec(query, args...)
 	if err != nil {

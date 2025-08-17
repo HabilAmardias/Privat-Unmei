@@ -67,7 +67,7 @@ func (c *RouteConfig) SetupPrivateRoute() {
 	v1.Use(middlewares.AuthenticationMiddleware(c.TokenUtil))
 	v1.POST("/courses/:id/reviews", c.CourseRatingHandler.AddReview)
 	v1.GET("/verify/send", c.StudentHandler.SendVerificationEmail)
-	v1.PATCH("/courses", middlewares.AuthorizationMiddleware(
+	v1.PATCH("/courses/:id", middlewares.AuthorizationMiddleware(
 		constants.UpdateOwnPermission,
 		constants.CourseResource,
 		c.RBACRepository,
