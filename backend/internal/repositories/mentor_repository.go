@@ -31,7 +31,7 @@ func (mr *MentorRepositoryImpl) GetMentorList(ctx context.Context, mentors *[]en
 		m.id,
 		u.name,
 		u.email,
-		m.whatsapp_number,
+		m.gopay_number,
 		m.years_of_experience
 	FROM users u
 	JOIN mentors m ON m.id = u.id
@@ -102,7 +102,7 @@ func (mr *MentorRepositoryImpl) GetMentorList(ctx context.Context, mentors *[]en
 			&mentor.ID,
 			&mentor.Name,
 			&mentor.Email,
-			&mentor.WhatsappNumber,
+			&mentor.GopayNumber,
 			&mentor.YearsOfExperience,
 		); err != nil {
 			return customerrors.NewError(
@@ -129,7 +129,7 @@ func (mr *MentorRepositoryImpl) FindByID(ctx context.Context, id string, mentor 
 		rating_count, 
 		resume_url, 
 		years_of_experience, 
-		whatsapp_number, 
+		gopay_number, 
 		degree, 
 		major, 
 		campus, 
@@ -154,7 +154,7 @@ func (mr *MentorRepositoryImpl) FindByID(ctx context.Context, id string, mentor 
 		&mentor.RatingCount,
 		&mentor.Resume,
 		&mentor.YearsOfExperience,
-		&mentor.WhatsappNumber,
+		&mentor.GopayNumber,
 		&mentor.Degree,
 		&mentor.Major,
 		&mentor.Campus,
@@ -178,7 +178,7 @@ func (mr *MentorRepositoryImpl) FindByID(ctx context.Context, id string, mentor 
 	return nil
 }
 
-func (mr *MentorRepositoryImpl) FindByWhatsapp(ctx context.Context, WhatsappNumber string, mentor *entity.Mentor) error {
+func (mr *MentorRepositoryImpl) FindByWhatsapp(ctx context.Context, GopayNumber string, mentor *entity.Mentor) error {
 	var driver RepoDriver
 	driver = mr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
@@ -191,7 +191,7 @@ func (mr *MentorRepositoryImpl) FindByWhatsapp(ctx context.Context, WhatsappNumb
 		rating_count, 
 		resume_url, 
 		years_of_experience, 
-		whatsapp_number, 
+		gopay_number, 
 		degree, 
 		major, 
 		campus, 
@@ -199,11 +199,11 @@ func (mr *MentorRepositoryImpl) FindByWhatsapp(ctx context.Context, WhatsappNumb
 		updated_at,
 		deleted_at
 	FROM mentors
-	WHERE whatsapp_number = $1 and deleted_at IS NULL
+	WHERE gopay_number = $1 and deleted_at IS NULL
 	`
 	row := driver.QueryRow(
 		query,
-		WhatsappNumber,
+		GopayNumber,
 	)
 	if err := row.Scan(
 		&mentor.ID,
@@ -211,7 +211,7 @@ func (mr *MentorRepositoryImpl) FindByWhatsapp(ctx context.Context, WhatsappNumb
 		&mentor.RatingCount,
 		&mentor.Resume,
 		&mentor.YearsOfExperience,
-		&mentor.WhatsappNumber,
+		&mentor.GopayNumber,
 		&mentor.Degree,
 		&mentor.Major,
 		&mentor.Campus,
@@ -242,7 +242,7 @@ func (mr *MentorRepositoryImpl) AddNewMentor(ctx context.Context, mentor *entity
 		driver = tx
 	}
 	query := `
-	INSERT INTO mentors(id, resume_url, years_of_experience, whatsapp_number, degree, major, campus)
+	INSERT INTO mentors(id, resume_url, years_of_experience, gopay_number, degree, major, campus)
 	VALUES ($1, $2, $3, $4, $5, $6, $7);
 	`
 	_, err := driver.Exec(
@@ -250,7 +250,7 @@ func (mr *MentorRepositoryImpl) AddNewMentor(ctx context.Context, mentor *entity
 		mentor.ID,
 		mentor.Resume,
 		mentor.YearsOfExperience,
-		mentor.WhatsappNumber,
+		mentor.GopayNumber,
 		mentor.Degree,
 		mentor.Major,
 		mentor.Campus,
@@ -276,7 +276,7 @@ func (mr *MentorRepositoryImpl) UpdateMentor(ctx context.Context, id string, que
 	SET
 		resume_url = COALESCE($1, resume_url),
 		years_of_experience = COALESCE($2, years_of_experience),
-		whatsapp_number = COALESCE($3, whatsapp_number),
+		gopay_number = COALESCE($3, gopay_number),
 		degree = COALESCE($4, degree),
 		major = COALESCE($5, major),
 		campus = COALESCE($6, campus),
@@ -289,7 +289,7 @@ func (mr *MentorRepositoryImpl) UpdateMentor(ctx context.Context, id string, que
 		query,
 		queryEntity.Resume,
 		queryEntity.YearsOfExperience,
-		queryEntity.WhatsappNumber,
+		queryEntity.GopayNumber,
 		queryEntity.Degree,
 		queryEntity.Major,
 		queryEntity.Campus,

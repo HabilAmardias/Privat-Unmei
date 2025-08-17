@@ -171,7 +171,7 @@ func (mh *MentorHandlerImpl) UpdateMentorForAdmin(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	if req.WhatsappNumber != nil && !ValidatePhoneNumber(*req.WhatsappNumber) {
+	if req.GopayNumber != nil && !ValidatePhoneNumber(*req.GopayNumber) {
 		ctx.Error(customerrors.NewError(
 			"invalid whatsapp number",
 			errors.New("invalid whatsapp number"),
@@ -181,7 +181,7 @@ func (mh *MentorHandlerImpl) UpdateMentorForAdmin(ctx *gin.Context) {
 	}
 	param := entity.UpdateMentorParam{
 		ID:                id,
-		WhatsappNumber:    req.WhatsappNumber,
+		GopayNumber:       req.GopayNumber,
 		YearsOfExperience: req.YearsOfExperience,
 	}
 	if err := mh.ms.UpdateMentorForAdmin(ctx, param); err != nil {
@@ -220,8 +220,8 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	if req.WhatsappNumber != nil {
-		if !ValidatePhoneNumber(*req.WhatsappNumber) {
+	if req.GopayNumber != nil {
+		if !ValidatePhoneNumber(*req.GopayNumber) {
 			ctx.Error(customerrors.NewError(
 				"invalid phone number",
 				errors.New("invalid phone number"),
@@ -248,7 +248,7 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 		Password:          req.Password,
 		Bio:               req.Bio,
 		YearsOfExperience: req.YearsOfExperience,
-		WhatsappNumber:    req.WhatsappNumber,
+		GopayNumber:       req.GopayNumber,
 		Degree:            req.Degree,
 		Major:             req.Major,
 		Campus:            req.Campus,
@@ -279,7 +279,7 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 		))
 		return
 	}
-	if !ValidatePhoneNumber(req.WhatsappNumber) {
+	if !ValidatePhoneNumber(req.GopayNumber) {
 		ctx.Error(customerrors.NewError(
 			"invalid whatsapp number",
 			errors.New("whatsapp number given is invalid"),
@@ -310,7 +310,7 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 		ResumeFile:        file,
 		Bio:               req.Bio,
 		YearsOfExperience: req.YearsOfExperience,
-		WhatsappNumber:    req.WhatsappNumber,
+		GopayNumber:       req.GopayNumber,
 		Degree:            req.Degree,
 		Major:             req.Major,
 		Campus:            req.Campus,

@@ -21,9 +21,7 @@ const (
 const (
 	PendingMentorStatus = iota + 1
 	PendingPaymentStatus
-	InProgressStatus
-	ConfirmedStatus
-	CanceledStatus
+	PaidStatus
 )
 
 const (

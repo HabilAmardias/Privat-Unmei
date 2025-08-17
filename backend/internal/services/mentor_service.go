@@ -214,7 +214,7 @@ func (ms *MentorServiceImpl) UpdateMentorProfile(ctx context.Context, param enti
 		mentorQuery.Campus = param.Campus
 		mentorQuery.Degree = param.Degree
 		mentorQuery.Major = param.Major
-		mentorQuery.WhatsappNumber = param.WhatsappNumber
+		mentorQuery.GopayNumber = param.GopayNumber
 		mentorQuery.YearsOfExperience = param.YearsOfExperience
 
 		if param.Resume != nil {
@@ -247,7 +247,7 @@ func (ms *MentorServiceImpl) UpdateMentorForAdmin(ctx context.Context, param ent
 		if err := ms.mr.FindByID(ctx, user.ID, mentor, false); err != nil {
 			return err
 		}
-		query.WhatsappNumber = param.WhatsappNumber
+		query.GopayNumber = param.GopayNumber
 		query.YearsOfExperience = param.YearsOfExperience
 		if err := ms.mr.UpdateMentor(ctx, mentor.ID, query); err != nil {
 			return err
@@ -262,7 +262,7 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 
 	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		// to be honest idk how to make this clean enough but for now it should work
-		if err := ms.mr.FindByWhatsapp(ctx, param.WhatsappNumber, mentor); err != nil {
+		if err := ms.mr.FindByWhatsapp(ctx, param.GopayNumber, mentor); err != nil {
 			if err.Error() != customerrors.UserNotFound {
 				return err
 			}
@@ -307,7 +307,7 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 		mentor.Campus = param.Campus
 		mentor.Degree = param.Degree
 		mentor.Major = param.Major
-		mentor.WhatsappNumber = param.WhatsappNumber
+		mentor.GopayNumber = param.GopayNumber
 		mentor.YearsOfExperience = param.YearsOfExperience
 
 		newFilename := fmt.Sprintf("%s.pdf", mentor.ID)

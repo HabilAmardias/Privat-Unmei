@@ -12,7 +12,7 @@ type (
 		RatingCount       int
 		Resume            string
 		YearsOfExperience int
-		WhatsappNumber    string
+		GopayNumber       string
 		Degree            string
 		Major             string
 		Campus            string
@@ -27,7 +27,7 @@ type (
 		Password          string
 		ResumeFile        multipart.File
 		YearsOfExperience int
-		WhatsappNumber    string
+		GopayNumber       string
 		Degree            string
 		Major             string
 		Campus            string
@@ -40,7 +40,7 @@ type (
 		Password          *string
 		Bio               *string
 		YearsOfExperience *int
-		WhatsappNumber    *string
+		GopayNumber       *string
 		Degree            *string
 		Major             *string
 		Campus            *string
@@ -50,7 +50,7 @@ type (
 		RatingCount       *int
 		Resume            *string
 		YearsOfExperience *int
-		WhatsappNumber    *string
+		GopayNumber       *string
 		Degree            *string
 		Major             *string
 		Campus            *string
@@ -62,7 +62,7 @@ type (
 		ID                string
 		Name              string
 		Email             string
-		WhatsappNumber    string
+		GopayNumber       string
 		YearsOfExperience int
 	}
 	ListMentorParam struct {

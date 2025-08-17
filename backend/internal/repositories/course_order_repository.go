@@ -37,9 +37,9 @@ func (cr *CourseRequestRepositoryImpl) FindOngoingByCourseID(ctx context.Context
 		updated_at,
 		deleted_at
 	FROM course_requests
-	WHERE course_id = $1 AND (status = $2 OR status = $3) AND deleted_at IS NULL
+	WHERE course_id = $1 AND status = $2 AND deleted_at IS NULL
 	`
-	rows, err := driver.Query(query, courseID, constants.PendingPaymentStatus, constants.InProgressStatus)
+	rows, err := driver.Query(query, courseID, constants.PendingPaymentStatus)
 	if err != nil {
 		return customerrors.NewError(
 			"failed to get order",
@@ -99,7 +99,7 @@ func (cr *CourseRequestRepositoryImpl) FindCompletedByStudentIDAndCourseID(ctx c
 	FROM course_requests
 	WHERE student_id = $1 AND course_id = $2 AND status = $3 AND deleted_at IS NULL
 	`
-	rows, err := driver.Query(query, studentID, courseID, constants.ConfirmedStatus)
+	rows, err := driver.Query(query, studentID, courseID, constants.PaidStatus)
 	if err != nil {
 		return customerrors.NewError(
 			"failed to get order",

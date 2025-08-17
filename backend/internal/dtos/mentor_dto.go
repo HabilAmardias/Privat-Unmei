@@ -7,7 +7,7 @@ type (
 		Bio               string `form:"bio" binding:"required"`
 		Password          string `form:"password" binding:"required,containsany=!@#?,min=8"`
 		YearsOfExperience int    `form:"years_of_experience" binding:"required,min=0"`
-		WhatsappNumber    string `form:"whatsapp_number" binding:"required"`
+		GopayNumber       string `form:"gopay_number" binding:"required"`
 		Degree            string `form:"degree" binding:"required"`
 		Major             string `form:"major" binding:"required"`
 		Campus            string `form:"campus" binding:"required"`
@@ -16,7 +16,7 @@ type (
 		Password string `json:"password"`
 	}
 	UpdateMentorForAdminReq struct {
-		WhatsappNumber    *string `json:"whatsapp_number"`
+		GopayNumber       *string `json:"gopay_number"`
 		YearsOfExperience *int    `json:"years_of_experience"`
 	}
 	UpdateMentorForAdminRes struct {
@@ -27,7 +27,7 @@ type (
 		Password          *string `form:"password" binding:"omitempty,containsany=!@#?,min=8"`
 		Bio               *string `form:"bio"`
 		YearsOfExperience *int    `form:"years_of_experience" binding:"omitempty,min=0"`
-		WhatsappNumber    *string `form:"whatsapp_number"`
+		GopayNumber       *string `form:"gopay_number"`
 		Degree            *string `form:"degree"`
 		Major             *string `form:"major"`
 		Campus            *string `form:"campus"`
@@ -44,7 +44,7 @@ type (
 		ID                string `json:"id"`
 		Name              string `json:"name"`
 		Email             string `json:"email"`
-		WhatsappNumber    string `json:"whatsapp_number"`
+		GopayNumber       string `json:"gopay_number"`
 		YearsOfExperience int    `json:"years_of_experience"`
 	}
 	LoginMentorReq struct {
