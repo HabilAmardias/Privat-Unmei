@@ -7,8 +7,6 @@ import (
 	"log"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
-
-	"github.com/lib/pq"
 )
 
 type MentorAvailabilityRepositoryImpl struct {
@@ -19,7 +17,7 @@ func CreateCourseAvailabilityRepository(db *sql.DB) *MentorAvailabilityRepositor
 	return &MentorAvailabilityRepositoryImpl{db}
 }
 
-func (car *MentorAvailabilityRepositoryImpl) GetAvailabilityByCourseID(ctx context.Context, courseID int, scheds *[]entity.MentorAvailability) error {
+func (car *MentorAvailabilityRepositoryImpl) GetAvailabilityByMentorID(ctx context.Context, mentorID string, scheds *[]entity.MentorAvailability) error {
 	var driver RepoDriver
 	driver = car.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
@@ -40,9 +38,9 @@ func (car *MentorAvailabilityRepositoryImpl) GetAvailabilityByCourseID(ctx conte
 		updated_at,
 		deleted_at
 	FROM mentor_availability
-	WHERE course_id = $1 AND deleted_at IS NULL
+	WHERE mentor_id = $1 AND deleted_at IS NULL
 	`
-	rows, err := driver.Query(query, courseID)
+	rows, err := driver.Query(query, mentorID)
 	if err != nil {
 		return customerrors.NewError(
 			"failed to get course schedules",
@@ -55,7 +53,7 @@ func (car *MentorAvailabilityRepositoryImpl) GetAvailabilityByCourseID(ctx conte
 		var item entity.MentorAvailability
 		if err := rows.Scan(
 			&item.ID,
-			&item.CourseID,
+			&item.MentorID,
 			&item.DayOfWeek,
 			&item.StartTime.Hour,
 			&item.StartTime.Minute,
@@ -78,7 +76,7 @@ func (car *MentorAvailabilityRepositoryImpl) GetAvailabilityByCourseID(ctx conte
 	return nil
 }
 
-func (car *MentorAvailabilityRepositoryImpl) DeleteAvailabilityMultipleCourses(ctx context.Context, courseIDs []int) error {
+func (car *MentorAvailabilityRepositoryImpl) DeleteAvailability(ctx context.Context, mentorID string) error {
 	var driver RepoDriver
 	driver = car.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
@@ -87,31 +85,9 @@ func (car *MentorAvailabilityRepositoryImpl) DeleteAvailabilityMultipleCourses(c
 	query := `
 	UPDATE mentor_availability
 	SET deleted_at = NOW(), updated_at = NOW()
-	WHERE course_id = ANY($1) AND deleted_at IS NULL
+	WHERE mentor_id = $1 AND deleted_at IS NULL
 	`
-	_, err := driver.Exec(query, pq.Array(courseIDs))
-	if err != nil {
-		return customerrors.NewError(
-			"failed to delete course schedules",
-			err,
-			customerrors.DatabaseExecutionError,
-		)
-	}
-	return nil
-}
-
-func (car *MentorAvailabilityRepositoryImpl) DeleteAvailability(ctx context.Context, courseID int) error {
-	var driver RepoDriver
-	driver = car.DB
-	if tx := GetTransactionFromContext(ctx); tx != nil {
-		driver = tx
-	}
-	query := `
-	UPDATE mentor_availability
-	SET deleted_at = NOW(), updated_at = NOW()
-	WHERE course_id = $1 AND deleted_at IS NULL
-	`
-	_, err := driver.Exec(query, courseID)
+	_, err := driver.Exec(query, mentorID)
 	if err != nil {
 		return customerrors.NewError(
 			"failed to delete course schedules",
@@ -129,7 +105,7 @@ func (car *MentorAvailabilityRepositoryImpl) CreateAvailability(ctx context.Cont
 		driver = tx
 	}
 	query := `
-	INSERT INTO mentor_availability (course_id, day_of_week, start_time, end_time)
+	INSERT INTO mentor_availability (mentor_id, day_of_week, start_time, end_time)
 	VALUES
 	`
 	args := []any{}
@@ -144,7 +120,7 @@ func (car *MentorAvailabilityRepositoryImpl) CreateAvailability(ctx context.Cont
 		($%d, $%d, $%d, $%d);
 		`, sprintIndex, sprintIndex+1, sprintIndex+2, sprintIndex+3)
 		}
-		args = append(args, schedule.CourseID)
+		args = append(args, schedule.MentorID)
 		args = append(args, schedule.DayOfWeek)
 		args = append(args, fmt.Sprintf("%d:%d:%d", schedule.StartTime.Hour, schedule.StartTime.Minute, schedule.StartTime.Second))
 		args = append(args, fmt.Sprintf("%d:%d:%d", schedule.EndTime.Hour, schedule.EndTime.Minute, schedule.EndTime.Second))

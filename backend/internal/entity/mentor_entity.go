@@ -12,7 +12,7 @@ type (
 		Second int
 	}
 	MentorSchedule struct {
-		DayOfWeek string
+		DayOfWeek int
 		StartTime TimeOnly
 		EndTime   TimeOnly
 	}
@@ -32,8 +32,8 @@ type (
 	}
 	MentorAvailability struct {
 		ID        int
-		CourseID  int
-		DayOfWeek string
+		MentorID  string
+		DayOfWeek int
 		StartTime TimeOnly
 		EndTime   TimeOnly
 		CreatedAt time.Time
@@ -51,6 +51,7 @@ type (
 		Degree            string
 		Major             string
 		Campus            string
+		MentorSchedules   []MentorSchedule
 	}
 	UpdateMentorParam struct {
 		ID                string
@@ -64,6 +65,7 @@ type (
 		Degree            *string
 		Major             *string
 		Campus            *string
+		MentorSchedules   []MentorSchedule
 	}
 	UpdateMentorQuery struct {
 		TotalRating       *float64

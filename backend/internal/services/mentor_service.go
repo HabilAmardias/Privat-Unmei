@@ -160,6 +160,9 @@ func (ms *MentorServiceImpl) DeleteMentor(ctx context.Context, param entity.Dele
 				return err
 			}
 		}
+		if err := ms.car.DeleteAvailability(ctx, param.ID); err != nil {
+			return err
+		}
 		if err := ms.mr.DeleteMentor(ctx, mentor.ID); err != nil {
 			return err
 		}
@@ -207,7 +210,23 @@ func (ms *MentorServiceImpl) UpdateMentorProfile(ctx context.Context, param enti
 			}
 			userQuery.ProfileImage = &res.SecureURL
 		}
-
+		if len(param.MentorSchedules) > 0 {
+			if err := ms.car.DeleteAvailability(ctx, param.ID); err != nil {
+				return err
+			}
+			scheds := new([]entity.MentorAvailability)
+			for _, sched := range param.MentorSchedules {
+				*scheds = append(*scheds, entity.MentorAvailability{
+					MentorID:  param.ID,
+					DayOfWeek: sched.DayOfWeek,
+					StartTime: sched.StartTime,
+					EndTime:   sched.EndTime,
+				})
+			}
+			if err := ms.car.CreateAvailability(ctx, scheds); err != nil {
+				return err
+			}
+		}
 		mentorQuery.Campus = param.Campus
 		mentorQuery.Degree = param.Degree
 		mentorQuery.Major = param.Major
@@ -259,7 +278,7 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 
 	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		// to be honest idk how to make this clean enough but for now it should work
-		if err := ms.mr.FindByWhatsapp(ctx, param.GopayNumber, mentor); err != nil {
+		if err := ms.mr.FindByGopay(ctx, param.GopayNumber, mentor); err != nil {
 			if err.Error() != customerrors.UserNotFound {
 				return err
 			}
@@ -312,8 +331,22 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 		if err != nil {
 			return err
 		}
+
 		mentor.Resume = uploadRes.SecureURL
 		if err := ms.mr.AddNewMentor(ctx, mentor); err != nil {
+			return err
+		}
+
+		schedules := new([]entity.MentorAvailability)
+		for _, sched := range param.MentorSchedules {
+			*schedules = append(*schedules, entity.MentorAvailability{
+				MentorID:  mentor.ID,
+				DayOfWeek: sched.DayOfWeek,
+				StartTime: sched.StartTime,
+				EndTime:   sched.EndTime,
+			})
+		}
+		if err := ms.car.CreateAvailability(ctx, schedules); err != nil {
 			return err
 		}
 

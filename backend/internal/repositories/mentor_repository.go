@@ -178,7 +178,7 @@ func (mr *MentorRepositoryImpl) FindByID(ctx context.Context, id string, mentor 
 	return nil
 }
 
-func (mr *MentorRepositoryImpl) FindByWhatsapp(ctx context.Context, GopayNumber string, mentor *entity.Mentor) error {
+func (mr *MentorRepositoryImpl) FindByGopay(ctx context.Context, GopayNumber string, mentor *entity.Mentor) error {
 	var driver RepoDriver
 	driver = mr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {

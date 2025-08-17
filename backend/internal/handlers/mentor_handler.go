@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"privat-unmei/internal/constants"
@@ -10,6 +11,7 @@ import (
 	"privat-unmei/internal/services"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 )
 
 type MentorHandlerImpl struct {
@@ -240,6 +242,7 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 			return
 		}
 	}
+
 	param := entity.UpdateMentorParam{
 		ID:                claim.Subject,
 		Resume:            resumeFile,
@@ -252,6 +255,29 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 		Degree:            req.Degree,
 		Major:             req.Major,
 		Campus:            req.Campus,
+		MentorSchedules:   []entity.MentorSchedule{},
+	}
+	if len(req.MentorSchedules) > 0 {
+		for _, sched := range req.MentorSchedules {
+			var mentorSchedule dtos.MentorAvailabilityReq
+			if err := json.Unmarshal([]byte(sched), &mentorSchedule); err != nil {
+				ctx.Error(customerrors.NewError(
+					"failed to parse input",
+					err,
+					customerrors.CommonErr,
+				))
+				return
+			}
+			if err := binding.Validator.ValidateStruct(mentorSchedule); err != nil {
+				ctx.Error(err)
+				return
+			}
+			param.MentorSchedules = append(param.MentorSchedules, entity.MentorSchedule{
+				DayOfWeek: mentorSchedule.DayOfWeek,
+				StartTime: entity.TimeOnly(mentorSchedule.StartTime),
+				EndTime:   entity.TimeOnly(mentorSchedule.EndTime),
+			})
+		}
 	}
 	if err := mh.ms.UpdateMentorProfile(ctx, param); err != nil {
 		ctx.Error(err)
@@ -287,6 +313,14 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 		))
 		return
 	}
+	if len(req.MentorSchedules) <= 0 {
+		ctx.Error(customerrors.NewError(
+			"mentor need to submit their schedule",
+			errors.New("mentor need to submit their schedule"),
+			customerrors.InvalidAction,
+		))
+		return
+	}
 	headerFile, err := ctx.FormFile("file")
 	if err != nil {
 		ctx.Error(
@@ -314,6 +348,27 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 		Degree:            req.Degree,
 		Major:             req.Major,
 		Campus:            req.Campus,
+		MentorSchedules:   []entity.MentorSchedule{},
+	}
+	for _, sched := range req.MentorSchedules {
+		var schedule dtos.MentorAvailabilityReq
+		if err := json.Unmarshal([]byte(sched), &schedule); err != nil {
+			ctx.Error(customerrors.NewError(
+				"failed to parse input",
+				err,
+				customerrors.CommonErr,
+			))
+			return
+		}
+		if err := binding.Validator.ValidateStruct(schedule); err != nil {
+			ctx.Error(err)
+			return
+		}
+		param.MentorSchedules = append(param.MentorSchedules, entity.MentorSchedule{
+			DayOfWeek: schedule.DayOfWeek,
+			StartTime: entity.TimeOnly(schedule.StartTime),
+			EndTime:   entity.TimeOnly(schedule.EndTime),
+		})
 	}
 	if err := mh.ms.AddNewMentor(ctx, param); err != nil {
 		ctx.Error(err)
