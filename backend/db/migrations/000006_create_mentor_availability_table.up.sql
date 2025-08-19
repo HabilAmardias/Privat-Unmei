@@ -6,5 +6,6 @@ CREATE TABLE mentor_availability (
     end_time TIME NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMPTZ
+    deleted_at TIMESTAMPTZ,
+    UNIQUE(mentor_id, day_of_week, start_time, end_time)
 );
