@@ -10,16 +10,15 @@ type (
 		Description string `json:"description"`
 	}
 	CreateCourseReq struct {
-		Title       string           `json:"title" binding:"required"`
-		Description string           `json:"description" binding:"required"`
-		Domicile    string           `json:"domicile" binding:"required"`
-		MinPrice    float64          `json:"min_price" binding:"required,min=1"`
-		MaxPrice    float64          `json:"max_price" binding:"required,min=1"`
-		Method      string           `json:"method" binding:"required"`
-		MinDuration int              `json:"min_duration_days" binding:"required,min=1"`
-		MaxDuration int              `json:"max_duration_days" binding:"required,min=1"`
-		Topics      []CourseTopicReq `json:"course_topics" binding:"dive"`
-		Categories  []int            `json:"course_categories"`
+		Title           string           `json:"title" binding:"required"`
+		Description     string           `json:"description" binding:"required"`
+		Domicile        string           `json:"domicile" binding:"required"`
+		Price           float64          `json:"price" binding:"required,min=1"`
+		Method          string           `json:"method" binding:"required"`
+		SessionDuration int              `json:"session_duration_minutes" binding:"required,min=1"`
+		MaxSession      int              `json:"max_total_session" binding:"required,min=1"`
+		Topics          []CourseTopicReq `json:"course_topics" binding:"dive"`
+		Categories      []int            `json:"course_categories"`
 	}
 	CreateCourseRes struct {
 		ID int `json:"id"`
@@ -43,10 +42,9 @@ type (
 		Title            string   `json:"title"`
 		Domicile         string   `json:"domicile"`
 		Method           string   `json:"method"`
-		MinPrice         float64  `json:"min_price"`
-		MaxPrice         float64  `json:"max_price"`
-		MinDurationDays  int      `json:"min_duration_days"`
-		MaxDurationDays  int      `json:"max_duration_days"`
+		Price            float64  `json:"price"`
+		SessionDuration  int      `json:"session_duration_minutes"`
+		MaxSession       int      `json:"max_total_session"`
 		CourseCategories []string `json:"course_categories"`
 	}
 	CourseListRes struct {
@@ -64,11 +62,10 @@ type (
 		Title            *string          `json:"title"`
 		Description      *string          `json:"description"`
 		Domicile         *string          `json:"domicile"`
-		MinPrice         *float64         `json:"min_price" binding:"omitempty,min=1"`
-		MaxPrice         *float64         `json:"max_price" binding:"omitempty,min=1"`
+		Price            *float64         `json:"min_price" binding:"omitempty,min=1"`
 		Method           *string          `json:"method"`
-		MinDurationDays  *int             `json:"min_duration_days" binding:"omitempty,min=1"`
-		MaxDurationDays  *int             `json:"max_duration_days" binding:"omitempty,min=1"`
+		SessionDuration  *int             `json:"min_duration_days" binding:"omitempty,min=1"`
+		MaxSession       *int             `json:"max_duration_days" binding:"omitempty,min=1"`
 		CourseTopic      []CourseTopicReq `json:"course_topics"`
 		CourseCategories []int            `json:"course_categories"`
 	}

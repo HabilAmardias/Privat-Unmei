@@ -9,6 +9,9 @@ CREATE TABLE course_schedule (
     end_time TIME NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMPTZ,
-    UNIQUE(course_request_id, session_number) WHERE deleted_at IS NULL
+    deleted_at TIMESTAMPTZ
 );
+
+CREATE UNIQUE INDEX idx_course_schedule_unique_active_session 
+ON course_schedule (course_request_id, session_number) 
+WHERE deleted_at IS NULL;

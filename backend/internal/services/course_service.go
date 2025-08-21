@@ -90,11 +90,10 @@ func (cs *CourseServiceImpl) UpdateCourse(ctx context.Context, param entity.Upda
 		updateCourseQuery.Title = param.Title
 		updateCourseQuery.Description = param.Description
 		updateCourseQuery.Domicile = param.Description
-		updateCourseQuery.MaxDurationDays = param.MaxDurationDays
-		updateCourseQuery.MaxPrice = param.MaxPrice
+		updateCourseQuery.SessionDuration = param.SessionDuration
+		updateCourseQuery.Price = param.Price
 		updateCourseQuery.Method = param.Method
-		updateCourseQuery.MinDurationDays = param.MinDurationDays
-		updateCourseQuery.MinPrice = param.MinPrice
+		updateCourseQuery.MaxSession = param.MaxSession
 
 		if err := cs.cr.UpdateCourse(ctx, param.CourseID, updateCourseQuery); err != nil {
 			return err
@@ -188,30 +187,15 @@ func (cs *CourseServiceImpl) CreateCourse(ctx context.Context, param entity.Crea
 	categories := new([]entity.CourseCategory)
 
 	err := cs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		if param.MaxDuration < param.MinDuration {
-			return customerrors.NewError(
-				"invalid course duration",
-				errors.New("invalid course duration"),
-				customerrors.InvalidAction,
-			)
-		}
-		if param.MaxPrice < param.MinPrice {
-			return customerrors.NewError(
-				"invalid course price",
-				errors.New("invalid course price"),
-				customerrors.InvalidAction,
-			)
-		}
 		if err := cs.cr.CreateCourse(
 			ctx,
 			param.MentorID,
 			param.Title,
 			param.Description,
 			param.Domicile,
-			param.MinPrice,
-			param.MaxPrice,
-			param.MinDuration,
-			param.MaxDuration,
+			param.Price,
+			param.SessionDuration,
+			param.MaxSession,
 			param.Method,
 			course,
 		); err != nil {

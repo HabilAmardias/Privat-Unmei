@@ -4,18 +4,16 @@ import "time"
 
 type (
 	CourseOrder struct {
-		ID           int
-		StudentID    string
-		CourseID     int
-		Status       int
-		Price        float64
-		DurationDays int
-		AcceptedAt   *time.Time
-		PaymentDue   *time.Time
-		StartDate    *time.Time
-		EndDate      *time.Time
-		CreatedAt    time.Time
-		UpdatedAt    time.Time
-		DeletedAt    *time.Time
+		ID               int
+		StudentID        string
+		CourseID         int
+		Status           int
+		TotalPrice       float64
+		NumberOfSessions int
+		AcceptedAt       *time.Time
+		PaymentDue       *time.Time
+		CreatedAt        time.Time
+		UpdatedAt        time.Time
+		DeletedAt        *time.Time
 	}
 )

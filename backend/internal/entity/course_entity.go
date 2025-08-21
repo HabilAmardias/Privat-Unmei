@@ -15,11 +15,10 @@ type (
 		Title            string
 		Description      string
 		Domicile         string
-		MinPrice         float64
-		MaxPrice         float64
-		MinDuration      int
-		MaxDuration      int
 		Method           string
+		Price            float64
+		SessionDuration  int
+		MaxSession       int
 		TransactionCount int
 		CreatedAt        time.Time
 		UpdatedAt        time.Time
@@ -36,17 +35,16 @@ type (
 		DeletedAt   *time.Time
 	}
 	CreateCourseParam struct {
-		MentorID    string
-		Title       string
-		Description string
-		Domicile    string
-		MinPrice    float64
-		MaxPrice    float64
-		Method      string
-		MinDuration int
-		MaxDuration int
-		Topics      []CreateTopic
-		Categories  []int
+		MentorID        string
+		Title           string
+		Description     string
+		Domicile        string
+		Price           float64
+		Method          string
+		SessionDuration int
+		MaxSession      int
+		Topics          []CreateTopic
+		Categories      []int
 	}
 	DeleteCourseParam struct {
 		MentorID string
@@ -69,10 +67,9 @@ type (
 		Title            string
 		Domicile         string
 		Method           string
-		MinPrice         float64
-		MaxPrice         float64
-		MinDurationDays  int
-		MaxDurationDays  int
+		Price            float64
+		SessionDuration  int
+		MaxSession       int
 		CourseCategories string
 	}
 	CourseListQuery struct {
@@ -93,11 +90,10 @@ type (
 		Title           *string
 		Description     *string
 		Domicile        *string
-		MinPrice        *float64
-		MaxPrice        *float64
 		Method          *string
-		MinDurationDays *int
-		MaxDurationDays *int
+		Price           *float64
+		SessionDuration *int
+		MaxSession      *int
 	}
 	UpdateCourseParam struct {
 		MentorID string
