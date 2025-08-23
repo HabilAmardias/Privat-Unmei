@@ -16,4 +16,13 @@ type (
 		UpdatedAt        time.Time
 		DeletedAt        *time.Time
 	}
+	PreferredSlot struct {
+		Date      time.Time
+		StartTime TimeOnly
+	}
+	CreateOrderParam struct {
+		CourseID       int
+		StudentID      string
+		PreferredSlots []PreferredSlot
+	}
 )

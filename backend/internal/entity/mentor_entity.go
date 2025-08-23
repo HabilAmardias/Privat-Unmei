@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"fmt"
 	"mime/multipart"
 	"time"
 )
@@ -101,3 +102,26 @@ type (
 		NewPassword string
 	}
 )
+
+func (to *TimeOnly) ToString() string {
+	var hour string
+	var minute string
+	var second string
+
+	hour = fmt.Sprintf("%d", to.Hour)
+	if to.Hour < 10 {
+		hour = fmt.Sprintf("0%d", to.Hour)
+	}
+
+	minute = fmt.Sprintf("%d", to.Minute)
+	if to.Minute < 10 {
+		minute = fmt.Sprintf("0%d", to.Minute)
+	}
+
+	second = fmt.Sprintf("%d", to.Second)
+	if to.Second < 10 {
+		second = fmt.Sprintf("0%d", to.Second)
+	}
+
+	return fmt.Sprintf("%s:%s:%s", hour, minute, second)
+}

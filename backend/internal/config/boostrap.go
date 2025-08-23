@@ -24,6 +24,7 @@ func Bootstrap(db *sql.DB, app *gin.Engine) {
 	topicRepo := repositories.CreateTopicRepository(db)
 	courseRequestRepo := repositories.CreateCourseRequestRepository(db)
 	courseRatingRepo := repositories.CreateCourseRatingRepository(db)
+	courseScheduleRepo := repositories.CreateCourseScheduleRepository(db)
 
 	bcryptUtil := utils.CreateBcryptUtil()
 	gomailUtil := utils.CreateGomailUtil()
@@ -37,6 +38,7 @@ func Bootstrap(db *sql.DB, app *gin.Engine) {
 	courseCategoryService := services.CreateCourseCategoryService(courseCategoryRepo, transactionManager)
 	courseService := services.CreateCourseService(courseRepo, courseCategoryRepo, topicRepo, transactionManager, courseRequestRepo)
 	courseRatingService := services.CreateCourseRatingService(courseRepo, courseRatingRepo, courseRequestRepo, mentorRepo, transactionManager)
+	courseRequestService := services.CreateCourseRequestService(courseRequestRepo, courseRepo, courseScheduleRepo, mentorAvailabilityRepo, userRepo, studentRepo, transactionManager)
 
 	studentHandler := handlers.CreateStudentHandler(studentService)
 	adminHandler := handlers.CreateAdminHandler(adminService)
@@ -44,6 +46,7 @@ func Bootstrap(db *sql.DB, app *gin.Engine) {
 	courseCategoryHandler := handlers.CreateCourseCategoryHandler(courseCategoryService)
 	courseHandler := handlers.CreateCourseHandler(courseService)
 	courseRatingHandler := handlers.CreateCourseRatingHandler(courseRatingService)
+	courseRequestHandler := handlers.CreateCourseRequestHandler(courseRequestService)
 
 	cfg := routers.RouteConfig{
 		App:                   app,
@@ -53,6 +56,7 @@ func Bootstrap(db *sql.DB, app *gin.Engine) {
 		CourseHandler:         courseHandler,
 		MentorHandler:         mentorHandler,
 		CourseRatingHandler:   courseRatingHandler,
+		CourseRequestHandler:  courseRequestHandler,
 		RBACRepository:        rbacRepo,
 		TokenUtil:             jwtUtil,
 	}

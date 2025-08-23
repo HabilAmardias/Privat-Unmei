@@ -13,5 +13,5 @@ CREATE TABLE course_schedule (
 );
 
 CREATE UNIQUE INDEX idx_course_schedule_unique_active_session 
-ON course_schedule (course_request_id, session_number) 
+ON course_schedule (course_request_id, session_number, scheduled_date) 
 WHERE deleted_at IS NULL;

@@ -87,13 +87,14 @@ type (
 		ID int
 	}
 	UpdateCourseQuery struct {
-		Title           *string
-		Description     *string
-		Domicile        *string
-		Method          *string
-		Price           *float64
-		SessionDuration *int
-		MaxSession      *int
+		Title            *string
+		Description      *string
+		Domicile         *string
+		Method           *string
+		Price            *float64
+		SessionDuration  *int
+		MaxSession       *int
+		TransactionCount *int
 	}
 	UpdateCourseParam struct {
 		MentorID string

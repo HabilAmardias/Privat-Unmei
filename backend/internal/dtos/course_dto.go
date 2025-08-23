@@ -62,10 +62,10 @@ type (
 		Title            *string          `json:"title"`
 		Description      *string          `json:"description"`
 		Domicile         *string          `json:"domicile"`
-		Price            *float64         `json:"min_price" binding:"omitempty,min=1"`
+		Price            *float64         `json:"price" binding:"omitempty,min=1"`
 		Method           *string          `json:"method"`
-		SessionDuration  *int             `json:"min_duration_days" binding:"omitempty,min=1"`
-		MaxSession       *int             `json:"max_duration_days" binding:"omitempty,min=1"`
+		SessionDuration  *int             `json:"session_duration_minutes" binding:"omitempty,min=1"`
+		MaxSession       *int             `json:"max_total_session" binding:"omitempty,min=1,max=7"`
 		CourseTopic      []CourseTopicReq `json:"course_topics"`
 		CourseCategories []int            `json:"course_categories"`
 	}

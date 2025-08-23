@@ -21,6 +21,7 @@ type RouteConfig struct {
 	CourseHandler         *handlers.CourseHandlerImpl
 	MentorHandler         *handlers.MentorHandlerImpl
 	CourseRatingHandler   *handlers.CourseRatingHandlerImpl
+	CourseRequestHandler  *handlers.CourseRequestHandlerImpl
 	RBACRepository        *repositories.RBACRepository
 	TokenUtil             *utils.JWTUtil
 }
@@ -142,4 +143,5 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.MentorResource,
 		c.RBACRepository,
 	), c.MentorHandler.UpdateMentor)
+	v1.POST("/course-requests", c.CourseRequestHandler.CreateReservation)
 }

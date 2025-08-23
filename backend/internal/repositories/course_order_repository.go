@@ -3,7 +3,6 @@ package repositories
 import (
 	"context"
 	"database/sql"
-	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 )
@@ -14,6 +13,34 @@ type CourseRequestRepositoryImpl struct {
 
 func CreateCourseRequestRepository(db *sql.DB) *CourseRequestRepositoryImpl {
 	return &CourseRequestRepositoryImpl{db}
+}
+
+func (cr *CourseRequestRepositoryImpl) CreateOrder(ctx context.Context, studentID string, courseID int, totalPrice float64, numberOfSessions int, id *int64) error {
+	var driver RepoDriver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	INSERT INTO course_requests (student_id, course_id, total_price, number_of_sessions)
+	VALUES
+	($1, $2, $3, $4)
+	RETURNING (id)
+	`
+	row := driver.QueryRow(
+		query,
+		studentID,
+		courseID,
+		totalPrice,
+		numberOfSessions,
+	)
+	if err := row.Scan(id); err != nil {
+		return customerrors.NewError(
+			"failed to create order",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
 }
 
 func (cr *CourseRequestRepositoryImpl) FindOngoingByCourseID(ctx context.Context, courseID int, orders *[]entity.CourseOrder) error {
@@ -35,9 +62,9 @@ func (cr *CourseRequestRepositoryImpl) FindOngoingByCourseID(ctx context.Context
 		updated_at,
 		deleted_at
 	FROM course_requests
-	WHERE course_id = $1 AND status = $2 AND deleted_at IS NULL
+	WHERE course_id = $1 AND status NOT IN ('completed', 'cancelled') AND deleted_at IS NULL
 	`
-	rows, err := driver.Query(query, courseID, constants.PendingPaymentStatus)
+	rows, err := driver.Query(query, courseID)
 	if err != nil {
 		return customerrors.NewError(
 			"failed to get order",
@@ -91,9 +118,9 @@ func (cr *CourseRequestRepositoryImpl) FindCompletedByStudentIDAndCourseID(ctx c
 		updated_at,
 		deleted_at
 	FROM course_requests
-	WHERE student_id = $1 AND course_id = $2 AND status = $3 AND deleted_at IS NULL
+	WHERE student_id = $1 AND course_id = $2 AND status = 'completed' AND deleted_at IS NULL
 	`
-	rows, err := driver.Query(query, studentID, courseID, constants.PaidStatus)
+	rows, err := driver.Query(query, studentID, courseID)
 	if err != nil {
 		return customerrors.NewError(
 			"failed to get order",

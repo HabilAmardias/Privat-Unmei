@@ -34,6 +34,7 @@ func (cr *CourseRepositoryImpl) UpdateCourse(ctx context.Context, courseID int, 
 		price = COALESCE($5, price),
 		session_duration_minutes = COALESCE($6, session_duration_minutes),
 		max_total_session = COALESCE($7, max_total_session),
+		transaction_count = COALESCE($8, transaction_count),
 		updated_at = NOW()
 	WHERE id = $8 AND deleted_at IS NULL
 	`

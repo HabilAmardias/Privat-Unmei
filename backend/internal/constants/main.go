@@ -19,9 +19,7 @@ const (
 )
 
 const (
-	PendingMentorStatus = iota + 1
-	PendingPaymentStatus
-	PaidStatus
+	OperationalCostPercentage float64 = 1.1
 )
 
 const (

@@ -7,6 +7,7 @@ import (
 	"log"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
+	"time"
 )
 
 type MentorAvailabilityRepositoryImpl struct {
@@ -122,8 +123,8 @@ func (car *MentorAvailabilityRepositoryImpl) CreateAvailability(ctx context.Cont
 		}
 		args = append(args, schedule.MentorID)
 		args = append(args, schedule.DayOfWeek)
-		args = append(args, fmt.Sprintf("%d:%d:%d", schedule.StartTime.Hour, schedule.StartTime.Minute, schedule.StartTime.Second))
-		args = append(args, fmt.Sprintf("%d:%d:%d", schedule.EndTime.Hour, schedule.EndTime.Minute, schedule.EndTime.Second))
+		args = append(args, schedule.StartTime.ToString())
+		args = append(args, schedule.EndTime.ToString())
 		sprintIndex += 4
 	}
 	log.Println(query)
@@ -131,6 +132,35 @@ func (car *MentorAvailabilityRepositoryImpl) CreateAvailability(ctx context.Cont
 	if err != nil {
 		return customerrors.NewError(
 			"failed to create available schedule",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (car *MentorAvailabilityRepositoryImpl) IsMentorAvailable(ctx context.Context, mentorID string, startTime string, endTime string, freeMentorSchedule *int64, date time.Time) error {
+	var driver RepoDriver
+	driver = car.DB
+
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	dayOfWeek := int(date.Weekday())
+	if dayOfWeek == 0 {
+		dayOfWeek = 7
+	}
+	query := `
+	SELECT count(*)
+	FROM mentor_availability
+	WHERE mentor_id = $1 AND day_of_week = $2 AND deleted_at IS NULL
+	AND start_time <= $3 AND end_time >= $4
+	`
+
+	row := driver.QueryRow(query, mentorID, dayOfWeek, startTime, endTime)
+	if err := row.Scan(freeMentorSchedule); err != nil {
+		return customerrors.NewError(
+			"failed to get free mentor schedule",
 			err,
 			customerrors.DatabaseExecutionError,
 		)
