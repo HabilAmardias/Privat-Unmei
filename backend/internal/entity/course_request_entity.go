@@ -3,7 +3,7 @@ package entity
 import "time"
 
 type (
-	CourseOrder struct {
+	CourseRequest struct {
 		ID               int
 		StudentID        string
 		CourseID         int
@@ -12,6 +12,7 @@ type (
 		NumberOfSessions int
 		AcceptedAt       *time.Time
 		PaymentDue       *time.Time
+		ExpiredAt        *time.Time
 		CreatedAt        time.Time
 		UpdatedAt        time.Time
 		DeletedAt        *time.Time
@@ -20,7 +21,7 @@ type (
 		Date      time.Time
 		StartTime TimeOnly
 	}
-	CreateOrderParam struct {
+	CreateCourseRequestParam struct {
 		CourseID       int
 		StudentID      string
 		PreferredSlots []PreferredSlot

@@ -42,7 +42,7 @@ func (crs *CourseRatingServiceImpl) GetCourseReview(ctx context.Context, param e
 func (crs *CourseRatingServiceImpl) AddReview(ctx context.Context, param entity.CreateRatingParam) (int, error) {
 	course := new(entity.Course)
 	rating := new(entity.CourseRating)
-	orders := new([]entity.CourseOrder)
+	orders := new([]entity.CourseRequest)
 	mentor := new(entity.Mentor)
 	updateMentor := new(entity.UpdateMentorQuery)
 

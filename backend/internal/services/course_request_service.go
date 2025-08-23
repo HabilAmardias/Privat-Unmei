@@ -7,6 +7,7 @@ import (
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/repositories"
+	"time"
 )
 
 type CourseRequestServiceImpl struct {
@@ -31,15 +32,17 @@ func CreateCourseRequestService(
 	return &CourseRequestServiceImpl{crr, cr, csr, mar, ur, sr, tmr}
 }
 
-func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, param entity.CreateOrderParam) (*int64, error) {
-	course := new(entity.Course)
+func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, param entity.CreateCourseRequestParam) (int, error) {
 	freeMentorSchedule := new(int64)
 	existingSchedule := new(int64)
+	ongoingOrderCount := new(int64)
+	course := new(entity.Course)
 	newScheds := new([]entity.CreateRequestSchedule)
-	courseRequestID := new(int64)
 	updateCourse := new(entity.UpdateCourseQuery)
 	user := new(entity.User)
 	student := new(entity.Student)
+	courseRequest := new(entity.CourseRequest)
+	now := time.Now()
 
 	if err := crs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := crs.cr.FindByID(ctx, param.CourseID, course, true); err != nil {
@@ -56,6 +59,16 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 				"you are not verified yet",
 				errors.New("user are not verified yet"),
 				customerrors.Unauthenticate,
+			)
+		}
+		if err := crs.crr.FindOngoingByCourseIDAndStudentID(ctx, param.CourseID, param.StudentID, ongoingOrderCount); err != nil {
+			return err
+		}
+		if *ongoingOrderCount > 0 {
+			return customerrors.NewError(
+				"There is an ongoing order for this course",
+				errors.New("there is an ongoing order for this course"),
+				customerrors.InvalidAction,
 			)
 		}
 		// I hate this solution to the bone because of N+1 Query
@@ -91,21 +104,32 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 				EndTime:   endTime,
 			})
 		}
+
 		totalPrice := course.Price * float64(len(param.PreferredSlots)) * constants.OperationalCostPercentage
-		if err := crs.crr.CreateOrder(ctx, param.StudentID, param.CourseID, totalPrice, len(param.PreferredSlots), courseRequestID); err != nil {
+
+		courseRequest.StudentID = param.StudentID
+		courseRequest.CourseID = param.CourseID
+		courseRequest.TotalPrice = totalPrice
+		courseRequest.NumberOfSessions = len(param.PreferredSlots)
+		eat := now.Add(2 * 24 * time.Hour)
+		courseRequest.ExpiredAt = &eat
+
+		if err := crs.crr.CreateOrder(ctx, courseRequest); err != nil {
 			return err
 		}
-		if err := crs.csr.CreateSchedule(ctx, *courseRequestID, newScheds); err != nil {
+		if err := crs.csr.CreateSchedule(ctx, courseRequest.ID, newScheds); err != nil {
 			return err
 		}
+
 		updatedTransactionCount := course.TransactionCount + 1
 		updateCourse.TransactionCount = &updatedTransactionCount
 		if err := crs.cr.UpdateCourse(ctx, param.CourseID, updateCourse); err != nil {
 			return err
 		}
+
 		return nil
 	}); err != nil {
-		return nil, err
+		return 0, err
 	}
-	return courseRequestID, nil
+	return courseRequest.ID, nil
 }

@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"net/http"
+	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/entity"
@@ -26,7 +27,7 @@ func (crh *CourseRequestHandlerImpl) CreateReservation(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	var req dtos.CreateOrderReq
+	var req dtos.CreateCourseRequstReq
 	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
 		ctx.Error(err)
 		return
@@ -39,7 +40,7 @@ func (crh *CourseRequestHandlerImpl) CreateReservation(ctx *gin.Context) {
 		))
 		return
 	}
-	if len(req.PreferredSlots) > 7 {
+	if len(req.PreferredSlots) > constants.MaxRequestSlot {
 		ctx.Error(customerrors.NewError(
 			"can only reserve up to seven session in one order",
 			errors.New("there are more than 7 requested slots"),
@@ -51,7 +52,7 @@ func (crh *CourseRequestHandlerImpl) CreateReservation(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	param := entity.CreateOrderParam{
+	param := entity.CreateCourseRequestParam{
 		CourseID:       req.CourseID,
 		StudentID:      claim.Subject,
 		PreferredSlots: []entity.PreferredSlot{},
@@ -86,8 +87,8 @@ func (crh *CourseRequestHandlerImpl) CreateReservation(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
-		Data: dtos.CreateOrderRes{
-			CourseRequestID: *courseRequestID,
+		Data: dtos.CreateCourseRequestRes{
+			CourseRequestID: courseRequestID,
 		},
 	})
 }

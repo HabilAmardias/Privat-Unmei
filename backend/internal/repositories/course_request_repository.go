@@ -15,25 +15,54 @@ func CreateCourseRequestRepository(db *sql.DB) *CourseRequestRepositoryImpl {
 	return &CourseRequestRepositoryImpl{db}
 }
 
-func (cr *CourseRequestRepositoryImpl) CreateOrder(ctx context.Context, studentID string, courseID int, totalPrice float64, numberOfSessions int, id *int64) error {
+func (cr *CourseRequestRepositoryImpl) FindOngoingByCourseIDAndStudentID(ctx context.Context, courseID int, studentID string, count *int64) error {
 	var driver RepoDriver = cr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
 	}
 	query := `
-	INSERT INTO course_requests (student_id, course_id, total_price, number_of_sessions)
+	SELECT COUNT(*)
+	FROM course_requests
+	WHERE
+		student_id = $1 AND
+		course_id = $2 AND
+		status IN ('reserved','pending payment', 'scheduled') AND
+		deleted_at IS NULL AND
+		expired_at > NOW()
+	`
+	if err := driver.QueryRow(query, studentID, courseID).Scan(count); err != nil {
+		return customerrors.NewError(
+			"failed to get order",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (cr *CourseRequestRepositoryImpl) CreateOrder(
+	ctx context.Context,
+	courseRequest *entity.CourseRequest,
+) error {
+	var driver RepoDriver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	INSERT INTO course_requests (student_id, course_id, total_price, number_of_sessions, expired_at)
 	VALUES
-	($1, $2, $3, $4)
+	($1, $2, $3, $4, $5)
 	RETURNING (id)
 	`
 	row := driver.QueryRow(
 		query,
-		studentID,
-		courseID,
-		totalPrice,
-		numberOfSessions,
+		courseRequest.StudentID,
+		courseRequest.CourseID,
+		courseRequest.TotalPrice,
+		courseRequest.NumberOfSessions,
+		courseRequest.ExpiredAt,
 	)
-	if err := row.Scan(id); err != nil {
+	if err := row.Scan(&courseRequest.ID); err != nil {
 		return customerrors.NewError(
 			"failed to create order",
 			err,
@@ -43,7 +72,7 @@ func (cr *CourseRequestRepositoryImpl) CreateOrder(ctx context.Context, studentI
 	return nil
 }
 
-func (cr *CourseRequestRepositoryImpl) FindOngoingByCourseID(ctx context.Context, courseID int, orders *[]entity.CourseOrder) error {
+func (cr *CourseRequestRepositoryImpl) FindOngoingByCourseID(ctx context.Context, courseID int, orders *[]entity.CourseRequest) error {
 	var driver RepoDriver = cr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
@@ -62,7 +91,7 @@ func (cr *CourseRequestRepositoryImpl) FindOngoingByCourseID(ctx context.Context
 		updated_at,
 		deleted_at
 	FROM course_requests
-	WHERE course_id = $1 AND status NOT IN ('completed', 'cancelled') AND deleted_at IS NULL
+	WHERE course_id = $1 AND status NOT IN ('completed', 'cancelled') AND deleted_at IS NULL AND expired_at > NOW()
 	`
 	rows, err := driver.Query(query, courseID)
 	if err != nil {
@@ -74,7 +103,7 @@ func (cr *CourseRequestRepositoryImpl) FindOngoingByCourseID(ctx context.Context
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var item entity.CourseOrder
+		var item entity.CourseRequest
 		if err := rows.Scan(
 			&item.ID,
 			&item.StudentID,
@@ -99,7 +128,7 @@ func (cr *CourseRequestRepositoryImpl) FindOngoingByCourseID(ctx context.Context
 	return nil
 }
 
-func (cr *CourseRequestRepositoryImpl) FindCompletedByStudentIDAndCourseID(ctx context.Context, studentID string, courseID int, orders *[]entity.CourseOrder) error {
+func (cr *CourseRequestRepositoryImpl) FindCompletedByStudentIDAndCourseID(ctx context.Context, studentID string, courseID int, orders *[]entity.CourseRequest) error {
 	var driver RepoDriver = cr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
@@ -130,7 +159,7 @@ func (cr *CourseRequestRepositoryImpl) FindCompletedByStudentIDAndCourseID(ctx c
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var item entity.CourseOrder
+		var item entity.CourseRequest
 		if err := rows.Scan(
 			&item.ID,
 			&item.StudentID,

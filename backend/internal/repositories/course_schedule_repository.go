@@ -30,7 +30,7 @@ func (csr *CourseScheduleRepositoryImpl) IsScheduleExist(ctx context.Context, me
 	JOIN courses c ON cr.course_id = c.id
 	WHERE c.mentor_id = $1 AND cs.scheduled_date = $2 
 	AND cs.deleted_at IS NULL AND cr.deleted_at IS NULL AND c.deleted_at IS NULL
-	AND cr.status IN ('scheduled', 'pending payment', 'reserved')
+	AND cs.status IN ('scheduled','reserved')
 	AND NOT (cs.end_time <= $3 OR cs.start_time >= $4)
 	`
 	row := driver.QueryRow(
@@ -50,7 +50,7 @@ func (csr *CourseScheduleRepositoryImpl) IsScheduleExist(ctx context.Context, me
 	return nil
 }
 
-func (csr *CourseScheduleRepositoryImpl) CreateSchedule(ctx context.Context, courseRequestID int64, slots *[]entity.CreateRequestSchedule) error {
+func (csr *CourseScheduleRepositoryImpl) CreateSchedule(ctx context.Context, courseRequestID int, slots *[]entity.CreateRequestSchedule) error {
 	var driver RepoDriver
 	driver = csr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {

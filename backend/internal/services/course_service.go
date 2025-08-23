@@ -29,7 +29,7 @@ func CreateCourseService(
 func (cs *CourseServiceImpl) UpdateCourse(ctx context.Context, param entity.UpdateCourseParam) error {
 	updateCourseQuery := new(entity.UpdateCourseQuery)
 	course := new(entity.Course)
-	orders := new([]entity.CourseOrder)
+	orders := new([]entity.CourseRequest)
 	categories := new([]entity.CourseCategory)
 	return cs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := cs.cr.FindByID(ctx, param.CourseID, course, true); err != nil {

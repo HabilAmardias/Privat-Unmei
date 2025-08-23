@@ -6,20 +6,18 @@ import (
 )
 
 const (
-	FileSizeThreshold    = 1_000_000 // 1MB
-	PNGType              = "image/png"
-	JPGType              = "image/jpeg"
-	PDFType              = "application/pdf"
-	UnverifiedStatus     = "unverified"
-	VerifiedStatus       = "verified"
-	CTX_AUTH_PAYLOAD_KEY = "auth_payload"
-	DefaultAvatar        = "https://res.cloudinary.com/dk8rlicon/image/upload/v1753881263/default-avatar-icon-of-social-media-user-vector_j8obqd.jpg"
-	AvatarFolder         = "Avatars/"
-	ResumeFolder         = "Resumes/"
-)
-
-const (
+	FileSizeThreshold                 = 1_000_000 // 1MB
+	PNGType                           = "image/png"
+	JPGType                           = "image/jpeg"
+	PDFType                           = "application/pdf"
+	UnverifiedStatus                  = "unverified"
+	VerifiedStatus                    = "verified"
+	CTX_AUTH_PAYLOAD_KEY              = "auth_payload"
+	DefaultAvatar                     = "https://res.cloudinary.com/dk8rlicon/image/upload/v1753881263/default-avatar-icon-of-social-media-user-vector_j8obqd.jpg"
+	AvatarFolder                      = "Avatars/"
+	ResumeFolder                      = "Resumes/"
 	OperationalCostPercentage float64 = 1.1
+	MaxRequestSlot                    = 7
 )
 
 const (

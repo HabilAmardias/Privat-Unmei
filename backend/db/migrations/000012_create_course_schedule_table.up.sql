@@ -7,6 +7,7 @@ CREATE TABLE course_schedule (
     scheduled_date DATE NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
+    status VARCHAR DEFAULT 'reserved' CHECK(status IN ('reserved', 'scheduled', 'completed')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMPTZ
