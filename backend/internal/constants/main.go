@@ -3,6 +3,7 @@ package constants
 import (
 	"fmt"
 	"os"
+	"time"
 )
 
 const (
@@ -18,6 +19,7 @@ const (
 	ResumeFolder                      = "Resumes/"
 	OperationalCostPercentage float64 = 1.1
 	MaxRequestSlot                    = 7
+	ExpiredInterval                   = 15 * time.Minute // 15 minute for development and testing
 )
 
 const (

@@ -42,7 +42,7 @@ func (crs *CourseRequestServiceImpl) HandleCourseRequest(ctx context.Context, pa
 	schedules := new([]entity.CourseRequestSchedule)
 	updateCourse := new(entity.UpdateCourseQuery)
 	now := time.Now()
-	temp := now.Add(2 * 24 * time.Hour)
+	temp := now.Add(constants.ExpiredInterval)
 	eat := &temp
 
 	if err := crs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
@@ -200,7 +200,7 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 		courseRequest.CourseID = param.CourseID
 		courseRequest.TotalPrice = totalPrice
 		courseRequest.NumberOfSessions = len(param.PreferredSlots)
-		eat := now.Add(2 * 24 * time.Hour)
+		eat := now.Add(constants.ExpiredInterval)
 		courseRequest.ExpiredAt = &eat
 
 		if err := crs.crr.CreateOrder(ctx, courseRequest); err != nil {
