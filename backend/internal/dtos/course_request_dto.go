@@ -11,4 +11,7 @@ type (
 	CreateCourseRequestRes struct {
 		CourseRequestID int `json:"id"`
 	}
+	HandleCourseRequestReq struct {
+		Accept *bool `json:"accept" binding:"required"`
+	}
 )

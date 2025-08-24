@@ -38,7 +38,7 @@ func Bootstrap(db *sql.DB, app *gin.Engine) {
 	courseCategoryService := services.CreateCourseCategoryService(courseCategoryRepo, transactionManager)
 	courseService := services.CreateCourseService(courseRepo, courseCategoryRepo, topicRepo, transactionManager, courseRequestRepo)
 	courseRatingService := services.CreateCourseRatingService(courseRepo, courseRatingRepo, courseRequestRepo, mentorRepo, transactionManager)
-	courseRequestService := services.CreateCourseRequestService(courseRequestRepo, courseRepo, courseScheduleRepo, mentorAvailabilityRepo, userRepo, studentRepo, transactionManager)
+	courseRequestService := services.CreateCourseRequestService(courseRequestRepo, courseRepo, courseScheduleRepo, mentorAvailabilityRepo, userRepo, studentRepo, mentorRepo, transactionManager)
 
 	studentHandler := handlers.CreateStudentHandler(studentService)
 	adminHandler := handlers.CreateAdminHandler(adminService)

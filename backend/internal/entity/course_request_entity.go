@@ -7,11 +7,9 @@ type (
 		ID               int
 		StudentID        string
 		CourseID         int
-		Status           int
+		Status           string
 		TotalPrice       float64
 		NumberOfSessions int
-		AcceptedAt       *time.Time
-		PaymentDue       *time.Time
 		ExpiredAt        *time.Time
 		CreatedAt        time.Time
 		UpdatedAt        time.Time
@@ -25,5 +23,10 @@ type (
 		CourseID       int
 		StudentID      string
 		PreferredSlots []PreferredSlot
+	}
+	HandleCourseRequestParam struct {
+		MentorID        string
+		CourseRequestID int
+		Accept          bool
 	}
 )

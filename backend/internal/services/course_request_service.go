@@ -17,6 +17,7 @@ type CourseRequestServiceImpl struct {
 	mar *repositories.MentorAvailabilityRepositoryImpl
 	ur  *repositories.UserRepositoryImpl
 	sr  *repositories.StudentRepositoryImpl
+	mr  *repositories.MentorRepositoryImpl
 	tmr *repositories.TransactionManagerRepositories
 }
 
@@ -27,9 +28,91 @@ func CreateCourseRequestService(
 	mar *repositories.MentorAvailabilityRepositoryImpl,
 	ur *repositories.UserRepositoryImpl,
 	sr *repositories.StudentRepositoryImpl,
+	mr *repositories.MentorRepositoryImpl,
 	tmr *repositories.TransactionManagerRepositories,
 ) *CourseRequestServiceImpl {
-	return &CourseRequestServiceImpl{crr, cr, csr, mar, ur, sr, tmr}
+	return &CourseRequestServiceImpl{crr, cr, csr, mar, ur, sr, mr, tmr}
+}
+
+func (crs *CourseRequestServiceImpl) HandleCourseRequest(ctx context.Context, param entity.HandleCourseRequestParam) error {
+	course := new(entity.Course)
+	courseRequest := new(entity.CourseRequest)
+	user := new(entity.User)
+	mentor := new(entity.Mentor)
+	schedules := new([]entity.CourseRequestSchedule)
+	now := time.Now()
+	temp := now.Add(2 * 24 * time.Hour)
+	eat := &temp
+
+	if err := crs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := crs.ur.FindByID(ctx, param.MentorID, user); err != nil {
+			return err
+		}
+		if err := crs.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
+			return err
+		}
+		if err := crs.crr.FindByID(ctx, param.CourseRequestID, courseRequest); err != nil {
+			return err
+		}
+		if err := crs.cr.FindByID(ctx, courseRequest.CourseID, course, false); err != nil {
+			return err
+		}
+		if err := crs.csr.FindReservedScheduleByCourseRequestID(ctx, param.CourseRequestID, schedules); err != nil {
+			return err
+		}
+		if course.MentorID != param.MentorID {
+			return customerrors.NewError(
+				"unauthorized access",
+				errors.New("unauthorized access"),
+				customerrors.Unauthenticate,
+			)
+		}
+		if courseRequest.Status != constants.ReservedStatus {
+			return customerrors.NewError(
+				"invalid course request",
+				errors.New("course request is not on reserved status"),
+				customerrors.InvalidAction,
+			)
+		}
+		if courseRequest.ExpiredAt == nil {
+			return customerrors.NewError(
+				"invalid course request",
+				errors.New("no expiration date"),
+				customerrors.InvalidAction,
+			)
+		}
+		if now.After(*courseRequest.ExpiredAt) {
+			return customerrors.NewError(
+				"course request already expired",
+				errors.New("course request already expired"),
+				customerrors.InvalidAction,
+			)
+		}
+		if len(*schedules) != courseRequest.NumberOfSessions {
+			return customerrors.NewError(
+				"requested number of session and number of schedules does not match",
+				errors.New("requested number of session and number of schedules does not match"),
+				customerrors.InvalidAction,
+			)
+		}
+		status := constants.PendingPaymentStatus
+		if !param.Accept {
+			status = constants.CancelledStatus
+			eat = nil
+		}
+		if err := crs.crr.ChangeRequestStatus(ctx, param.CourseRequestID, status, eat); err != nil {
+			return err
+		}
+		if !param.Accept {
+			if err := crs.csr.UpdateScheduleStatusByCourseRequestID(ctx, param.CourseRequestID, constants.CancelledStatus); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, param entity.CreateCourseRequestParam) (int, error) {

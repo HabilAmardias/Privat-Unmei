@@ -22,6 +22,43 @@ func CreateCourseRequestHandler(cos *services.CourseRequestServiceImpl) *CourseR
 	return &CourseRequestHandlerImpl{cos}
 }
 
+func (crh *CourseRequestHandlerImpl) HandleCourseRequest(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	courseRequestID, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.Error(customerrors.NewError(
+			"invalid course request",
+			err,
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	var req dtos.HandleCourseRequestReq
+	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.HandleCourseRequestParam{
+		MentorID:        claim.Subject,
+		CourseRequestID: courseRequestID,
+		Accept:          *req.Accept,
+	}
+	if err := crh.cos.HandleCourseRequest(ctx, param); err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.CreateCourseRequestRes{
+			CourseRequestID: param.CourseRequestID,
+		},
+	})
+}
+
 func (crh *CourseRequestHandlerImpl) CreateReservation(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
@@ -95,7 +132,7 @@ func (crh *CourseRequestHandlerImpl) CreateReservation(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	ctx.JSON(http.StatusOK, dtos.Response{
+	ctx.JSON(http.StatusCreated, dtos.Response{
 		Success: true,
 		Data: dtos.CreateCourseRequestRes{
 			CourseRequestID: courseRequestID,

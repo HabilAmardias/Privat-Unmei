@@ -21,6 +21,14 @@ const (
 )
 
 const (
+	ReservedStatus       = "reserved"
+	PendingPaymentStatus = "pending payment"
+	ScheduledStatus      = "scheduled"
+	CompletedStatus      = "completed"
+	CancelledStatus      = "cancelled"
+)
+
+const (
 	AdminRole   = iota + 1 // 1
 	MentorRole             // 2
 	StudentRole            // 3
@@ -43,6 +51,7 @@ const (
 	MentorResource
 	CourseCategoryResource
 	CourseResource
+	CourseRequestResource
 )
 
 const (

@@ -19,7 +19,8 @@ VALUES
 (1, 'student', 'registered student data'),
 (2, 'mentor', 'course manager data'),
 (3, 'course_category', 'course category data'),
-(4, 'course', 'course data');
+(4, 'course', 'course data'),
+(5, 'course_request', 'course request data');
 
 INSERT INTO rbac(role_id, permission_id, resource_id)
 VALUES
@@ -35,4 +36,5 @@ VALUES
 (2, 6, 4), -- mentor can delete his own course
 (2, 2, 4), -- mentor can read their own course
 (2, 4, 4), -- mentor can update their own course
-(1, 1, 2); -- admin can create mentor data
+(1, 1, 2), -- admin can create mentor data
+(2, 5, 5); -- mentor can update course request data
