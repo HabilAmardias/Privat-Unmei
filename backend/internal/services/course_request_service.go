@@ -40,6 +40,7 @@ func (crs *CourseRequestServiceImpl) HandleCourseRequest(ctx context.Context, pa
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
 	schedules := new([]entity.CourseRequestSchedule)
+	updateCourse := new(entity.UpdateCourseQuery)
 	now := time.Now()
 	temp := now.Add(2 * 24 * time.Hour)
 	eat := &temp
@@ -54,7 +55,7 @@ func (crs *CourseRequestServiceImpl) HandleCourseRequest(ctx context.Context, pa
 		if err := crs.crr.FindByID(ctx, param.CourseRequestID, courseRequest); err != nil {
 			return err
 		}
-		if err := crs.cr.FindByID(ctx, courseRequest.CourseID, course, false); err != nil {
+		if err := crs.cr.FindByID(ctx, courseRequest.CourseID, course, true); err != nil {
 			return err
 		}
 		if err := crs.csr.FindReservedScheduleByCourseRequestID(ctx, param.CourseRequestID, schedules); err != nil {
@@ -105,6 +106,11 @@ func (crs *CourseRequestServiceImpl) HandleCourseRequest(ctx context.Context, pa
 		}
 		if !param.Accept {
 			if err := crs.csr.UpdateScheduleStatusByCourseRequestID(ctx, param.CourseRequestID, constants.CancelledStatus); err != nil {
+				return err
+			}
+			updatedTransactionCount := course.TransactionCount - 1
+			updateCourse.TransactionCount = &updatedTransactionCount
+			if err := crs.cr.UpdateCourse(ctx, course.ID, updateCourse); err != nil {
 				return err
 			}
 		}
