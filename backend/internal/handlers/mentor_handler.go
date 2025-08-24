@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"privat-unmei/internal/constants"
@@ -10,6 +11,7 @@ import (
 	"privat-unmei/internal/services"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 )
 
 type MentorHandlerImpl struct {
@@ -171,17 +173,17 @@ func (mh *MentorHandlerImpl) UpdateMentorForAdmin(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	if req.WhatsappNumber != nil && !ValidatePhoneNumber(*req.WhatsappNumber) {
+	if req.GopayNumber != nil && !ValidatePhoneNumber(*req.GopayNumber) {
 		ctx.Error(customerrors.NewError(
-			"invalid whatsapp number",
-			errors.New("invalid whatsapp number"),
+			"invalid gopay number",
+			errors.New("invalid gopay number"),
 			customerrors.InvalidAction,
 		))
 		return
 	}
 	param := entity.UpdateMentorParam{
 		ID:                id,
-		WhatsappNumber:    req.WhatsappNumber,
+		GopayNumber:       req.GopayNumber,
 		YearsOfExperience: req.YearsOfExperience,
 	}
 	if err := mh.ms.UpdateMentorForAdmin(ctx, param); err != nil {
@@ -220,8 +222,8 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	if req.WhatsappNumber != nil {
-		if !ValidatePhoneNumber(*req.WhatsappNumber) {
+	if req.GopayNumber != nil {
+		if !ValidatePhoneNumber(*req.GopayNumber) {
 			ctx.Error(customerrors.NewError(
 				"invalid phone number",
 				errors.New("invalid phone number"),
@@ -240,6 +242,7 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 			return
 		}
 	}
+
 	param := entity.UpdateMentorParam{
 		ID:                claim.Subject,
 		Resume:            resumeFile,
@@ -248,10 +251,33 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 		Password:          req.Password,
 		Bio:               req.Bio,
 		YearsOfExperience: req.YearsOfExperience,
-		WhatsappNumber:    req.WhatsappNumber,
+		GopayNumber:       req.GopayNumber,
 		Degree:            req.Degree,
 		Major:             req.Major,
 		Campus:            req.Campus,
+		MentorSchedules:   []entity.MentorSchedule{},
+	}
+	if len(req.MentorSchedules) > 0 {
+		for _, sched := range req.MentorSchedules {
+			var mentorSchedule dtos.MentorAvailabilityReq
+			if err := json.Unmarshal([]byte(sched), &mentorSchedule); err != nil {
+				ctx.Error(customerrors.NewError(
+					"failed to parse input",
+					err,
+					customerrors.CommonErr,
+				))
+				return
+			}
+			if err := binding.Validator.ValidateStruct(mentorSchedule); err != nil {
+				ctx.Error(err)
+				return
+			}
+			param.MentorSchedules = append(param.MentorSchedules, entity.MentorSchedule{
+				DayOfWeek: mentorSchedule.DayOfWeek,
+				StartTime: entity.TimeOnly(mentorSchedule.StartTime),
+				EndTime:   entity.TimeOnly(mentorSchedule.EndTime),
+			})
+		}
 	}
 	if err := mh.ms.UpdateMentorProfile(ctx, param); err != nil {
 		ctx.Error(err)
@@ -279,10 +305,18 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 		))
 		return
 	}
-	if !ValidatePhoneNumber(req.WhatsappNumber) {
+	if !ValidatePhoneNumber(req.GopayNumber) {
 		ctx.Error(customerrors.NewError(
-			"invalid whatsapp number",
-			errors.New("whatsapp number given is invalid"),
+			"invalid gopay number",
+			errors.New("gopay number given is invalid"),
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	if len(req.MentorSchedules) <= 0 {
+		ctx.Error(customerrors.NewError(
+			"mentor need to submit their schedule",
+			errors.New("mentor need to submit their schedule"),
 			customerrors.InvalidAction,
 		))
 		return
@@ -310,10 +344,31 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 		ResumeFile:        file,
 		Bio:               req.Bio,
 		YearsOfExperience: req.YearsOfExperience,
-		WhatsappNumber:    req.WhatsappNumber,
+		GopayNumber:       req.GopayNumber,
 		Degree:            req.Degree,
 		Major:             req.Major,
 		Campus:            req.Campus,
+		MentorSchedules:   []entity.MentorSchedule{},
+	}
+	for _, sched := range req.MentorSchedules {
+		var schedule dtos.MentorAvailabilityReq
+		if err := json.Unmarshal([]byte(sched), &schedule); err != nil {
+			ctx.Error(customerrors.NewError(
+				"failed to parse input",
+				err,
+				customerrors.CommonErr,
+			))
+			return
+		}
+		if err := binding.Validator.ValidateStruct(schedule); err != nil {
+			ctx.Error(err)
+			return
+		}
+		param.MentorSchedules = append(param.MentorSchedules, entity.MentorSchedule{
+			DayOfWeek: schedule.DayOfWeek,
+			StartTime: entity.TimeOnly(schedule.StartTime),
+			EndTime:   entity.TimeOnly(schedule.EndTime),
+		})
 	}
 	if err := mh.ms.AddNewMentor(ctx, param); err != nil {
 		ctx.Error(err)

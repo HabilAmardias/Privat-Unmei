@@ -30,24 +30,23 @@ func (cr *CourseRepositoryImpl) UpdateCourse(ctx context.Context, courseID int, 
 		title = COALESCE($1, title),
 		description = COALESCE($2, description),
 		domicile = COALESCE($3, domicile),
-		min_price = COALESCE($4, min_price),
-		max_price = COALESCE($5, max_price),
-		method = COALESCE($6, method),
-		min_duration_days = COALESCE($7, min_duration_days),
-		max_duration_days = COALESCE($8, max_duration_days),
+		method = COALESCE($4, method),
+		price = COALESCE($5, price),
+		session_duration_minutes = COALESCE($6, session_duration_minutes),
+		max_total_session = COALESCE($7, max_total_session),
+		transaction_count = COALESCE($8, transaction_count),
 		updated_at = NOW()
-	WHERE id = $9 AND deleted_at IS NULL
+	WHERE id = $8 AND deleted_at IS NULL
 	`
 	_, err := driver.Exec(
 		query,
 		updateQuery.Title,
 		updateQuery.Description,
 		updateQuery.Domicile,
-		updateQuery.MinPrice,
-		updateQuery.MaxPrice,
 		updateQuery.Method,
-		updateQuery.MinDurationDays,
-		updateQuery.MaxDurationDays,
+		updateQuery.Price,
+		updateQuery.SessionDuration,
+		updateQuery.MaxSession,
 		courseID,
 	)
 	if err != nil {
@@ -75,11 +74,10 @@ func (cr *CourseRepositoryImpl) CourseDetail(ctx context.Context, query *entity.
 		c.title,
 		c.description,
 		c.domicile,
-		c.min_price,
-		c.max_price,
+		c.price,
 		c.method,
-		c.min_duration_days,
-		c.max_duration_days,
+		c.session_duration_minutes,
+		c.max_total_session,
 		COALESCE(
 			(SELECT STRING_AGG(cc_all.name, ',') 
 			FROM course_category_assignments cca_all 
@@ -103,11 +101,10 @@ func (cr *CourseRepositoryImpl) CourseDetail(ctx context.Context, query *entity.
 		&query.Title,
 		&query.Description,
 		&query.Domicile,
-		&query.MinPrice,
-		&query.MaxPrice,
+		&query.Price,
 		&query.Method,
-		&query.MinDurationDays,
-		&query.MaxDurationDays,
+		&query.SessionDuration,
+		&query.MaxSession,
 		&query.CourseCategories,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -147,11 +144,10 @@ func (cr *CourseRepositoryImpl) ListCourse(
 		u.email,
 		c.title,
 		c.domicile,
-		c.min_price,
-		c.max_price,
+		c.price,
 		c.method,
-		c.min_duration_days,
-		c.max_duration_days,
+		c.session_duration_minutes,
+		c.max_total_session,
 		COALESCE(
 			(SELECT STRING_AGG(cc_all.name, ',') 
 			FROM course_category_assignments cca_all 
@@ -236,11 +232,10 @@ func (cr *CourseRepositoryImpl) ListCourse(
 			&item.MentorEmail,
 			&item.Title,
 			&item.Domicile,
-			&item.MinPrice,
-			&item.MaxPrice,
+			&item.Price,
 			&item.Method,
-			&item.MinDurationDays,
-			&item.MaxDurationDays,
+			&item.SessionDuration,
+			&item.MaxSession,
 			&item.CourseCategories,
 		); err != nil {
 			return customerrors.NewError(
@@ -268,11 +263,10 @@ func (cr *CourseRepositoryImpl) GetMostBoughtCourses(ctx context.Context, course
 		u.email,
 		c.title,
 		c.domicile,
-		c.min_price,
-		c.max_price,
+		c.price,
 		c.method,
-		c.min_duration_days,
-		c.max_duration_days,
+		c.session_duration_minutes,
+		c.max_total_session,
 		COALESCE(
 			(SELECT STRING_AGG(cc_all.name, ',') 
 			FROM course_category_assignments cca_all 
@@ -307,11 +301,10 @@ func (cr *CourseRepositoryImpl) GetMostBoughtCourses(ctx context.Context, course
 			&item.MentorEmail,
 			&item.Title,
 			&item.Domicile,
-			&item.MinPrice,
-			&item.MaxPrice,
+			&item.Price,
 			&item.Method,
-			&item.MinDurationDays,
-			&item.MaxDurationDays,
+			&item.SessionDuration,
+			&item.MaxSession,
 			&item.CourseCategories,
 		); err != nil {
 			return customerrors.NewError(
@@ -401,11 +394,10 @@ func (cr *CourseRepositoryImpl) MentorListCourse(
 		c.id,
 		c.title,
 		c.domicile,
-		c.min_price,
-		c.max_price,
+		c.price,
 		c.method,
-		c.min_duration_days,
-		c.max_duration_days,
+		c.session_duration_minutes,
+		c.max_total_session,
 		COALESCE(
 			(SELECT STRING_AGG(cc_all.name, ',') 
 			FROM course_category_assignments cca_all 
@@ -478,11 +470,10 @@ func (cr *CourseRepositoryImpl) MentorListCourse(
 			&item.ID,
 			&item.Title,
 			&item.Domicile,
-			&item.MinPrice,
-			&item.MaxPrice,
+			&item.Price,
 			&item.Method,
-			&item.MinDurationDays,
-			&item.MaxDurationDays,
+			&item.SessionDuration,
+			&item.MaxSession,
 			&item.CourseCategories,
 		); err != nil {
 			return customerrors.NewError(
@@ -510,11 +501,10 @@ func (cr *CourseRepositoryImpl) FindByID(ctx context.Context, id int, course *en
 		title,
 		description,
 		domicile,
-		min_price,
+		price,
 		method,
-		max_price,
-		min_duration_days,
-		max_duration_days,
+		session_duration_minutes,
+		max_total_session,
 		transaction_count,
 		created_at,
 		updated_at,
@@ -534,11 +524,10 @@ func (cr *CourseRepositoryImpl) FindByID(ctx context.Context, id int, course *en
 		&course.Title,
 		&course.Description,
 		&course.Domicile,
-		&course.MinPrice,
+		&course.Price,
 		&course.Method,
-		&course.MaxPrice,
-		&course.MinDuration,
-		&course.MaxDuration,
+		&course.SessionDuration,
+		&course.MaxSession,
 		&course.TransactionCount,
 		&course.CreatedAt,
 		&course.UpdatedAt,
@@ -610,10 +599,9 @@ func (cr *CourseRepositoryImpl) CreateCourse(
 	title string,
 	description string,
 	domicile string,
-	minPrice float64,
-	maxPrice float64,
-	minDuration int,
-	maxDuration int,
+	price float64,
+	sessionDuration int,
+	maxSession int,
 	method string,
 	course *entity.Course,
 ) error {
@@ -623,12 +611,12 @@ func (cr *CourseRepositoryImpl) CreateCourse(
 		driver = tx
 	}
 	query := `
-	INSERT INTO courses (mentor_id, title, description, domicile, min_price, max_price, min_duration_days, max_duration_days, method)
+	INSERT INTO courses (mentor_id, title, description, domicile, price, session_duration_minutes, max_total_session, method)
 	VALUES
-	($1, $2, $3, $4, $5, $6, $7, $8, $9)
+	($1, $2, $3, $4, $5, $6, $7, $8)
 	RETURNING id
 	`
-	row := driver.QueryRow(query, mentorID, title, description, domicile, minPrice, maxPrice, minDuration, maxDuration, method)
+	row := driver.QueryRow(query, mentorID, title, description, domicile, price, sessionDuration, maxSession, method)
 	if err := row.Scan(&course.ID); err != nil {
 		return customerrors.NewError(
 			"failed to create course",

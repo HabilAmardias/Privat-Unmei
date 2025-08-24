@@ -7,8 +7,10 @@ import (
 	"net/http"
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
+	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/entity"
 	"regexp"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -98,4 +100,25 @@ func ValidateFile(headerFile *multipart.FileHeader, fileSizeThresh int64, fileTy
 
 func ValidateMethod(method string) bool {
 	return method == "offline" || method == "online" || method == "hybrid"
+}
+
+func ValidateDate(date time.Time) bool {
+	now := time.Now()
+	return date.After(now)
+}
+
+func CheckDateUniqueness(slots []dtos.PreferredSlot) error {
+	dateMap := make(map[string]bool)
+	for _, slot := range slots {
+		if _, exist := dateMap[slot.Date]; exist {
+			return customerrors.NewError(
+				"cannot reserve multiple session on same date",
+				errors.New("there are duplicate date"),
+				customerrors.InvalidAction,
+			)
+		} else {
+			dateMap[slot.Date] = true
+		}
+	}
+	return nil
 }

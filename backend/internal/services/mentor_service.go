@@ -17,7 +17,7 @@ type MentorServiceImpl struct {
 	mr  *repositories.MentorRepositoryImpl
 	tr  *repositories.TopicRepositoryImpl
 	ccr *repositories.CourseCategoryRepositoryImpl
-	car *repositories.CourseAvailabilityRepositoryImpl
+	car *repositories.MentorAvailabilityRepositoryImpl
 	cr  *repositories.CourseRepositoryImpl
 	bu  *utils.BcryptUtil
 	ju  *utils.JWTUtil
@@ -31,7 +31,7 @@ func CreateMentorService(
 	mr *repositories.MentorRepositoryImpl,
 	tr *repositories.TopicRepositoryImpl,
 	ccr *repositories.CourseCategoryRepositoryImpl,
-	car *repositories.CourseAvailabilityRepositoryImpl,
+	car *repositories.MentorAvailabilityRepositoryImpl,
 	cr *repositories.CourseRepositoryImpl,
 	bu *utils.BcryptUtil,
 	ju *utils.JWTUtil,
@@ -156,12 +156,12 @@ func (ms *MentorServiceImpl) DeleteMentor(ctx context.Context, param entity.Dele
 			if err := ms.ccr.UnassignCategoriesMultipleCourse(ctx, *courseIDs); err != nil {
 				return err
 			}
-			if err := ms.car.DeleteAvailabilityMultipleCourses(ctx, *courseIDs); err != nil {
-				return err
-			}
 			if err := ms.cr.DeleteMentorCourse(ctx, param.ID); err != nil {
 				return err
 			}
+		}
+		if err := ms.car.DeleteAvailability(ctx, param.ID); err != nil {
+			return err
 		}
 		if err := ms.mr.DeleteMentor(ctx, mentor.ID); err != nil {
 			return err
@@ -210,11 +210,27 @@ func (ms *MentorServiceImpl) UpdateMentorProfile(ctx context.Context, param enti
 			}
 			userQuery.ProfileImage = &res.SecureURL
 		}
-
+		if len(param.MentorSchedules) > 0 {
+			if err := ms.car.DeleteAvailability(ctx, param.ID); err != nil {
+				return err
+			}
+			scheds := new([]entity.MentorAvailability)
+			for _, sched := range param.MentorSchedules {
+				*scheds = append(*scheds, entity.MentorAvailability{
+					MentorID:  param.ID,
+					DayOfWeek: sched.DayOfWeek,
+					StartTime: sched.StartTime,
+					EndTime:   sched.EndTime,
+				})
+			}
+			if err := ms.car.CreateAvailability(ctx, scheds); err != nil {
+				return err
+			}
+		}
 		mentorQuery.Campus = param.Campus
 		mentorQuery.Degree = param.Degree
 		mentorQuery.Major = param.Major
-		mentorQuery.WhatsappNumber = param.WhatsappNumber
+		mentorQuery.GopayNumber = param.GopayNumber
 		mentorQuery.YearsOfExperience = param.YearsOfExperience
 
 		if param.Resume != nil {
@@ -247,7 +263,7 @@ func (ms *MentorServiceImpl) UpdateMentorForAdmin(ctx context.Context, param ent
 		if err := ms.mr.FindByID(ctx, user.ID, mentor, false); err != nil {
 			return err
 		}
-		query.WhatsappNumber = param.WhatsappNumber
+		query.GopayNumber = param.GopayNumber
 		query.YearsOfExperience = param.YearsOfExperience
 		if err := ms.mr.UpdateMentor(ctx, mentor.ID, query); err != nil {
 			return err
@@ -262,7 +278,7 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 
 	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		// to be honest idk how to make this clean enough but for now it should work
-		if err := ms.mr.FindByWhatsapp(ctx, param.WhatsappNumber, mentor); err != nil {
+		if err := ms.mr.FindByGopay(ctx, param.GopayNumber, mentor); err != nil {
 			if err.Error() != customerrors.UserNotFound {
 				return err
 			}
@@ -307,7 +323,7 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 		mentor.Campus = param.Campus
 		mentor.Degree = param.Degree
 		mentor.Major = param.Major
-		mentor.WhatsappNumber = param.WhatsappNumber
+		mentor.GopayNumber = param.GopayNumber
 		mentor.YearsOfExperience = param.YearsOfExperience
 
 		newFilename := fmt.Sprintf("%s.pdf", mentor.ID)
@@ -315,8 +331,22 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 		if err != nil {
 			return err
 		}
+
 		mentor.Resume = uploadRes.SecureURL
 		if err := ms.mr.AddNewMentor(ctx, mentor); err != nil {
+			return err
+		}
+
+		schedules := new([]entity.MentorAvailability)
+		for _, sched := range param.MentorSchedules {
+			*schedules = append(*schedules, entity.MentorAvailability{
+				MentorID:  mentor.ID,
+				DayOfWeek: sched.DayOfWeek,
+				StartTime: sched.StartTime,
+				EndTime:   sched.EndTime,
+			})
+		}
+		if err := ms.car.CreateAvailability(ctx, schedules); err != nil {
 			return err
 		}
 

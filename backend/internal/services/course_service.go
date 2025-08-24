@@ -9,7 +9,6 @@ import (
 )
 
 type CourseServiceImpl struct {
-	car *repositories.CourseAvailabilityRepositoryImpl
 	cr  *repositories.CourseRepositoryImpl
 	ccr *repositories.CourseCategoryRepositoryImpl
 	tr  *repositories.TopicRepositoryImpl
@@ -18,21 +17,19 @@ type CourseServiceImpl struct {
 }
 
 func CreateCourseService(
-	car *repositories.CourseAvailabilityRepositoryImpl,
 	cr *repositories.CourseRepositoryImpl,
 	ccr *repositories.CourseCategoryRepositoryImpl,
 	tr *repositories.TopicRepositoryImpl,
 	tmr *repositories.TransactionManagerRepositories,
 	cor *repositories.CourseRequestRepositoryImpl,
 ) *CourseServiceImpl {
-	return &CourseServiceImpl{car, cr, ccr, tr, tmr, cor}
+	return &CourseServiceImpl{cr, ccr, tr, tmr, cor}
 }
 
 func (cs *CourseServiceImpl) UpdateCourse(ctx context.Context, param entity.UpdateCourseParam) error {
 	updateCourseQuery := new(entity.UpdateCourseQuery)
 	course := new(entity.Course)
-	scheds := new([]entity.CourseAvailability)
-	orders := new([]entity.CourseOrder)
+	orders := new([]entity.CourseRequest)
 	categories := new([]entity.CourseCategory)
 	return cs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := cs.cr.FindByID(ctx, param.CourseID, course, true); err != nil {
@@ -89,38 +86,14 @@ func (cs *CourseServiceImpl) UpdateCourse(ctx context.Context, param entity.Upda
 				return err
 			}
 		}
-		if len(param.CourseSchedule) > 0 {
-			if err := cs.car.DeleteAvailability(ctx, param.CourseID); err != nil {
-				return err
-			}
-			for _, schedule := range param.CourseSchedule {
-				if schedule.EndTime.Hour < schedule.StartTime.Hour {
-					return customerrors.NewError(
-						"invalid schedule",
-						errors.New("invalid schedule"),
-						customerrors.InvalidAction,
-					)
-				}
-				*scheds = append(*scheds, entity.CourseAvailability{
-					CourseID:  course.ID,
-					DayOfWeek: schedule.DayOfWeek,
-					StartTime: schedule.StartTime,
-					EndTime:   schedule.EndTime,
-				})
-			}
-			if err := cs.car.CreateAvailability(ctx, scheds); err != nil {
-				return err
-			}
-		}
 
 		updateCourseQuery.Title = param.Title
 		updateCourseQuery.Description = param.Description
 		updateCourseQuery.Domicile = param.Description
-		updateCourseQuery.MaxDurationDays = param.MaxDurationDays
-		updateCourseQuery.MaxPrice = param.MaxPrice
+		updateCourseQuery.SessionDuration = param.SessionDuration
+		updateCourseQuery.Price = param.Price
 		updateCourseQuery.Method = param.Method
-		updateCourseQuery.MinDurationDays = param.MinDurationDays
-		updateCourseQuery.MinPrice = param.MinPrice
+		updateCourseQuery.MaxSession = param.MaxSession
 
 		if err := cs.cr.UpdateCourse(ctx, param.CourseID, updateCourseQuery); err != nil {
 			return err
@@ -132,7 +105,6 @@ func (cs *CourseServiceImpl) UpdateCourse(ctx context.Context, param entity.Upda
 func (cs *CourseServiceImpl) CourseDetail(ctx context.Context, param entity.CourseDetailParam) (*entity.CourseDetailQuery, error) {
 	query := new(entity.CourseDetailQuery)
 	topics := new([]entity.CourseTopic)
-	scheds := new([]entity.CourseAvailability)
 	if err := cs.cr.CourseDetail(ctx, query, param.ID); err != nil {
 		return nil, err
 	}
@@ -147,17 +119,6 @@ func (cs *CourseServiceImpl) CourseDetail(ctx context.Context, param entity.Cour
 		)
 	}
 	query.Topics = topics
-	if err := cs.car.GetAvailabilityByCourseID(ctx, param.ID, scheds); err != nil {
-		return nil, err
-	}
-	if len(*scheds) == 0 {
-		return nil, customerrors.NewError(
-			"schedule availability for this course does not exist",
-			errors.New("schedule availability for this course does not exist"),
-			customerrors.ItemNotExist,
-		)
-	}
-	query.Schedules = scheds
 	return query, nil
 }
 
@@ -210,9 +171,6 @@ func (cs *CourseServiceImpl) DeleteCourse(ctx context.Context, param entity.Dele
 		if err := cs.ccr.UnassignCategories(ctx, course.ID); err != nil {
 			return err
 		}
-		if err := cs.car.DeleteAvailability(ctx, param.CourseID); err != nil {
-			return err
-		}
 		if err := cs.tr.DeleteTopics(ctx, param.CourseID); err != nil {
 			return err
 		}
@@ -226,34 +184,18 @@ func (cs *CourseServiceImpl) DeleteCourse(ctx context.Context, param entity.Dele
 func (cs *CourseServiceImpl) CreateCourse(ctx context.Context, param entity.CreateCourseParam) (int, error) {
 	course := new(entity.Course)
 	topics := new([]entity.CourseTopic)
-	schedules := new([]entity.CourseAvailability)
 	categories := new([]entity.CourseCategory)
 
 	err := cs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		if param.MaxDuration < param.MinDuration {
-			return customerrors.NewError(
-				"invalid course duration",
-				errors.New("invalid course duration"),
-				customerrors.InvalidAction,
-			)
-		}
-		if param.MaxPrice < param.MinPrice {
-			return customerrors.NewError(
-				"invalid course price",
-				errors.New("invalid course price"),
-				customerrors.InvalidAction,
-			)
-		}
 		if err := cs.cr.CreateCourse(
 			ctx,
 			param.MentorID,
 			param.Title,
 			param.Description,
 			param.Domicile,
-			param.MinPrice,
-			param.MaxPrice,
-			param.MinDuration,
-			param.MaxDuration,
+			param.Price,
+			param.SessionDuration,
+			param.MaxSession,
 			param.Method,
 			course,
 		); err != nil {
@@ -280,24 +222,6 @@ func (cs *CourseServiceImpl) CreateCourse(ctx context.Context, param entity.Crea
 			return err
 		}
 		if err := cs.tr.CreateTopics(ctx, topics); err != nil {
-			return err
-		}
-		for _, schedule := range param.CourseAvailability {
-			if schedule.EndTime.Hour < schedule.StartTime.Hour {
-				return customerrors.NewError(
-					"invalid schedule",
-					errors.New("invalid schedule"),
-					customerrors.InvalidAction,
-				)
-			}
-			*schedules = append(*schedules, entity.CourseAvailability{
-				CourseID:  course.ID,
-				DayOfWeek: schedule.DayOfWeek,
-				StartTime: schedule.StartTime,
-				EndTime:   schedule.EndTime,
-			})
-		}
-		if err := cs.car.CreateAvailability(ctx, schedules); err != nil {
 			return err
 		}
 		return nil

@@ -58,24 +58,13 @@ func (ch *CourseHandlerImpl) UpdateCourse(ctx *gin.Context) {
 			Title:           req.Title,
 			Description:     req.Description,
 			Domicile:        req.Domicile,
-			MinPrice:        req.MinPrice,
-			MaxPrice:        req.MaxPrice,
+			Price:           req.Price,
 			Method:          req.Method,
-			MinDurationDays: req.MinDurationDays,
-			MaxDurationDays: req.MaxDurationDays,
+			SessionDuration: req.SessionDuration,
+			MaxSession:      req.MaxSession,
 		},
-		CourseSchedule:   []entity.CreateSchedule{},
 		CourseTopic:      []entity.CreateTopic{},
 		CourseCategories: req.CourseCategories,
-	}
-	if len(req.CourseSchedule) > 0 {
-		for _, sched := range req.CourseSchedule {
-			param.CourseSchedule = append(param.CourseSchedule, entity.CreateSchedule{
-				DayOfWeek: sched.DayOfWeek,
-				StartTime: entity.TimeOnly(sched.StartTime),
-				EndTime:   entity.TimeOnly(sched.EndTime),
-			})
-		}
 	}
 	if len(req.CourseTopic) > 0 {
 		for _, t := range req.CourseTopic {
@@ -120,33 +109,22 @@ func (ch *CourseHandlerImpl) CourseDetail(ctx *gin.Context) {
 				Title:            res.Title,
 				Domicile:         res.Domicile,
 				Method:           res.Method,
-				MinPrice:         res.MinPrice,
-				MaxPrice:         res.MaxPrice,
-				MinDurationDays:  res.MinDurationDays,
-				MaxDurationDays:  res.MaxDurationDays,
+				Price:            res.Price,
+				SessionDuration:  res.SessionDuration,
+				MaxSession:       res.MaxSession,
 				CourseCategories: strings.Split(res.CourseCategories, ","),
 			},
 			MentorID:    res.MentorID,
 			MentorName:  res.MentorName,
 			MentorEmail: res.MentorEmail,
 		},
-		Description:  res.Description,
-		Topics:       []dtos.CourseTopicRes{},
-		Availability: []dtos.CourseAvailabilityRes{},
+		Description: res.Description,
+		Topics:      []dtos.CourseTopicRes{},
 	}
 	for _, topic := range *res.Topics {
 		entry.Topics = append(entry.Topics, dtos.CourseTopicRes{
 			Title:       topic.Title,
 			Description: topic.Description,
-		})
-	}
-	for _, av := range *res.Schedules {
-		startTime := dtos.TimeOnly(av.StartTime)
-		endTime := dtos.TimeOnly(av.EndTime)
-		entry.Availability = append(entry.Availability, dtos.CourseAvailabilityRes{
-			DayOfWeek: av.DayOfWeek,
-			StartTime: startTime,
-			EndTime:   endTime,
 		})
 	}
 	ctx.JSON(http.StatusOK, dtos.Response{
@@ -189,10 +167,9 @@ func (ch *CourseHandlerImpl) ListCourse(ctx *gin.Context) {
 				Title:            course.Title,
 				Domicile:         course.Domicile,
 				Method:           course.Method,
-				MinPrice:         course.MinPrice,
-				MaxPrice:         course.MaxPrice,
-				MinDurationDays:  course.MinDurationDays,
-				MaxDurationDays:  course.MaxDurationDays,
+				Price:            course.Price,
+				SessionDuration:  course.SessionDuration,
+				MaxSession:       course.MaxSession,
 				CourseCategories: strings.Split(course.CourseCategories, ","),
 			},
 			MentorID:    course.MentorID,
@@ -257,10 +234,9 @@ func (ch *CourseHandlerImpl) MostBoughtCourses(ctx *gin.Context) {
 				Title:            course.Title,
 				Domicile:         course.Domicile,
 				Method:           course.Method,
-				MinPrice:         course.MinPrice,
-				MaxPrice:         course.MaxPrice,
-				MinDurationDays:  course.MinDurationDays,
-				MaxDurationDays:  course.MaxDurationDays,
+				Price:            course.Price,
+				SessionDuration:  course.SessionDuration,
+				MaxSession:       course.MaxSession,
 				CourseCategories: strings.Split(course.CourseCategories, ","),
 			},
 			MentorID:    course.MentorID,
@@ -313,10 +289,9 @@ func (ch *CourseHandlerImpl) MentorListCourse(ctx *gin.Context) {
 			Title:            item.Title,
 			Domicile:         item.Domicile,
 			Method:           item.Method,
-			MinPrice:         item.MinPrice,
-			MaxPrice:         item.MaxPrice,
-			MinDurationDays:  item.MinDurationDays,
-			MaxDurationDays:  item.MaxDurationDays,
+			Price:            item.Price,
+			SessionDuration:  item.SessionDuration,
+			MaxSession:       item.MaxSession,
 			CourseCategories: strings.Split(item.CourseCategories, ","),
 		})
 	}
@@ -416,14 +391,6 @@ func (ch *CourseHandlerImpl) AddNewCourse(ctx *gin.Context) {
 		))
 		return
 	}
-	if len(req.CourseAvailability) <= 0 {
-		ctx.Error(customerrors.NewError(
-			"mentor should insert their schedule",
-			errors.New("mentor should insert their schedule"),
-			customerrors.InvalidAction,
-		))
-		return
-	}
 	if len(req.Topics) <= 0 {
 		ctx.Error(customerrors.NewError(
 			"mentor should enter course topic at least one",
@@ -443,31 +410,19 @@ func (ch *CourseHandlerImpl) AddNewCourse(ctx *gin.Context) {
 		return
 	}
 	param := entity.CreateCourseParam{
-		MentorID:           claim.Subject,
-		Title:              req.Title,
-		Description:        req.Description,
-		Domicile:           req.Domicile,
-		MinPrice:           req.MinPrice,
-		MaxPrice:           req.MaxPrice,
-		Method:             req.Method,
-		MinDuration:        req.MinDuration,
-		MaxDuration:        req.MaxDuration,
-		CourseAvailability: []entity.CreateSchedule{},
-		Topics:             []entity.CreateTopic{},
-		Categories:         req.Categories,
+		MentorID:        claim.Subject,
+		Title:           req.Title,
+		Description:     req.Description,
+		Domicile:        req.Domicile,
+		Price:           req.Price,
+		Method:          req.Method,
+		SessionDuration: req.SessionDuration,
+		MaxSession:      req.MaxSession,
+		Topics:          []entity.CreateTopic{},
+		Categories:      req.Categories,
 	}
 	for _, topic := range req.Topics {
 		param.Topics = append(param.Topics, entity.CreateTopic(topic))
-	}
-	for _, schedule := range req.CourseAvailability {
-		param.CourseAvailability = append(
-			param.CourseAvailability,
-			entity.CreateSchedule{
-				DayOfWeek: schedule.DayOfWeek,
-				StartTime: entity.TimeOnly(schedule.StartTime),
-				EndTime:   entity.TimeOnly(schedule.EndTime),
-			},
-		)
 	}
 	courseID, err := ch.cs.CreateCourse(ctx, param)
 	if err != nil {
