@@ -143,5 +143,5 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.MentorResource,
 		c.RBACRepository,
 	), c.MentorHandler.UpdateMentor)
-	v1.POST("/course-requests", c.CourseRequestHandler.CreateReservation)
+	v1.POST("/courses/:id/course-requests", c.CourseRequestHandler.CreateReservation)
 }

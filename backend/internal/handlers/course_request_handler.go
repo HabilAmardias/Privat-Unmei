@@ -8,6 +8,7 @@ import (
 	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/services"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -22,6 +23,15 @@ func CreateCourseRequestHandler(cos *services.CourseRequestServiceImpl) *CourseR
 }
 
 func (crh *CourseRequestHandlerImpl) CreateReservation(ctx *gin.Context) {
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.Error(customerrors.NewError(
+			"invalid course",
+			err,
+			customerrors.InvalidAction,
+		))
+		return
+	}
 	claim, err := getAuthenticationPayload(ctx)
 	if err != nil {
 		ctx.Error(err)
@@ -53,7 +63,7 @@ func (crh *CourseRequestHandlerImpl) CreateReservation(ctx *gin.Context) {
 		return
 	}
 	param := entity.CreateCourseRequestParam{
-		CourseID:       req.CourseID,
+		CourseID:       id,
 		StudentID:      claim.Subject,
 		PreferredSlots: []entity.PreferredSlot{},
 	}
