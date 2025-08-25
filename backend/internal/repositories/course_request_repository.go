@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
+	"time"
 )
 
 type CourseRequestRepositoryImpl struct {
@@ -13,6 +14,71 @@ type CourseRequestRepositoryImpl struct {
 
 func CreateCourseRequestRepository(db *sql.DB) *CourseRequestRepositoryImpl {
 	return &CourseRequestRepositoryImpl{db}
+}
+
+func (cr *CourseRequestRepositoryImpl) ChangeRequestStatus(ctx context.Context, id int, newStatus string, eat *time.Time) error {
+	var driver RepoDriver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE course_requests
+	SET
+		status = $1,
+		updated_at = NOW(),
+		expired_at = $2
+	WHERE id = $3 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, newStatus, eat, id)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to update request status",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (cr *CourseRequestRepositoryImpl) FindByID(ctx context.Context, id int, courseRequest *entity.CourseRequest) error {
+	var driver RepoDriver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	SELECT
+		id,
+		student_id,
+		course_id,
+		status,
+		total_price,
+		number_of_sessions,
+		expired_at,
+		created_at,
+		updated_at,
+		deleted_at
+	FROM course_requests
+	WHERE id = $1 AND deleted_at IS NULL
+	`
+	if err := driver.QueryRow(query, id).Scan(
+		&courseRequest.ID,
+		&courseRequest.StudentID,
+		&courseRequest.CourseID,
+		&courseRequest.Status,
+		&courseRequest.TotalPrice,
+		&courseRequest.NumberOfSessions,
+		&courseRequest.ExpiredAt,
+		&courseRequest.CreatedAt,
+		&courseRequest.UpdatedAt,
+		&courseRequest.DeletedAt,
+	); err != nil {
+		return customerrors.NewError(
+			"failed to get request",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
 }
 
 func (cr *CourseRequestRepositoryImpl) FindOngoingByCourseIDAndStudentID(ctx context.Context, courseID int, studentID string, count *int64) error {
@@ -85,8 +151,7 @@ func (cr *CourseRequestRepositoryImpl) FindOngoingByCourseID(ctx context.Context
 		status,
 		total_price,
 		number_of_sessions,
-		accepted_at,
-		payment_due,
+		expired_at,
 		created_at,
 		updated_at,
 		deleted_at
@@ -111,8 +176,7 @@ func (cr *CourseRequestRepositoryImpl) FindOngoingByCourseID(ctx context.Context
 			&item.Status,
 			&item.TotalPrice,
 			&item.NumberOfSessions,
-			&item.AcceptedAt,
-			&item.PaymentDue,
+			&item.ExpiredAt,
 			&item.CreatedAt,
 			&item.UpdatedAt,
 			&item.DeletedAt,
@@ -141,8 +205,7 @@ func (cr *CourseRequestRepositoryImpl) FindCompletedByStudentIDAndCourseID(ctx c
 		status,
 		total_price,
 		number_of_sessions,
-		accepted_at,
-		payment_due,
+		expired_at,
 		created_at,
 		updated_at,
 		deleted_at
@@ -167,8 +230,7 @@ func (cr *CourseRequestRepositoryImpl) FindCompletedByStudentIDAndCourseID(ctx c
 			&item.Status,
 			&item.TotalPrice,
 			&item.NumberOfSessions,
-			&item.AcceptedAt,
-			&item.PaymentDue,
+			&item.ExpiredAt,
 			&item.CreatedAt,
 			&item.UpdatedAt,
 			&item.DeletedAt,

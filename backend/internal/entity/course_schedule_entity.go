@@ -6,10 +6,9 @@ type (
 	CourseRequestSchedule struct {
 		ID              int
 		CourseRequestID int
-		SessionNumber   int
 		ScheduledDate   time.Time
-		StartTime       TimeOnly
-		EndTime         TimeOnly
+		StartTime       string
+		EndTime         string
 		Status          string
 		CreatedAt       time.Time
 		UpdatedAt       time.Time
