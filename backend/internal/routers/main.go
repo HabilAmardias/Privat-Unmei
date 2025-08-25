@@ -144,9 +144,14 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		c.RBACRepository,
 	), c.MentorHandler.UpdateMentor)
 	v1.POST("/courses/:id/course-requests", c.CourseRequestHandler.CreateReservation)
-	v1.POST("/course-requests/:id/request-approval", middlewares.AuthorizationMiddleware(
+	v1.GET("/course-requests/:id/approve", middlewares.AuthorizationMiddleware(
 		constants.UpdateAllPermission,
 		constants.CourseRequestResource,
 		c.RBACRepository,
-	), c.CourseRequestHandler.HandleCourseRequest)
+	), c.CourseRequestHandler.AcceptCourseRequest)
+	v1.GET("/course-requests/:id/reject", middlewares.AuthorizationMiddleware(
+		constants.UpdateAllPermission,
+		constants.CourseRequestResource,
+		c.RBACRepository,
+	), c.CourseRequestHandler.RejectCourseRequest)
 }
