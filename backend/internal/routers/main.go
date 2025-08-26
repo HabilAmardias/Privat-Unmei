@@ -154,4 +154,9 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.CourseRequestResource,
 		c.RBACRepository,
 	), c.CourseRequestHandler.RejectCourseRequest)
+	v1.GET("/course-requests/:id/confirm-payment", middlewares.AuthorizationMiddleware(
+		constants.UpdateAllPermission,
+		constants.CourseRequestResource,
+		c.RBACRepository,
+	), c.CourseRequestHandler.ConfirmPayment)
 }

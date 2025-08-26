@@ -29,4 +29,8 @@ type (
 		CourseRequestID int
 		Accept          bool
 	}
+	ConfirmPaymentParam struct {
+		MentorID        string
+		CourseRequestID int
+	}
 )
