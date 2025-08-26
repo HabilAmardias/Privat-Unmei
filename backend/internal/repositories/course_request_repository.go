@@ -33,21 +33,15 @@ func (cr *CourseRequestRepositoryImpl) CancelExpiredRequest(ctx context.Context,
 	log.Println(query)
 	rows, err := driver.Query(query)
 	if err != nil {
-		return customerrors.NewError(
-			"failed to update course request status",
-			err,
-			customerrors.DatabaseExecutionError,
-		)
+		// not wrapping it on customerror because its just for cron
+		return err
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var item int
 		if err := rows.Scan(&item); err != nil {
-			return customerrors.NewError(
-				"failed to update course request status",
-				err,
-				customerrors.DatabaseExecutionError,
-			)
+			// not wrapping it on customerror because its just for cron
+			return err
 		}
 		*courseRequestIDs = append(*courseRequestIDs, item)
 	}

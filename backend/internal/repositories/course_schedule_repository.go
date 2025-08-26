@@ -8,6 +8,8 @@ import (
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 	"time"
+
+	"github.com/lib/pq"
 )
 
 type CourseScheduleRepositoryImpl struct {
@@ -31,19 +33,12 @@ func (csr *CourseScheduleRepositoryImpl) CancelExpiredSchedule(ctx context.Conte
 		updated_at = NOW()
 	WHERE 
 		course_request_id = ANY($1) 
-		AND deleted_at IS NULL 
-		AND NOW() >= expired_at
+		AND deleted_at IS NULL
 	`
 	log.Println(query)
-	_, err := driver.Exec(query, ids)
-	if err != nil {
-		return customerrors.NewError(
-			"failed to update course schedule",
-			err,
-			customerrors.DatabaseExecutionError,
-		)
-	}
-	return nil
+	_, err := driver.Exec(query, pq.Array(ids))
+	// not wrapping it on customerror because its just for cron
+	return err
 }
 
 func (csr *CourseScheduleRepositoryImpl) UpdateScheduleStatusByCourseRequestID(ctx context.Context, courseRequestID int, newStatus string) error {
