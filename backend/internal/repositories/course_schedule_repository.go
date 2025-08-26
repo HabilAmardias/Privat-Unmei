@@ -18,6 +18,34 @@ func CreateCourseScheduleRepository(db *sql.DB) *CourseScheduleRepositoryImpl {
 	return &CourseScheduleRepositoryImpl{db}
 }
 
+func (csr *CourseScheduleRepositoryImpl) CancelExpiredSchedule(ctx context.Context, ids []int) error {
+	var driver RepoDriver
+	driver = csr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE course_schedule
+	SET
+		status = 'cancelled',
+		updated_at = NOW()
+	WHERE 
+		course_request_id = ANY($1) 
+		AND deleted_at IS NULL 
+		AND NOW() >= expired_at
+	`
+	log.Println(query)
+	_, err := driver.Exec(query, ids)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to update course schedule",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (csr *CourseScheduleRepositoryImpl) UpdateScheduleStatusByCourseRequestID(ctx context.Context, courseRequestID int, newStatus string) error {
 	var driver RepoDriver
 	driver = csr.DB
