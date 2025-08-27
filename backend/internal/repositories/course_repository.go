@@ -18,6 +18,38 @@ func CreateCourseRepository(db *sql.DB) *CourseRepositoryImpl {
 	return &CourseRepositoryImpl{db}
 }
 
+func (cr *CourseRepositoryImpl) UpdateCourseTransactionCount(ctx context.Context) error {
+	var driver RepoDriver
+	driver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+
+	query := `
+	WITH requests_to_cancel AS (
+		SELECT id, course_id
+		FROM course_requests 
+		WHERE expired_at < CURRENT_TIMESTAMP 
+		AND status IN ('reserved','pending payment')
+		AND deleted_at IS NULL
+	),
+	course_cancel_counts AS (
+		SELECT course_id, COUNT(*) as cancel_count
+		FROM requests_to_cancel
+		GROUP BY course_id
+	)
+	UPDATE courses 
+	SET transaction_count = transaction_count - course_cancel_counts.cancel_count,
+		updated_at = NOW()
+	FROM course_cancel_counts
+	WHERE courses.id = course_cancel_counts.course_id AND courses.deleted_at IS NULL;
+	`
+	log.Println(query)
+	_, err := driver.Exec(query)
+	// not wrapping it on customerror because its just for cron
+	return err
+}
+
 func (cr *CourseRepositoryImpl) UpdateCourse(ctx context.Context, courseID int, updateQuery *entity.UpdateCourseQuery) error {
 	var driver RepoDriver
 	driver = cr.DB

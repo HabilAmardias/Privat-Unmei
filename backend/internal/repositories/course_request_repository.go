@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"log"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 	"time"
@@ -14,6 +15,39 @@ type CourseRequestRepositoryImpl struct {
 
 func CreateCourseRequestRepository(db *sql.DB) *CourseRequestRepositoryImpl {
 	return &CourseRequestRepositoryImpl{db}
+}
+
+func (cr *CourseRequestRepositoryImpl) CancelExpiredRequest(ctx context.Context, courseRequestIDs *[]int) error {
+	var driver RepoDriver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE course_requests
+	SET
+		status = 'cancelled',
+		updated_at = NOW()
+	WHERE NOW() >= expired_at 
+	AND deleted_at IS NULL
+	AND status IN ('reserved','pending payment')
+	RETURNING (id)
+	`
+	log.Println(query)
+	rows, err := driver.Query(query)
+	if err != nil {
+		// not wrapping it on customerror because its just for cron
+		return err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var item int
+		if err := rows.Scan(&item); err != nil {
+			// not wrapping it on customerror because its just for cron
+			return err
+		}
+		*courseRequestIDs = append(*courseRequestIDs, item)
+	}
+	return nil
 }
 
 func (cr *CourseRequestRepositoryImpl) ChangeRequestStatus(ctx context.Context, id int, newStatus string, eat *time.Time) error {

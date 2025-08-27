@@ -7,25 +7,25 @@ Start Database
 docker compose up
 ```
 Down Migration
-```
-cd backend
-go run cmd/db/main.go -down
+``` 
+go run backend/cmd/db/main.go -down
 ```
 Up Migration
 ```
-cd backend
-go run cmd/db/main.go
+go run backend/cmd/db/main.go
+```
+Start CronJob
+```
+go run backend/cmd/cron/main.go
 ```
 Start Development Server
 ```
-cd backend
-go run main.go
+go run backend/main.go
 ```
 
 Start Production Server
-```
-cd backend
-go run main.go -release
+``` 
+go run backend/main.go -release
 ```
 ### ERD Visualization
 ![ERD Visualization](privat_unmei_db.png)
