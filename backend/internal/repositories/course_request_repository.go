@@ -27,7 +27,9 @@ func (cr *CourseRequestRepositoryImpl) CancelExpiredRequest(ctx context.Context,
 	SET
 		status = 'cancelled',
 		updated_at = NOW()
-	WHERE NOW() >= expired_at AND deleted_at IS NULL
+	WHERE NOW() >= expired_at 
+	AND deleted_at IS NULL
+	AND status IN ('reserved','pending payment')
 	RETURNING (id)
 	`
 	log.Println(query)
