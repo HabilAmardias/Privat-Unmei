@@ -30,7 +30,7 @@ func (cr *CourseRepositoryImpl) UpdateCourseTransactionCount(ctx context.Context
 		SELECT id, course_id
 		FROM course_requests 
 		WHERE expired_at < CURRENT_TIMESTAMP 
-		AND status != 'cancelled'
+		AND status IN ('reserved','pending payment')
 		AND deleted_at IS NULL
 	),
 	course_cancel_counts AS (
