@@ -8,6 +8,8 @@ type (
 		StudentID        string
 		CourseID         int
 		Status           string
+		SubTotal         float64
+		OperationalCost  float64
 		TotalPrice       float64
 		NumberOfSessions int
 		ExpiredAt        *time.Time

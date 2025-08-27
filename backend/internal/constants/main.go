@@ -17,7 +17,7 @@ const (
 	DefaultAvatar                     = "https://res.cloudinary.com/dk8rlicon/image/upload/v1753881263/default-avatar-icon-of-social-media-user-vector_j8obqd.jpg"
 	AvatarFolder                      = "Avatars/"
 	ResumeFolder                      = "Resumes/"
-	OperationalCostPercentage float64 = 1.1
+	OperationalCostPercentage float64 = 0.1
 	MaxRequestSlot                    = 7
 	ExpiredInterval                   = 15 * time.Minute // 15 minute for development and testing
 )
