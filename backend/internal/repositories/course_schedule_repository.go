@@ -20,6 +20,28 @@ func CreateCourseScheduleRepository(db *sql.DB) *CourseScheduleRepositoryImpl {
 	return &CourseScheduleRepositoryImpl{db}
 }
 
+func (csr *CourseScheduleRepositoryImpl) CompleteSchedule(ctx context.Context) error {
+	var driver RepoDriver
+	driver = csr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE course_schedule
+	SET
+		status = 'completed',
+		updated_at = NOW()
+	WHERE
+		end_time <= CURRENT_TIME AND
+		scheduled_date <= CURRENT_DATE AND
+		status = 'scheduled' AND
+		deleted_at IS NULL
+	`
+	log.Println(query)
+	_, err := driver.Exec(query)
+	return err
+}
+
 func (csr *CourseScheduleRepositoryImpl) CancelExpiredSchedule(ctx context.Context, ids []int) error {
 	var driver RepoDriver
 	driver = csr.DB
