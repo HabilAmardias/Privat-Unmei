@@ -38,7 +38,10 @@ func Run() {
 		log.Fatalln(err.Error())
 	}
 	crc := NewCourseRequestCron(driver)
-	if err := rcu.AddJob(os.Getenv("CRON_SPEC"), crc.UpdateExpiredRequest); err != nil {
+	if err := rcu.AddJob(os.Getenv("EXPIRED_CRON_SPEC"), crc.UpdateExpiredRequest); err != nil {
+		log.Fatalln(err.Error())
+	}
+	if err := rcu.AddJob(os.Getenv("COMPLETED_CRON_SPEC"), crc.UpdateCompletedRequest); err != nil {
 		log.Fatalln(err.Error())
 	}
 	rcu.Start()

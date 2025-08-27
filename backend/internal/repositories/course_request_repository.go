@@ -17,6 +17,31 @@ func CreateCourseRequestRepository(db *sql.DB) *CourseRequestRepositoryImpl {
 	return &CourseRequestRepositoryImpl{db}
 }
 
+func (cr *CourseRequestRepositoryImpl) CompleteRequest(ctx context.Context) error {
+	var driver RepoDriver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE course_requests cr
+	SET
+		status = 'completed',
+		updated_at = NOW()
+	WHERE cr.status = 'scheduled'
+	AND cr.deleted_at IS NULL
+	AND NOT EXISTS (
+		SELECT 1
+		FROM course_schedule cs
+		WHERE cs.course_request_id = cr.id
+		AND cs.status != 'completed'
+		AND cs.deleted_at IS NULL
+	)
+	`
+	log.Println(query)
+	_, err := driver.Exec(query)
+	return err
+}
+
 func (cr *CourseRequestRepositoryImpl) CancelExpiredRequest(ctx context.Context, courseRequestIDs *[]int) error {
 	var driver RepoDriver = cr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
