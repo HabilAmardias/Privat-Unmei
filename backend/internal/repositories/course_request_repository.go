@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"log"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
@@ -15,6 +16,48 @@ type CourseRequestRepositoryImpl struct {
 
 func CreateCourseRequestRepository(db *sql.DB) *CourseRequestRepositoryImpl {
 	return &CourseRequestRepositoryImpl{db}
+}
+
+func (cr *CourseRequestRepositoryImpl) GetPaymentDetail(ctx context.Context, id int, cre *entity.CourseRequest) error {
+	var driver RepoDriver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	SELECT
+		student_id,
+		course_id,
+		status,
+		subtotal,
+		operational_cost,
+		total_price,
+		expired_at
+	FROM course_requests
+	WHERE id = $1 AND deleted_at IS NULL
+	`
+	if err := driver.QueryRow(query, id).Scan(
+		&cre.StudentID,
+		&cre.CourseID,
+		&cre.Status,
+		&cre.SubTotal,
+		&cre.OperationalCost,
+		&cre.TotalPrice,
+		&cre.ExpiredAt,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return customerrors.NewError(
+				"no course request found",
+				err,
+				customerrors.ItemNotExist,
+			)
+		}
+		return customerrors.NewError(
+			"failed to get course request",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
 }
 
 func (cr *CourseRequestRepositoryImpl) CompleteRequest(ctx context.Context) error {

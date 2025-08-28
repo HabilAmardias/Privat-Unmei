@@ -34,6 +34,84 @@ func CreateCourseRequestService(
 	return &CourseRequestServiceImpl{crr, cr, csr, mar, ur, sr, mr, tmr}
 }
 
+func (crs *CourseRequestServiceImpl) GetPaymentDetail(ctx context.Context, param entity.GetPaymentDetailParam) (*entity.PaymentDetailQuery, error) {
+	courseRequest := new(entity.CourseRequest)
+	course := new(entity.Course)
+	userMentor := new(entity.User)
+	mentor := new(entity.Mentor)
+	userStudent := new(entity.User)
+	student := new(entity.Student)
+	query := new(entity.PaymentDetailQuery)
+	now := time.Now()
+
+	if err := crs.ur.FindByID(ctx, param.UserID, userStudent); err != nil {
+		return nil, err
+	}
+	if err := crs.sr.FindByID(ctx, userStudent.ID, student); err != nil {
+		return nil, err
+	}
+	if err := crs.crr.GetPaymentDetail(ctx, param.CourseRequestID, courseRequest); err != nil {
+		return nil, err
+	}
+	if err := crs.cr.FindByID(ctx, courseRequest.CourseID, course, false); err != nil {
+		return nil, err
+	}
+	if err := crs.ur.FindByID(ctx, course.MentorID, userMentor); err != nil {
+		return nil, err
+	}
+	if err := crs.mr.FindByID(ctx, userMentor.ID, mentor, false); err != nil {
+		return nil, err
+	}
+	if courseRequest.Status != constants.PendingPaymentStatus {
+		return nil, customerrors.NewError(
+			"invalid course request",
+			errors.New("course request status is not pending payment"),
+			customerrors.InvalidAction,
+		)
+	}
+	if courseRequest.ExpiredAt == nil {
+		return nil, customerrors.NewError(
+			"invalid course request",
+			errors.New("no expire date found"),
+			customerrors.CommonErr,
+		)
+	}
+	if now.After(*courseRequest.ExpiredAt) {
+		return nil, customerrors.NewError(
+			"course request has expired",
+			errors.New("course request has expired"),
+			customerrors.InvalidAction,
+		)
+	}
+	if courseRequest.StudentID != student.ID {
+		return nil, customerrors.NewError(
+			"unauthorized",
+			errors.New("course request student id is different"),
+			customerrors.Unauthenticate,
+		)
+	}
+	if userStudent.Status != constants.VerifiedStatus {
+		return nil, customerrors.NewError(
+			"need to verify account",
+			errors.New("user is still unverified"),
+			customerrors.Unauthenticate,
+		)
+	}
+
+	query.CourseID = course.ID
+	query.CourseRequestID = param.CourseRequestID
+	query.CourseTitle = course.Title
+	query.ExpiredAt = *courseRequest.ExpiredAt
+	query.GopayNumber = mentor.GopayNumber
+	query.MentorID = mentor.ID
+	query.MentorName = userMentor.Name
+	query.OperationalCost = courseRequest.OperationalCost
+	query.Subtotal = courseRequest.SubTotal
+	query.TotalCost = courseRequest.TotalPrice
+
+	return query, nil
+}
+
 func (crs *CourseRequestServiceImpl) MentorConfirmPayment(ctx context.Context, param entity.ConfirmPaymentParam) error {
 	course := new(entity.Course)
 	courseRequest := new(entity.CourseRequest)
