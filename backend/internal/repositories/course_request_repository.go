@@ -174,15 +174,17 @@ func (cr *CourseRequestRepositoryImpl) CreateOrder(
 		driver = tx
 	}
 	query := `
-	INSERT INTO course_requests (student_id, course_id, total_price, number_of_sessions, expired_at)
+	INSERT INTO course_requests (student_id, course_id, subtotal, operational_cost, total_price, number_of_sessions, expired_at)
 	VALUES
-	($1, $2, $3, $4, $5)
+	($1, $2, $3, $4, $5, $6, $7)
 	RETURNING (id)
 	`
 	row := driver.QueryRow(
 		query,
 		courseRequest.StudentID,
 		courseRequest.CourseID,
+		courseRequest.SubTotal,
+		courseRequest.OperationalCost,
 		courseRequest.TotalPrice,
 		courseRequest.NumberOfSessions,
 		courseRequest.ExpiredAt,

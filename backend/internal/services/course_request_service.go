@@ -265,8 +265,9 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 				EndTime:   endTime,
 			})
 		}
-
-		totalPrice := course.Price * float64(len(param.PreferredSlots)) * constants.OperationalCostPercentage
+		courseRequest.SubTotal = course.Price * float64(len(param.PreferredSlots))
+		courseRequest.OperationalCost = courseRequest.SubTotal * constants.OperationalCostPercentage
+		totalPrice := courseRequest.SubTotal + courseRequest.OperationalCost
 
 		courseRequest.StudentID = param.StudentID
 		courseRequest.CourseID = param.CourseID
