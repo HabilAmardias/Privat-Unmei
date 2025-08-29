@@ -57,6 +57,26 @@ func getAuthenticationPayload(ctx *gin.Context) (*entity.CustomClaim, error) {
 	return customClaims, nil
 }
 
+func getAuthenticationToken(ctx *gin.Context) (string, error) {
+	val, ok := ctx.Get(constants.CTX_AUTH_TOKEN_KEY)
+	if !ok {
+		return "", customerrors.NewError(
+			"user credential identification failed",
+			errors.New("cannot find authentication token"),
+			customerrors.CommonErr,
+		)
+	}
+	token, ok := val.(string)
+	if !ok {
+		return "", customerrors.NewError(
+			"user credential identification failed",
+			errors.New("cannot parse authentication token"),
+			customerrors.CommonErr,
+		)
+	}
+	return token, nil
+}
+
 func ValidateDegree(degree string) bool {
 	for _, item := range degreelist {
 		if degree == item {

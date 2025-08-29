@@ -27,7 +27,12 @@ type (
 	}
 	ResetPasswordParam struct {
 		NewPassword string
+		ID          string
 		Token       string
+	}
+	VerifyStudentParam struct {
+		Token string
+		ID    string
 	}
 	ListStudentQuery struct {
 		ID           string

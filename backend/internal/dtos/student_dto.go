@@ -15,15 +15,11 @@ type (
 	LoginStudentRes struct {
 		Token string `json:"token"`
 	}
-	VerifyStudentReq struct {
-		Token string `json:"token" binding:"required"`
-	}
 	SendResetTokenEmailReq struct {
 		Email string `json:"email" binding:"required,email"`
 	}
 	ResetPasswordReq struct {
 		NewPassword string `json:"new_password" binding:"required,containsany=!@#?,min=8"`
-		Token       string `json:"token"`
 	}
 	ListStudentRes struct {
 		ID           string `json:"id"`

@@ -226,8 +226,19 @@ func (sh *StudentHandlerImpl) ResetPassword(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
+	token, err := getAuthenticationToken(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 	param := entity.ResetPasswordParam{
-		Token:       req.Token,
+		ID:          claim.Subject,
+		Token:       token,
 		NewPassword: req.NewPassword,
 	}
 	if err := sh.ss.ResetPassword(ctx, param); err != nil {
@@ -261,12 +272,21 @@ func (sh *StudentHandlerImpl) SendResetTokenEmail(ctx *gin.Context) {
 }
 
 func (sh *StudentHandlerImpl) Verify(ctx *gin.Context) {
-	var req dtos.VerifyStudentReq
-	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
+	token, err := getAuthenticationToken(ctx)
+	if err != nil {
 		ctx.Error(err)
 		return
 	}
-	if err := sh.ss.Verify(ctx, req.Token); err != nil {
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.VerifyStudentParam{
+		Token: token,
+		ID:    claim.Subject,
+	}
+	if err := sh.ss.Verify(ctx, param); err != nil {
 		ctx.Error(err)
 		return
 	}

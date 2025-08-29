@@ -263,11 +263,7 @@ func (us *StudentServiceImpl) ResetPassword(ctx context.Context, param entity.Re
 	student := new(entity.Student)
 
 	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		claim, err := us.ju.VerifyJWT(param.Token, constants.ForReset)
-		if err != nil {
-			return err
-		}
-		if err := us.ur.FindByID(ctx, claim.Subject, user); err != nil {
+		if err := us.ur.FindByID(ctx, param.ID, user); err != nil {
 			return err
 		}
 		if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
@@ -330,21 +326,17 @@ func (us *StudentServiceImpl) SendResetTokenEmail(ctx context.Context, email str
 	})
 }
 
-func (us *StudentServiceImpl) Verify(ctx context.Context, token string) error {
+func (us *StudentServiceImpl) Verify(ctx context.Context, param entity.VerifyStudentParam) error {
 	user := new(entity.User)
 	student := new(entity.Student)
 	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		claim, err := us.ju.VerifyJWT(token, constants.ForVerification)
-		if err != nil {
-			return err
-		}
-		if err := us.ur.FindByID(ctx, claim.Subject, user); err != nil {
+		if err := us.ur.FindByID(ctx, param.ID, user); err != nil {
 			return err
 		}
 		if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
 			return err
 		}
-		if student.VerifyToken == nil || token != *student.VerifyToken {
+		if student.VerifyToken == nil || param.Token != *student.VerifyToken {
 			return customerrors.NewError(
 				"invalid credential",
 				errors.New("invalid verify token"),
