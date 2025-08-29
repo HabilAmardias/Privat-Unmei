@@ -73,6 +73,7 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.CourseResource,
 		c.RBACRepository,
 	), c.CourseHandler.UpdateCourse)
+	v1.POST("/me/change-password", c.StudentHandler.ChangePassword)
 	v1.GET("/students", middlewares.AuthorizationMiddleware(
 		constants.ReadAllPermission,
 		constants.StudentResource,

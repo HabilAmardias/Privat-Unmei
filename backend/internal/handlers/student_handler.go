@@ -25,6 +25,33 @@ func CreateStudentHandler(ss *services.StudentServiceImpl) *StudentHandlerImpl {
 	return &StudentHandlerImpl{ss}
 }
 
+func (sh *StudentHandlerImpl) ChangePassword(ctx *gin.Context) {
+	var req dtos.MentorChangePasswordReq
+	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.StudentChangePasswordParam{
+		ID:          claim.Subject,
+		NewPassword: req.NewPassword,
+	}
+	if err := sh.ss.ChangePassword(ctx, param); err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.MessageResponse{
+			Message: "Succesfully change password",
+		},
+	})
+}
+
 func (sh *StudentHandlerImpl) GoogleLogin(ctx *gin.Context) {
 	expTime := time.Now().Add(30 * time.Minute)
 	b := make([]byte, 16)
@@ -97,7 +124,6 @@ func (sh *StudentHandlerImpl) UpdateStudentProfile(ctx *gin.Context) {
 	param := entity.UpdateStudentParam{
 		ID:           claim.Subject,
 		Name:         req.Name,
-		Password:     req.Password,
 		Bio:          req.Bio,
 		ProfileImage: file,
 	}

@@ -230,20 +230,7 @@ func (ms *MentorServiceImpl) UpdateMentorProfile(ctx context.Context, param enti
 		}
 		userQuery.Name = param.Name
 		userQuery.Bio = param.Bio
-		if param.Password != nil {
-			if match := ms.bu.ComparePassword(*param.Password, user.Password); match {
-				return customerrors.NewError(
-					"cannot change into same password",
-					errors.New("new password same as previous password"),
-					customerrors.InvalidAction,
-				)
-			}
-			hashed, err := ms.bu.HashPassword(*param.Password)
-			if err != nil {
-				return err
-			}
-			userQuery.Password = &hashed
-		}
+
 		if param.ProfileImage != nil {
 			filename := mentor.ID
 			res, err := ms.cu.UploadFile(ctx, param.ProfileImage, filename, constants.AvatarFolder)

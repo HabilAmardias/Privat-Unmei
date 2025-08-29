@@ -288,7 +288,6 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 		Resume:            resumeFile,
 		ProfileImage:      profileImageFile,
 		Name:              req.Name,
-		Password:          req.Password,
 		Bio:               req.Bio,
 		YearsOfExperience: req.YearsOfExperience,
 		GopayNumber:       req.GopayNumber,

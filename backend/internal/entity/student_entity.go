@@ -43,8 +43,11 @@ type (
 	UpdateStudentParam struct {
 		ID           string
 		Name         *string
-		Password     *string
 		Bio          *string
 		ProfileImage multipart.File
+	}
+	StudentChangePasswordParam struct {
+		ID          string
+		NewPassword string
 	}
 )

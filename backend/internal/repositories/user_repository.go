@@ -26,16 +26,14 @@ func (ur *UserRepositoryImpl) UpdateUserProfile(ctx context.Context, queryEntity
 	UPDATE users
 	SET
 		name = COALESCE($1, name),
-		password_hash = COALESCE($2, password_hash),
-		bio = COALESCE($3, bio),
-		profile_image = COALESCE($4, profile_image),
+		bio = COALESCE($2, bio),
+		profile_image = COALESCE($3, profile_image),
 		updated_at = NOW()
-	WHERE id = $5 AND deleted_at IS NULL
+	WHERE id = $4 AND deleted_at IS NULL
 	`
 	_, err := driver.Exec(
 		query,
 		queryEntity.Name,
-		queryEntity.Password,
 		queryEntity.Bio,
 		queryEntity.ProfileImage,
 		id,
