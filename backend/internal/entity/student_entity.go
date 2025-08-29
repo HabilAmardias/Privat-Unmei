@@ -50,4 +50,12 @@ type (
 		ID          string
 		NewPassword string
 	}
+	StudentProfileParam struct {
+		ID string
+	}
+	StudentProfileQuery struct {
+		Name         string
+		Bio          string
+		ProfileImage string
+	}
 )

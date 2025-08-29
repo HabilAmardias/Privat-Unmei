@@ -43,6 +43,23 @@ func (us *StudentServiceImpl) GoogleLogin(oauthState string) string {
 	return us.goauth.Config.AuthCodeURL(oauthState)
 }
 
+func (us *StudentServiceImpl) GetStudentProfile(ctx context.Context, param entity.StudentProfileParam) (*entity.StudentProfileQuery, error) {
+	user := new(entity.User)
+	student := new(entity.Student)
+	profile := new(entity.StudentProfileQuery)
+	if err := us.ur.FindByID(ctx, param.ID, user); err != nil {
+		return nil, err
+	}
+	if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
+		return nil, err
+	}
+	profile.Name = user.Name
+	profile.Bio = user.Bio
+	profile.ProfileImage = user.ProfileImage
+
+	return profile, nil
+}
+
 func (us *StudentServiceImpl) ChangePassword(ctx context.Context, param entity.StudentChangePasswordParam) error {
 	user := new(entity.User)
 	student := new(entity.Student)

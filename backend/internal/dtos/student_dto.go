@@ -40,4 +40,9 @@ type (
 	UpdateStudentRes struct {
 		ID string `json:"id"`
 	}
+	StudentProfileRes struct {
+		Name         string `json:"name"`
+		Bio          string `json:"bio"`
+		ProfileImage string `json:"profile_image"`
+	}
 )
