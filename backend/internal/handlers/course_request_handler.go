@@ -22,6 +22,36 @@ func CreateCourseRequestHandler(cos *services.CourseRequestServiceImpl) *CourseR
 	return &CourseRequestHandlerImpl{cos}
 }
 
+func (crh *CourseRequestHandlerImpl) GetPaymentDetail(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	courseRequestID, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.Error(customerrors.NewError(
+			"invalid course request",
+			err,
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	param := entity.GetPaymentDetailParam{
+		UserID:          claim.Subject,
+		CourseRequestID: courseRequestID,
+	}
+	paymentDetail, err := crh.cos.GetPaymentDetail(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data:    dtos.PaymentDetailRes(*paymentDetail),
+	})
+}
+
 func (crh *CourseRequestHandlerImpl) ConfirmPayment(ctx *gin.Context) {
 	claim, err := getAuthenticationPayload(ctx)
 	if err != nil {

@@ -35,4 +35,20 @@ type (
 		MentorID        string
 		CourseRequestID int
 	}
+	GetPaymentDetailParam struct {
+		UserID          string
+		CourseRequestID int
+	}
+	PaymentDetailQuery struct {
+		CourseRequestID int
+		MentorID        string
+		MentorName      string
+		GopayNumber     string
+		CourseID        int
+		CourseTitle     string
+		Subtotal        float64
+		OperationalCost float64
+		TotalCost       float64
+		ExpiredAt       time.Time
+	}
 )

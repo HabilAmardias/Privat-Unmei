@@ -159,4 +159,5 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.CourseRequestResource,
 		c.RBACRepository,
 	), c.CourseRequestHandler.ConfirmPayment)
+	v1.GET("/course-requests/:id/payment-detail", c.CourseRequestHandler.GetPaymentDetail)
 }
