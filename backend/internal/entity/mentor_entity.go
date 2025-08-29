@@ -101,6 +101,21 @@ type (
 		ID          string
 		NewPassword string
 	}
+	GetProfileMentorParam struct {
+		MentorID string
+	}
+	GetProfileMentorQuery struct {
+		ResumeFile           string
+		ProfileImage         string
+		Name                 string
+		Bio                  string
+		YearsOfExperience    int
+		GopayNumber          string
+		Degree               string
+		Major                string
+		Campus               string
+		MentorAvailabilities []MentorSchedule
+	}
 )
 
 func (to *TimeOnly) ToString() string {

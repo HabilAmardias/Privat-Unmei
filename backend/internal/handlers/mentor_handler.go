@@ -22,6 +22,46 @@ func CreateMentorHandler(ms *services.MentorServiceImpl) *MentorHandlerImpl {
 	return &MentorHandlerImpl{ms}
 }
 
+func (mh *MentorHandlerImpl) GetProfileForMentor(ctx *gin.Context) {
+	claims, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.GetProfileMentorParam{
+		MentorID: claims.Subject,
+	}
+	res, err := mh.ms.GetProfileForMentor(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	profile := dtos.GetProfileMentorRes{
+		ResumeFile:           res.ResumeFile,
+		ProfileImage:         res.ProfileImage,
+		Name:                 res.Name,
+		Bio:                  res.Bio,
+		YearsOfExperience:    res.YearsOfExperience,
+		GopayNumber:          res.GopayNumber,
+		Degree:               res.Degree,
+		Major:                res.Major,
+		Campus:               res.Campus,
+		MentorAvailabilities: []dtos.MentorAvailabilityRes{},
+	}
+	for _, sched := range res.MentorAvailabilities {
+		profile.MentorAvailabilities = append(profile.MentorAvailabilities, dtos.MentorAvailabilityRes{
+			DayOfWeek: sched.DayOfWeek,
+			StartTime: dtos.TimeOnly(sched.StartTime),
+			EndTime:   dtos.TimeOnly(sched.EndTime),
+		})
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data:    profile,
+	})
+}
+
 func (mh *MentorHandlerImpl) ChangePassword(ctx *gin.Context) {
 	var req dtos.MentorChangePasswordReq
 	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {

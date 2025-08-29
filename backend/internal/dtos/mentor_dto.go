@@ -2,9 +2,9 @@ package dtos
 
 type (
 	TimeOnly struct {
-		Hour   int `json:"hour,omitempty" binding:"gte=0,lt=24"`
-		Minute int `json:"minute,omitempty" binding:"gte=0,lt=60"`
-		Second int `json:"second,omitempty" binding:"gte=0,lt=60"`
+		Hour   int `json:"hour" binding:"omitempty,gte=0,lt=24"`
+		Minute int `json:"minute" binding:"omitempty,gte=0,lt=60"`
+		Second int `json:"second" binding:"omitempty,gte=0,lt=60"`
 	}
 	MentorAvailabilityReq struct {
 		DayOfWeek int      `json:"day_of_week" binding:"required,gte=1,lte=7"`
@@ -73,5 +73,17 @@ type (
 	}
 	MentorChangePasswordReq struct {
 		NewPassword string `json:"password" binding:"required,containsany=!@#?,min=8"`
+	}
+	GetProfileMentorRes struct {
+		ResumeFile           string                  `json:"resume_file"`
+		ProfileImage         string                  `json:"profile_image"`
+		Name                 string                  `json:"name"`
+		Bio                  string                  `json:"bio"`
+		YearsOfExperience    int                     `json:"years_of_experience"`
+		GopayNumber          string                  `json:"gopay_number"`
+		Degree               string                  `json:"degree"`
+		Major                string                  `json:"major"`
+		Campus               string                  `json:"campus"`
+		MentorAvailabilities []MentorAvailabilityRes `json:"mentor_availability"`
 	}
 )
