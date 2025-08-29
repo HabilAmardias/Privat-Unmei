@@ -51,6 +51,12 @@ func (ch *CourseHandlerImpl) UpdateCourse(ctx *gin.Context) {
 		))
 		return
 	}
+	if len(req.CourseCategories) > 0 {
+		if err := ValidateCategories(req.CourseCategories); err != nil {
+			ctx.Error(err)
+			return
+		}
+	}
 	if len(req.CourseCategories) > constants.MaxCourseCategories {
 		ctx.Error(customerrors.NewError(
 			fmt.Sprintf("max num of course categories is %d", constants.MaxCourseCategories),
@@ -424,6 +430,10 @@ func (ch *CourseHandlerImpl) AddNewCourse(ctx *gin.Context) {
 			fmt.Errorf("max num of course categories is %d", constants.MaxCourseCategories),
 			customerrors.InvalidAction,
 		))
+		return
+	}
+	if err := ValidateCategories(req.Categories); err != nil {
+		ctx.Error(err)
 		return
 	}
 	param := entity.CreateCourseParam{
