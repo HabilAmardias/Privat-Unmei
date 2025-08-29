@@ -27,7 +27,7 @@ func (car *MentorAvailabilityRepositoryImpl) GetAvailabilityByMentorID(ctx conte
 	query := `
 	SELECT
 		id,
-		course_id,
+		mentor_id,
 		day_of_week,
 		CAST(EXTRACT(HOUR from start_time) AS INT),
 		CAST(EXTRACT(MINUTE from start_time) AS INT),
