@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
@@ -9,7 +10,6 @@ import (
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/services"
 	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -47,6 +47,14 @@ func (ch *CourseHandlerImpl) UpdateCourse(ctx *gin.Context) {
 		ctx.Error(customerrors.NewError(
 			"invalid course method",
 			errors.New("invalid course method"),
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	if len(req.CourseCategories) > constants.MaxCourseCategories {
+		ctx.Error(customerrors.NewError(
+			fmt.Sprintf("max num of course categories is %d", constants.MaxCourseCategories),
+			fmt.Errorf("max num of course categories is %d", constants.MaxCourseCategories),
 			customerrors.InvalidAction,
 		))
 		return
@@ -105,27 +113,30 @@ func (ch *CourseHandlerImpl) CourseDetail(ctx *gin.Context) {
 	entry := dtos.CourseDetailRes{
 		CourseListRes: dtos.CourseListRes{
 			MentorListCourseRes: dtos.MentorListCourseRes{
-				ID:               res.ID,
-				Title:            res.Title,
-				Domicile:         res.Domicile,
-				Method:           res.Method,
-				Price:            res.Price,
-				SessionDuration:  res.SessionDuration,
-				MaxSession:       res.MaxSession,
-				CourseCategories: strings.Split(res.CourseCategories, ","),
+				ID:              res.ID,
+				Title:           res.Title,
+				Domicile:        res.Domicile,
+				Method:          res.Method,
+				Price:           res.Price,
+				SessionDuration: res.SessionDuration,
+				MaxSession:      res.MaxSession,
 			},
 			MentorID:    res.MentorID,
 			MentorName:  res.MentorName,
 			MentorEmail: res.MentorEmail,
 		},
-		Description: res.Description,
-		Topics:      []dtos.CourseTopicRes{},
+		Description:      res.Description,
+		Topics:           []dtos.CourseTopicRes{},
+		CourseCategories: []dtos.GetCategoriesRes{},
 	}
-	for _, topic := range *res.Topics {
+	for _, topic := range res.Topics {
 		entry.Topics = append(entry.Topics, dtos.CourseTopicRes{
 			Title:       topic.Title,
 			Description: topic.Description,
 		})
+	}
+	for _, cat := range res.CourseCategories {
+		entry.CourseCategories = append(entry.CourseCategories, dtos.GetCategoriesRes(cat))
 	}
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
@@ -163,14 +174,13 @@ func (ch *CourseHandlerImpl) ListCourse(ctx *gin.Context) {
 	for _, course := range *res {
 		item := dtos.CourseListRes{
 			MentorListCourseRes: dtos.MentorListCourseRes{
-				ID:               course.ID,
-				Title:            course.Title,
-				Domicile:         course.Domicile,
-				Method:           course.Method,
-				Price:            course.Price,
-				SessionDuration:  course.SessionDuration,
-				MaxSession:       course.MaxSession,
-				CourseCategories: strings.Split(course.CourseCategories, ","),
+				ID:              course.ID,
+				Title:           course.Title,
+				Domicile:        course.Domicile,
+				Method:          course.Method,
+				Price:           course.Price,
+				SessionDuration: course.SessionDuration,
+				MaxSession:      course.MaxSession,
 			},
 			MentorID:    course.MentorID,
 			MentorName:  course.MentorName,
@@ -230,14 +240,13 @@ func (ch *CourseHandlerImpl) MostBoughtCourses(ctx *gin.Context) {
 	for _, course := range *res {
 		item := dtos.CourseListRes{
 			MentorListCourseRes: dtos.MentorListCourseRes{
-				ID:               course.ID,
-				Title:            course.Title,
-				Domicile:         course.Domicile,
-				Method:           course.Method,
-				Price:            course.Price,
-				SessionDuration:  course.SessionDuration,
-				MaxSession:       course.MaxSession,
-				CourseCategories: strings.Split(course.CourseCategories, ","),
+				ID:              course.ID,
+				Title:           course.Title,
+				Domicile:        course.Domicile,
+				Method:          course.Method,
+				Price:           course.Price,
+				SessionDuration: course.SessionDuration,
+				MaxSession:      course.MaxSession,
 			},
 			MentorID:    course.MentorID,
 			MentorName:  course.MentorName,
@@ -284,16 +293,16 @@ func (ch *CourseHandlerImpl) MentorListCourse(ctx *gin.Context) {
 	}
 	entries := []dtos.MentorListCourseRes{}
 	for _, item := range *res {
-		entries = append(entries, dtos.MentorListCourseRes{
-			ID:               item.ID,
-			Title:            item.Title,
-			Domicile:         item.Domicile,
-			Method:           item.Method,
-			Price:            item.Price,
-			SessionDuration:  item.SessionDuration,
-			MaxSession:       item.MaxSession,
-			CourseCategories: strings.Split(item.CourseCategories, ","),
-		})
+		entry := dtos.MentorListCourseRes{
+			ID:              item.ID,
+			Title:           item.Title,
+			Domicile:        item.Domicile,
+			Method:          item.Method,
+			Price:           item.Price,
+			SessionDuration: item.SessionDuration,
+			MaxSession:      item.MaxSession,
+		}
+		entries = append(entries, entry)
 	}
 	var filters []dtos.FilterInfo
 	if req.Search != nil {
@@ -407,6 +416,14 @@ func (ch *CourseHandlerImpl) AddNewCourse(ctx *gin.Context) {
 				customerrors.InvalidAction,
 			),
 		)
+		return
+	}
+	if len(req.Categories) > constants.MaxCourseCategories {
+		ctx.Error(customerrors.NewError(
+			fmt.Sprintf("max num of course categories is %d", constants.MaxCourseCategories),
+			fmt.Errorf("max num of course categories is %d", constants.MaxCourseCategories),
+			customerrors.InvalidAction,
+		))
 		return
 	}
 	param := entity.CreateCourseParam{

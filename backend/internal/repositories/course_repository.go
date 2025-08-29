@@ -109,16 +109,7 @@ func (cr *CourseRepositoryImpl) CourseDetail(ctx context.Context, query *entity.
 		c.price,
 		c.method,
 		c.session_duration_minutes,
-		c.max_total_session,
-		COALESCE(
-			(SELECT STRING_AGG(cc_all.name, ',') 
-			FROM course_category_assignments cca_all 
-			JOIN course_categories cc_all ON cca_all.category_id = cc_all.id 
-			WHERE cca_all.course_id = c.id 
-			AND cca_all.deleted_at IS NULL 
-			AND cc_all.deleted_at IS NULL), 
-			''
-		) AS categories
+		c.max_total_session
 	FROM courses c
 	JOIN users u ON u.id = c.mentor_id
 	WHERE c.id = $1 AND c.deleted_at IS NULL AND u.deleted_at IS NULL
@@ -137,7 +128,6 @@ func (cr *CourseRepositoryImpl) CourseDetail(ctx context.Context, query *entity.
 		&query.Method,
 		&query.SessionDuration,
 		&query.MaxSession,
-		&query.CourseCategories,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return customerrors.NewError(
@@ -179,16 +169,7 @@ func (cr *CourseRepositoryImpl) ListCourse(
 		c.price,
 		c.method,
 		c.session_duration_minutes,
-		c.max_total_session,
-		COALESCE(
-			(SELECT STRING_AGG(cc_all.name, ',') 
-			FROM course_category_assignments cca_all 
-			JOIN course_categories cc_all ON cca_all.category_id = cc_all.id 
-			WHERE cca_all.course_id = c.id 
-			AND cca_all.deleted_at IS NULL 
-			AND cc_all.deleted_at IS NULL), 
-			''
-		) AS categories
+		c.max_total_session
 	FROM courses c
 	JOIN users u ON u.id = c.mentor_id
 	WHERE c.deleted_at IS NULL AND u.deleted_at IS NULL AND c.id < $1
@@ -268,7 +249,6 @@ func (cr *CourseRepositoryImpl) ListCourse(
 			&item.Method,
 			&item.SessionDuration,
 			&item.MaxSession,
-			&item.CourseCategories,
 		); err != nil {
 			return customerrors.NewError(
 				"failed to get course list",
@@ -298,16 +278,7 @@ func (cr *CourseRepositoryImpl) GetMostBoughtCourses(ctx context.Context, course
 		c.price,
 		c.method,
 		c.session_duration_minutes,
-		c.max_total_session,
-		COALESCE(
-			(SELECT STRING_AGG(cc_all.name, ',') 
-			FROM course_category_assignments cca_all 
-			JOIN course_categories cc_all ON cca_all.category_id = cc_all.id 
-			WHERE cca_all.course_id = c.id 
-			AND cca_all.deleted_at IS NULL 
-			AND cc_all.deleted_at IS NULL), 
-			''
-		) AS categories
+		c.max_total_session
 	FROM courses c
 	JOIN users u ON u.id = c.mentor_id
 	WHERE c.deleted_at IS NULL AND u.deleted_at IS NULL
@@ -337,7 +308,6 @@ func (cr *CourseRepositoryImpl) GetMostBoughtCourses(ctx context.Context, course
 			&item.Method,
 			&item.SessionDuration,
 			&item.MaxSession,
-			&item.CourseCategories,
 		); err != nil {
 			return customerrors.NewError(
 				"failed to get courses",
@@ -429,16 +399,7 @@ func (cr *CourseRepositoryImpl) MentorListCourse(
 		c.price,
 		c.method,
 		c.session_duration_minutes,
-		c.max_total_session,
-		COALESCE(
-			(SELECT STRING_AGG(cc_all.name, ',') 
-			FROM course_category_assignments cca_all 
-			JOIN course_categories cc_all ON cca_all.category_id = cc_all.id 
-			WHERE cca_all.course_id = c.id 
-			AND cca_all.deleted_at IS NULL 
-			AND cc_all.deleted_at IS NULL), 
-			''
-		) AS categories
+		c.max_total_session
 	FROM courses c
 	WHERE c.mentor_id = $1 AND c.deleted_at IS NULL AND c.id < $2
 	`
@@ -506,7 +467,6 @@ func (cr *CourseRepositoryImpl) MentorListCourse(
 			&item.Method,
 			&item.SessionDuration,
 			&item.MaxSession,
-			&item.CourseCategories,
 		); err != nil {
 			return customerrors.NewError(
 				"failed to get course list",

@@ -20,6 +20,47 @@ func CreateCourseCategoryRepository(db *sql.DB) *CourseCategoryRepositoryImpl {
 	return &CourseCategoryRepositoryImpl{db}
 }
 
+func (ccr *CourseCategoryRepositoryImpl) GetCategoriesByCourseID(ctx context.Context, courseID int, categories *[]entity.GetCategoriesQuery) error {
+	var driver RepoDriver
+	driver = ccr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+
+	query := `
+	SELECT
+		cc.id,
+		cc.name
+	FROM course_categories cc
+	JOIN course_category_assignments cca on cca.category_id = cc.id
+	WHERE cca.course_id = $1 AND cca.deleted_at IS NULL AND cc.deleted_at IS NULL
+	`
+
+	rows, err := driver.Query(query, courseID)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to get course categories",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var item entity.GetCategoriesQuery
+		if err := rows.Scan(&item.CategoryID, &item.CategoryName); err != nil {
+			return customerrors.NewError(
+				"failed to get course categories",
+				err,
+				customerrors.DatabaseExecutionError,
+			)
+		}
+		*categories = append(*categories, item)
+	}
+
+	return nil
+}
+
 func (ccr *CourseCategoryRepositoryImpl) UnassignCategories(ctx context.Context, courseID int) error {
 	var driver RepoDriver
 	driver = ccr.DB

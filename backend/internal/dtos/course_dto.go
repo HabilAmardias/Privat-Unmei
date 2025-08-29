@@ -37,15 +37,18 @@ type (
 		CourseCategory *int    `form:"course_category"`
 		Method         *string `form:"method"`
 	}
+	GetCategoriesRes struct {
+		CategoryID   int    `json:"category_id"`
+		CategoryName string `json:"category_name"`
+	}
 	MentorListCourseRes struct {
-		ID               int      `json:"id"`
-		Title            string   `json:"title"`
-		Domicile         string   `json:"domicile"`
-		Method           string   `json:"method"`
-		Price            float64  `json:"price"`
-		SessionDuration  int      `json:"session_duration_minutes"`
-		MaxSession       int      `json:"max_total_session"`
-		CourseCategories []string `json:"course_categories"`
+		ID              int     `json:"id"`
+		Title           string  `json:"title"`
+		Domicile        string  `json:"domicile"`
+		Method          string  `json:"method"`
+		Price           float64 `json:"price"`
+		SessionDuration int     `json:"session_duration_minutes"`
+		MaxSession      int     `json:"max_total_session"`
 	}
 	CourseListRes struct {
 		MentorListCourseRes
@@ -55,8 +58,9 @@ type (
 	}
 	CourseDetailRes struct {
 		CourseListRes
-		Description string           `json:"description"`
-		Topics      []CourseTopicRes `json:"topics"`
+		Description      string             `json:"description"`
+		Topics           []CourseTopicRes   `json:"topics"`
+		CourseCategories []GetCategoriesRes `json:"course_categories"`
 	}
 	UpdateCourseReq struct {
 		Title            *string          `json:"title"`
