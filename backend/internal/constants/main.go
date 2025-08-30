@@ -14,11 +14,13 @@ const (
 	UnverifiedStatus                  = "unverified"
 	VerifiedStatus                    = "verified"
 	CTX_AUTH_PAYLOAD_KEY              = "auth_payload"
+	CTX_AUTH_TOKEN_KEY                = "auth_token"
 	DefaultAvatar                     = "https://res.cloudinary.com/dk8rlicon/image/upload/v1753881263/default-avatar-icon-of-social-media-user-vector_j8obqd.jpg"
 	AvatarFolder                      = "Avatars/"
 	ResumeFolder                      = "Resumes/"
 	OperationalCostPercentage float64 = 0.1
 	MaxRequestSlot                    = 7
+	MaxCourseCategories               = 5
 	ExpiredInterval                   = 15 * time.Minute // 15 minute for development and testing
 )
 

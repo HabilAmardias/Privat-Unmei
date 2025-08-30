@@ -27,7 +27,12 @@ type (
 	}
 	ResetPasswordParam struct {
 		NewPassword string
+		ID          string
 		Token       string
+	}
+	VerifyStudentParam struct {
+		Token string
+		ID    string
 	}
 	ListStudentQuery struct {
 		ID           string
@@ -43,8 +48,19 @@ type (
 	UpdateStudentParam struct {
 		ID           string
 		Name         *string
-		Password     *string
 		Bio          *string
 		ProfileImage multipart.File
+	}
+	StudentChangePasswordParam struct {
+		ID          string
+		NewPassword string
+	}
+	StudentProfileParam struct {
+		ID string
+	}
+	StudentProfileQuery struct {
+		Name         string
+		Bio          string
+		ProfileImage string
 	}
 )

@@ -16,7 +16,7 @@ const (
 	authorizationTypeBearer = "bearer"
 )
 
-func AuthenticationMiddleware(tokenUtil *utils.JWTUtil) gin.HandlerFunc {
+func AuthenticationMiddleware(tokenUtil *utils.JWTUtil, usedFor int) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authorizationHeader := ctx.GetHeader(authorizationHeaderKey)
 
@@ -59,7 +59,7 @@ func AuthenticationMiddleware(tokenUtil *utils.JWTUtil) gin.HandlerFunc {
 		}
 
 		accessToken := fields[1]
-		payload, err := tokenUtil.VerifyJWT(accessToken, constants.ForLogin)
+		payload, err := tokenUtil.VerifyJWT(accessToken, usedFor)
 		if err != nil {
 			ctx.Error(err)
 			ctx.Abort()
@@ -67,6 +67,7 @@ func AuthenticationMiddleware(tokenUtil *utils.JWTUtil) gin.HandlerFunc {
 		}
 
 		ctx.Set(constants.CTX_AUTH_PAYLOAD_KEY, payload)
+		ctx.Set(constants.CTX_AUTH_TOKEN_KEY, accessToken)
 		ctx.Next()
 	}
 }

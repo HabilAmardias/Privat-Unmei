@@ -59,7 +59,6 @@ type (
 		Resume            multipart.File
 		ProfileImage      multipart.File
 		Name              *string
-		Password          *string
 		Bio               *string
 		YearsOfExperience *int
 		GopayNumber       *string

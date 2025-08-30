@@ -43,6 +43,52 @@ func (us *StudentServiceImpl) GoogleLogin(oauthState string) string {
 	return us.goauth.Config.AuthCodeURL(oauthState)
 }
 
+func (us *StudentServiceImpl) GetStudentProfile(ctx context.Context, param entity.StudentProfileParam) (*entity.StudentProfileQuery, error) {
+	user := new(entity.User)
+	student := new(entity.Student)
+	profile := new(entity.StudentProfileQuery)
+	if err := us.ur.FindByID(ctx, param.ID, user); err != nil {
+		return nil, err
+	}
+	if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
+		return nil, err
+	}
+	profile.Name = user.Name
+	profile.Bio = user.Bio
+	profile.ProfileImage = user.ProfileImage
+
+	return profile, nil
+}
+
+func (us *StudentServiceImpl) ChangePassword(ctx context.Context, param entity.StudentChangePasswordParam) error {
+	user := new(entity.User)
+	student := new(entity.Student)
+
+	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := us.ur.FindByID(ctx, param.ID, user); err != nil {
+			return err
+		}
+		if err := us.sr.FindByID(ctx, param.ID, student); err != nil {
+			return err
+		}
+		if match := us.bu.ComparePassword(param.NewPassword, user.Password); match {
+			return customerrors.NewError(
+				"cannot change into same password",
+				errors.New("new password same as previous password"),
+				customerrors.InvalidAction,
+			)
+		}
+		hashedPass, err := us.bu.HashPassword(param.NewPassword)
+		if err != nil {
+			return err
+		}
+		if err := us.ur.UpdateUserPassword(ctx, hashedPass, param.ID); err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
 func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code string) (string, error) {
 	oauthToken, err := us.goauth.Config.Exchange(context.Background(), code)
 	if err != nil {
@@ -150,21 +196,6 @@ func (us *StudentServiceImpl) UpdateStudentProfile(ctx context.Context, param en
 		updateQuery.Name = param.Name
 		updateQuery.Bio = param.Bio
 
-		if param.Password != nil {
-			if match := us.bu.ComparePassword(*param.Password, user.Password); match {
-				return customerrors.NewError(
-					"cannot change into same password",
-					errors.New("new password same as previous password"),
-					customerrors.InvalidAction,
-				)
-			}
-			hashedPass, err := us.bu.HashPassword(*param.Password)
-			if err != nil {
-				return err
-			}
-			updateQuery.Password = &hashedPass
-		}
-
 		if param.ProfileImage != nil {
 			filename := param.ID
 			res, err := us.cu.UploadFile(ctx, param.ProfileImage, filename, constants.AvatarFolder)
@@ -232,11 +263,7 @@ func (us *StudentServiceImpl) ResetPassword(ctx context.Context, param entity.Re
 	student := new(entity.Student)
 
 	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		claim, err := us.ju.VerifyJWT(param.Token, constants.ForReset)
-		if err != nil {
-			return err
-		}
-		if err := us.ur.FindByID(ctx, claim.Subject, user); err != nil {
+		if err := us.ur.FindByID(ctx, param.ID, user); err != nil {
 			return err
 		}
 		if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
@@ -299,21 +326,17 @@ func (us *StudentServiceImpl) SendResetTokenEmail(ctx context.Context, email str
 	})
 }
 
-func (us *StudentServiceImpl) Verify(ctx context.Context, token string) error {
+func (us *StudentServiceImpl) Verify(ctx context.Context, param entity.VerifyStudentParam) error {
 	user := new(entity.User)
 	student := new(entity.Student)
 	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		claim, err := us.ju.VerifyJWT(token, constants.ForVerification)
-		if err != nil {
-			return err
-		}
-		if err := us.ur.FindByID(ctx, claim.Subject, user); err != nil {
+		if err := us.ur.FindByID(ctx, param.ID, user); err != nil {
 			return err
 		}
 		if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
 			return err
 		}
-		if student.VerifyToken == nil || token != *student.VerifyToken {
+		if student.VerifyToken == nil || param.Token != *student.VerifyToken {
 			return customerrors.NewError(
 				"invalid credential",
 				errors.New("invalid verify token"),

@@ -118,7 +118,7 @@ func (car *MentorAvailabilityRepositoryImpl) CreateAvailability(ctx context.Cont
 		`, sprintIndex, sprintIndex+1, sprintIndex+2, sprintIndex+3)
 		} else {
 			query += fmt.Sprintf(`
-		($%d, $%d, $%d, $%d);
+		($%d, $%d, $%d, $%d)
 		`, sprintIndex, sprintIndex+1, sprintIndex+2, sprintIndex+3)
 		}
 		args = append(args, schedule.MentorID)
@@ -127,6 +127,16 @@ func (car *MentorAvailabilityRepositoryImpl) CreateAvailability(ctx context.Cont
 		args = append(args, schedule.EndTime.ToString())
 		sprintIndex += 4
 	}
+	query += `
+	ON CONFLICT(mentor_id, day_of_week, start_time, end_time)
+	DO UPDATE SET
+		mentor_id = EXCLUDED.mentor_id,
+		day_of_week = EXCLUDED.day_of_week,
+		start_time = EXCLUDED.start_time,
+		end_time = EXCLUDED.end_time,
+		deleted_at = NULL,
+		updated_at = NOW();
+	`
 	log.Println(query)
 	_, err := driver.Exec(query, args...)
 	if err != nil {

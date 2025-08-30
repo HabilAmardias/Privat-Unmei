@@ -105,11 +105,22 @@ func (cs *CourseServiceImpl) UpdateCourse(ctx context.Context, param entity.Upda
 func (cs *CourseServiceImpl) CourseDetail(ctx context.Context, param entity.CourseDetailParam) (*entity.CourseDetailQuery, error) {
 	query := new(entity.CourseDetailQuery)
 	topics := new([]entity.CourseTopic)
+	categories := new([]entity.GetCategoriesQuery)
 	if err := cs.cr.CourseDetail(ctx, query, param.ID); err != nil {
 		return nil, err
 	}
 	if err := cs.tr.GetTopicsByCourseID(ctx, param.ID, topics); err != nil {
 		return nil, err
+	}
+	if err := cs.ccr.GetCategoriesByCourseID(ctx, param.ID, categories); err != nil {
+		return nil, err
+	}
+	if len(*categories) == 0 {
+		return nil, customerrors.NewError(
+			"no course categories found",
+			errors.New("the course does not have course category"),
+			customerrors.ItemNotExist,
+		)
 	}
 	if len(*topics) == 0 {
 		return nil, customerrors.NewError(
@@ -118,7 +129,9 @@ func (cs *CourseServiceImpl) CourseDetail(ctx context.Context, param entity.Cour
 			customerrors.ItemNotExist,
 		)
 	}
-	query.Topics = topics
+	query.Topics = *topics
+	query.CourseCategories = *categories
+
 	return query, nil
 }
 

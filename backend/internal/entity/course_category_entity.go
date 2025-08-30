@@ -36,4 +36,8 @@ type (
 		ID   int
 		Name *string
 	}
+	GetCategoriesQuery struct {
+		CategoryID   int
+		CategoryName string
+	}
 )

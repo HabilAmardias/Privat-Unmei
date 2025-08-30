@@ -15,15 +15,11 @@ type (
 	LoginStudentRes struct {
 		Token string `json:"token"`
 	}
-	VerifyStudentReq struct {
-		Token string `json:"token" binding:"required"`
-	}
 	SendResetTokenEmailReq struct {
 		Email string `json:"email" binding:"required,email"`
 	}
 	ResetPasswordReq struct {
 		NewPassword string `json:"new_password" binding:"required,containsany=!@#?,min=8"`
-		Token       string `json:"token"`
 	}
 	ListStudentRes struct {
 		ID           string `json:"id"`
@@ -34,11 +30,15 @@ type (
 		Status       string `json:"status"`
 	}
 	UpdateStudentReq struct {
-		Name     *string `form:"name"`
-		Password *string `form:"password" binding:"omitempty,containsany=!@#?,min=8"`
-		Bio      *string `form:"bio"`
+		Name *string `form:"name"`
+		Bio  *string `form:"bio"`
 	}
 	UpdateStudentRes struct {
 		ID string `json:"id"`
+	}
+	StudentProfileRes struct {
+		Name         string `json:"name"`
+		Bio          string `json:"bio"`
+		ProfileImage string `json:"profile_image"`
 	}
 )

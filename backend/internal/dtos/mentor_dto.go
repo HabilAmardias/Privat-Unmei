@@ -40,7 +40,6 @@ type (
 	}
 	UpdateMentorReq struct {
 		Name              *string  `form:"name"`
-		Password          *string  `form:"password" binding:"omitempty,containsany=!@#?,min=8"`
 		Bio               *string  `form:"bio"`
 		YearsOfExperience *int     `form:"years_of_experience" binding:"omitempty,gte=0"`
 		GopayNumber       *string  `form:"gopay_number"`

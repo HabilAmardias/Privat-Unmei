@@ -63,14 +63,13 @@ type (
 		Method         *string
 	}
 	MentorListCourseQuery struct {
-		ID               int
-		Title            string
-		Domicile         string
-		Method           string
-		Price            float64
-		SessionDuration  int
-		MaxSession       int
-		CourseCategories string
+		ID              int
+		Title           string
+		Domicile        string
+		Method          string
+		Price           float64
+		SessionDuration int
+		MaxSession      int
 	}
 	CourseListQuery struct {
 		MentorListCourseQuery
@@ -80,8 +79,9 @@ type (
 	}
 	CourseDetailQuery struct {
 		CourseListQuery
-		Description string
-		Topics      *[]CourseTopic
+		Description      string
+		Topics           []CourseTopic
+		CourseCategories []GetCategoriesQuery
 	}
 	CourseDetailParam struct {
 		ID int

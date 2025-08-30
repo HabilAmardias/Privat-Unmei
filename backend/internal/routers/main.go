@@ -49,9 +49,9 @@ func (c *RouteConfig) SetupPublicRoute() {
 	})
 	v1.POST("/register", c.StudentHandler.Register)
 	v1.POST("/login", c.StudentHandler.Login)
-	v1.POST("/verify", c.StudentHandler.Verify)
+	v1.GET("/verify", middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForVerification), c.StudentHandler.Verify)
 	v1.POST("/reset-password/send", c.StudentHandler.SendResetTokenEmail)
-	v1.POST("/reset-password/reset", c.StudentHandler.ResetPassword)
+	v1.POST("/reset-password/reset", middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForReset), c.StudentHandler.ResetPassword)
 	v1.POST("/admin/login", c.AdminHandler.Login)
 	v1.POST("/mentor/login", c.MentorHandler.Login)
 	v1.GET("/courses/categories", c.CourseCategoryHandler.GetCategoriesList)
@@ -65,7 +65,7 @@ func (c *RouteConfig) SetupPublicRoute() {
 
 func (c *RouteConfig) SetupPrivateRoute() {
 	v1 := c.App.Group("/api/v1")
-	v1.Use(middlewares.AuthenticationMiddleware(c.TokenUtil))
+	v1.Use(middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForLogin))
 	v1.POST("/courses/:id/reviews", c.CourseRatingHandler.AddReview)
 	v1.GET("/verify/send", c.StudentHandler.SendVerificationEmail)
 	v1.PATCH("/courses/:id", middlewares.AuthorizationMiddleware(
@@ -73,6 +73,8 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.CourseResource,
 		c.RBACRepository,
 	), c.CourseHandler.UpdateCourse)
+	v1.GET("/me", c.StudentHandler.GetStudentProfile)
+	v1.POST("/me/change-password", c.StudentHandler.ChangePassword)
 	v1.GET("/students", middlewares.AuthorizationMiddleware(
 		constants.ReadAllPermission,
 		constants.StudentResource,
