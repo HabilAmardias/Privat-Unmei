@@ -42,4 +42,17 @@ type (
 		Email      string  `json:"email"`
 		CourseName string  `json:"course_name"`
 	}
+	MentorCourseRequestDetailRes struct {
+		CourseRequestID  int                 `json:"course_request_id"`
+		CourseName       string              `json:"course_name"`
+		StudentName      string              `json:"student_name"`
+		StudentEmail     string              `json:"student_email"`
+		TotalPrice       float64             `json:"total_price"`
+		Subtotal         float64             `json:"subtotal"`
+		OperationalCost  float64             `json:"operational_cost"`
+		NumberOfSessions int                 `json:"number_of_sessions"`
+		Status           string              `json:"status"`
+		ExpiredAt        *time.Time          `json:"expired_at"`
+		Schedules        []CourseScheduleRes `json:"schedules"`
+	}
 )

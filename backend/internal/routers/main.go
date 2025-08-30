@@ -168,4 +168,9 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.CourseRequestResource,
 		c.RBACRepository,
 	), c.CourseRequestHandler.MentorCourseRequestList)
+	v1.GET("/mentors/me/course-requests/:id", middlewares.AuthorizationMiddleware(
+		constants.ReadOwnPermission,
+		constants.CourseRequestResource,
+		c.RBACRepository,
+	), c.CourseRequestHandler.MentorCourseRequestDetail)
 }

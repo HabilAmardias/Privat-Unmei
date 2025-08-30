@@ -262,6 +262,8 @@ func (cr *CourseRequestRepositoryImpl) FindByID(ctx context.Context, id int, cou
 		student_id,
 		course_id,
 		status,
+		subtotal,
+		operational_cost,
 		total_price,
 		number_of_sessions,
 		expired_at,
@@ -276,6 +278,8 @@ func (cr *CourseRequestRepositoryImpl) FindByID(ctx context.Context, id int, cou
 		&courseRequest.StudentID,
 		&courseRequest.CourseID,
 		&courseRequest.Status,
+		&courseRequest.SubTotal,
+		&courseRequest.OperationalCost,
 		&courseRequest.TotalPrice,
 		&courseRequest.NumberOfSessions,
 		&courseRequest.ExpiredAt,
@@ -304,8 +308,7 @@ func (cr *CourseRequestRepositoryImpl) FindOngoingByCourseIDAndStudentID(ctx con
 		student_id = $1 AND
 		course_id = $2 AND
 		status IN ('reserved','pending payment', 'scheduled') AND
-		deleted_at IS NULL AND
-		expired_at > NOW()
+		deleted_at IS NULL
 	`
 	if err := driver.QueryRow(query, studentID, courseID).Scan(count); err != nil {
 		return customerrors.NewError(
@@ -369,7 +372,7 @@ func (cr *CourseRequestRepositoryImpl) FindOngoingByCourseID(ctx context.Context
 		updated_at,
 		deleted_at
 	FROM course_requests
-	WHERE course_id = $1 AND status NOT IN ('completed', 'cancelled') AND deleted_at IS NULL AND expired_at > NOW()
+	WHERE course_id = $1 AND status NOT IN ('completed', 'cancelled') AND deleted_at IS NULL
 	`
 	rows, err := driver.Query(query, courseID)
 	if err != nil {

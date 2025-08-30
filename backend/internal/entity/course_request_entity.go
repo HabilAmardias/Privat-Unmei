@@ -1,6 +1,8 @@
 package entity
 
-import "time"
+import (
+	"time"
+)
 
 type (
 	CourseRequest struct {
@@ -65,5 +67,22 @@ type (
 		SeekPaginatedParam
 		MentorID string
 		Status   *string
+	}
+	MentorCourseRequestDetailParam struct {
+		CourseRequestID int
+		MentorID        string
+	}
+	MentorCourseRequestDetailQuery struct {
+		CourseRequestID  int
+		CourseName       string
+		StudentName      string
+		StudentEmail     string
+		TotalPrice       float64
+		Subtotal         float64
+		OperationalCost  float64
+		NumberOfSessions int
+		Status           string
+		ExpiredAt        *time.Time
+		Schedules        []CourseRequestSchedule
 	}
 )

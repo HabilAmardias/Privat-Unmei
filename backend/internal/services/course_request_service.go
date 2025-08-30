@@ -34,6 +34,68 @@ func CreateCourseRequestService(
 	return &CourseRequestServiceImpl{crr, cr, csr, mar, ur, sr, mr, tmr}
 }
 
+func (crs *CourseRequestServiceImpl) MentorCourseRequestDetail(ctx context.Context, param entity.MentorCourseRequestDetailParam) (*entity.MentorCourseRequestDetailQuery, error) {
+	courseRequest := new(entity.CourseRequest)
+	course := new(entity.Course)
+	userMentor := new(entity.User)
+	mentor := new(entity.Mentor)
+	userStudent := new(entity.User)
+	student := new(entity.Student)
+	schedules := new([]entity.CourseRequestSchedule)
+	res := new(entity.MentorCourseRequestDetailQuery)
+
+	if err := crs.crr.FindByID(ctx, param.CourseRequestID, courseRequest); err != nil {
+		return nil, err
+	}
+	if err := crs.cr.FindByID(ctx, courseRequest.CourseID, course, false); err != nil {
+		return nil, err
+	}
+	if err := crs.ur.FindByID(ctx, param.MentorID, userMentor); err != nil {
+		return nil, err
+	}
+	if err := crs.mr.FindByID(ctx, userMentor.ID, mentor, false); err != nil {
+		return nil, err
+	}
+	if course.MentorID != param.MentorID {
+		return nil, customerrors.NewError(
+			"the course does not belong to the mentor",
+			errors.New("mentor id does not match"),
+			customerrors.InvalidAction,
+		)
+	}
+	if err := crs.ur.FindByID(ctx, courseRequest.StudentID, userStudent); err != nil {
+		return nil, err
+	}
+	if err := crs.sr.FindByID(ctx, userStudent.ID, student); err != nil {
+		return nil, err
+	}
+	if err := crs.csr.FindScheduleByCourseRequestID(ctx, param.CourseRequestID, schedules); err != nil {
+		return nil, err
+	}
+
+	if len(*schedules) != courseRequest.NumberOfSessions {
+		return nil, customerrors.NewError(
+			"something went wrong",
+			errors.New("course schedule and number of session does not match, integrity breached"),
+			customerrors.CommonErr,
+		)
+	}
+
+	res.CourseRequestID = courseRequest.ID
+	res.CourseName = course.Title
+	res.StudentName = userStudent.Name
+	res.StudentEmail = userStudent.Email
+	res.TotalPrice = courseRequest.TotalPrice
+	res.Subtotal = courseRequest.SubTotal
+	res.OperationalCost = courseRequest.OperationalCost
+	res.NumberOfSessions = courseRequest.NumberOfSessions
+	res.Status = courseRequest.Status
+	res.ExpiredAt = courseRequest.ExpiredAt
+	res.Schedules = *schedules
+
+	return res, nil
+}
+
 func (crs *CourseRequestServiceImpl) MentorCourseRequestList(ctx context.Context, param entity.MentorCourseRequestListParam) (*[]entity.MentorCourseRequestQuery, *int64, error) {
 	requests := new([]entity.MentorCourseRequestQuery)
 	totalRow := new(int64)

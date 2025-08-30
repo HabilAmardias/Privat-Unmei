@@ -10,4 +10,9 @@ type (
 	CreateCourseScheduleReq struct {
 		PreferredSlots []PreferredSlotReq `json:"preferred_slots" binding:"dive"`
 	}
+	CourseScheduleRes struct {
+		ScheduledDate time.Time `json:"date"`
+		StartTime     string    `json:"start_time"`
+		EndTime       string    `json:"end_time"`
+	}
 )
