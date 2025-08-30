@@ -28,4 +28,18 @@ type (
 		TotalCost       float64   `json:"total_cost"`
 		ExpiredAt       time.Time `json:"expired_at"`
 	}
+	MentorCourseRequestListReq struct {
+		SeekPaginatedReq
+		Status *string `form:"status"`
+	}
+	MentorCourseRequestRes struct {
+		ID         int     `json:"id"`
+		StudentID  string  `json:"student_id"`
+		CourseID   int     `json:"course_id"`
+		TotalPrice float64 `json:"total_price"`
+		Status     string  `json:"status"`
+		Name       string  `json:"name"`
+		Email      string  `json:"email"`
+		CourseName string  `json:"course_name"`
+	}
 )

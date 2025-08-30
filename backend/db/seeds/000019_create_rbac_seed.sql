@@ -37,4 +37,5 @@ VALUES
 (2, 2, 4), -- mentor can read their own course
 (2, 4, 4), -- mentor can update their own course
 (1, 1, 2), -- admin can create mentor data
-(2, 5, 5); -- mentor can update course request data
+(2, 5, 5), -- mentor can update course request data
+(2, 2, 5); -- mentor can read their own course-related request

@@ -34,6 +34,15 @@ func CreateCourseRequestService(
 	return &CourseRequestServiceImpl{crr, cr, csr, mar, ur, sr, mr, tmr}
 }
 
+func (crs *CourseRequestServiceImpl) MentorCourseRequestList(ctx context.Context, param entity.MentorCourseRequestListParam) (*[]entity.MentorCourseRequestQuery, *int64, error) {
+	requests := new([]entity.MentorCourseRequestQuery)
+	totalRow := new(int64)
+	if err := crs.crr.MentorCourseRequestList(ctx, param.MentorID, param.Status, param.LastID, param.Limit, totalRow, requests); err != nil {
+		return nil, nil, err
+	}
+	return requests, totalRow, nil
+}
+
 func (crs *CourseRequestServiceImpl) GetPaymentDetail(ctx context.Context, param entity.GetPaymentDetailParam) (*entity.PaymentDetailQuery, error) {
 	courseRequest := new(entity.CourseRequest)
 	course := new(entity.Course)

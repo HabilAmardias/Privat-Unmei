@@ -51,4 +51,19 @@ type (
 		TotalCost       float64
 		ExpiredAt       time.Time
 	}
+	MentorCourseRequestQuery struct {
+		ID         int
+		StudentID  string
+		CourseID   int
+		TotalPrice float64
+		Status     string
+		Name       string
+		Email      string
+		CourseName string
+	}
+	MentorCourseRequestListParam struct {
+		SeekPaginatedParam
+		MentorID string
+		Status   *string
+	}
 )
