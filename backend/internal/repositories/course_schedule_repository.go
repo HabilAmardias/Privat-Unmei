@@ -20,6 +20,59 @@ func CreateCourseScheduleRepository(db *sql.DB) *CourseScheduleRepositoryImpl {
 	return &CourseScheduleRepositoryImpl{db}
 }
 
+func (csr *CourseScheduleRepositoryImpl) FindScheduleByCourseRequestID(ctx context.Context, courseRequestID int, schedules *[]entity.CourseRequestSchedule) error {
+	var driver RepoDriver
+	driver = csr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	SELECT
+		id,
+		course_request_id,
+		scheduled_date,
+		start_time,
+		end_time,
+		status,
+		created_at,
+		updated_at,
+		deleted_at
+	FROM course_schedule
+	WHERE course_request_id = $1 AND deleted_at IS NULL
+	`
+	rows, err := driver.Query(query, courseRequestID)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to get course request schedule",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var item entity.CourseRequestSchedule
+		if err := rows.Scan(
+			&item.ID,
+			&item.CourseRequestID,
+			&item.ScheduledDate,
+			&item.StartTime,
+			&item.EndTime,
+			&item.Status,
+			&item.CreatedAt,
+			&item.UpdatedAt,
+			&item.DeletedAt,
+		); err != nil {
+			return customerrors.NewError(
+				"failed to get couse request schedule",
+				err,
+				customerrors.DatabaseExecutionError,
+			)
+		}
+		*schedules = append(*schedules, item)
+	}
+	return nil
+}
+
 func (csr *CourseScheduleRepositoryImpl) CompleteSchedule(ctx context.Context) error {
 	var driver RepoDriver
 	driver = csr.DB

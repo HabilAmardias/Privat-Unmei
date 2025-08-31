@@ -17,6 +17,7 @@ import (
 
 var (
 	degreelist = []string{"bachelor", "diploma", "high school", "master", "professor"}
+	statuslist = []string{"reserved", "pending payment", "scheduled", "completed", "cancelled"}
 )
 
 func ValidateCategories(categories []int) error {
@@ -157,4 +158,17 @@ func CheckDateUniqueness(slots []dtos.PreferredSlot) error {
 		}
 	}
 	return nil
+}
+
+func ValidateRequestStatus(status string) error {
+	for _, item := range statuslist {
+		if status == item {
+			return nil
+		}
+	}
+	return customerrors.NewError(
+		"invalid status",
+		errors.New("invalid status"),
+		customerrors.InvalidAction,
+	)
 }

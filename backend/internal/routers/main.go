@@ -54,7 +54,7 @@ func (c *RouteConfig) SetupPublicRoute() {
 	v1.POST("/reset-password/reset", middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForReset), c.StudentHandler.ResetPassword)
 	v1.POST("/admin/login", c.AdminHandler.Login)
 	v1.POST("/mentor/login", c.MentorHandler.Login)
-	v1.GET("/courses/categories", c.CourseCategoryHandler.GetCategoriesList)
+	v1.GET("/course-categories", c.CourseCategoryHandler.GetCategoriesList)
 	v1.GET("/courses/most-bought", c.CourseHandler.MostBoughtCourses)
 	v1.GET("/auth/google", c.StudentHandler.GoogleLogin)
 	v1.GET("/auth/google/callback", c.StudentHandler.GoogleLoginCallback)
@@ -95,7 +95,7 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.MentorResource,
 		c.RBACRepository,
 	), c.AdminHandler.GenerateRandomPassword)
-	v1.PATCH("/admin/mentors/:id", middlewares.AuthorizationMiddleware(
+	v1.PATCH("/mentors/:id", middlewares.AuthorizationMiddleware(
 		constants.UpdateAllPermission,
 		constants.MentorResource,
 		c.RBACRepository,
@@ -105,12 +105,12 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.MentorResource,
 		c.RBACRepository,
 	), c.MentorHandler.DeleteMentor)
-	v1.POST("/courses/categories", middlewares.AuthorizationMiddleware(
+	v1.POST("/course-categories", middlewares.AuthorizationMiddleware(
 		constants.CreatePermission,
 		constants.CourseCategoryResource,
 		c.RBACRepository,
 	), c.CourseCategoryHandler.CreateCategory)
-	v1.PATCH("/courses/categories/:id", middlewares.AuthorizationMiddleware(
+	v1.PATCH("/course-categories/:id", middlewares.AuthorizationMiddleware(
 		constants.UpdateAllPermission,
 		constants.CourseCategoryResource,
 		c.RBACRepository,
@@ -135,7 +135,7 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.CourseResource,
 		c.RBACRepository,
 	), c.CourseHandler.DeleteCourse)
-	v1.GET("/mentor/courses", middlewares.AuthorizationMiddleware(
+	v1.GET("/mentors/me/courses", middlewares.AuthorizationMiddleware(
 		constants.ReadOwnPermission,
 		constants.CourseResource,
 		c.RBACRepository,
@@ -163,4 +163,14 @@ func (c *RouteConfig) SetupPrivateRoute() {
 	), c.CourseRequestHandler.ConfirmPayment)
 	v1.GET("/course-requests/:id/payment-detail", c.CourseRequestHandler.GetPaymentDetail)
 	v1.GET("/mentors/me", c.MentorHandler.GetProfileForMentor)
+	v1.GET("/mentors/me/course-requests", middlewares.AuthorizationMiddleware(
+		constants.ReadOwnPermission,
+		constants.CourseRequestResource,
+		c.RBACRepository,
+	), c.CourseRequestHandler.MentorCourseRequestList)
+	v1.GET("/mentors/me/course-requests/:id", middlewares.AuthorizationMiddleware(
+		constants.ReadOwnPermission,
+		constants.CourseRequestResource,
+		c.RBACRepository,
+	), c.CourseRequestHandler.MentorCourseRequestDetail)
 }
