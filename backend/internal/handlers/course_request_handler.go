@@ -22,6 +22,56 @@ func CreateCourseRequestHandler(cos *services.CourseRequestServiceImpl) *CourseR
 	return &CourseRequestHandlerImpl{cos}
 }
 
+func (crh *CourseRequestHandlerImpl) StudentCourseRequestDetail(ctx *gin.Context) {
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.Error(customerrors.NewError(
+			"invalid course request credential",
+			err,
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.StudentCourseRequestDetailParam{
+		CourseRequestID: id,
+		StudentID:       claim.Subject,
+	}
+	detail, err := crh.cos.StudentCourseRequestDetail(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	res := dtos.StudentCourseRequestDetailRes{
+		CourseRequestID:  param.CourseRequestID,
+		CourseName:       detail.CourseName,
+		MentorName:       detail.MentorName,
+		MentorEmail:      detail.MentorEmail,
+		TotalPrice:       detail.TotalPrice,
+		Subtotal:         detail.Subtotal,
+		OperationalCost:  detail.OperationalCost,
+		NumberOfSessions: detail.NumberOfSessions,
+		Status:           detail.Status,
+		ExpiredAt:        detail.ExpiredAt,
+		Schedules:        []dtos.CourseScheduleRes{},
+	}
+	for _, sc := range detail.Schedules {
+		res.Schedules = append(res.Schedules, dtos.CourseScheduleRes{
+			ScheduledDate: sc.ScheduledDate,
+			StartTime:     sc.StartTime,
+			EndTime:       sc.EndTime,
+		})
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data:    res,
+	})
+}
+
 func (crh *CourseRequestHandlerImpl) StudentCourseRequestList(ctx *gin.Context) {
 	var req dtos.StudentCourseRequestListReq
 	if err := ctx.ShouldBind(&req); err != nil {

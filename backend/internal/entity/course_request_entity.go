@@ -101,4 +101,21 @@ type (
 		Status    *string
 		Search    *string
 	}
+	StudentCourseRequestDetailParam struct {
+		CourseRequestID int
+		StudentID       string
+	}
+	StudentCourseRequestDetailQuery struct {
+		CourseRequestID  int
+		CourseName       string
+		MentorName       string
+		MentorEmail      string
+		TotalPrice       float64
+		Subtotal         float64
+		OperationalCost  float64
+		NumberOfSessions int
+		Status           string
+		ExpiredAt        *time.Time
+		Schedules        []CourseRequestSchedule
+	}
 )
