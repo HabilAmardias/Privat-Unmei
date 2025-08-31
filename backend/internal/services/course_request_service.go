@@ -34,6 +34,99 @@ func CreateCourseRequestService(
 	return &CourseRequestServiceImpl{crr, cr, csr, mar, ur, sr, mr, tmr}
 }
 
+func (crs *CourseRequestServiceImpl) StudentCourseRequestDetail(ctx context.Context, param entity.StudentCourseRequestDetailParam) (*entity.StudentCourseRequestDetailQuery, error) {
+	courseRequest := new(entity.CourseRequest)
+	course := new(entity.Course)
+	userMentor := new(entity.User)
+	mentor := new(entity.Mentor)
+	userStudent := new(entity.User)
+	student := new(entity.Student)
+	schedules := new([]entity.CourseRequestSchedule)
+	res := new(entity.StudentCourseRequestDetailQuery)
+
+	if err := crs.crr.FindByID(ctx, param.CourseRequestID, courseRequest); err != nil {
+		return nil, err
+	}
+	if err := crs.cr.FindByID(ctx, courseRequest.CourseID, course, false); err != nil {
+		return nil, err
+	}
+	if err := crs.ur.FindByID(ctx, param.StudentID, userStudent); err != nil {
+		return nil, err
+	}
+	if err := crs.sr.FindByID(ctx, userStudent.ID, student); err != nil {
+		return nil, err
+	}
+	if courseRequest.StudentID != param.StudentID {
+		return nil, customerrors.NewError(
+			"the course does not belong to the student",
+			errors.New("student id does not match"),
+			customerrors.InvalidAction,
+		)
+	}
+	if userStudent.Status != constants.VerifiedStatus {
+		return nil, customerrors.NewError(
+			"unauthorized user",
+			errors.New("user is not verified"),
+			customerrors.Unauthenticate,
+		)
+	}
+	if err := crs.ur.FindByID(ctx, course.MentorID, userMentor); err != nil {
+		return nil, err
+	}
+	if err := crs.mr.FindByID(ctx, userMentor.ID, mentor, false); err != nil {
+		return nil, err
+	}
+	if err := crs.csr.FindScheduleByCourseRequestID(ctx, param.CourseRequestID, schedules); err != nil {
+		return nil, err
+	}
+
+	if len(*schedules) != courseRequest.NumberOfSessions {
+		return nil, customerrors.NewError(
+			"something went wrong",
+			errors.New("course schedule and number of session does not match, integrity breached"),
+			customerrors.CommonErr,
+		)
+	}
+
+	res.CourseRequestID = courseRequest.ID
+	res.CourseName = course.Title
+	res.MentorName = userMentor.Name
+	res.MentorEmail = userMentor.Email
+	res.TotalPrice = courseRequest.TotalPrice
+	res.Subtotal = courseRequest.SubTotal
+	res.OperationalCost = courseRequest.OperationalCost
+	res.NumberOfSessions = courseRequest.NumberOfSessions
+	res.Status = courseRequest.Status
+	res.ExpiredAt = courseRequest.ExpiredAt
+	res.Schedules = *schedules
+
+	return res, nil
+}
+
+func (crs *CourseRequestServiceImpl) StudentCourseRequestList(ctx context.Context, param entity.StudentCourseRequestListParam) (*[]entity.StudentCourseRequestQuery, *int64, error) {
+	requests := new([]entity.StudentCourseRequestQuery)
+	totalRow := new(int64)
+	user := new(entity.User)
+	student := new(entity.Student)
+	if err := crs.ur.FindByID(ctx, param.StudentID, user); err != nil {
+		return nil, nil, err
+	}
+	if err := crs.sr.FindByID(ctx, user.ID, student); err != nil {
+		return nil, nil, err
+	}
+	if user.Status != constants.VerifiedStatus {
+		return nil, nil, customerrors.NewError(
+			"unauthorized access",
+			errors.New("user status is not verified"),
+			customerrors.Unauthenticate,
+		)
+	}
+	if err := crs.crr.StudentCourseRequestList(ctx, param.StudentID, param.Status, param.Search, param.LastID, param.Limit, totalRow, requests); err != nil {
+		return nil, nil, err
+	}
+	return requests, totalRow, nil
+}
+
 func (crs *CourseRequestServiceImpl) MentorCourseRequestDetail(ctx context.Context, param entity.MentorCourseRequestDetailParam) (*entity.MentorCourseRequestDetailQuery, error) {
 	courseRequest := new(entity.CourseRequest)
 	course := new(entity.Course)

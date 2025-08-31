@@ -55,4 +55,32 @@ type (
 		ExpiredAt        *time.Time          `json:"expired_at"`
 		Schedules        []CourseScheduleRes `json:"schedules"`
 	}
+	StudentCourseRequestListReq struct {
+		SeekPaginatedReq
+		Status *string `form:"status"`
+		Search *string `form:"search"`
+	}
+	StudentCourseRequestRes struct {
+		ID          int     `json:"id"`
+		StudentID   string  `json:"student_id"`
+		CourseID    int     `json:"course_id"`
+		TotalPrice  float64 `json:"total_price"`
+		Status      string  `json:"status"`
+		MentorName  string  `json:"mentor_name"`
+		MentorEmail string  `json:"mentor_email"`
+		CourseName  string  `json:"course_name"`
+	}
+	StudentCourseRequestDetailRes struct {
+		CourseRequestID  int                 `json:"course_request_id"`
+		CourseName       string              `json:"course_name"`
+		MentorName       string              `json:"mentor_name"`
+		MentorEmail      string              `json:"mentor_email"`
+		TotalPrice       float64             `json:"total_price"`
+		Subtotal         float64             `json:"subtotal"`
+		OperationalCost  float64             `json:"operational_cost"`
+		NumberOfSessions int                 `json:"number_of_sessions"`
+		Status           string              `json:"status"`
+		ExpiredAt        *time.Time          `json:"expired_at"`
+		Schedules        []CourseScheduleRes `json:"schedules"`
+	}
 )

@@ -85,4 +85,37 @@ type (
 		ExpiredAt        *time.Time
 		Schedules        []CourseRequestSchedule
 	}
+	StudentCourseRequestQuery struct {
+		ID          int
+		StudentID   string
+		CourseID    int
+		TotalPrice  float64
+		Status      string
+		MentorName  string
+		MentorEmail string
+		CourseName  string
+	}
+	StudentCourseRequestListParam struct {
+		SeekPaginatedParam
+		StudentID string
+		Status    *string
+		Search    *string
+	}
+	StudentCourseRequestDetailParam struct {
+		CourseRequestID int
+		StudentID       string
+	}
+	StudentCourseRequestDetailQuery struct {
+		CourseRequestID  int
+		CourseName       string
+		MentorName       string
+		MentorEmail      string
+		TotalPrice       float64
+		Subtotal         float64
+		OperationalCost  float64
+		NumberOfSessions int
+		Status           string
+		ExpiredAt        *time.Time
+		Schedules        []CourseRequestSchedule
+	}
 )
