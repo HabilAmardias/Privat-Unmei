@@ -34,6 +34,30 @@ func CreateCourseRequestService(
 	return &CourseRequestServiceImpl{crr, cr, csr, mar, ur, sr, mr, tmr}
 }
 
+func (crs *CourseRequestServiceImpl) StudentCourseRequestList(ctx context.Context, param entity.StudentCourseRequestListParam) (*[]entity.StudentCourseRequestQuery, *int64, error) {
+	requests := new([]entity.StudentCourseRequestQuery)
+	totalRow := new(int64)
+	user := new(entity.User)
+	student := new(entity.Student)
+	if err := crs.ur.FindByID(ctx, param.StudentID, user); err != nil {
+		return nil, nil, err
+	}
+	if err := crs.sr.FindByID(ctx, user.ID, student); err != nil {
+		return nil, nil, err
+	}
+	if user.Status != constants.VerifiedStatus {
+		return nil, nil, customerrors.NewError(
+			"unauthorized access",
+			errors.New("user status is not verified"),
+			customerrors.Unauthenticate,
+		)
+	}
+	if err := crs.crr.StudentCourseRequestList(ctx, param.StudentID, param.Status, param.Search, param.LastID, param.Limit, totalRow, requests); err != nil {
+		return nil, nil, err
+	}
+	return requests, totalRow, nil
+}
+
 func (crs *CourseRequestServiceImpl) MentorCourseRequestDetail(ctx context.Context, param entity.MentorCourseRequestDetailParam) (*entity.MentorCourseRequestDetailQuery, error) {
 	courseRequest := new(entity.CourseRequest)
 	course := new(entity.Course)

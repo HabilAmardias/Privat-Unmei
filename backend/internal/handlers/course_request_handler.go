@@ -22,6 +22,80 @@ func CreateCourseRequestHandler(cos *services.CourseRequestServiceImpl) *CourseR
 	return &CourseRequestHandlerImpl{cos}
 }
 
+func (crh *CourseRequestHandlerImpl) StudentCourseRequestList(ctx *gin.Context) {
+	var req dtos.StudentCourseRequestListReq
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	if req.Status != nil {
+		if err := ValidateRequestStatus(*req.Status); err != nil {
+			ctx.Error(err)
+			return
+		}
+	}
+	param := entity.StudentCourseRequestListParam{
+		SeekPaginatedParam: entity.SeekPaginatedParam{
+			Limit:  req.Limit,
+			LastID: req.LastID,
+		},
+		Status:    req.Status,
+		StudentID: claim.Subject,
+		Search:    req.Search,
+	}
+	if req.Limit <= 0 {
+		param.Limit = constants.DefaultLimit
+	}
+	if req.LastID <= 0 {
+		param.LastID = constants.DefaultLastID
+	}
+	res, totalRow, err := crh.cos.StudentCourseRequestList(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	entries := []dtos.StudentCourseRequestRes{}
+	for _, req := range *res {
+		entries = append(entries, dtos.StudentCourseRequestRes(req))
+	}
+	var filters []dtos.FilterInfo
+	if req.Status != nil {
+		filters = append(filters, dtos.FilterInfo{
+			Name:  "Status",
+			Value: *req.Status,
+		})
+	}
+	if req.Search != nil {
+		filters = append(filters, dtos.FilterInfo{
+			Name:  "Search",
+			Value: *req.Search,
+		})
+	}
+	var lastID int
+	if len(entries) > 0 {
+		lastID = entries[len(entries)-1].ID
+	} else {
+		lastID = 0
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.SeekPaginatedResponse[dtos.StudentCourseRequestRes]{
+			Entries: entries,
+			PageInfo: dtos.SeekPaginatedInfo{
+				LastID:   lastID,
+				FilterBy: filters,
+				Limit:    param.Limit,
+				TotalRow: *totalRow,
+			},
+		},
+	})
+}
+
 func (crh *CourseRequestHandlerImpl) MentorCourseRequestDetail(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {

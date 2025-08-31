@@ -19,6 +19,125 @@ func CreateCourseRequestRepository(db *sql.DB) *CourseRequestRepositoryImpl {
 	return &CourseRequestRepositoryImpl{db}
 }
 
+func (cr *CourseRequestRepositoryImpl) StudentCourseRequestList(
+	ctx context.Context,
+	studentID string,
+	status *string,
+	search *string,
+	lastID int,
+	limit int,
+	totalRow *int64,
+	requests *[]entity.StudentCourseRequestQuery,
+) error {
+	var driver RepoDriver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	args := []any{lastID, studentID}
+	countArgs := []any{lastID, studentID}
+	query := `
+	SELECT
+		cr.id,
+		cr.student_id,
+		cr.course_id,
+		cr.total_price,
+		cr.status,
+		u.name,
+		u.email,
+		c.title
+	FROM course_requests cr
+	JOIN courses c on cr.course_id = c.id
+	JOIN mentors m on c.mentor_id = m.id
+	JOIN users u on u.id = m.id
+	WHERE
+		cr.deleted_at IS NULL
+		AND c.deleted_at IS NULL
+		AND m.deleted_at IS NULL
+		AND u.deleted_at IS NULL
+		AND cr.id < $1
+		AND cr.student_id = $2
+	`
+	countQuery := `
+	SELECT
+		count(*)
+	FROM course_requests cr
+	JOIN courses c on cr.course_id = c.id
+	JOIN mentors m on c.mentor_id = m.id
+	JOIN users u on u.id = m.id
+	WHERE
+		cr.deleted_at IS NULL
+		AND c.deleted_at IS NULL
+		AND m.deleted_at IS NULL
+		AND u.deleted_at IS NULL
+		AND cr.id < $1
+		AND cr.student_id = $2
+	`
+	if status != nil {
+		args = append(args, *status)
+		countArgs = append(countArgs, *status)
+		query += fmt.Sprintf(`
+			AND cr.status = $%d
+		`, len(args))
+		countQuery += fmt.Sprintf(`
+			AND cr.status = $%d
+		`, len(countArgs))
+	}
+	if search != nil {
+		args = append(args, "%"+*search+"%")
+		countArgs = append(countArgs, "%"+*search+"%")
+		query += fmt.Sprintf(`
+		AND c.title ILIKE $%d
+		`, len(args))
+		countQuery += fmt.Sprintf(`
+		AND c.title ILIKE $%d
+		`, len(countArgs))
+	}
+
+	query += `ORDER BY cr.id DESC `
+	args = append(args, limit)
+	query += fmt.Sprintf(`LIMIT $%d`, len(args))
+
+	if err := driver.QueryRow(countQuery, countArgs...).Scan(totalRow); err != nil {
+		return customerrors.NewError(
+			"failed to get mentor course request list",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	log.Println(query)
+	rows, err := driver.Query(query, args...)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to get mentor course request list",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var item entity.StudentCourseRequestQuery
+		if err := rows.Scan(
+			&item.ID,
+			&item.StudentID,
+			&item.CourseID,
+			&item.TotalPrice,
+			&item.Status,
+			&item.MentorName,
+			&item.MentorEmail,
+			&item.CourseName,
+		); err != nil {
+			return customerrors.NewError(
+				"failed to get mentor course request list",
+				err,
+				customerrors.DatabaseExecutionError,
+			)
+		}
+		*requests = append(*requests, item)
+	}
+	return nil
+}
+
 func (cr *CourseRequestRepositoryImpl) MentorCourseRequestList(
 	ctx context.Context,
 	mentorID string,

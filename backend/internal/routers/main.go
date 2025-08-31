@@ -173,4 +173,5 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.CourseRequestResource,
 		c.RBACRepository,
 	), c.CourseRequestHandler.MentorCourseRequestDetail)
+	v1.GET("/me/course-requests", c.CourseRequestHandler.StudentCourseRequestList)
 }
