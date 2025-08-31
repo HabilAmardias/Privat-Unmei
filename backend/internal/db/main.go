@@ -15,17 +15,17 @@ type CustomDB struct {
 }
 
 func (cdb *CustomDB) Query(query string, args ...any) (*sql.Rows, error) {
-	cdb.logger.Info(query)
+	cdb.logger.Infoln(query)
 	return cdb.db.Query(query, args...)
 }
 
 func (cdb *CustomDB) QueryRow(query string, args ...any) *sql.Row {
-	cdb.logger.Info(query)
+	cdb.logger.Infoln(query)
 	return cdb.db.QueryRow(query, args...)
 }
 
 func (cdb *CustomDB) Exec(query string, args ...any) (sql.Result, error) {
-	cdb.logger.Info(query)
+	cdb.logger.Infoln(query)
 	return cdb.db.Exec(query, args...)
 }
 
