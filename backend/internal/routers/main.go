@@ -5,6 +5,7 @@ import (
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/handlers"
+	"privat-unmei/internal/logger"
 	"privat-unmei/internal/middlewares"
 	"privat-unmei/internal/repositories"
 	"privat-unmei/internal/utils"
@@ -24,6 +25,7 @@ type RouteConfig struct {
 	CourseRequestHandler  *handlers.CourseRequestHandlerImpl
 	RBACRepository        *repositories.RBACRepository
 	TokenUtil             *utils.JWTUtil
+	Logger                logger.CustomLogger
 }
 
 func (c *RouteConfig) Setup() {
@@ -33,7 +35,7 @@ func (c *RouteConfig) Setup() {
 		AllowHeaders:    []string{"Content-Type", "Authorization"},
 	}
 	c.App.Use(cors.New(config))
-	c.App.Use(middlewares.ErrorMiddleware())
+	c.App.Use(middlewares.ErrorMiddleware(c.Logger))
 
 	c.SetupPublicRoute()
 	c.SetupPrivateRoute()

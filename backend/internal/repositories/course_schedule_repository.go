@@ -2,10 +2,10 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
-	"log"
+
 	"privat-unmei/internal/customerrors"
+	"privat-unmei/internal/db"
 	"privat-unmei/internal/entity"
 	"time"
 
@@ -13,10 +13,10 @@ import (
 )
 
 type CourseScheduleRepositoryImpl struct {
-	DB *sql.DB
+	DB *db.CustomDB
 }
 
-func CreateCourseScheduleRepository(db *sql.DB) *CourseScheduleRepositoryImpl {
+func CreateCourseScheduleRepository(db *db.CustomDB) *CourseScheduleRepositoryImpl {
 	return &CourseScheduleRepositoryImpl{db}
 }
 
@@ -90,7 +90,7 @@ func (csr *CourseScheduleRepositoryImpl) CompleteSchedule(ctx context.Context) e
 		status = 'scheduled' AND
 		deleted_at IS NULL
 	`
-	log.Println(query)
+
 	_, err := driver.Exec(query)
 	return err
 }
@@ -110,7 +110,7 @@ func (csr *CourseScheduleRepositoryImpl) CancelExpiredSchedule(ctx context.Conte
 		course_request_id = ANY($1) 
 		AND deleted_at IS NULL
 	`
-	log.Println(query)
+
 	_, err := driver.Exec(query, pq.Array(ids))
 	// not wrapping it on customerror because its just for cron
 	return err
@@ -257,7 +257,7 @@ func (csr *CourseScheduleRepositoryImpl) CreateSchedule(ctx context.Context, cou
 		args = append(args, slot.Date, slot.StartTime, slot.EndTime)
 		sprintIndex += 3
 	}
-	log.Println(query)
+
 	_, err := driver.Exec(query, args...)
 	if err != nil {
 		return customerrors.NewError(

@@ -3,16 +3,16 @@ package middlewares
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/dtos"
+	"privat-unmei/internal/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
 
-func ErrorMiddleware() gin.HandlerFunc {
+func ErrorMiddleware(logger logger.CustomLogger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ctx.Next()
 		if len(ctx.Errors) == 0 {
@@ -24,7 +24,7 @@ func ErrorMiddleware() gin.HandlerFunc {
 			fieldErrors := make([]dtos.DetailsError, 0)
 
 			for _, fe := range ve {
-				log.Println(fe.Error())
+				logger.Errorln(err.Error())
 
 				fieldErrors = append(fieldErrors, dtos.DetailsError{
 					Title:   fe.Field(),
@@ -39,7 +39,7 @@ func ErrorMiddleware() gin.HandlerFunc {
 		}
 		var ce *customerrors.CustomError
 		if errors.As(err, &ce) {
-			log.Println(ce.ErrLog)
+			logger.Errorln(ce.ErrLog.Error())
 			ctx.JSON(ce.GetStatusCode(), dtos.Response{
 				Success: false,
 				Data: dtos.MessageResponse{
@@ -48,7 +48,7 @@ func ErrorMiddleware() gin.HandlerFunc {
 			})
 			return
 		}
-		log.Println(err.Error())
+		logger.Errorln(err.Error())
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, dtos.Response{
 			Success: false,
 			Data: dtos.MessageResponse{

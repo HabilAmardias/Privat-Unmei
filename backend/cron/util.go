@@ -1,9 +1,11 @@
 package cronApp
 
 import (
+	"flag"
 	"log"
 	"os"
 	"privat-unmei/internal/db"
+	"privat-unmei/internal/logger"
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/robfig/cron/v3"
@@ -32,12 +34,19 @@ func (rcu *CronUtil) AddJob(spec string, callback func()) error {
 }
 
 func Run() {
+	var isProd bool
+	flag.BoolVar(&isProd, "release", false, "Run production environemnt")
+	flag.Parse()
 	rcu := NewCronUtil()
-	driver, err := db.ConnectDB()
+	logger, err := logger.CreateNewLogger(isProd)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	crc := NewCourseRequestCron(driver)
+	driver, err := db.ConnectDB(logger)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+	crc := NewCourseRequestCron(driver, logger)
 	if err := rcu.AddJob(os.Getenv("EXPIRED_CRON_SPEC"), crc.UpdateExpiredRequest); err != nil {
 		log.Fatalln(err.Error())
 	}

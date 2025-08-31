@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"privat-unmei/internal/db"
+	"privat-unmei/internal/logger"
 	"strconv"
 	"syscall"
 	"time"
@@ -17,12 +18,6 @@ import (
 )
 
 func Run() {
-	driver, err := db.ConnectDB()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-	defer driver.Close()
-
 	// add production environment option
 	var isProd bool
 	flag.BoolVar(&isProd, "release", false, "Run production environemnt")
@@ -31,9 +26,20 @@ func Run() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	zl, err := logger.CreateNewLogger(isProd)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	driver, err := db.ConnectDB(zl)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+	defer driver.Close()
+
 	app := gin.New()
 	app.ContextWithFallback = true
-	Bootstrap(driver, app)
+	Bootstrap(driver, zl, app)
 
 	port := ":" + os.Getenv("SERVER_PORT")
 	server := &http.Server{

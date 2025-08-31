@@ -5,14 +5,15 @@ import (
 	"database/sql"
 	"errors"
 	"privat-unmei/internal/customerrors"
+	"privat-unmei/internal/db"
 	"privat-unmei/internal/entity"
 )
 
 type UserRepositoryImpl struct {
-	DB *sql.DB
+	DB *db.CustomDB
 }
 
-func CreateUserRepository(db *sql.DB) *UserRepositoryImpl {
+func CreateUserRepository(db *db.CustomDB) *UserRepositoryImpl {
 	return &UserRepositoryImpl{db}
 }
 

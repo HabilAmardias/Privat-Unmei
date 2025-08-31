@@ -4,16 +4,16 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"log"
 	"privat-unmei/internal/customerrors"
+	"privat-unmei/internal/db"
 	"privat-unmei/internal/entity"
 )
 
 type StudentRepositoryImpl struct {
-	DB *sql.DB
+	DB *db.CustomDB
 }
 
-func CreateStudentRepository(db *sql.DB) *StudentRepositoryImpl {
+func CreateStudentRepository(db *db.CustomDB) *StudentRepositoryImpl {
 	return &StudentRepositoryImpl{db}
 }
 
@@ -64,7 +64,6 @@ func (sr *StudentRepositoryImpl) GetStudentList(ctx context.Context, totalRow *i
 		OFFSET $2
 	`
 
-	log.Println(query)
 	rows, err := driver.Query(query, args...)
 	if err != nil {
 		return customerrors.NewError(
