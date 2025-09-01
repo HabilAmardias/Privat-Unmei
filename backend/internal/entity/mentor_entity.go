@@ -115,6 +115,23 @@ type (
 		Campus               string
 		MentorAvailabilities []MentorSchedule
 	}
+	GetMentorProfileForStudentParam struct {
+		MentorID string
+	}
+	GetMentorProfileForStudentQuery struct {
+		MentorID                string
+		MentorName              string
+		MentorEmail             string
+		MentorBio               string
+		MentorProfileImage      string
+		MentorAverageRating     float64
+		MentorResume            string
+		MentorYearsOfExperience int
+		MentorDegree            string
+		MentorMajor             string
+		MentorCampus            string
+		MentorAvailabilities    []MentorSchedule
+	}
 )
 
 func (to *TimeOnly) ToString() string {
