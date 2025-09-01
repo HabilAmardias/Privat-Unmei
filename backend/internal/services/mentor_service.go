@@ -41,6 +41,48 @@ func CreateMentorService(
 	return &MentorServiceImpl{tmr, ur, mr, tr, ccr, car, cr, bu, ju, cu, gu}
 }
 
+func (ms *MentorServiceImpl) GetMentorProfileForStudent(ctx context.Context, param entity.GetMentorProfileForStudentParam) (*entity.GetMentorProfileForStudentQuery, error) {
+	user := new(entity.User)
+	mentor := new(entity.Mentor)
+	mentorAvailability := new([]entity.MentorAvailability)
+	res := new(entity.GetMentorProfileForStudentQuery)
+	if err := ms.ur.FindByID(ctx, param.MentorID, user); err != nil {
+		return nil, err
+	}
+	if err := ms.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
+		return nil, err
+	}
+	if err := ms.car.GetAvailabilityByMentorID(ctx, param.MentorID, mentorAvailability); err != nil {
+		return nil, err
+	}
+
+	res.MentorAvailabilities = []entity.MentorSchedule{}
+	res.MentorAverageRating = constants.NoRating
+	if mentor.RatingCount > constants.NoRating {
+		res.MentorAverageRating = mentor.TotalRating / float64(mentor.RatingCount)
+	}
+	res.MentorBio = user.Bio
+	res.MentorCampus = mentor.Campus
+	res.MentorDegree = mentor.Degree
+	res.MentorEmail = user.Email
+	res.MentorID = mentor.ID
+	res.MentorMajor = mentor.Major
+	res.MentorName = user.Name
+	res.MentorProfileImage = user.ProfileImage
+	res.MentorResume = mentor.Resume
+	res.MentorYearsOfExperience = mentor.YearsOfExperience
+
+	for _, sc := range *mentorAvailability {
+		res.MentorAvailabilities = append(res.MentorAvailabilities, entity.MentorSchedule{
+			DayOfWeek: sc.DayOfWeek,
+			StartTime: sc.StartTime,
+			EndTime:   sc.EndTime,
+		})
+	}
+
+	return res, nil
+}
+
 func (ms *MentorServiceImpl) GetProfileForMentor(ctx context.Context, param entity.GetProfileMentorParam) (*entity.GetProfileMentorQuery, error) {
 	user := new(entity.User)
 	mentor := new(entity.Mentor)

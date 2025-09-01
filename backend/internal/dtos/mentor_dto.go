@@ -85,4 +85,18 @@ type (
 		Campus               string                  `json:"campus"`
 		MentorAvailabilities []MentorAvailabilityRes `json:"mentor_availability"`
 	}
+	GetMentorProfileForStudentRes struct {
+		MentorID                string                  `json:"id"`
+		MentorName              string                  `json:"name"`
+		MentorEmail             string                  `json:"email"`
+		MentorBio               string                  `json:"bio"`
+		MentorProfileImage      string                  `json:"profile_image"`
+		MentorAverageRating     float64                 `json:"rating"`
+		MentorResume            string                  `json:"resume"`
+		MentorYearsOfExperience int                     `json:"years_of_experience"`
+		MentorDegree            string                  `json:"degree"`
+		MentorMajor             string                  `json:"major"`
+		MentorCampus            string                  `json:"campus"`
+		MentorAvailabilities    []MentorAvailabilityRes `json:"mentor_availability"`
+	}
 )

@@ -22,6 +22,7 @@ const (
 	MaxRequestSlot                    = 7
 	MaxCourseCategories               = 5
 	ExpiredInterval                   = 15 * time.Minute // 15 minute for development and testing
+	NoRating                          = 0
 )
 
 const (
