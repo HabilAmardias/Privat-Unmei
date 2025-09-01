@@ -2,8 +2,9 @@ package cronApp
 
 import (
 	"context"
-	"database/sql"
 	"log"
+	"privat-unmei/internal/db"
+	"privat-unmei/internal/logger"
 	"privat-unmei/internal/repositories"
 )
 
@@ -14,11 +15,11 @@ type CourseRequestCron struct {
 	tmr *repositories.TransactionManagerRepositories
 }
 
-func NewCourseRequestCron(db *sql.DB) *CourseRequestCron {
+func NewCourseRequestCron(db *db.CustomDB, logger logger.CustomLogger) *CourseRequestCron {
 	crr := repositories.CreateCourseRequestRepository(db)
 	csr := repositories.CreateCourseScheduleRepository(db)
 	cr := repositories.CreateCourseRepository(db)
-	tmr := repositories.CreateTransactionManager(db)
+	tmr := repositories.CreateTransactionManager(db, logger)
 	return &CourseRequestCron{crr, csr, cr, tmr}
 }
 

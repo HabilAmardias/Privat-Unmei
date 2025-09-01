@@ -5,17 +5,18 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
+
 	"privat-unmei/internal/customerrors"
+	"privat-unmei/internal/db"
 	"privat-unmei/internal/entity"
 	"time"
 )
 
 type CourseRequestRepositoryImpl struct {
-	DB *sql.DB
+	DB *db.CustomDB
 }
 
-func CreateCourseRequestRepository(db *sql.DB) *CourseRequestRepositoryImpl {
+func CreateCourseRequestRepository(db *db.CustomDB) *CourseRequestRepositoryImpl {
 	return &CourseRequestRepositoryImpl{db}
 }
 
@@ -104,7 +105,7 @@ func (cr *CourseRequestRepositoryImpl) StudentCourseRequestList(
 			customerrors.DatabaseExecutionError,
 		)
 	}
-	log.Println(query)
+
 	rows, err := driver.Query(query, args...)
 	if err != nil {
 		return customerrors.NewError(
@@ -212,7 +213,7 @@ func (cr *CourseRequestRepositoryImpl) MentorCourseRequestList(
 			customerrors.DatabaseExecutionError,
 		)
 	}
-	log.Println(query)
+
 	rows, err := driver.Query(query, args...)
 	if err != nil {
 		return customerrors.NewError(
@@ -308,7 +309,7 @@ func (cr *CourseRequestRepositoryImpl) CompleteRequest(ctx context.Context) erro
 		AND cs.deleted_at IS NULL
 	)
 	`
-	log.Println(query)
+
 	_, err := driver.Exec(query)
 	return err
 }
@@ -328,7 +329,7 @@ func (cr *CourseRequestRepositoryImpl) CancelExpiredRequest(ctx context.Context,
 	AND status IN ('reserved','pending payment')
 	RETURNING (id)
 	`
-	log.Println(query)
+
 	rows, err := driver.Query(query)
 	if err != nil {
 		// not wrapping it on customerror because its just for cron

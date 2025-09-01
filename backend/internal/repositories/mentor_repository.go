@@ -5,16 +5,16 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"privat-unmei/internal/customerrors"
+	"privat-unmei/internal/db"
 	"privat-unmei/internal/entity"
 )
 
 type MentorRepositoryImpl struct {
-	DB *sql.DB
+	DB *db.CustomDB
 }
 
-func CreateMentorRepositoryImpl(db *sql.DB) *MentorRepositoryImpl {
+func CreateMentorRepositoryImpl(db *db.CustomDB) *MentorRepositoryImpl {
 	return &MentorRepositoryImpl{db}
 }
 
@@ -86,7 +86,6 @@ func (mr *MentorRepositoryImpl) GetMentorList(ctx context.Context, mentors *[]en
 			customerrors.DatabaseExecutionError,
 		)
 	}
-	log.Println(query)
 	rows, err := driver.Query(query, args...)
 	if err != nil {
 		return customerrors.NewError(

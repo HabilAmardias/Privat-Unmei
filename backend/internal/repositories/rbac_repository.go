@@ -5,14 +5,15 @@ import (
 	"database/sql"
 	"errors"
 	"privat-unmei/internal/customerrors"
+	"privat-unmei/internal/db"
 	"privat-unmei/internal/entity"
 )
 
 type RBACRepository struct {
-	DB *sql.DB
+	DB *db.CustomDB
 }
 
-func CreateRBACRepository(db *sql.DB) *RBACRepository {
+func CreateRBACRepository(db *db.CustomDB) *RBACRepository {
 	return &RBACRepository{db}
 }
 

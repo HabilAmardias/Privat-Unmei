@@ -2,20 +2,19 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
-	"log"
 	"privat-unmei/internal/customerrors"
+	"privat-unmei/internal/db"
 	"privat-unmei/internal/entity"
 
 	"github.com/lib/pq"
 )
 
 type TopicRepositoryImpl struct {
-	DB *sql.DB
+	DB *db.CustomDB
 }
 
-func CreateTopicRepository(db *sql.DB) *TopicRepositoryImpl {
+func CreateTopicRepository(db *db.CustomDB) *TopicRepositoryImpl {
 	return &TopicRepositoryImpl{db}
 }
 
@@ -139,7 +138,6 @@ func (tr *TopicRepositoryImpl) CreateTopics(ctx context.Context, topics *[]entit
 		args = append(args, topic.Description)
 		sprintIndex += 3
 	}
-	log.Println(query)
 	_, err := driver.Exec(query, args...)
 	if err != nil {
 		return customerrors.NewError(

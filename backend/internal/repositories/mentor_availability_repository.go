@@ -2,19 +2,19 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
-	"log"
+
 	"privat-unmei/internal/customerrors"
+	"privat-unmei/internal/db"
 	"privat-unmei/internal/entity"
 	"time"
 )
 
 type MentorAvailabilityRepositoryImpl struct {
-	DB *sql.DB
+	DB *db.CustomDB
 }
 
-func CreateCourseAvailabilityRepository(db *sql.DB) *MentorAvailabilityRepositoryImpl {
+func CreateCourseAvailabilityRepository(db *db.CustomDB) *MentorAvailabilityRepositoryImpl {
 	return &MentorAvailabilityRepositoryImpl{db}
 }
 
@@ -137,7 +137,7 @@ func (car *MentorAvailabilityRepositoryImpl) CreateAvailability(ctx context.Cont
 		deleted_at = NULL,
 		updated_at = NOW();
 	`
-	log.Println(query)
+
 	_, err := driver.Exec(query, args...)
 	if err != nil {
 		return customerrors.NewError(

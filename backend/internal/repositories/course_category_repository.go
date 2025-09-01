@@ -5,18 +5,18 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"privat-unmei/internal/customerrors"
+	"privat-unmei/internal/db"
 	"privat-unmei/internal/entity"
 
 	"github.com/lib/pq"
 )
 
 type CourseCategoryRepositoryImpl struct {
-	DB *sql.DB
+	DB *db.CustomDB
 }
 
-func CreateCourseCategoryRepository(db *sql.DB) *CourseCategoryRepositoryImpl {
+func CreateCourseCategoryRepository(db *db.CustomDB) *CourseCategoryRepositoryImpl {
 	return &CourseCategoryRepositoryImpl{db}
 }
 
@@ -117,7 +117,7 @@ func (ccr *CourseCategoryRepositoryImpl) FindByMultipleIDs(ctx context.Context, 
 	FROM course_categories
 	WHERE id = ANY($1) AND deleted_at IS NULL
 	`
-	log.Println(query)
+
 	rows, err := driver.Query(query, args...)
 	if err != nil {
 		return customerrors.NewError(
@@ -178,7 +178,7 @@ func (ccr *CourseCategoryRepositoryImpl) AssignCategories(ctx context.Context, c
 		deleted_at = NULL,
 		updated_at = NOW();
 	`
-	log.Println(query)
+
 	_, err := driver.Exec(query, args...)
 	if err != nil {
 		return customerrors.NewError(
@@ -356,7 +356,7 @@ func (ccr *CourseCategoryRepositoryImpl) GetCourseCategoryList(
 			customerrors.DatabaseExecutionError,
 		)
 	}
-	log.Println(query)
+
 	rows, err := driver.Query(query, args...)
 	if err != nil {
 		return customerrors.NewError(

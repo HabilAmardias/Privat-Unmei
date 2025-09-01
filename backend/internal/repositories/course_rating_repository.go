@@ -5,14 +5,15 @@ import (
 	"database/sql"
 	"errors"
 	"privat-unmei/internal/customerrors"
+	"privat-unmei/internal/db"
 	"privat-unmei/internal/entity"
 )
 
 type CourseRatingRepositoryImpl struct {
-	DB *sql.DB
+	DB *db.CustomDB
 }
 
-func CreateCourseRatingRepository(db *sql.DB) *CourseRatingRepositoryImpl {
+func CreateCourseRatingRepository(db *db.CustomDB) *CourseRatingRepositoryImpl {
 	return &CourseRatingRepositoryImpl{db}
 }
 

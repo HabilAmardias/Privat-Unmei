@@ -5,16 +5,17 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
+
 	"privat-unmei/internal/customerrors"
+	"privat-unmei/internal/db"
 	"privat-unmei/internal/entity"
 )
 
 type CourseRepositoryImpl struct {
-	DB *sql.DB
+	DB *db.CustomDB
 }
 
-func CreateCourseRepository(db *sql.DB) *CourseRepositoryImpl {
+func CreateCourseRepository(db *db.CustomDB) *CourseRepositoryImpl {
 	return &CourseRepositoryImpl{db}
 }
 
@@ -44,7 +45,6 @@ func (cr *CourseRepositoryImpl) UpdateCourseTransactionCount(ctx context.Context
 	FROM course_cancel_counts
 	WHERE courses.id = course_cancel_counts.course_id AND courses.deleted_at IS NULL;
 	`
-	log.Println(query)
 	_, err := driver.Exec(query)
 	// not wrapping it on customerror because its just for cron
 	return err
@@ -114,7 +114,7 @@ func (cr *CourseRepositoryImpl) CourseDetail(ctx context.Context, query *entity.
 	JOIN users u ON u.id = c.mentor_id
 	WHERE c.id = $1 AND c.deleted_at IS NULL AND u.deleted_at IS NULL
 	`
-	log.Println(sqlQuery)
+
 	row := driver.QueryRow(sqlQuery, courseID)
 	if err := row.Scan(
 		&query.ID,
@@ -225,7 +225,7 @@ func (cr *CourseRepositoryImpl) ListCourse(
 			customerrors.DatabaseExecutionError,
 		)
 	}
-	log.Println(sqlQuery)
+
 	rows, err := driver.Query(sqlQuery, args...)
 	if err != nil {
 		return customerrors.NewError(

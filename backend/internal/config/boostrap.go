@@ -1,8 +1,9 @@
 package config
 
 import (
-	"database/sql"
+	"privat-unmei/internal/db"
 	"privat-unmei/internal/handlers"
+	"privat-unmei/internal/logger"
 	"privat-unmei/internal/repositories"
 	"privat-unmei/internal/routers"
 	"privat-unmei/internal/services"
@@ -11,12 +12,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Bootstrap(db *sql.DB, app *gin.Engine) {
+func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine) {
 	userRepo := repositories.CreateUserRepository(db)
 	studentRepo := repositories.CreateStudentRepository(db)
 	adminRepo := repositories.CreateAdminRepository(db)
 	mentorRepo := repositories.CreateMentorRepositoryImpl(db)
-	transactionManager := repositories.CreateTransactionManager(db)
+	transactionManager := repositories.CreateTransactionManager(db, logger)
 	rbacRepo := repositories.CreateRBACRepository(db)
 	courseCategoryRepo := repositories.CreateCourseCategoryRepository(db)
 	mentorAvailabilityRepo := repositories.CreateCourseAvailabilityRepository(db)
@@ -59,6 +60,7 @@ func Bootstrap(db *sql.DB, app *gin.Engine) {
 		CourseRequestHandler:  courseRequestHandler,
 		RBACRepository:        rbacRepo,
 		TokenUtil:             jwtUtil,
+		Logger:                logger,
 	}
 	cfg.Setup()
 }

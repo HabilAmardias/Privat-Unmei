@@ -5,14 +5,15 @@ import (
 	"database/sql"
 	"errors"
 	"privat-unmei/internal/customerrors"
+	"privat-unmei/internal/db"
 	"privat-unmei/internal/entity"
 )
 
 type AdminRepositoryImpl struct {
-	DB *sql.DB
+	DB *db.CustomDB
 }
 
-func CreateAdminRepository(db *sql.DB) *AdminRepositoryImpl {
+func CreateAdminRepository(db *db.CustomDB) *AdminRepositoryImpl {
 	return &AdminRepositoryImpl{db}
 }
 
