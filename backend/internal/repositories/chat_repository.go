@@ -17,7 +17,7 @@ func CreateChatRepository(db *db.CustomDB) *ChatRepositoryImpl {
 	return &ChatRepositoryImpl{db}
 }
 
-func (chr *ChatRepositoryImpl) CreateChatroom(ctx context.Context, mentorID string, userID string) error {
+func (chr *ChatRepositoryImpl) CreateChatroom(ctx context.Context, mentorID string, userID string, chatroom *entity.Chatroom) error {
 	var driver RepoDriver
 	driver = chr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
@@ -28,15 +28,23 @@ func (chr *ChatRepositoryImpl) CreateChatroom(ctx context.Context, mentorID stri
 	INSERT INTO chatrooms (user_id, mentor_id)
 	VALUES
 	($1, $2)
+	RETURNING (id, user_id, mentor_id, created_at, updated_at, deleted_at)
 	`
-	_, err := driver.Exec(query, userID, mentorID)
-	if err != nil {
+	if err := driver.QueryRow(query, userID, mentorID).Scan(
+		&chatroom.ID,
+		&chatroom.UserID,
+		&chatroom.MentorID,
+		&chatroom.CreatedAt,
+		&chatroom.UpdatedAt,
+		&chatroom.DeletedAt,
+	); err != nil {
 		return customerrors.NewError(
 			"failed to create chatroom",
 			err,
 			customerrors.DatabaseExecutionError,
 		)
 	}
+
 	return nil
 }
 
@@ -81,11 +89,24 @@ func (chr *ChatRepositoryImpl) GetChatroom(ctx context.Context, mentorID string,
 	return nil
 }
 
-func (chr *ChatRepositoryImpl) GetUserChatrooms(ctx context.Context, userID string, limit int, page int, chatrooms *[]entity.Chatroom) error {
+func (chr *ChatRepositoryImpl) GetUserChatrooms(ctx context.Context, userID string, limit int, page int, totalRow *int64, chatrooms *[]entity.Chatroom) error {
 	var driver RepoDriver
 	driver = chr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
+	}
+	countQuery := `
+	SELECT
+		count(*)
+	FROM chatrooms
+	WHERE (user_id = $1 OR mentor_id = $1) AND deleted_at IS NULL
+	`
+	if err := driver.QueryRow(countQuery, userID).Scan(totalRow); err != nil {
+		return customerrors.NewError(
+			"failed to get chatrooms",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
 	}
 	query := `
 	SELECT
@@ -184,11 +205,30 @@ func (chr *ChatRepositoryImpl) UpdateChatroom(ctx context.Context, chatroomID in
 	return nil
 }
 
-func (chr *ChatRepositoryImpl) GetMessages(ctx context.Context, chatroomID int, limit int, lastID int, messages *[]entity.Message) error {
+func (chr *ChatRepositoryImpl) GetMessages(ctx context.Context, chatroomID int, limit int, lastID int, totalRow *int64, messages *[]entity.Message) error {
 	var driver RepoDriver
 	driver = chr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
+	}
+	countQuery := `
+	SELECT
+		id,
+		sender_id,
+		chatroom_id,
+		content,
+		created_at,
+		updated_at,
+		deleted_at
+	FROM messages
+	WHERE chatroom_id = $1 AND deleted_at IS NULL
+	`
+	if err := driver.QueryRow(countQuery, chatroomID).Scan(totalRow); err != nil {
+		return customerrors.NewError(
+			"failed to retrieve messages",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
 	}
 	query := `
 	SELECT

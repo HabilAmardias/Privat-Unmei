@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"privat-unmei/internal/db"
 	"privat-unmei/internal/logger"
+	"privat-unmei/internal/upgrader"
 	"strconv"
 	"syscall"
 	"time"
@@ -26,6 +27,8 @@ func Run() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	upg := upgrader.CreateUpgrader()
+
 	zl, err := logger.CreateNewLogger(isProd)
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -39,7 +42,7 @@ func Run() {
 
 	app := gin.New()
 	app.ContextWithFallback = true
-	Bootstrap(driver, zl, app)
+	Bootstrap(driver, zl, app, upg)
 
 	port := ":" + os.Getenv("SERVER_PORT")
 	server := &http.Server{

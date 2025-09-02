@@ -10,9 +10,10 @@ import (
 	"privat-unmei/internal/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 )
 
-func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine) {
+func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine, upg *websocket.Upgrader) {
 	userRepo := repositories.CreateUserRepository(db)
 	studentRepo := repositories.CreateStudentRepository(db)
 	adminRepo := repositories.CreateAdminRepository(db)
@@ -26,6 +27,7 @@ func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine) {
 	courseRequestRepo := repositories.CreateCourseRequestRepository(db)
 	courseRatingRepo := repositories.CreateCourseRatingRepository(db)
 	courseScheduleRepo := repositories.CreateCourseScheduleRepository(db)
+	chatRepo := repositories.CreateChatRepository(db)
 
 	bcryptUtil := utils.CreateBcryptUtil()
 	gomailUtil := utils.CreateGomailUtil()
@@ -40,6 +42,7 @@ func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine) {
 	courseService := services.CreateCourseService(courseRepo, courseCategoryRepo, topicRepo, transactionManager, courseRequestRepo)
 	courseRatingService := services.CreateCourseRatingService(courseRepo, courseRatingRepo, courseRequestRepo, mentorRepo, transactionManager)
 	courseRequestService := services.CreateCourseRequestService(courseRequestRepo, courseRepo, courseScheduleRepo, mentorAvailabilityRepo, userRepo, studentRepo, mentorRepo, transactionManager)
+	chatService := services.CreateChatService(chatRepo, userRepo, transactionManager)
 
 	studentHandler := handlers.CreateStudentHandler(studentService)
 	adminHandler := handlers.CreateAdminHandler(adminService)
@@ -48,6 +51,7 @@ func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine) {
 	courseHandler := handlers.CreateCourseHandler(courseService)
 	courseRatingHandler := handlers.CreateCourseRatingHandler(courseRatingService)
 	courseRequestHandler := handlers.CreateCourseRequestHandler(courseRequestService)
+	chatHandler := handlers.CreateChatHandler(chatService, upg)
 
 	cfg := routers.RouteConfig{
 		App:                   app,
@@ -58,6 +62,7 @@ func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine) {
 		MentorHandler:         mentorHandler,
 		CourseRatingHandler:   courseRatingHandler,
 		CourseRequestHandler:  courseRequestHandler,
+		ChatHandler:           chatHandler,
 		RBACRepository:        rbacRepo,
 		TokenUtil:             jwtUtil,
 		Logger:                logger,
