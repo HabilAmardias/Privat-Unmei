@@ -7,6 +7,8 @@ type CustomLogger interface {
 	Infoln(args ...interface{})
 	Error(args ...interface{})
 	Errorln(args ...interface{})
+	Warn(args ...interface{})
+	Warnln(args ...interface{})
 }
 
 func CreateNewLogger(isProd bool) (*zap.SugaredLogger, error) {

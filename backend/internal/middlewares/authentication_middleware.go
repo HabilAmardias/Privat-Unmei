@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
+	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/utils"
 	"strings"
 
@@ -68,6 +69,27 @@ func AuthenticationMiddleware(tokenUtil *utils.JWTUtil, usedFor int) gin.Handler
 
 		ctx.Set(constants.CTX_AUTH_PAYLOAD_KEY, payload)
 		ctx.Set(constants.CTX_AUTH_TOKEN_KEY, accessToken)
+		ctx.Next()
+	}
+}
+
+func WSAuthenticationMiddleware(tokenUtil *utils.JWTUtil, usedFor int) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var req dtos.AuthenticationReq
+		if err := ctx.ShouldBind(&req); err != nil {
+			ctx.Error(err)
+			ctx.Abort()
+			return
+		}
+		payload, err := tokenUtil.VerifyJWT(req.Token, usedFor)
+		if err != nil {
+			ctx.Error(err)
+			ctx.Abort()
+			return
+		}
+
+		ctx.Set(constants.CTX_AUTH_PAYLOAD_KEY, payload)
+		ctx.Set(constants.CTX_AUTH_TOKEN_KEY, req.Token)
 		ctx.Next()
 	}
 }

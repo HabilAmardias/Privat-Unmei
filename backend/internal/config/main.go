@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"privat-unmei/internal/db"
+	"privat-unmei/internal/entity"
 	"privat-unmei/internal/logger"
 	"privat-unmei/internal/upgrader"
 	"strconv"
@@ -42,7 +43,11 @@ func Run() {
 
 	app := gin.New()
 	app.ContextWithFallback = true
-	Bootstrap(driver, zl, app, upg)
+
+	hub := entity.CreateChatHub()
+	go hub.Run()
+
+	Bootstrap(driver, zl, app, upg, hub)
 
 	port := ":" + os.Getenv("SERVER_PORT")
 	server := &http.Server{

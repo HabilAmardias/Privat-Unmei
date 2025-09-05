@@ -28,7 +28,7 @@ func (chr *ChatRepositoryImpl) CreateChatroom(ctx context.Context, mentorID stri
 	INSERT INTO chatrooms (user_id, mentor_id)
 	VALUES
 	($1, $2)
-	RETURNING (id, user_id, mentor_id, created_at, updated_at, deleted_at)
+	RETURNING id, user_id, mentor_id, created_at, updated_at, deleted_at
 	`
 	if err := driver.QueryRow(query, userID, mentorID).Scan(
 		&chatroom.ID,
@@ -162,7 +162,7 @@ func (chr *ChatRepositoryImpl) SendMessage(ctx context.Context, senderID string,
 	INSERT into messages (sender_id, chatroom_id, content)
 	VALUES
 	($1, $2, $3)
-	RETURNING (id, sender_id, chatroom_id, content, created_at, updated_at, deleted_at)
+	RETURNING id, sender_id, chatroom_id, content, created_at, updated_at, deleted_at
 	`
 
 	if err := driver.QueryRow(query, senderID, chatroomID, content).Scan(
@@ -212,14 +212,7 @@ func (chr *ChatRepositoryImpl) GetMessages(ctx context.Context, chatroomID int, 
 		driver = tx
 	}
 	countQuery := `
-	SELECT
-		id,
-		sender_id,
-		chatroom_id,
-		content,
-		created_at,
-		updated_at,
-		deleted_at
+	SELECT count(*)
 	FROM messages
 	WHERE chatroom_id = $1 AND deleted_at IS NULL
 	`
@@ -259,6 +252,7 @@ func (chr *ChatRepositoryImpl) GetMessages(ctx context.Context, chatroomID int, 
 			&item.ID,
 			&item.SenderID,
 			&item.ChatroomID,
+			&item.Content,
 			&item.CreatedAt,
 			&item.UpdatedAt,
 			&item.DeletedAt,
@@ -269,6 +263,7 @@ func (chr *ChatRepositoryImpl) GetMessages(ctx context.Context, chatroomID int, 
 				customerrors.DatabaseExecutionError,
 			)
 		}
+		*messages = append(*messages, item)
 	}
 	return nil
 }

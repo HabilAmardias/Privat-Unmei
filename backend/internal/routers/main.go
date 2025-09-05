@@ -40,6 +40,7 @@ func (c *RouteConfig) Setup() {
 
 	c.SetupPublicRoute()
 	c.SetupPrivateRoute()
+	c.SetupWebsocketRoute()
 }
 
 func (c *RouteConfig) SetupPublicRoute() {
@@ -188,4 +189,10 @@ func (c *RouteConfig) SetupPrivateRoute() {
 	v1.GET("/chatrooms/:id", c.ChatHandler.GetChatroom)
 	v1.GET("/chatrooms/:id/messages", c.ChatHandler.GetMessages)
 	v1.POST("/chatrooms/:id/messages", c.ChatHandler.SendMessage)
+}
+
+func (c *RouteConfig) SetupWebsocketRoute() {
+	r := c.App.Group("/ws/v1")
+	r.Use(middlewares.WSAuthenticationMiddleware(c.TokenUtil, constants.ForLogin))
+	r.GET("/chatrooms/:id/messages", c.ChatHandler.ConnectChatChannel)
 }

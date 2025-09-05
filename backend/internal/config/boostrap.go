@@ -2,6 +2,7 @@ package config
 
 import (
 	"privat-unmei/internal/db"
+	"privat-unmei/internal/entity"
 	"privat-unmei/internal/handlers"
 	"privat-unmei/internal/logger"
 	"privat-unmei/internal/repositories"
@@ -13,7 +14,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine, upg *websocket.Upgrader) {
+func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine, upg *websocket.Upgrader, chatHub *entity.ChatHub) {
 	userRepo := repositories.CreateUserRepository(db)
 	studentRepo := repositories.CreateStudentRepository(db)
 	adminRepo := repositories.CreateAdminRepository(db)
@@ -42,7 +43,7 @@ func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine, upg
 	courseService := services.CreateCourseService(courseRepo, courseCategoryRepo, topicRepo, transactionManager, courseRequestRepo)
 	courseRatingService := services.CreateCourseRatingService(courseRepo, courseRatingRepo, courseRequestRepo, mentorRepo, transactionManager)
 	courseRequestService := services.CreateCourseRequestService(courseRequestRepo, courseRepo, courseScheduleRepo, mentorAvailabilityRepo, userRepo, studentRepo, mentorRepo, transactionManager)
-	chatService := services.CreateChatService(chatRepo, userRepo, transactionManager)
+	chatService := services.CreateChatService(chatRepo, userRepo, mentorRepo, transactionManager)
 
 	studentHandler := handlers.CreateStudentHandler(studentService)
 	adminHandler := handlers.CreateAdminHandler(adminService)
@@ -51,7 +52,7 @@ func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine, upg
 	courseHandler := handlers.CreateCourseHandler(courseService)
 	courseRatingHandler := handlers.CreateCourseRatingHandler(courseRatingService)
 	courseRequestHandler := handlers.CreateCourseRequestHandler(courseRequestService)
-	chatHandler := handlers.CreateChatHandler(chatService, upg)
+	chatHandler := handlers.CreateChatHandler(chatService, upg, chatHub, logger)
 
 	cfg := routers.RouteConfig{
 		App:                   app,

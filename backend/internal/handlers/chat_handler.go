@@ -1,11 +1,13 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/entity"
+	"privat-unmei/internal/logger"
 	"privat-unmei/internal/services"
 	"strconv"
 
@@ -16,10 +18,60 @@ import (
 type ChatHandlerImpl struct {
 	chs *services.ChatServiceImpl
 	upg *websocket.Upgrader
+	hub *entity.ChatHub
+	lg  logger.CustomLogger
 }
 
-func CreateChatHandler(chs *services.ChatServiceImpl, upg *websocket.Upgrader) *ChatHandlerImpl {
-	return &ChatHandlerImpl{chs, upg}
+func CreateChatHandler(chs *services.ChatServiceImpl, upg *websocket.Upgrader, hub *entity.ChatHub, lg logger.CustomLogger) *ChatHandlerImpl {
+	return &ChatHandlerImpl{chs, upg, hub, lg}
+}
+
+func (chh *ChatHandlerImpl) ConnectChatChannel(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	chatroomID, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.Error(customerrors.NewError(
+			"invalid chatroom",
+			err,
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	param := entity.GetChatroomParam{
+		ChatroomID: chatroomID,
+		UserID:     claim.Subject,
+		Role:       claim.Role,
+	}
+	if _, err := chh.chs.GetChatroom(ctx, param); err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	conn, err := chh.upg.Upgrade(ctx.Writer, ctx.Request, nil)
+	if err != nil {
+		ctx.Error(customerrors.NewError(
+			"failed to connect",
+			err,
+			customerrors.CommonErr,
+		))
+		return
+	}
+	client := &entity.ChatClient{
+		Conn:       conn,
+		Send:       make(chan []byte),
+		UserID:     claim.Subject,
+		ChatroomID: chatroomID,
+		Logger:     chh.lg,
+	}
+	chh.hub.Register <- client
+	go func() {
+		client.Read(chh.hub)
+	}()
+	go client.Write()
 }
 
 func (chh *ChatHandlerImpl) CreateChatroom(ctx *gin.Context) {
@@ -71,6 +123,7 @@ func (chh *ChatHandlerImpl) GetChatroom(ctx *gin.Context) {
 	param := entity.GetChatroomParam{
 		ChatroomID: chatroomID,
 		UserID:     claim.Subject,
+		Role:       claim.Role,
 	}
 	chatroom, err := chh.chs.GetChatroom(ctx, param)
 	if err != nil {
@@ -105,6 +158,7 @@ func (chh *ChatHandlerImpl) GetUserChatrooms(ctx *gin.Context) {
 			Page:  req.Page,
 		},
 		UserID: claim.Subject,
+		Role:   claim.Role,
 	}
 	if param.Limit <= 0 {
 		param.Limit = constants.DefaultLimit
@@ -167,6 +221,16 @@ func (chh *ChatHandlerImpl) SendMessage(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
+	messagePayload, err := json.Marshal(message)
+	if err != nil {
+		ctx.Error(customerrors.NewError(
+			"failed to send message",
+			err,
+			customerrors.CommonErr,
+		))
+		return
+	}
+	chh.hub.BroadcastMessage(messagePayload, chatroomID)
 	ctx.JSON(http.StatusCreated, dtos.Response{
 		Success: true,
 		Data: dtos.MessageRes{
@@ -205,6 +269,7 @@ func (chh *ChatHandlerImpl) GetMessages(ctx *gin.Context) {
 		},
 		UserID:     claim.Subject,
 		ChatroomID: chatroomID,
+		Role:       claim.Role,
 	}
 	if param.Limit <= 0 {
 		param.Limit = constants.DefaultLimit
