@@ -23,6 +23,7 @@ type RouteConfig struct {
 	MentorHandler         *handlers.MentorHandlerImpl
 	CourseRatingHandler   *handlers.CourseRatingHandlerImpl
 	CourseRequestHandler  *handlers.CourseRequestHandlerImpl
+	ChatHandler           *handlers.ChatHandlerImpl
 	RBACRepository        *repositories.RBACRepository
 	TokenUtil             *utils.JWTUtil
 	Logger                logger.CustomLogger
@@ -39,6 +40,7 @@ func (c *RouteConfig) Setup() {
 
 	c.SetupPublicRoute()
 	c.SetupPrivateRoute()
+	c.SetupWebsocketRoute()
 }
 
 func (c *RouteConfig) SetupPublicRoute() {
@@ -178,4 +180,19 @@ func (c *RouteConfig) SetupPrivateRoute() {
 	), c.CourseRequestHandler.MentorCourseRequestDetail)
 	v1.GET("/me/course-requests", c.CourseRequestHandler.StudentCourseRequestList)
 	v1.GET("/me/course-requests/:id", c.CourseRequestHandler.StudentCourseRequestDetail)
+	v1.POST("/chatrooms", middlewares.AuthorizationMiddleware(
+		constants.CreatePermission,
+		constants.ChatroomResource,
+		c.RBACRepository,
+	), c.ChatHandler.CreateChatroom)
+	v1.GET("/chatrooms/me", c.ChatHandler.GetUserChatrooms)
+	v1.GET("/chatrooms/:id", c.ChatHandler.GetChatroom)
+	v1.GET("/chatrooms/:id/messages", c.ChatHandler.GetMessages)
+	v1.POST("/chatrooms/:id/messages", c.ChatHandler.SendMessage)
+}
+
+func (c *RouteConfig) SetupWebsocketRoute() {
+	r := c.App.Group("/ws/v1")
+	r.Use(middlewares.WSAuthenticationMiddleware(c.TokenUtil, constants.ForLogin))
+	r.GET("/chatrooms/:id/messages", c.ChatHandler.ConnectChatChannel)
 }

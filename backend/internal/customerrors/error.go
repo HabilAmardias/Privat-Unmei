@@ -12,7 +12,8 @@ const (
 )
 
 const (
-	UserNotFound = "user not found"
+	UserNotFound     = "user not found"
+	ChatroomNotFound = "chatroom does not exist"
 )
 
 var (

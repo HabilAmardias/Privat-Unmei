@@ -32,7 +32,7 @@ func (rr *RBACRepository) CheckRoleAccess(ctx context.Context, rbac *entity.Rbac
 	row := driver.QueryRow(query, role, permission, resource)
 	if err := row.Scan(&rbac.ID); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return customerrors.NewError("user does not have access", err, customerrors.ItemNotExist)
+			return customerrors.NewError("user does not have access", err, customerrors.Unauthenticate)
 		}
 		return customerrors.NewError("failed to authorize", err, customerrors.DatabaseExecutionError)
 	}

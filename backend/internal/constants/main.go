@@ -57,6 +57,7 @@ const (
 	CourseCategoryResource
 	CourseResource
 	CourseRequestResource
+	ChatroomResource
 )
 
 const (

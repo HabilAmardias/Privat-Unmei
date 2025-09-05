@@ -20,7 +20,8 @@ VALUES
 (2, 'mentor', 'course manager data'),
 (3, 'course_category', 'course category data'),
 (4, 'course', 'course data'),
-(5, 'course_request', 'course request data');
+(5, 'course_request', 'course request data'),
+(6, 'chatroom', 'chatroom data');
 
 INSERT INTO rbac(role_id, permission_id, resource_id)
 VALUES
@@ -38,4 +39,5 @@ VALUES
 (2, 4, 4), -- mentor can update their own course
 (1, 1, 2), -- admin can create mentor data
 (2, 5, 5), -- mentor can update course request data
-(2, 2, 5); -- mentor can read their own course-related request
+(2, 2, 5), -- mentor can read their own course-related request
+(3, 1, 6); -- student can create chatroom
