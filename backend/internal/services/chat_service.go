@@ -118,12 +118,14 @@ func (chs *ChatServiceImpl) SendMessage(ctx context.Context, param entity.SendMe
 		if err := chs.ur.FindByID(ctx, param.UserID, user); err != nil {
 			return err
 		}
-		if user.Status != constants.VerifiedStatus {
-			return customerrors.NewError(
-				"user is not verified",
-				errors.New("user is not verified"),
-				customerrors.Unauthenticate,
-			)
+		if param.Role == constants.StudentRole {
+			if user.Status != constants.VerifiedStatus {
+				return customerrors.NewError(
+					"user is not verified",
+					errors.New("user is not verified"),
+					customerrors.Unauthenticate,
+				)
+			}
 		}
 		if err := chs.chr.FindByID(ctx, param.ChatroomID, chatroom); err != nil {
 			return err

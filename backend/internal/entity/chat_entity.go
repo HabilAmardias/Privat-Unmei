@@ -43,6 +43,7 @@ type (
 		ChatroomID int
 		UserID     string
 		Content    string
+		Role       int
 	}
 	GetMessagesParam struct {
 		SeekPaginatedParam

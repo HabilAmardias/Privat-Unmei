@@ -215,13 +215,20 @@ func (chh *ChatHandlerImpl) SendMessage(ctx *gin.Context) {
 		ChatroomID: chatroomID,
 		UserID:     claim.Subject,
 		Content:    req.Content,
+		Role:       claim.Role,
 	}
 	message, err := chh.chs.SendMessage(ctx, param)
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
-	messagePayload, err := json.Marshal(message)
+	res := dtos.MessageRes{
+		ID:         message.ID,
+		SenderID:   message.SenderID,
+		ChatroomID: message.ChatroomID,
+		Content:    message.Content,
+	}
+	messagePayload, err := json.Marshal(res)
 	if err != nil {
 		ctx.Error(customerrors.NewError(
 			"failed to send message",
@@ -233,12 +240,7 @@ func (chh *ChatHandlerImpl) SendMessage(ctx *gin.Context) {
 	chh.hub.BroadcastMessage(messagePayload, chatroomID)
 	ctx.JSON(http.StatusCreated, dtos.Response{
 		Success: true,
-		Data: dtos.MessageRes{
-			ID:         message.ID,
-			SenderID:   message.SenderID,
-			ChatroomID: message.ChatroomID,
-			Content:    message.Content,
-		},
+		Data:    res,
 	})
 }
 
