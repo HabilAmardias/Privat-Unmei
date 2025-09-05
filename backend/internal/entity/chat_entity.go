@@ -10,7 +10,7 @@ import (
 type (
 	Chatroom struct {
 		ID        int
-		UserID    string
+		StudentID string
 		MentorID  string
 		CreatedAt time.Time
 		UpdatedAt time.Time
@@ -25,9 +25,24 @@ type (
 		UpdatedAt  time.Time
 		DeletedAt  *time.Time
 	}
+	MessageDetailQuery struct {
+		ID          int
+		SenderID    string
+		SenderName  string
+		SenderEmail string
+		ChatroomID  int
+		Content     string
+	}
+	ChatroomDetailQuery struct {
+		ID               int
+		UserID           string
+		Username         string
+		UserEmail        string
+		UserProfileImage string
+	}
 	CreateChatroomParam struct {
-		UserID   string
-		MentorID string
+		StudentID string
+		MentorID  string
 	}
 	GetChatroomParam struct {
 		ChatroomID int

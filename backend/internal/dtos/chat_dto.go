@@ -13,15 +13,22 @@ type (
 	GetMessagesReq struct {
 		SeekPaginatedReq
 	}
+	CreateChatroomRes struct {
+		ID int `json:"id"`
+	}
 	ChatroomRes struct {
-		ID       int    `json:"id"`
-		UserID   string `json:"user_id"`
-		MentorID string `json:"mentor_id"`
+		ID               int    `json:"id"`
+		UserID           string `json:"user_id"`
+		Username         string `json:"username"`
+		UserEmail        string `json:"email"`
+		UserProfileImage string `json:"profile_image"`
 	}
 	MessageRes struct {
-		ID         int    `json:"id"`
-		SenderID   string `json:"sender_id"`
-		ChatroomID int    `json:"chatroom_id"`
-		Content    string `json:"content"`
+		ID          int    `json:"id"`
+		SenderID    string `json:"sender_id"`
+		SenderName  string `json:"sender_name"`
+		SenderEmail string `json:"sender_email"`
+		ChatroomID  int    `json:"chatroom_id"`
+		Content     string `json:"content"`
 	}
 )

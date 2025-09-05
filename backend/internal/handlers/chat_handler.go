@@ -86,22 +86,19 @@ func (chh *ChatHandlerImpl) CreateChatroom(ctx *gin.Context) {
 		return
 	}
 	param := entity.CreateChatroomParam{
-		UserID:   claim.Subject,
-		MentorID: req.MentorID,
+		StudentID: claim.Subject,
+		MentorID:  req.MentorID,
 	}
-	chatroom, err := chh.chs.CreateChatroom(ctx, param)
+	id, err := chh.chs.CreateChatroom(ctx, param)
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
-	res := dtos.ChatroomRes{
-		ID:       chatroom.ID,
-		UserID:   chatroom.UserID,
-		MentorID: chatroom.MentorID,
-	}
 	ctx.JSON(http.StatusCreated, dtos.Response{
 		Success: true,
-		Data:    res,
+		Data: dtos.CreateChatroomRes{
+			ID: id,
+		},
 	})
 }
 
@@ -130,14 +127,9 @@ func (chh *ChatHandlerImpl) GetChatroom(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	res := dtos.ChatroomRes{
-		UserID:   chatroom.UserID,
-		MentorID: chatroom.MentorID,
-		ID:       chatroom.ID,
-	}
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
-		Data:    res,
+		Data:    dtos.ChatroomRes(*chatroom),
 	})
 }
 
@@ -173,11 +165,7 @@ func (chh *ChatHandlerImpl) GetUserChatrooms(ctx *gin.Context) {
 	}
 	res := []dtos.ChatroomRes{}
 	for _, ch := range *chatrooms {
-		res = append(res, dtos.ChatroomRes{
-			ID:       ch.ID,
-			UserID:   ch.UserID,
-			MentorID: ch.MentorID,
-		})
+		res = append(res, dtos.ChatroomRes(ch))
 	}
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
@@ -222,12 +210,7 @@ func (chh *ChatHandlerImpl) SendMessage(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	res := dtos.MessageRes{
-		ID:         message.ID,
-		SenderID:   message.SenderID,
-		ChatroomID: message.ChatroomID,
-		Content:    message.Content,
-	}
+	res := dtos.MessageRes(*message)
 	messagePayload, err := json.Marshal(res)
 	if err != nil {
 		ctx.Error(customerrors.NewError(
@@ -286,12 +269,7 @@ func (chh *ChatHandlerImpl) GetMessages(ctx *gin.Context) {
 	}
 	res := []dtos.MessageRes{}
 	for _, msg := range *messages {
-		res = append(res, dtos.MessageRes{
-			ID:         msg.ID,
-			SenderID:   msg.SenderID,
-			ChatroomID: msg.ChatroomID,
-			Content:    msg.Content,
-		})
+		res = append(res, dtos.MessageRes(msg))
 	}
 	lastID := 0
 	if len(res) > 0 {

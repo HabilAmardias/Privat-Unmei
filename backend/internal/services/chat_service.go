@@ -20,12 +20,13 @@ func CreateChatService(chr *repositories.ChatRepositoryImpl, ur *repositories.Us
 	return &ChatServiceImpl{chr, ur, mr, tmr}
 }
 
-func (chs *ChatServiceImpl) CreateChatroom(ctx context.Context, param entity.CreateChatroomParam) (*entity.Chatroom, error) {
+func (chs *ChatServiceImpl) CreateChatroom(ctx context.Context, param entity.CreateChatroomParam) (int, error) {
 	chatroom := new(entity.Chatroom)
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
+
 	if err := chs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		if err := chs.ur.FindByID(ctx, param.UserID, user); err != nil {
+		if err := chs.ur.FindByID(ctx, param.StudentID, user); err != nil {
 			return err
 		}
 		if user.Status != constants.VerifiedStatus {
@@ -38,7 +39,7 @@ func (chs *ChatServiceImpl) CreateChatroom(ctx context.Context, param entity.Cre
 		if err := chs.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
 			return err
 		}
-		if err := chs.chr.GetChatroom(ctx, param.MentorID, param.UserID, chatroom); err != nil {
+		if err := chs.chr.GetChatroom(ctx, param.MentorID, param.StudentID, chatroom); err != nil {
 			if err.Error() != customerrors.ChatroomNotFound {
 				return err
 			}
@@ -49,19 +50,22 @@ func (chs *ChatServiceImpl) CreateChatroom(ctx context.Context, param entity.Cre
 				customerrors.ItemAlreadyExist,
 			)
 		}
-		if err := chs.chr.CreateChatroom(ctx, param.MentorID, param.UserID, chatroom); err != nil {
+		if err := chs.chr.CreateChatroom(ctx, param.MentorID, param.StudentID, chatroom); err != nil {
 			return err
 		}
 		return nil
 	}); err != nil {
-		return nil, err
+		return 0, err
 	}
-	return chatroom, nil
+	return chatroom.ID, nil
 }
 
-func (chs *ChatServiceImpl) GetChatroom(ctx context.Context, param entity.GetChatroomParam) (*entity.Chatroom, error) {
+func (chs *ChatServiceImpl) GetChatroom(ctx context.Context, param entity.GetChatroomParam) (*entity.ChatroomDetailQuery, error) {
 	chatroom := new(entity.Chatroom)
 	user := new(entity.User)
+	secondUser := new(entity.User)
+	query := new(entity.ChatroomDetailQuery)
+
 	if err := chs.ur.FindByID(ctx, param.UserID, user); err != nil {
 		return nil, err
 	}
@@ -77,18 +81,32 @@ func (chs *ChatServiceImpl) GetChatroom(ctx context.Context, param entity.GetCha
 	if err := chs.chr.FindByID(ctx, param.ChatroomID, chatroom); err != nil {
 		return nil, err
 	}
-	if chatroom.MentorID != param.UserID && chatroom.UserID != param.UserID {
+	if chatroom.MentorID != param.UserID && chatroom.StudentID != param.UserID {
 		return nil, customerrors.NewError(
 			"unauthorized",
 			errors.New("chatroom does not belong to the user"),
 			customerrors.Unauthenticate,
 		)
 	}
-	return chatroom, nil
+	secondUserID := chatroom.MentorID
+	if param.Role == constants.MentorRole {
+		secondUserID = chatroom.StudentID
+	}
+	if err := chs.ur.FindByID(ctx, secondUserID, secondUser); err != nil {
+		return nil, err
+	}
+
+	query.ID = chatroom.ID
+	query.UserID = secondUser.ID
+	query.Username = secondUser.Name
+	query.UserEmail = secondUser.Email
+	query.UserProfileImage = secondUser.ProfileImage
+
+	return query, nil
 }
 
-func (chs *ChatServiceImpl) GetUserChatrooms(ctx context.Context, param entity.GetUserChatroomsParam) (*[]entity.Chatroom, *int64, error) {
-	chatrooms := new([]entity.Chatroom)
+func (chs *ChatServiceImpl) GetUserChatrooms(ctx context.Context, param entity.GetUserChatroomsParam) (*[]entity.ChatroomDetailQuery, *int64, error) {
+	chatrooms := new([]entity.ChatroomDetailQuery)
 	user := new(entity.User)
 	totalRow := new(int64)
 	if err := chs.ur.FindByID(ctx, param.UserID, user); err != nil {
@@ -103,16 +121,17 @@ func (chs *ChatServiceImpl) GetUserChatrooms(ctx context.Context, param entity.G
 			)
 		}
 	}
-	if err := chs.chr.GetUserChatrooms(ctx, param.UserID, param.Limit, param.Page, totalRow, chatrooms); err != nil {
+	if err := chs.chr.GetUserChatrooms(ctx, param.UserID, param.Role, param.Limit, param.Page, totalRow, chatrooms); err != nil {
 		return nil, nil, err
 	}
 	return chatrooms, totalRow, nil
 }
 
-func (chs *ChatServiceImpl) SendMessage(ctx context.Context, param entity.SendMessageParam) (*entity.Message, error) {
+func (chs *ChatServiceImpl) SendMessage(ctx context.Context, param entity.SendMessageParam) (*entity.MessageDetailQuery, error) {
 	user := new(entity.User)
 	message := new(entity.Message)
 	chatroom := new(entity.Chatroom)
+	messageDetail := new(entity.MessageDetailQuery)
 
 	if err := chs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := chs.ur.FindByID(ctx, param.UserID, user); err != nil {
@@ -130,7 +149,7 @@ func (chs *ChatServiceImpl) SendMessage(ctx context.Context, param entity.SendMe
 		if err := chs.chr.FindByID(ctx, param.ChatroomID, chatroom); err != nil {
 			return err
 		}
-		if chatroom.UserID != param.UserID && chatroom.MentorID != param.UserID {
+		if chatroom.StudentID != param.UserID && chatroom.MentorID != param.UserID {
 			return customerrors.NewError(
 				"unauthorized",
 				errors.New("chatroom does not belong to the user"),
@@ -147,12 +166,19 @@ func (chs *ChatServiceImpl) SendMessage(ctx context.Context, param entity.SendMe
 	}); err != nil {
 		return nil, err
 	}
-	return message, nil
+	messageDetail.ID = message.ID
+	messageDetail.ChatroomID = message.ChatroomID
+	messageDetail.SenderEmail = user.Email
+	messageDetail.SenderID = user.ID
+	messageDetail.SenderName = user.Name
+	messageDetail.Content = message.Content
+
+	return messageDetail, nil
 }
 
-func (chs *ChatServiceImpl) GetMessages(ctx context.Context, param entity.GetMessagesParam) (*[]entity.Message, *int64, error) {
+func (chs *ChatServiceImpl) GetMessages(ctx context.Context, param entity.GetMessagesParam) (*[]entity.MessageDetailQuery, *int64, error) {
 	user := new(entity.User)
-	messages := new([]entity.Message)
+	messages := new([]entity.MessageDetailQuery)
 	chatroom := new(entity.Chatroom)
 	totalRow := new(int64)
 	if err := chs.ur.FindByID(ctx, param.UserID, user); err != nil {
@@ -174,7 +200,7 @@ func (chs *ChatServiceImpl) GetMessages(ctx context.Context, param entity.GetMes
 			customerrors.Unauthenticate,
 		)
 	}
-	if chatroom.UserID != param.UserID && chatroom.MentorID != param.UserID {
+	if chatroom.StudentID != param.UserID && chatroom.MentorID != param.UserID {
 		return nil, nil, customerrors.NewError(
 			"unauthorized",
 			errors.New("chatroom does not belong to the user"),
