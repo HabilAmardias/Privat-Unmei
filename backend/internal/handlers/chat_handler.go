@@ -152,7 +152,7 @@ func (chh *ChatHandlerImpl) GetUserChatrooms(ctx *gin.Context) {
 		UserID: claim.Subject,
 		Role:   claim.Role,
 	}
-	if param.Limit <= 0 {
+	if param.Limit <= 0 || param.Limit > constants.MaxLimit {
 		param.Limit = constants.DefaultLimit
 	}
 	if param.Page <= 0 {
@@ -256,7 +256,7 @@ func (chh *ChatHandlerImpl) GetMessages(ctx *gin.Context) {
 		ChatroomID: chatroomID,
 		Role:       claim.Role,
 	}
-	if param.Limit <= 0 {
+	if param.Limit <= 0 || param.Limit > constants.MaxLimit {
 		param.Limit = constants.DefaultLimit
 	}
 	if param.LastID <= 0 {

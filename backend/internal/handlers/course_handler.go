@@ -165,10 +165,10 @@ func (ch *CourseHandlerImpl) ListCourse(ctx *gin.Context) {
 		CourseCategory: req.CourseCategory,
 		Method:         req.Method,
 	}
-	if req.Limit <= 0 {
+	if param.Limit <= 0 || param.Limit > constants.MaxLimit {
 		param.Limit = constants.DefaultLimit
 	}
-	if req.LastID <= 0 {
+	if param.LastID <= 0 {
 		param.LastID = constants.DefaultLastID
 	}
 	res, totalRow, err := ch.cs.ListCourse(ctx, param)
@@ -286,10 +286,10 @@ func (ch *CourseHandlerImpl) MentorListCourse(ctx *gin.Context) {
 		Search:         req.Search,
 		CourseCategory: req.CourseCategory,
 	}
-	if req.Limit <= 0 {
+	if param.Limit <= 0 || param.Limit > constants.MaxLimit {
 		param.Limit = constants.DefaultLimit
 	}
-	if req.LastID <= 0 {
+	if param.LastID <= 0 {
 		param.LastID = constants.DefaultLastID
 	}
 	res, totalRow, err := ch.cs.MentorListCourse(ctx, param)
