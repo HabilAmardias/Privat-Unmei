@@ -163,11 +163,11 @@ func (mh *MentorHandlerImpl) GetMentorList(ctx *gin.Context) {
 		Search:               req.Search,
 		SortYearOfExperience: req.SortYearOfExperience,
 	}
-	if req.Limit <= 0 {
+	if param.Limit <= 0 || param.Limit > constants.MaxLimit {
 		param.Limit = constants.DefaultLimit
 
 	}
-	if req.Page <= 0 {
+	if param.Page <= 0 {
 		param.Page = constants.DefaultPage
 	}
 	res, totalRow, err := mh.ms.GetMentorList(ctx, param)

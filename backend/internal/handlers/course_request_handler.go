@@ -98,10 +98,10 @@ func (crh *CourseRequestHandlerImpl) StudentCourseRequestList(ctx *gin.Context) 
 		StudentID: claim.Subject,
 		Search:    req.Search,
 	}
-	if req.Limit <= 0 {
+	if param.Limit <= 0 || param.Limit > constants.MaxLimit {
 		param.Limit = constants.DefaultLimit
 	}
-	if req.LastID <= 0 {
+	if param.LastID <= 0 {
 		param.LastID = constants.DefaultLastID
 	}
 	res, totalRow, err := crh.cos.StudentCourseRequestList(ctx, param)
@@ -221,10 +221,10 @@ func (crh *CourseRequestHandlerImpl) MentorCourseRequestList(ctx *gin.Context) {
 		Status:   req.Status,
 		MentorID: claim.Subject,
 	}
-	if req.Limit <= 0 {
+	if param.Limit <= 0 || param.Limit > constants.MaxLimit {
 		param.Limit = constants.DefaultLimit
 	}
-	if req.LastID <= 0 {
+	if param.LastID <= 0 {
 		param.LastID = constants.DefaultLastID
 	}
 	res, totalRow, err := crh.cos.MentorCourseRequestList(ctx, param)
@@ -412,14 +412,6 @@ func (crh *CourseRequestHandlerImpl) CreateReservation(ctx *gin.Context) {
 		ctx.Error(customerrors.NewError(
 			"need to enter preferred schedule to create order",
 			errors.New("no preferred slots"),
-			customerrors.InvalidAction,
-		))
-		return
-	}
-	if len(req.PreferredSlots) > constants.MaxRequestSlot {
-		ctx.Error(customerrors.NewError(
-			"can only reserve up to seven session in one order",
-			errors.New("there are more than 7 requested slots"),
 			customerrors.InvalidAction,
 		))
 		return

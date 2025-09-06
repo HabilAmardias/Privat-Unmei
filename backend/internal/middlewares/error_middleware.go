@@ -24,7 +24,7 @@ func ErrorMiddleware(logger logger.CustomLogger) gin.HandlerFunc {
 			fieldErrors := make([]dtos.DetailsError, 0)
 
 			for _, fe := range ve {
-				logger.Warnln(err.Error())
+				logger.Errorln(err.Error())
 
 				fieldErrors = append(fieldErrors, dtos.DetailsError{
 					Title:   fe.Field(),
@@ -39,7 +39,7 @@ func ErrorMiddleware(logger logger.CustomLogger) gin.HandlerFunc {
 		}
 		var ce *customerrors.CustomError
 		if errors.As(err, &ce) {
-			logger.Warnln(ce.ErrLog.Error())
+			logger.Errorln(ce.ErrLog.Error())
 			ctx.JSON(ce.GetStatusCode(), dtos.Response{
 				Success: false,
 				Data: dtos.MessageResponse{
@@ -48,7 +48,7 @@ func ErrorMiddleware(logger logger.CustomLogger) gin.HandlerFunc {
 			})
 			return
 		}
-		logger.Warnln(err.Error())
+		logger.Errorln(err.Error())
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, dtos.Response{
 			Success: false,
 			Data: dtos.MessageResponse{

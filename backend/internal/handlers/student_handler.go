@@ -174,10 +174,10 @@ func (sh *StudentHandlerImpl) GetStudentList(ctx *gin.Context) {
 			Page:  req.Page,
 		},
 	}
-	if req.Limit <= 0 {
+	if param.Limit <= 0 || param.Limit > constants.MaxLimit {
 		param.Limit = constants.DefaultLimit
 	}
-	if req.Page <= 0 {
+	if param.Page <= 0 {
 		param.Page = constants.DefaultPage
 	}
 	students, totalRow, err := sh.ss.GetStudentList(ctx, param)

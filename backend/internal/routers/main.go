@@ -36,6 +36,7 @@ func (c *RouteConfig) Setup() {
 		AllowHeaders:    []string{"Content-Type", "Authorization"},
 	}
 	c.App.Use(cors.New(config))
+	c.App.Use(middlewares.LoggerMiddleware(c.Logger))
 	c.App.Use(middlewares.ErrorMiddleware(c.Logger))
 
 	c.SetupPublicRoute()
@@ -166,7 +167,11 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.CourseRequestResource,
 		c.RBACRepository,
 	), c.CourseRequestHandler.ConfirmPayment)
-	v1.GET("/course-requests/:id/payment-detail", c.CourseRequestHandler.GetPaymentDetail)
+	v1.GET("/course-requests/:id/payment-detail", middlewares.AuthorizationMiddleware(
+		constants.ReadOwnPermission,
+		constants.PaymentDetailResource,
+		c.RBACRepository,
+	), c.CourseRequestHandler.GetPaymentDetail)
 	v1.GET("/mentors/me", c.MentorHandler.GetProfileForMentor)
 	v1.GET("/mentors/me/course-requests", middlewares.AuthorizationMiddleware(
 		constants.ReadOwnPermission,

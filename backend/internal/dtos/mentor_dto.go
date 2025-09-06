@@ -7,7 +7,7 @@ type (
 		Second int `json:"second" binding:"omitempty,gte=0,lt=60"`
 	}
 	MentorAvailabilityReq struct {
-		DayOfWeek int      `json:"day_of_week" binding:"required,gte=1,lte=7"`
+		DayOfWeek int      `json:"day_of_week" binding:"omitempty,gte=0,lte=6"`
 		StartTime TimeOnly `json:"start_time" binding:"required"`
 		EndTime   TimeOnly `json:"end_time" binding:"required"`
 	}

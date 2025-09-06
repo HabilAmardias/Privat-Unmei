@@ -19,10 +19,10 @@ const (
 	AvatarFolder                      = "Avatars/"
 	ResumeFolder                      = "Resumes/"
 	OperationalCostPercentage float64 = 0.1
-	MaxRequestSlot                    = 7
 	MaxCourseCategories               = 5
 	ExpiredInterval                   = 15 * time.Minute // 15 minute for development and testing
 	NoRating                          = 0
+	MaxLimit                          = 25
 )
 
 const (
@@ -58,6 +58,7 @@ const (
 	CourseResource
 	CourseRequestResource
 	ChatroomResource
+	PaymentDetailResource
 )
 
 const (

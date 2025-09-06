@@ -43,10 +43,10 @@ func (crh *CourseRatingHandlerImpl) GetCourseReview(ctx *gin.Context) {
 		},
 		CourseID: courseID,
 	}
-	if req.Limit <= 0 {
+	if param.Limit <= 0 || param.Limit > constants.MaxLimit {
 		param.Limit = constants.DefaultLimit
 	}
-	if req.LastID <= 0 {
+	if param.LastID <= 0 {
 		param.LastID = constants.DefaultLastID
 	}
 	res, totalRow, err := crh.crs.GetCourseReview(ctx, param)
