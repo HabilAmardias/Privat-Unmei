@@ -36,6 +36,7 @@ func (c *RouteConfig) Setup() {
 		AllowHeaders:    []string{"Content-Type", "Authorization"},
 	}
 	c.App.Use(cors.New(config))
+	c.App.Use(middlewares.LoggerMiddleware(c.Logger))
 	c.App.Use(middlewares.ErrorMiddleware(c.Logger))
 
 	c.SetupPublicRoute()
