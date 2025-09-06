@@ -227,19 +227,14 @@ func (crs *CourseRequestServiceImpl) GetPaymentDetail(ctx context.Context, param
 	if err := crs.mr.FindByID(ctx, userMentor.ID, mentor, false); err != nil {
 		return nil, err
 	}
-	if courseRequest.ExpiredAt == nil {
-		return nil, customerrors.NewError(
-			"invalid course request",
-			errors.New("no expire date found"),
-			customerrors.CommonErr,
-		)
-	}
-	if now.After(*courseRequest.ExpiredAt) {
-		return nil, customerrors.NewError(
-			"course request has expired",
-			errors.New("course request has expired"),
-			customerrors.InvalidAction,
-		)
+	if courseRequest.ExpiredAt != nil {
+		if now.After(*courseRequest.ExpiredAt) {
+			return nil, customerrors.NewError(
+				"course request has expired",
+				errors.New("course request has expired"),
+				customerrors.InvalidAction,
+			)
+		}
 	}
 	if courseRequest.StudentID != student.ID {
 		return nil, customerrors.NewError(
@@ -259,7 +254,7 @@ func (crs *CourseRequestServiceImpl) GetPaymentDetail(ctx context.Context, param
 	query.CourseID = course.ID
 	query.CourseRequestID = param.CourseRequestID
 	query.CourseTitle = course.Title
-	query.ExpiredAt = *courseRequest.ExpiredAt
+	query.ExpiredAt = courseRequest.ExpiredAt
 	query.GopayNumber = mentor.GopayNumber
 	query.MentorID = mentor.ID
 	query.MentorName = userMentor.Name

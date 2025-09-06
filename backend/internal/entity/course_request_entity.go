@@ -51,7 +51,7 @@ type (
 		Subtotal        float64
 		OperationalCost float64
 		TotalCost       float64
-		ExpiredAt       time.Time
+		ExpiredAt       *time.Time
 	}
 	MentorCourseRequestQuery struct {
 		ID         int
