@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"fmt"
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
@@ -226,13 +227,6 @@ func (crs *CourseRequestServiceImpl) GetPaymentDetail(ctx context.Context, param
 	if err := crs.mr.FindByID(ctx, userMentor.ID, mentor, false); err != nil {
 		return nil, err
 	}
-	if courseRequest.Status != constants.PendingPaymentStatus {
-		return nil, customerrors.NewError(
-			"invalid course request",
-			errors.New("course request status is not pending payment"),
-			customerrors.InvalidAction,
-		)
-	}
 	if courseRequest.ExpiredAt == nil {
 		return nil, customerrors.NewError(
 			"invalid course request",
@@ -436,8 +430,6 @@ func (crs *CourseRequestServiceImpl) HandleCourseRequest(ctx context.Context, pa
 }
 
 func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, param entity.CreateCourseRequestParam) (int, error) {
-	freeMentorSchedule := new(int64)
-	existingSchedule := new(int64)
 	ongoingOrderCount := new(int64)
 	course := new(entity.Course)
 	newScheds := new([]entity.CreateRequestSchedule)
@@ -445,11 +437,23 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 	user := new(entity.User)
 	student := new(entity.Student)
 	courseRequest := new(entity.CourseRequest)
+	availabilityRes := new(entity.AvailabilityResult)
+	conflictingScheds := new([]entity.ConflictingSchedule)
+	dates := make([]time.Time, 0, len(param.PreferredSlots))
+	startTimes := make([]string, 0, len(param.PreferredSlots))
+	endTimes := make([]string, 0, len(param.PreferredSlots))
 	now := time.Now()
 
 	if err := crs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := crs.cr.FindByID(ctx, param.CourseID, course, true); err != nil {
 			return err
+		}
+		if len(param.PreferredSlots) > course.MaxSession {
+			return customerrors.NewError(
+				fmt.Sprintf("cannot reserve more than %d slots", course.MaxSession),
+				errors.New("reservation slots is more than max session"),
+				customerrors.InvalidAction,
+			)
 		}
 		if err := crs.ur.FindByID(ctx, param.StudentID, user); err != nil {
 			return err
@@ -474,39 +478,42 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 				customerrors.InvalidAction,
 			)
 		}
-		// I hate this solution to the bone because of N+1 Query
-		// but i can't find another solution for this case, my skill issue I guess
 		for _, slot := range param.PreferredSlots {
 			endTime, err := CalculateEndTime(slot.StartTime.ToString(), course.SessionDuration)
 			if err != nil {
 				return err
 			}
-			if err := crs.mar.IsMentorAvailable(ctx, course.MentorID, slot.StartTime.ToString(), endTime, freeMentorSchedule, slot.Date); err != nil {
-				return err
-			}
-			if *freeMentorSchedule == 0 {
-				return customerrors.NewError(
-					"Mentor not available",
-					errors.New("mentor not available"),
-					customerrors.InvalidAction,
-				)
-			}
-			if err := crs.csr.IsScheduleExist(ctx, course.MentorID, slot.Date, slot.StartTime.ToString(), endTime, existingSchedule); err != nil {
-				return err
-			}
-			if *existingSchedule > 0 {
-				return customerrors.NewError(
-					"Schedule already reserved",
-					errors.New("schedule already reserved"),
-					customerrors.InvalidAction,
-				)
-			}
+
+			dates = append(dates, slot.Date)
+			startTimes = append(startTimes, slot.StartTime.ToString())
+			endTimes = append(endTimes, endTime)
 			*newScheds = append(*newScheds, entity.CreateRequestSchedule{
 				Date:      slot.Date,
 				StartTime: slot.StartTime.ToString(),
 				EndTime:   endTime,
 			})
 		}
+		if err := crs.mar.CheckMentorAvailability(ctx, course.MentorID, dates, startTimes, endTimes, availabilityRes); err != nil {
+			return err
+		}
+		if availabilityRes.AvailableSlots < availabilityRes.TotalRequested {
+			return customerrors.NewError(
+				"mentor not available",
+				errors.New("mentor not available"),
+				customerrors.InvalidAction,
+			)
+		}
+		if err := crs.csr.CheckScheduleConflicts(ctx, course.MentorID, dates, startTimes, endTimes, conflictingScheds); err != nil {
+			return err
+		}
+		if len(*conflictingScheds) > 0 {
+			return customerrors.NewError(
+				"Some schedules are already reserved",
+				errors.New("schedule already reserved"),
+				customerrors.InvalidAction,
+			)
+		}
+
 		courseRequest.SubTotal = course.Price * float64(len(param.PreferredSlots))
 		courseRequest.OperationalCost = courseRequest.SubTotal * constants.OperationalCostPercentage
 		totalPrice := courseRequest.SubTotal + courseRequest.OperationalCost

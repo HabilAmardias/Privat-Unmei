@@ -3,11 +3,11 @@ package repositories
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/db"
 	"privat-unmei/internal/entity"
-	"time"
 
 	"github.com/lib/pq"
 )
@@ -193,38 +193,6 @@ func (csr *CourseScheduleRepositoryImpl) FindReservedScheduleByCourseRequestID(c
 	return nil
 }
 
-func (csr *CourseScheduleRepositoryImpl) IsScheduleExist(ctx context.Context, mentorID string, date time.Time, startTime string, endTime string, existingSchedule *int64) error {
-	var driver RepoDriver
-	driver = csr.DB
-	if tx := GetTransactionFromContext(ctx); tx != nil {
-		driver = tx
-	}
-	query := `
-	SELECT COUNT(*) FROM course_schedule cs
-	JOIN course_requests cr ON cs.course_request_id = cr.id
-	JOIN courses c ON cr.course_id = c.id
-	WHERE c.mentor_id = $1 AND cs.scheduled_date = $2 
-	AND cs.deleted_at IS NULL AND cr.deleted_at IS NULL AND c.deleted_at IS NULL
-	AND cs.status IN ('scheduled','reserved')
-	AND NOT (cs.end_time <= $3 OR cs.start_time >= $4)
-	`
-	row := driver.QueryRow(
-		query,
-		mentorID,
-		fmt.Sprintf("%d-%d-%d", date.Year(), date.Month(), date.Day()),
-		startTime,
-		endTime,
-	)
-	if err := row.Scan(existingSchedule); err != nil {
-		return customerrors.NewError(
-			"failed to get schedule",
-			err,
-			customerrors.DatabaseExecutionError,
-		)
-	}
-	return nil
-}
-
 func (csr *CourseScheduleRepositoryImpl) CreateSchedule(ctx context.Context, courseRequestID int, slots *[]entity.CreateRequestSchedule) error {
 	var driver RepoDriver
 	driver = csr.DB
@@ -265,6 +233,72 @@ func (csr *CourseScheduleRepositoryImpl) CreateSchedule(ctx context.Context, cou
 			err,
 			customerrors.DatabaseExecutionError,
 		)
+	}
+	return nil
+}
+
+func (csr *CourseScheduleRepositoryImpl) CheckScheduleConflicts(
+	ctx context.Context,
+	mentorID string,
+	dates []time.Time,
+	startTimes []string,
+	endTimes []string,
+	conflictingScheds *[]entity.ConflictingSchedule,
+) error {
+	var driver RepoDriver
+	driver = csr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	WITH requested_slots AS (
+		SELECT 
+			unnest($1::date[]) as requested_date,
+			unnest($2::text[])::time as requested_start_time,
+			unnest($3::text[])::time as requested_end_time
+	)
+	SELECT 
+		rs.requested_date,
+		rs.requested_start_time,
+		rs.requested_end_time,
+		cs.id as conflicting_schedule_id
+	FROM requested_slots rs
+	LEFT JOIN course_schedule cs ON (
+		cs.scheduled_date = rs.requested_date
+		AND cs.start_time < rs.requested_end_time
+		AND cs.end_time > rs.requested_start_time
+		AND cs.deleted_at IS NULL
+		AND cs.status IN ('reserved', 'scheduled')
+	)
+	JOIN course_requests cr ON (cs.course_request_id = cr.id)
+	JOIN courses c ON (cr.course_id = c.id)
+	WHERE c.mentor_id = $4::uuid;
+	`
+
+	rows, err := driver.Query(query, pq.Array(dates), pq.Array(startTimes), pq.Array(endTimes), mentorID)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to get conflicting schedules",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var item entity.ConflictingSchedule
+		if err := rows.Scan(
+			&item.Date,
+			&item.StartTime,
+			&item.EndTime,
+			&item.ScheduleID,
+		); err != nil {
+			return customerrors.NewError(
+				"failed to get conflicting schedules",
+				err,
+				customerrors.DatabaseExecutionError,
+			)
+		}
+		*conflictingScheds = append(*conflictingScheds, item)
 	}
 	return nil
 }

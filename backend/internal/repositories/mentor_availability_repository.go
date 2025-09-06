@@ -3,11 +3,13 @@ package repositories
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/db"
 	"privat-unmei/internal/entity"
-	"time"
+
+	"github.com/lib/pq"
 )
 
 type MentorAvailabilityRepositoryImpl struct {
@@ -149,28 +151,61 @@ func (car *MentorAvailabilityRepositoryImpl) CreateAvailability(ctx context.Cont
 	return nil
 }
 
-func (car *MentorAvailabilityRepositoryImpl) IsMentorAvailable(ctx context.Context, mentorID string, startTime string, endTime string, freeMentorSchedule *int64, date time.Time) error {
+func (car *MentorAvailabilityRepositoryImpl) CheckMentorAvailability(
+	ctx context.Context,
+	mentorID string,
+	dates []time.Time,
+	startTimes []string,
+	endTimes []string,
+	availabilityRes *entity.AvailabilityResult,
+) error {
 	var driver RepoDriver
 	driver = car.DB
-
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
 	}
-	dayOfWeek := int(date.Weekday())
-	if dayOfWeek == 0 {
-		dayOfWeek = 7
-	}
 	query := `
-	SELECT count(*)
-	FROM mentor_availability
-	WHERE mentor_id = $1 AND day_of_week = $2 AND deleted_at IS NULL
-	AND start_time <= $3 AND end_time >= $4
+	WITH requested_slots AS (
+		SELECT 
+			unnest($1::date[]) as requested_date,
+			unnest($2::text[])::time as requested_start_time,
+			unnest($3::text[])::time as requested_end_time
+	),
+	mentor_available_slots AS (
+		SELECT 
+			rs.requested_date,
+			rs.requested_start_time,
+			rs.requested_end_time,
+			CASE 
+				WHEN ma.id IS NOT NULL THEN 1 
+				ELSE 0 
+			END as is_available
+		FROM requested_slots rs
+		LEFT JOIN mentor_availability ma ON (
+			ma.mentor_id = $4
+			AND ma.day_of_week = EXTRACT(DOW FROM rs.requested_date)
+			AND ma.start_time <= rs.requested_start_time
+			AND ma.end_time >= rs.requested_end_time
+			AND ma.deleted_at IS NULL
+		)
+	)
+	SELECT 
+		COUNT(*) as total_requested,
+		COUNT(CASE WHEN is_available = 1 THEN 1 END) as available_slots,
+		array_agg(
+			CASE WHEN is_available = 0 THEN 
+				requested_date || ' ' || requested_start_time 
+			END
+		) FILTER (WHERE is_available = 0) as unavailable_slots
+	FROM mentor_available_slots;
 	`
-
-	row := driver.QueryRow(query, mentorID, dayOfWeek, startTime, endTime)
-	if err := row.Scan(freeMentorSchedule); err != nil {
+	if err := driver.QueryRow(query, pq.Array(dates), pq.Array(startTimes), pq.Array(endTimes), mentorID).Scan(
+		&availabilityRes.TotalRequested,
+		&availabilityRes.AvailableSlots,
+		(*pq.StringArray)(&availabilityRes.UnavailableSlots),
+	); err != nil {
 		return customerrors.NewError(
-			"failed to get free mentor schedule",
+			"failed to get availability",
 			err,
 			customerrors.DatabaseExecutionError,
 		)

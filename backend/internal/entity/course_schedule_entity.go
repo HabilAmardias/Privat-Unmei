@@ -19,4 +19,10 @@ type (
 		StartTime string
 		EndTime   string
 	}
+	ConflictingSchedule struct {
+		Date       time.Time
+		StartTime  string
+		EndTime    string
+		ScheduleID int64
+	}
 )

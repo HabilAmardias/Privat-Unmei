@@ -132,6 +132,11 @@ type (
 		MentorCampus            string
 		MentorAvailabilities    []MentorSchedule
 	}
+	AvailabilityResult struct {
+		TotalRequested   int
+		AvailableSlots   int
+		UnavailableSlots []string
+	}
 )
 
 func (to *TimeOnly) ToString() string {

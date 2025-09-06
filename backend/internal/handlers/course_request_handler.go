@@ -416,14 +416,6 @@ func (crh *CourseRequestHandlerImpl) CreateReservation(ctx *gin.Context) {
 		))
 		return
 	}
-	if len(req.PreferredSlots) > constants.MaxRequestSlot {
-		ctx.Error(customerrors.NewError(
-			"can only reserve up to seven session in one order",
-			errors.New("there are more than 7 requested slots"),
-			customerrors.InvalidAction,
-		))
-		return
-	}
 	if err := CheckDateUniqueness(req.PreferredSlots); err != nil {
 		ctx.Error(err)
 		return
