@@ -194,6 +194,7 @@ func (c *RouteConfig) SetupPrivateRoute() {
 	v1.GET("/chatrooms/:id", c.ChatHandler.GetChatroom)
 	v1.GET("/chatrooms/:id/messages", c.ChatHandler.GetMessages)
 	v1.POST("/chatrooms/:id/messages", c.ChatHandler.SendMessage)
+	v1.GET("/courses/:id/mentor-availability", c.MentorHandler.GetDOWAvailability)
 }
 
 func (c *RouteConfig) SetupWebsocketRoute() {

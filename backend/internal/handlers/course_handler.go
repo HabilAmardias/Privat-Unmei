@@ -43,13 +43,11 @@ func (ch *CourseHandlerImpl) UpdateCourse(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	if req.Method != nil && !ValidateMethod(*req.Method) {
-		ctx.Error(customerrors.NewError(
-			"invalid course method",
-			errors.New("invalid course method"),
-			customerrors.InvalidAction,
-		))
-		return
+	if req.Method != nil {
+		if err := ValidateMethod(*req.Method); err != nil {
+			ctx.Error(err)
+			return
+		}
 	}
 	if len(req.CourseCategories) > 0 {
 		if err := ValidateCategories(req.CourseCategories); err != nil {
@@ -398,12 +396,8 @@ func (ch *CourseHandlerImpl) AddNewCourse(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	if !ValidateMethod(req.Method) {
-		ctx.Error(customerrors.NewError(
-			"invalid course method",
-			errors.New("invalid course method"),
-			customerrors.InvalidAction,
-		))
+	if err := ValidateMethod(req.Method); err != nil {
+		ctx.Error(err)
 		return
 	}
 	if len(req.Topics) <= 0 {
