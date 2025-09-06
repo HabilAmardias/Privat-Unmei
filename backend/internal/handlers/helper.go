@@ -168,22 +168,6 @@ func ValidateDate(date time.Time) error {
 	)
 }
 
-func CheckDateUniqueness(slots []entity.PreferredSlot) error {
-	dateMap := make(map[time.Time]bool)
-	for _, slot := range slots {
-		if _, exist := dateMap[slot.Date]; exist {
-			return customerrors.NewError(
-				"cannot reserve multiple session on same date",
-				errors.New("there are duplicate date"),
-				customerrors.InvalidAction,
-			)
-		} else {
-			dateMap[slot.Date] = true
-		}
-	}
-	return nil
-}
-
 func ValidateRequestStatus(status string) error {
 	for _, item := range statuslist {
 		if status == item {

@@ -421,6 +421,7 @@ func (crh *CourseRequestHandlerImpl) CreateReservation(ctx *gin.Context) {
 		StudentID:      claim.Subject,
 		PreferredSlots: []entity.PreferredSlot{},
 	}
+	dateMap := make(map[time.Time]bool)
 	for _, slot := range req.PreferredSlots {
 		parsedDate, err := time.Parse("2006-01-02", slot.Date)
 		if err != nil {
@@ -435,14 +436,20 @@ func (crh *CourseRequestHandlerImpl) CreateReservation(ctx *gin.Context) {
 			ctx.Error(err)
 			return
 		}
+		if _, exist := dateMap[parsedDate]; exist {
+			ctx.Error(customerrors.NewError(
+				"cannot have 2 same request date",
+				errors.New("there are duplicate date"),
+				customerrors.InvalidAction,
+			))
+			return
+		} else {
+			dateMap[parsedDate] = true
+		}
 		param.PreferredSlots = append(param.PreferredSlots, entity.PreferredSlot{
 			Date:      parsedDate,
 			StartTime: entity.TimeOnly(slot.StartTime),
 		})
-	}
-	if err := CheckDateUniqueness(param.PreferredSlots); err != nil {
-		ctx.Error(err)
-		return
 	}
 	courseRequestID, err := crh.cos.CreateReservation(ctx, param)
 	if err != nil {
