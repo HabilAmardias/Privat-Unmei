@@ -358,6 +358,7 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 		MentorSchedules:   []entity.MentorSchedule{},
 	}
 	if len(req.MentorSchedules) > 0 {
+		dowsMap := make(map[int]bool)
 		for _, sched := range req.MentorSchedules {
 			var mentorSchedule dtos.MentorAvailabilityReq
 			if err := json.Unmarshal([]byte(sched), &mentorSchedule); err != nil {
@@ -371,6 +372,16 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 			if err := binding.Validator.ValidateStruct(mentorSchedule); err != nil {
 				ctx.Error(err)
 				return
+			}
+			if _, exist := dowsMap[mentorSchedule.DayOfWeek]; exist {
+				ctx.Error(customerrors.NewError(
+					"cannot have 2 same day of week",
+					errors.New("cannot have 2 same day of week"),
+					customerrors.InvalidAction,
+				))
+				return
+			} else {
+				dowsMap[mentorSchedule.DayOfWeek] = true
 			}
 			param.MentorSchedules = append(param.MentorSchedules, entity.MentorSchedule{
 				DayOfWeek: mentorSchedule.DayOfWeek,
@@ -442,6 +453,7 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 		Campus:            req.Campus,
 		MentorSchedules:   []entity.MentorSchedule{},
 	}
+	dowsMap := make(map[int]bool)
 	for _, sched := range req.MentorSchedules {
 		var schedule dtos.MentorAvailabilityReq
 		if err := json.Unmarshal([]byte(sched), &schedule); err != nil {
@@ -455,6 +467,16 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 		if err := binding.Validator.ValidateStruct(schedule); err != nil {
 			ctx.Error(err)
 			return
+		}
+		if _, exist := dowsMap[schedule.DayOfWeek]; exist {
+			ctx.Error(customerrors.NewError(
+				"cannot have 2 same day of week",
+				errors.New("cannot have 2 same day of week"),
+				customerrors.InvalidAction,
+			))
+			return
+		} else {
+			dowsMap[schedule.DayOfWeek] = true
 		}
 		param.MentorSchedules = append(param.MentorSchedules, entity.MentorSchedule{
 			DayOfWeek: schedule.DayOfWeek,
