@@ -29,7 +29,7 @@ services:
     env_file:
       - backend/.env
     ports:
-      - "8080:8080" # expose Go app for metrics
+      - "8080:8080"
 
   cron:
     build:
@@ -63,15 +63,15 @@ services:
   promtail:
     image: grafana/promtail:latest
     restart: unless-stopped
-    user: root  # Add this line
+    user: root
     ports:
-      - "9080:9080"  # Add this for debugging/metrics
+      - "9080:9080"
     volumes:
       - ./backend/promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro  # Add :ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro 
     depends_on:
       - loki
-    command: -config.file=/etc/promtail/promtail-config.yaml  # Add this
+    command: -config.file=/etc/promtail/promtail-config.yaml
 
   prometheus:
     image: prom/prometheus:latest
