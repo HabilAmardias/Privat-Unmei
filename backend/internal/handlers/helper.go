@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
-	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/entity"
 	"regexp"
 	"time"
@@ -169,8 +168,8 @@ func ValidateDate(date time.Time) error {
 	)
 }
 
-func CheckDateUniqueness(slots []dtos.PreferredSlot) error {
-	dateMap := make(map[string]bool)
+func CheckDateUniqueness(slots []entity.PreferredSlot) error {
+	dateMap := make(map[time.Time]bool)
 	for _, slot := range slots {
 		if _, exist := dateMap[slot.Date]; exist {
 			return customerrors.NewError(

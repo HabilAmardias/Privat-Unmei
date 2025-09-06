@@ -416,10 +416,6 @@ func (crh *CourseRequestHandlerImpl) CreateReservation(ctx *gin.Context) {
 		))
 		return
 	}
-	if err := CheckDateUniqueness(req.PreferredSlots); err != nil {
-		ctx.Error(err)
-		return
-	}
 	param := entity.CreateCourseRequestParam{
 		CourseID:       id,
 		StudentID:      claim.Subject,
@@ -443,6 +439,10 @@ func (crh *CourseRequestHandlerImpl) CreateReservation(ctx *gin.Context) {
 			Date:      parsedDate,
 			StartTime: entity.TimeOnly(slot.StartTime),
 		})
+	}
+	if err := CheckDateUniqueness(param.PreferredSlots); err != nil {
+		ctx.Error(err)
+		return
 	}
 	courseRequestID, err := crh.cos.CreateReservation(ctx, param)
 	if err != nil {
