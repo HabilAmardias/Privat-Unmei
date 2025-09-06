@@ -3,7 +3,8 @@ build:
 start:
 	docker compose up database backend cron postgres-exporter loki promtail prometheus grafana -d
 down:
-	docker compose down && \
+	docker compose down
+datadown:
 	docker volume prune --force && \
 	docker volume rm privat-unmei_grafana-storage && \
 	docker volume rm privat-unmei_privat-unmei-data && \
