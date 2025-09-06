@@ -78,22 +78,33 @@ func getAuthenticationToken(ctx *gin.Context) (string, error) {
 	return token, nil
 }
 
-func ValidateDegree(degree string) bool {
+func ValidateDegree(degree string) error {
 	for _, item := range degreelist {
 		if degree == item {
-			return true
+			return nil
 		}
 	}
-	return false
+	return customerrors.NewError(
+		"invalid degree",
+		errors.New("invalid degree"),
+		customerrors.InvalidAction,
+	)
 }
 
-func ValidatePhoneNumber(phoneNumber string) bool {
+func ValidatePhoneNumber(phoneNumber string) error {
 
 	pattern := `^0\d{9,12}$`
 
 	regex := regexp.MustCompile(pattern)
 
-	return regex.MatchString(phoneNumber)
+	if regex.MatchString(phoneNumber) {
+		return nil
+	}
+	return customerrors.NewError(
+		"invalid phone number",
+		errors.New("invalid phone number"),
+		customerrors.InvalidAction,
+	)
 }
 
 func ValidateFile(headerFile *multipart.FileHeader, fileSizeThresh int64, fileType string) (multipart.File, error) {
@@ -135,13 +146,27 @@ func ValidateFile(headerFile *multipart.FileHeader, fileSizeThresh int64, fileTy
 	return file, nil
 }
 
-func ValidateMethod(method string) bool {
-	return method == "offline" || method == "online" || method == "hybrid"
+func ValidateMethod(method string) error {
+	if method == "offline" || method == "online" || method == "hybrid" {
+		return nil
+	}
+	return customerrors.NewError(
+		"invalid method",
+		errors.New("invalid method"),
+		customerrors.InvalidAction,
+	)
 }
 
-func ValidateDate(date time.Time) bool {
+func ValidateDate(date time.Time) error {
 	now := time.Now()
-	return date.After(now)
+	if date.After(now) {
+		return nil
+	}
+	return customerrors.NewError(
+		"invalid date",
+		errors.New("invalid date"),
+		customerrors.InvalidAction,
+	)
 }
 
 func CheckDateUniqueness(slots []dtos.PreferredSlot) error {

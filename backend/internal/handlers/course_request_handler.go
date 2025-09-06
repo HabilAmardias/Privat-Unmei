@@ -435,12 +435,8 @@ func (crh *CourseRequestHandlerImpl) CreateReservation(ctx *gin.Context) {
 			))
 			return
 		}
-		if !ValidateDate(parsedDate) {
-			ctx.Error(customerrors.NewError(
-				"invalid date",
-				errors.New("invalid date"),
-				customerrors.InvalidAction,
-			))
+		if err := ValidateDate(parsedDate); err != nil {
+			ctx.Error(err)
 			return
 		}
 		param.PreferredSlots = append(param.PreferredSlots, entity.PreferredSlot{

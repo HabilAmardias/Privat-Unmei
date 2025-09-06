@@ -284,13 +284,11 @@ func (mh *MentorHandlerImpl) UpdateMentorForAdmin(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	if req.GopayNumber != nil && !ValidatePhoneNumber(*req.GopayNumber) {
-		ctx.Error(customerrors.NewError(
-			"invalid gopay number",
-			errors.New("invalid gopay number"),
-			customerrors.InvalidAction,
-		))
-		return
+	if req.GopayNumber != nil {
+		if err := ValidatePhoneNumber(*req.GopayNumber); err != nil {
+			ctx.Error(err)
+			return
+		}
 	}
 	param := entity.UpdateMentorParam{
 		ID:                id,
@@ -334,22 +332,14 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 		return
 	}
 	if req.GopayNumber != nil {
-		if !ValidatePhoneNumber(*req.GopayNumber) {
-			ctx.Error(customerrors.NewError(
-				"invalid phone number",
-				errors.New("invalid phone number"),
-				customerrors.InvalidAction,
-			))
+		if err := ValidatePhoneNumber(*req.GopayNumber); err != nil {
+			ctx.Error(err)
 			return
 		}
 	}
 	if req.Degree != nil {
-		if !ValidateDegree(*req.Degree) {
-			ctx.Error(customerrors.NewError(
-				"invalid degree",
-				errors.New("invalid degree"),
-				customerrors.InvalidAction,
-			))
+		if err := ValidateDegree(*req.Degree); err != nil {
+			ctx.Error(err)
 			return
 		}
 	}
@@ -407,20 +397,12 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	if !ValidateDegree(req.Degree) {
-		ctx.Error(customerrors.NewError(
-			"invalid degree",
-			errors.New("degree given is invalid"),
-			customerrors.InvalidAction,
-		))
+	if err := ValidateDegree(req.Degree); err != nil {
+		ctx.Error(err)
 		return
 	}
-	if !ValidatePhoneNumber(req.GopayNumber) {
-		ctx.Error(customerrors.NewError(
-			"invalid gopay number",
-			errors.New("gopay number given is invalid"),
-			customerrors.InvalidAction,
-		))
+	if err := ValidatePhoneNumber(req.GopayNumber); err != nil {
+		ctx.Error(err)
 		return
 	}
 	if len(req.MentorSchedules) <= 0 {
