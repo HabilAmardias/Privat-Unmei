@@ -99,4 +99,7 @@ type (
 		MentorCampus            string                  `json:"campus"`
 		MentorAvailabilities    []MentorAvailabilityRes `json:"mentor_availability"`
 	}
+	GetDOWAvailabilityRes struct {
+		DayOfWeeks []int `json:"day_of_weeks"`
+	}
 )

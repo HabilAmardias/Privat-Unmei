@@ -9,6 +9,7 @@ import (
 	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/services"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -20,6 +21,39 @@ type MentorHandlerImpl struct {
 
 func CreateMentorHandler(ms *services.MentorServiceImpl) *MentorHandlerImpl {
 	return &MentorHandlerImpl{ms}
+}
+
+func (mh *MentorHandlerImpl) GetDOWAvailability(ctx *gin.Context) {
+	courseID, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.Error(customerrors.NewError(
+			"invalid course",
+			err,
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.GetDOWAvailabilityParam{
+		Role:     claim.Role,
+		CourseID: courseID,
+		UserID:   claim.Subject,
+	}
+	dows, err := mh.ms.GetDOWAvailability(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.GetDOWAvailabilityRes{
+			DayOfWeeks: *dows,
+		},
+	})
 }
 
 func (mh *MentorHandlerImpl) GetMentorProfileForStudent(ctx *gin.Context) {

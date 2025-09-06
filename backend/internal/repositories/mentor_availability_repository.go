@@ -20,6 +20,41 @@ func CreateCourseAvailabilityRepository(db *db.CustomDB) *MentorAvailabilityRepo
 	return &MentorAvailabilityRepositoryImpl{db}
 }
 
+func (car *MentorAvailabilityRepositoryImpl) GetDOWAvailability(ctx context.Context, mentorID string, dows *[]int) error {
+	var driver RepoDriver
+	driver = car.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	SELECT
+		day_of_week
+	FROM mentor_availability
+	WHERE mentor_id = $1 AND deleted_at IS NULL
+	`
+	rows, err := driver.Query(query, mentorID)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to get availability",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var item int
+		if err := rows.Scan(&item); err != nil {
+			return customerrors.NewError(
+				"failed to get availability",
+				err,
+				customerrors.DatabaseExecutionError,
+			)
+		}
+		*dows = append(*dows, item)
+	}
+	return nil
+}
+
 func (car *MentorAvailabilityRepositoryImpl) GetAvailabilityByMentorID(ctx context.Context, mentorID string, scheds *[]entity.MentorAvailability) error {
 	var driver RepoDriver
 	driver = car.DB

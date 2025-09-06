@@ -137,6 +137,11 @@ type (
 		AvailableSlots   int
 		UnavailableSlots []string
 	}
+	GetDOWAvailabilityParam struct {
+		Role     int
+		CourseID int
+		UserID   string
+	}
 )
 
 func (to *TimeOnly) ToString() string {

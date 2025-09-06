@@ -41,6 +41,38 @@ func CreateMentorService(
 	return &MentorServiceImpl{tmr, ur, mr, tr, ccr, car, cr, bu, ju, cu, gu}
 }
 
+func (ms *MentorServiceImpl) GetDOWAvailability(ctx context.Context, param entity.GetDOWAvailabilityParam) (*[]int, error) {
+	dows := new([]int)
+	user := new(entity.User)
+	course := new(entity.Course)
+	if err := ms.ur.FindByID(ctx, param.UserID, user); err != nil {
+		return nil, err
+	}
+	if param.Role == constants.StudentRole {
+		if user.Status != constants.VerifiedStatus {
+			return nil, customerrors.NewError(
+				"unverified",
+				errors.New("user unverified"),
+				customerrors.Unauthenticate,
+			)
+		}
+	}
+	if err := ms.cr.FindByID(ctx, param.CourseID, course, false); err != nil {
+		return nil, err
+	}
+	if err := ms.car.GetDOWAvailability(ctx, course.MentorID, dows); err != nil {
+		return nil, err
+	}
+	if len(*dows) == 0 {
+		return nil, customerrors.NewError(
+			"mentor availability not found",
+			errors.New("mentor availability not found"),
+			customerrors.ItemNotExist,
+		)
+	}
+	return dows, nil
+}
+
 func (ms *MentorServiceImpl) GetMentorProfileForStudent(ctx context.Context, param entity.GetMentorProfileForStudentParam) (*entity.GetMentorProfileForStudentQuery, error) {
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
