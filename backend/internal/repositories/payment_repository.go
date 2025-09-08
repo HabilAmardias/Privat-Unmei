@@ -1,6 +1,14 @@
 package repositories
 
-import "privat-unmei/internal/db"
+import (
+	"context"
+	"database/sql"
+	"errors"
+	"fmt"
+	"privat-unmei/internal/customerrors"
+	"privat-unmei/internal/db"
+	"privat-unmei/internal/entity"
+)
 
 type PaymentRepositoryImpl struct {
 	DB *db.CustomDB
@@ -8,4 +16,193 @@ type PaymentRepositoryImpl struct {
 
 func CreatePaymentRepository(db *db.CustomDB) *PaymentRepositoryImpl {
 	return &PaymentRepositoryImpl{db}
+}
+
+func (pr *PaymentRepositoryImpl) UnassignPaymentMethodFromMentor(ctx context.Context, mentorID string) error {
+	var driver RepoDriver
+	driver = pr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE mentor_payments
+	SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+	WHERE mentor_id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, mentorID)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to unassign payment method",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (pr *PaymentRepositoryImpl) AssignPaymentMethodToMentor(ctx context.Context, mentorID string, paymentInfo []entity.MentorPaymentInfo) error {
+	var driver RepoDriver
+	driver = pr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	INSERT INTO mentor_payments (payment_method_id, mentor_id, account_number)
+	VALUES
+	`
+	args := []any{}
+	sprintIndex := 1
+	for i, info := range paymentInfo {
+		if i != len(paymentInfo)-1 {
+			query += fmt.Sprintf(`
+			($%d, $%d, $%d),
+			`, sprintIndex, sprintIndex+1, sprintIndex+2)
+		} else {
+			query += fmt.Sprintf(`
+			($%d, $%d, $%d)
+			`, sprintIndex, sprintIndex+1, sprintIndex+2)
+		}
+		args = append(args, info.PaymentMethodID, mentorID, info.AccountNumber)
+		sprintIndex += 3
+	}
+	query += `
+	ON CONFLICT (mentor_id, payment_method_id)
+	DO UPDATE SET
+		mentor_id = EXCLUDED.mentor_id,
+		payment_method_id = EXCLUDED.payment_method_id,
+		account_number = EXCLUDED.account_number,
+		deleted_at = NULL,
+		updated_at = CURRENT_TIMESTAMP
+	`
+	_, err := driver.Exec(query, args...)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to create mentor payment method",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (pr *PaymentRepositoryImpl) MentorPaymentInfo(ctx context.Context, mentorID string, paymentInfo *[]entity.MentorPaymentInfo) error {
+	var driver RepoDriver
+	driver = pr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	SELECT
+		pm.name,
+		mp.account_number,
+		pm.id
+	FROM mentor_payments mp
+	JOIN payment_methods pm ON pm.id = mp.payment_method_id
+	WHERE mp.mentor_id = $1 AND pm.deleted_at IS NULL AND mp.deleted_at IS NULL
+	`
+	rows, err := driver.Query(query, mentorID)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to get mentor payment info",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var item entity.MentorPaymentInfo
+		if err := rows.Scan(
+			&item.PaymentMethodName,
+			&item.AccountNumber,
+			&item.PaymentMethodID,
+		); err != nil {
+			return customerrors.NewError(
+				"failed to get mentor payment info",
+				err,
+				customerrors.DatabaseExecutionError,
+			)
+		}
+		*paymentInfo = append(*paymentInfo, item)
+	}
+	return nil
+}
+
+func (pr *PaymentRepositoryImpl) FindPaymentMethodByID(ctx context.Context, id int, method *entity.PaymentMethod) error {
+	var driver RepoDriver
+	driver = pr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	SELECT
+		id,
+		name,
+		created_at,
+		updated_at,
+		deleted_at
+	FROM payment_methods
+	WHERE id = $1 AND deleted_at IS NULL
+	`
+	if err := driver.QueryRow(query, id).Scan(
+		&method.ID,
+		&method.Name,
+		&method.CreatedAt,
+		&method.UpdatedAt,
+		&method.DeletedAt,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return customerrors.NewError(
+				"payment method not found",
+				err,
+				customerrors.ItemNotExist,
+			)
+		}
+		return customerrors.NewError(
+			"failed to get payment method detail",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (pr *PaymentRepositoryImpl) GetPaymentInfoByMentorAndMethodID(ctx context.Context, mentorID string, paymentMethodID int, mentorPayment *entity.MentorPayment) error {
+	var driver RepoDriver
+	driver = pr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	SELECT
+		payment_method_id,
+		mentor_id,
+		account_number,
+		created_at,
+		updated_at,
+		deleted_at
+	FROM mentor_payments
+	WHERE mentor_id = $1 AND payment_method_id = $2 AND deleted_at IS NULL
+	`
+	if err := driver.QueryRow(query, mentorID, paymentMethodID).Scan(
+		&mentorPayment.PaymentMethodID,
+		&mentorPayment.MentorID,
+		&mentorPayment.AccountNumber,
+		&mentorPayment.CreatedAt,
+		&mentorPayment.UpdatedAt,
+		&mentorPayment.DeletedAt,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return customerrors.NewError(
+				"mentor payment info not found",
+				err,
+				customerrors.ItemNotExist,
+			)
+		}
+		return customerrors.NewError(
+			"failed to get mentor payment info",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
 }

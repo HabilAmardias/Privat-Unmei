@@ -19,6 +19,7 @@ type CourseRequestServiceImpl struct {
 	ur  *repositories.UserRepositoryImpl
 	sr  *repositories.StudentRepositoryImpl
 	mr  *repositories.MentorRepositoryImpl
+	pr  *repositories.PaymentRepositoryImpl
 	tmr *repositories.TransactionManagerRepositories
 }
 
@@ -30,9 +31,10 @@ func CreateCourseRequestService(
 	ur *repositories.UserRepositoryImpl,
 	sr *repositories.StudentRepositoryImpl,
 	mr *repositories.MentorRepositoryImpl,
+	pr *repositories.PaymentRepositoryImpl,
 	tmr *repositories.TransactionManagerRepositories,
 ) *CourseRequestServiceImpl {
-	return &CourseRequestServiceImpl{crr, cr, csr, mar, ur, sr, mr, tmr}
+	return &CourseRequestServiceImpl{crr, cr, csr, mar, ur, sr, mr, pr, tmr}
 }
 
 func (crs *CourseRequestServiceImpl) StudentCourseRequestDetail(ctx context.Context, param entity.StudentCourseRequestDetailParam) (*entity.StudentCourseRequestDetailQuery, error) {
@@ -207,6 +209,8 @@ func (crs *CourseRequestServiceImpl) GetPaymentDetail(ctx context.Context, param
 	userStudent := new(entity.User)
 	student := new(entity.Student)
 	query := new(entity.PaymentDetailQuery)
+	mentorPaymentInfo := new(entity.MentorPayment)
+	paymentMethod := new(entity.PaymentMethod)
 	now := time.Now()
 
 	if err := crs.ur.FindByID(ctx, param.UserID, userStudent); err != nil {
@@ -215,16 +219,14 @@ func (crs *CourseRequestServiceImpl) GetPaymentDetail(ctx context.Context, param
 	if err := crs.sr.FindByID(ctx, userStudent.ID, student); err != nil {
 		return nil, err
 	}
+	if userStudent.Status != constants.VerifiedStatus {
+		return nil, customerrors.NewError(
+			"need to verify account",
+			errors.New("user is still unverified"),
+			customerrors.Unauthenticate,
+		)
+	}
 	if err := crs.crr.GetPaymentDetail(ctx, param.CourseRequestID, courseRequest); err != nil {
-		return nil, err
-	}
-	if err := crs.cr.FindByID(ctx, courseRequest.CourseID, course, false); err != nil {
-		return nil, err
-	}
-	if err := crs.ur.FindByID(ctx, course.MentorID, userMentor); err != nil {
-		return nil, err
-	}
-	if err := crs.mr.FindByID(ctx, userMentor.ID, mentor, false); err != nil {
 		return nil, err
 	}
 	if courseRequest.ExpiredAt != nil {
@@ -243,19 +245,28 @@ func (crs *CourseRequestServiceImpl) GetPaymentDetail(ctx context.Context, param
 			customerrors.Unauthenticate,
 		)
 	}
-	if userStudent.Status != constants.VerifiedStatus {
-		return nil, customerrors.NewError(
-			"need to verify account",
-			errors.New("user is still unverified"),
-			customerrors.Unauthenticate,
-		)
+	if err := crs.cr.FindByID(ctx, courseRequest.CourseID, course, false); err != nil {
+		return nil, err
+	}
+	if err := crs.ur.FindByID(ctx, course.MentorID, userMentor); err != nil {
+		return nil, err
+	}
+	if err := crs.mr.FindByID(ctx, userMentor.ID, mentor, false); err != nil {
+		return nil, err
+	}
+	if err := crs.pr.GetPaymentInfoByMentorAndMethodID(ctx, course.MentorID, courseRequest.PaymentMethodID, mentorPaymentInfo); err != nil {
+		return nil, err
+	}
+	if err := crs.pr.FindPaymentMethodByID(ctx, courseRequest.PaymentMethodID, paymentMethod); err != nil {
+		return nil, err
 	}
 
 	query.CourseID = course.ID
 	query.CourseRequestID = param.CourseRequestID
 	query.CourseTitle = course.Title
 	query.ExpiredAt = courseRequest.ExpiredAt
-	query.GopayNumber = mentor.GopayNumber
+	query.AccountNumber = mentorPaymentInfo.AccountNumber
+	query.PaymentMethod = paymentMethod.Name
 	query.MentorID = mentor.ID
 	query.MentorName = userMentor.Name
 	query.OperationalCost = courseRequest.OperationalCost
@@ -516,6 +527,7 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 		courseRequest.StudentID = param.StudentID
 		courseRequest.CourseID = param.CourseID
 		courseRequest.TotalPrice = totalPrice
+		courseRequest.PaymentMethodID = param.PaymentMethodID
 		courseRequest.NumberOfSessions = len(param.PreferredSlots)
 		eat := now.Add(constants.ExpiredInterval)
 		courseRequest.ExpiredAt = &eat

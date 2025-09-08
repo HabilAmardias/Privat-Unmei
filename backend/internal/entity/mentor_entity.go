@@ -41,8 +41,9 @@ type (
 		DeletedAt *time.Time
 	}
 	MentorPaymentInfo struct {
-		PaymentMethodID int
-		AccountNumber   string
+		PaymentMethodID   int
+		PaymentMethodName string
+		AccountNumber     string
 	}
 	AddNewMentorParam struct {
 		Name              string
