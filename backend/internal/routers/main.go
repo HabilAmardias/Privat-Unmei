@@ -12,6 +12,8 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type RouteConfig struct {
@@ -30,14 +32,33 @@ type RouteConfig struct {
 }
 
 func (c *RouteConfig) Setup() {
+	httpRequestDuration := prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:    "http_request_duration_seconds",
+			Help:    "HTTP request duration in seconds",
+			Buckets: prometheus.DefBuckets,
+		},
+		[]string{"method", "endpoint", "status_code"},
+	)
+	httpRequestsTotal := prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "http_requests_total",
+			Help: "Total number of HTTP requests",
+		},
+		[]string{"method", "endpoint", "status_code"},
+	)
+	prometheus.MustRegister(httpRequestDuration, httpRequestsTotal)
+
 	config := cors.Config{
 		AllowAllOrigins: true,
 		AllowMethods:    []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
 		AllowHeaders:    []string{"Content-Type", "Authorization"},
 	}
 	c.App.Use(cors.New(config))
+	c.App.Use(middlewares.PrometheusMiddleware(httpRequestsTotal, httpRequestDuration))
 	c.App.Use(middlewares.LoggerMiddleware(c.Logger))
 	c.App.Use(middlewares.ErrorMiddleware(c.Logger))
+	c.App.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	c.SetupPublicRoute()
 	c.SetupPrivateRoute()
