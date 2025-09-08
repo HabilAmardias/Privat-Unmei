@@ -8,7 +8,8 @@ type (
 		StartTime TimeOnly `json:"start_time" binding:"required"`
 	}
 	CreateCourseRequstReq struct {
-		PreferredSlots []PreferredSlot `json:"preferred_slots" binding:"dive"`
+		PreferredSlots  []PreferredSlot `json:"preferred_slots" binding:"dive"`
+		PaymentMethodID int             `json:"payment_method_id" binding:"required"`
 	}
 	CreateCourseRequestRes struct {
 		CourseRequestID int `json:"id"`
@@ -20,9 +21,10 @@ type (
 		CourseRequestID int        `json:"id"`
 		MentorID        string     `json:"mentor_id"`
 		MentorName      string     `json:"mentor_name"`
-		GopayNumber     string     `json:"gopay_number"`
 		CourseID        int        `json:"course_id"`
 		CourseTitle     string     `json:"course_title"`
+		PaymentMethod   string     `json:"payment_method"`
+		AccountNumber   string     `json:"account_number"`
 		Subtotal        float64    `json:"subtotal"`
 		OperationalCost float64    `json:"operational_cost"`
 		TotalCost       float64    `json:"total_cost"`
@@ -53,6 +55,8 @@ type (
 		NumberOfSessions int                 `json:"number_of_sessions"`
 		Status           string              `json:"status"`
 		ExpiredAt        *time.Time          `json:"expired_at"`
+		PaymentMethod    string              `json:"payment_method"`
+		AccountNumber    string              `json:"account_number"`
 		Schedules        []CourseScheduleRes `json:"schedules"`
 	}
 	StudentCourseRequestListReq struct {

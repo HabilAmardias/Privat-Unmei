@@ -31,7 +31,6 @@ func (mr *MentorRepositoryImpl) GetMentorList(ctx context.Context, mentors *[]en
 		m.id,
 		u.name,
 		u.email,
-		m.gopay_number,
 		m.years_of_experience
 	FROM users u
 	JOIN mentors m ON m.id = u.id
@@ -101,7 +100,6 @@ func (mr *MentorRepositoryImpl) GetMentorList(ctx context.Context, mentors *[]en
 			&mentor.ID,
 			&mentor.Name,
 			&mentor.Email,
-			&mentor.GopayNumber,
 			&mentor.YearsOfExperience,
 		); err != nil {
 			return customerrors.NewError(
@@ -127,8 +125,7 @@ func (mr *MentorRepositoryImpl) FindByID(ctx context.Context, id string, mentor 
 		total_rating, 
 		rating_count, 
 		resume_url, 
-		years_of_experience, 
-		gopay_number, 
+		years_of_experience,
 		degree, 
 		major, 
 		campus, 
@@ -153,64 +150,6 @@ func (mr *MentorRepositoryImpl) FindByID(ctx context.Context, id string, mentor 
 		&mentor.RatingCount,
 		&mentor.Resume,
 		&mentor.YearsOfExperience,
-		&mentor.GopayNumber,
-		&mentor.Degree,
-		&mentor.Major,
-		&mentor.Campus,
-		&mentor.CreatedAt,
-		&mentor.UpdatedAt,
-		&mentor.DeletedAt,
-	); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return customerrors.NewError(
-				customerrors.UserNotFound,
-				err,
-				customerrors.ItemNotExist,
-			)
-		}
-		return customerrors.NewError(
-			"failed to get user",
-			err,
-			customerrors.DatabaseExecutionError,
-		)
-	}
-	return nil
-}
-
-func (mr *MentorRepositoryImpl) FindByGopay(ctx context.Context, GopayNumber string, mentor *entity.Mentor) error {
-	var driver RepoDriver
-	driver = mr.DB
-	if tx := GetTransactionFromContext(ctx); tx != nil {
-		driver = tx
-	}
-	query := `
-	SELECT 
-		id, 
-		total_rating, 
-		rating_count, 
-		resume_url, 
-		years_of_experience, 
-		gopay_number, 
-		degree, 
-		major, 
-		campus, 
-		created_at,
-		updated_at,
-		deleted_at
-	FROM mentors
-	WHERE gopay_number = $1 and deleted_at IS NULL
-	`
-	row := driver.QueryRow(
-		query,
-		GopayNumber,
-	)
-	if err := row.Scan(
-		&mentor.ID,
-		&mentor.TotalRating,
-		&mentor.RatingCount,
-		&mentor.Resume,
-		&mentor.YearsOfExperience,
-		&mentor.GopayNumber,
 		&mentor.Degree,
 		&mentor.Major,
 		&mentor.Campus,
@@ -241,15 +180,14 @@ func (mr *MentorRepositoryImpl) AddNewMentor(ctx context.Context, mentor *entity
 		driver = tx
 	}
 	query := `
-	INSERT INTO mentors(id, resume_url, years_of_experience, gopay_number, degree, major, campus)
-	VALUES ($1, $2, $3, $4, $5, $6, $7);
+	INSERT INTO mentors(id, resume_url, years_of_experience, degree, major, campus)
+	VALUES ($1, $2, $3, $4, $5, $6);
 	`
 	_, err := driver.Exec(
 		query,
 		mentor.ID,
 		mentor.Resume,
 		mentor.YearsOfExperience,
-		mentor.GopayNumber,
 		mentor.Degree,
 		mentor.Major,
 		mentor.Campus,
@@ -275,20 +213,18 @@ func (mr *MentorRepositoryImpl) UpdateMentor(ctx context.Context, id string, que
 	SET
 		resume_url = COALESCE($1, resume_url),
 		years_of_experience = COALESCE($2, years_of_experience),
-		gopay_number = COALESCE($3, gopay_number),
-		degree = COALESCE($4, degree),
-		major = COALESCE($5, major),
-		campus = COALESCE($6, campus),
-		total_rating = COALESCE($7, total_rating),
-		rating_count = COALESCE($8, rating_count),
+		degree = COALESCE($3, degree),
+		major = COALESCE($4, major),
+		campus = COALESCE($5, campus),
+		total_rating = COALESCE($6, total_rating),
+		rating_count = COALESCE($7, rating_count),
 		updated_at = NOW()
-	WHERE id = $9 AND deleted_at IS NULL;
+	WHERE id = $8 AND deleted_at IS NULL;
 	`
 	_, err := driver.Exec(
 		query,
 		queryEntity.Resume,
 		queryEntity.YearsOfExperience,
-		queryEntity.GopayNumber,
 		queryEntity.Degree,
 		queryEntity.Major,
 		queryEntity.Campus,

@@ -13,6 +13,7 @@ type (
 		SubTotal         float64
 		OperationalCost  float64
 		TotalPrice       float64
+		PaymentMethodID  int
 		NumberOfSessions int
 		ExpiredAt        *time.Time
 		CreatedAt        time.Time
@@ -24,9 +25,10 @@ type (
 		StartTime TimeOnly
 	}
 	CreateCourseRequestParam struct {
-		CourseID       int
-		StudentID      string
-		PreferredSlots []PreferredSlot
+		CourseID        int
+		StudentID       string
+		PreferredSlots  []PreferredSlot
+		PaymentMethodID int
 	}
 	HandleCourseRequestParam struct {
 		MentorID        string
@@ -45,9 +47,10 @@ type (
 		CourseRequestID int
 		MentorID        string
 		MentorName      string
-		GopayNumber     string
 		CourseID        int
 		CourseTitle     string
+		PaymentMethod   string
+		AccountNumber   string
 		Subtotal        float64
 		OperationalCost float64
 		TotalCost       float64

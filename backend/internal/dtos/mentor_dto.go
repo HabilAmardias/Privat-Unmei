@@ -16,37 +16,40 @@ type (
 		StartTime TimeOnly `json:"start_time"`
 		EndTime   TimeOnly `json:"end_time"`
 	}
+	MentorPaymentInfo struct {
+		PaymentMethodID int    `json:"payment_method_id" binding:"required"`
+		AccountNumber   string `json:"account_number" binding:"required,numeric"`
+	}
 	AddNewMentorReq struct {
-		Name              string   `form:"name" binding:"required"`
-		Email             string   `form:"email" binding:"required,email"`
-		Bio               string   `form:"bio" binding:"required"`
-		Password          string   `form:"password" binding:"required,containsany=!@#?,min=8"`
-		YearsOfExperience int      `form:"years_of_experience" binding:"required,gte=0"`
-		GopayNumber       string   `form:"gopay_number" binding:"required"`
-		Degree            string   `form:"degree" binding:"required"`
-		Major             string   `form:"major" binding:"required"`
-		Campus            string   `form:"campus" binding:"required"`
-		MentorSchedules   []string `form:"mentor_availability"`
+		Name              string              `form:"name" binding:"required"`
+		Email             string              `form:"email" binding:"required,email"`
+		Bio               string              `form:"bio" binding:"required"`
+		Password          string              `form:"password" binding:"required,containsany=!@#?,min=8"`
+		MentorPayments    []MentorPaymentInfo `form:"mentor_payment_info" binding:"dive"`
+		YearsOfExperience int                 `form:"years_of_experience" binding:"required,gte=0"`
+		Degree            string              `form:"degree" binding:"required"`
+		Major             string              `form:"major" binding:"required"`
+		Campus            string              `form:"campus" binding:"required"`
+		MentorSchedules   []string            `form:"mentor_availability"`
 	}
 	GeneratePasswordRes struct {
 		Password string `json:"password"`
 	}
 	UpdateMentorForAdminReq struct {
-		GopayNumber       *string `json:"gopay_number"`
-		YearsOfExperience *int    `json:"years_of_experience"`
+		YearsOfExperience *int `json:"years_of_experience"`
 	}
 	UpdateMentorForAdminRes struct {
 		ID string `json:"id"`
 	}
 	UpdateMentorReq struct {
-		Name              *string  `form:"name"`
-		Bio               *string  `form:"bio"`
-		YearsOfExperience *int     `form:"years_of_experience" binding:"omitempty,gte=0"`
-		GopayNumber       *string  `form:"gopay_number"`
-		Degree            *string  `form:"degree"`
-		Major             *string  `form:"major"`
-		Campus            *string  `form:"campus"`
-		MentorSchedules   []string `form:"mentor_availability"`
+		Name              *string             `form:"name"`
+		Bio               *string             `form:"bio"`
+		YearsOfExperience *int                `form:"years_of_experience" binding:"omitempty,gte=0"`
+		Degree            *string             `form:"degree"`
+		Major             *string             `form:"major"`
+		Campus            *string             `form:"campus"`
+		MentorSchedules   []string            `form:"mentor_availability"`
+		MentorPayments    []MentorPaymentInfo `form:"mentor_payment_info" binding:"dive"`
 	}
 	UpdateMentorRes struct {
 		ID string `json:"id"`
@@ -60,7 +63,6 @@ type (
 		ID                string `json:"id"`
 		Name              string `json:"name"`
 		Email             string `json:"email"`
-		GopayNumber       string `json:"gopay_number"`
 		YearsOfExperience int    `json:"years_of_experience"`
 	}
 	LoginMentorReq struct {
@@ -79,11 +81,11 @@ type (
 		Name                 string                  `json:"name"`
 		Bio                  string                  `json:"bio"`
 		YearsOfExperience    int                     `json:"years_of_experience"`
-		GopayNumber          string                  `json:"gopay_number"`
 		Degree               string                  `json:"degree"`
 		Major                string                  `json:"major"`
 		Campus               string                  `json:"campus"`
 		MentorAvailabilities []MentorAvailabilityRes `json:"mentor_availability"`
+		MentorPayments       []MentorPaymentInfo     `json:"mentor_payment_info"`
 	}
 	GetMentorProfileForStudentRes struct {
 		MentorID                string                  `json:"id"`

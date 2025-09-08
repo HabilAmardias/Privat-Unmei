@@ -7,6 +7,7 @@ CREATE TABLE course_requests (
     subtotal NUMERIC NOT NULL,
     operational_cost NUMERIC NOT NULL,
     total_price NUMERIC NOT NULL,
+    payment_method_id BIGINT REFERENCES payment_methods(id),
     number_of_sessions INT NOT NULL DEFAULT 7,
     expired_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
