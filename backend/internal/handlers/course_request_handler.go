@@ -417,9 +417,10 @@ func (crh *CourseRequestHandlerImpl) CreateReservation(ctx *gin.Context) {
 		return
 	}
 	param := entity.CreateCourseRequestParam{
-		CourseID:       id,
-		StudentID:      claim.Subject,
-		PreferredSlots: []entity.PreferredSlot{},
+		CourseID:        id,
+		StudentID:       claim.Subject,
+		PreferredSlots:  []entity.PreferredSlot{},
+		PaymentMethodID: req.PaymentMethodID,
 	}
 	dateMap := make(map[time.Time]bool)
 	for _, slot := range req.PreferredSlots {

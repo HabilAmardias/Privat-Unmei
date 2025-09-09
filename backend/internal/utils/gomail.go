@@ -14,7 +14,6 @@ func CreateGomailUtil() *GomailUtil {
 	return &GomailUtil{}
 }
 
-// TODO: Create account for sending email
 func (gu GomailUtil) SendEmail(email entity.SendEmailParams) error {
 	m := gomail.NewMessage()
 	m.SetHeader("From", os.Getenv("SENDER"))

@@ -445,6 +445,7 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 	courseRequest := new(entity.CourseRequest)
 	availabilityRes := new(entity.AvailabilityResult)
 	conflictingScheds := new([]entity.ConflictingSchedule)
+	paymentInfo := new(entity.MentorPayment)
 	dates := make([]time.Time, 0, len(param.PreferredSlots))
 	startTimes := make([]string, 0, len(param.PreferredSlots))
 	endTimes := make([]string, 0, len(param.PreferredSlots))
@@ -518,6 +519,10 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 				errors.New("schedule already reserved"),
 				customerrors.InvalidAction,
 			)
+		}
+
+		if err := crs.pr.GetPaymentInfoByMentorAndMethodID(ctx, course.MentorID, param.PaymentMethodID, paymentInfo); err != nil {
+			return err
 		}
 
 		courseRequest.SubTotal = course.Price * float64(len(param.PreferredSlots))

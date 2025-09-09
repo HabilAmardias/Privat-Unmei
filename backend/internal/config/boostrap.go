@@ -29,6 +29,7 @@ func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine, upg
 	courseRatingRepo := repositories.CreateCourseRatingRepository(db)
 	courseScheduleRepo := repositories.CreateCourseScheduleRepository(db)
 	chatRepo := repositories.CreateChatRepository(db)
+	paymentRepo := repositories.CreatePaymentRepository(db)
 
 	bcryptUtil := utils.CreateBcryptUtil()
 	gomailUtil := utils.CreateGomailUtil()
@@ -36,13 +37,13 @@ func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine, upg
 	jwtUtil := utils.CreateJWTUtil()
 	googleUtil := utils.CreateGoogleUtil()
 
-	mentorService := services.CreateMentorService(transactionManager, userRepo, mentorRepo, topicRepo, courseCategoryRepo, mentorAvailabilityRepo, courseRepo, bcryptUtil, jwtUtil, cloudinaryUtil, gomailUtil)
+	mentorService := services.CreateMentorService(transactionManager, userRepo, mentorRepo, topicRepo, courseCategoryRepo, mentorAvailabilityRepo, courseRepo, paymentRepo, bcryptUtil, jwtUtil, cloudinaryUtil, gomailUtil)
 	adminService := services.CreateAdminService(userRepo, adminRepo, studentRepo, mentorRepo, transactionManager, cloudinaryUtil, bcryptUtil, jwtUtil, gomailUtil)
 	studentService := services.CreateStudentService(userRepo, studentRepo, transactionManager, bcryptUtil, gomailUtil, cloudinaryUtil, jwtUtil, googleUtil)
 	courseCategoryService := services.CreateCourseCategoryService(courseCategoryRepo, transactionManager)
 	courseService := services.CreateCourseService(courseRepo, courseCategoryRepo, topicRepo, transactionManager, courseRequestRepo)
 	courseRatingService := services.CreateCourseRatingService(courseRepo, courseRatingRepo, courseRequestRepo, mentorRepo, transactionManager)
-	courseRequestService := services.CreateCourseRequestService(courseRequestRepo, courseRepo, courseScheduleRepo, mentorAvailabilityRepo, userRepo, studentRepo, mentorRepo, transactionManager)
+	courseRequestService := services.CreateCourseRequestService(courseRequestRepo, courseRepo, courseScheduleRepo, mentorAvailabilityRepo, userRepo, studentRepo, mentorRepo, paymentRepo, transactionManager)
 	chatService := services.CreateChatService(chatRepo, userRepo, mentorRepo, transactionManager)
 
 	studentHandler := handlers.CreateStudentHandler(studentService)

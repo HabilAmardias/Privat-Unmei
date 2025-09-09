@@ -282,6 +282,9 @@ func (ms *MentorServiceImpl) DeleteMentor(ctx context.Context, param entity.Dele
 				return err
 			}
 		}
+		if err := ms.pr.UnassignPaymentMethodFromMentor(ctx, param.ID); err != nil {
+			return err
+		}
 		if err := ms.car.DeleteAvailability(ctx, param.ID); err != nil {
 			return err
 		}
@@ -352,6 +355,7 @@ func (ms *MentorServiceImpl) UpdateMentorProfile(ctx context.Context, param enti
 		if err := ms.ur.UpdateUserProfile(ctx, userQuery, param.ID); err != nil {
 			return err
 		}
+		// TODO: Add ongoing order checking before updating mentor payment method
 		if len(param.MentorPayments) > 0 {
 			if err := ms.pr.UnassignPaymentMethodFromMentor(ctx, param.ID); err != nil {
 				return err
