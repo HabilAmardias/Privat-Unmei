@@ -245,6 +245,13 @@ func (crs *CourseRequestServiceImpl) GetPaymentDetail(ctx context.Context, param
 			customerrors.Unauthenticate,
 		)
 	}
+	if !isOngoing(courseRequest.Status) {
+		return nil, customerrors.NewError(
+			"unauthorized",
+			errors.New("cannot see payment detail of completed transaction"),
+			customerrors.Unauthenticate,
+		)
+	}
 	if err := crs.cr.FindByID(ctx, courseRequest.CourseID, course, false); err != nil {
 		return nil, err
 	}

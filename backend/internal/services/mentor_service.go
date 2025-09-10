@@ -18,6 +18,7 @@ type MentorServiceImpl struct {
 	tr  *repositories.TopicRepositoryImpl
 	ccr *repositories.CourseCategoryRepositoryImpl
 	car *repositories.MentorAvailabilityRepositoryImpl
+	crr *repositories.CourseRequestRepositoryImpl
 	cr  *repositories.CourseRepositoryImpl
 	pr  *repositories.PaymentRepositoryImpl
 	bu  *utils.BcryptUtil
@@ -33,6 +34,7 @@ func CreateMentorService(
 	tr *repositories.TopicRepositoryImpl,
 	ccr *repositories.CourseCategoryRepositoryImpl,
 	car *repositories.MentorAvailabilityRepositoryImpl,
+	crr *repositories.CourseRequestRepositoryImpl,
 	cr *repositories.CourseRepositoryImpl,
 	pr *repositories.PaymentRepositoryImpl,
 	bu *utils.BcryptUtil,
@@ -40,7 +42,7 @@ func CreateMentorService(
 	cu *utils.CloudinaryUtil,
 	gu *utils.GomailUtil,
 ) *MentorServiceImpl {
-	return &MentorServiceImpl{tmr, ur, mr, tr, ccr, car, cr, pr, bu, ju, cu, gu}
+	return &MentorServiceImpl{tmr, ur, mr, tr, ccr, car, crr, cr, pr, bu, ju, cu, gu}
 }
 
 func (ms *MentorServiceImpl) GetDOWAvailability(ctx context.Context, param entity.GetDOWAvailabilityParam) (*[]int, error) {
@@ -355,8 +357,18 @@ func (ms *MentorServiceImpl) UpdateMentorProfile(ctx context.Context, param enti
 		if err := ms.ur.UpdateUserProfile(ctx, userQuery, param.ID); err != nil {
 			return err
 		}
-		// TODO: Add ongoing order checking before updating mentor payment method
 		if len(param.MentorPayments) > 0 {
+			orderCount := new(int64)
+			if err := ms.crr.FindOngoingOrderByMentorID(ctx, param.ID, orderCount); err != nil {
+				return err
+			}
+			if *orderCount > 0 {
+				return customerrors.NewError(
+					"there is an ongoing order, cannot update payment method",
+					errors.New("there is an ongoing order, cannot update payment method"),
+					customerrors.InvalidAction,
+				)
+			}
 			if err := ms.pr.UnassignPaymentMethodFromMentor(ctx, param.ID); err != nil {
 				return err
 			}
