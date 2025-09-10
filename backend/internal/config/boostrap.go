@@ -45,6 +45,7 @@ func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine, upg
 	courseRatingService := services.CreateCourseRatingService(courseRepo, courseRatingRepo, courseRequestRepo, mentorRepo, transactionManager)
 	courseRequestService := services.CreateCourseRequestService(courseRequestRepo, courseRepo, courseScheduleRepo, mentorAvailabilityRepo, userRepo, studentRepo, mentorRepo, paymentRepo, transactionManager)
 	chatService := services.CreateChatService(chatRepo, userRepo, mentorRepo, transactionManager)
+	paymentService := services.CreatePaymentService(paymentRepo, adminRepo, userRepo, transactionManager)
 
 	studentHandler := handlers.CreateStudentHandler(studentService)
 	adminHandler := handlers.CreateAdminHandler(adminService)
@@ -54,6 +55,7 @@ func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine, upg
 	courseRatingHandler := handlers.CreateCourseRatingHandler(courseRatingService)
 	courseRequestHandler := handlers.CreateCourseRequestHandler(courseRequestService)
 	chatHandler := handlers.CreateChatHandler(chatService, upg, chatHub, logger)
+	paymentHandler := handlers.CreatePaymentHandler(paymentService)
 
 	cfg := routers.RouteConfig{
 		App:                   app,
@@ -65,6 +67,7 @@ func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine, upg
 		CourseRatingHandler:   courseRatingHandler,
 		CourseRequestHandler:  courseRequestHandler,
 		ChatHandler:           chatHandler,
+		PaymentHandler:        paymentHandler,
 		RBACRepository:        rbacRepo,
 		TokenUtil:             jwtUtil,
 		Logger:                logger,

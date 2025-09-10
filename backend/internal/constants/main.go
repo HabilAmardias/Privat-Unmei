@@ -59,6 +59,7 @@ const (
 	CourseRequestResource
 	ChatroomResource
 	PaymentDetailResource
+	PaymentMethodResource
 )
 
 const (

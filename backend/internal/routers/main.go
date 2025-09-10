@@ -26,6 +26,7 @@ type RouteConfig struct {
 	CourseRatingHandler   *handlers.CourseRatingHandlerImpl
 	CourseRequestHandler  *handlers.CourseRequestHandlerImpl
 	ChatHandler           *handlers.ChatHandlerImpl
+	PaymentHandler        *handlers.PaymentHandlerImpl
 	RBACRepository        *repositories.RBACRepository
 	TokenUtil             *utils.JWTUtil
 	Logger                logger.CustomLogger
@@ -216,6 +217,11 @@ func (c *RouteConfig) SetupPrivateRoute() {
 	v1.GET("/chatrooms/:id/messages", c.ChatHandler.GetMessages)
 	v1.POST("/chatrooms/:id/messages", c.ChatHandler.SendMessage)
 	v1.GET("/courses/:id/mentor-availability", c.MentorHandler.GetDOWAvailability)
+	v1.POST("/payment-methods", middlewares.AuthorizationMiddleware(
+		constants.CreatePermission,
+		constants.PaymentMethodResource,
+		c.RBACRepository,
+	), c.PaymentHandler.CreatePaymentMethod)
 }
 
 func (c *RouteConfig) SetupWebsocketRoute() {

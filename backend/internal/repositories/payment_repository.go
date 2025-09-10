@@ -18,6 +18,55 @@ func CreatePaymentRepository(db *db.CustomDB) *PaymentRepositoryImpl {
 	return &PaymentRepositoryImpl{db}
 }
 
+func (pr *PaymentRepositoryImpl) FindPaymentMethodByName(ctx context.Context, paymentName string, count *int64) error {
+	var driver RepoDriver
+	driver = pr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	SELECT COUNT(*)
+	FROM payment_methods
+	WHERE LOWER(name) = LOWER($1) AND deleted_at IS NULL
+	`
+	if err := driver.QueryRow(query, paymentName).Scan(count); err != nil {
+		return customerrors.NewError(
+			"failed to find payment method",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (pr *PaymentRepositoryImpl) CreatePaymentMethod(ctx context.Context, paymentName string, method *entity.PaymentMethod) error {
+	var driver RepoDriver
+	driver = pr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	INSERT INTO payment_methods (name)
+	VALUES
+	($1)
+	RETURNING id, name, created_at, updated_at, deleted_at
+	`
+	if err := driver.QueryRow(query, paymentName).Scan(
+		&method.ID,
+		&method.Name,
+		&method.CreatedAt,
+		&method.UpdatedAt,
+		&method.DeletedAt,
+	); err != nil {
+		return customerrors.NewError(
+			"failed to create payment method",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (pr *PaymentRepositoryImpl) UnassignPaymentMethodFromMentor(ctx context.Context, mentorID string) error {
 	var driver RepoDriver
 	driver = pr.DB

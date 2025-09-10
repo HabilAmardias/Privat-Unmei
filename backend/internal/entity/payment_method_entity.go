@@ -18,4 +18,8 @@ type (
 		UpdatedAt       time.Time
 		DeletedAt       *time.Time
 	}
+	CreatePaymentMethodParam struct {
+		AdminID    string
+		MethodName string
+	}
 )

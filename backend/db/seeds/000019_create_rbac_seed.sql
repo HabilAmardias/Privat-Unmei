@@ -22,7 +22,8 @@ VALUES
 (4, 'course', 'course data'),
 (5, 'course_request', 'course request data'),
 (6, 'chatroom', 'chatroom data'),
-(7, 'payment_detail', 'payment detail data');
+(7, 'payment_detail', 'payment detail data'),
+(8, 'payment_method', 'payment method data');
 
 INSERT INTO rbac(role_id, permission_id, resource_id)
 VALUES
@@ -42,4 +43,7 @@ VALUES
 (2, 5, 5), -- mentor can update course request data
 (2, 2, 5), -- mentor can read their own course-related request
 (3, 2, 7), -- student can read their own payment detail
-(3, 1, 6); -- student can create chatroom
+(3, 1, 6), -- student can create chatroom
+(1, 1, 8), -- admin can create payment method
+(1, 5, 8), -- admin can update all payment method
+(1, 7, 8); -- admin can delete all payment method
