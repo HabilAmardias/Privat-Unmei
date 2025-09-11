@@ -24,15 +24,30 @@ func CreatePaymentService(
 	return &PaymentServiceImpl{pr, ar, ur, tmr}
 }
 
+func (ps *PaymentServiceImpl) DeletePaymentMethod(ctx context.Context, param entity.DeletePaymentMethodParam) error {
+	admin := new(entity.Admin)
+	method := new(entity.PaymentMethod)
+	return ps.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := ps.ar.FindByID(ctx, param.AdminID, admin); err != nil {
+			return err
+		}
+		if err := ps.pr.FindPaymentMethodByID(ctx, param.MethodID, method); err != nil {
+			return err
+		}
+		if err := ps.pr.UnassignPaymentMethodFromAllMentor(ctx, param.MethodID); err != nil {
+			return err
+		}
+		if err := ps.pr.DeletePaymentMethod(ctx, param.MethodID); err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
 func (ps *PaymentServiceImpl) CreatePaymentMethod(ctx context.Context, param entity.CreatePaymentMethodParam) (*int, error) {
-	user := new(entity.User)
 	admin := new(entity.Admin)
 	paymentMethod := new(entity.PaymentMethod)
 	count := new(int64)
-
-	if err := ps.ur.FindByID(ctx, param.AdminID, user); err != nil {
-		return nil, err
-	}
 	if err := ps.ar.FindByID(ctx, param.AdminID, admin); err != nil {
 		return nil, err
 	}

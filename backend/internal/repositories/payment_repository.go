@@ -18,6 +18,51 @@ func CreatePaymentRepository(db *db.CustomDB) *PaymentRepositoryImpl {
 	return &PaymentRepositoryImpl{db}
 }
 
+func (pr *PaymentRepositoryImpl) DeletePaymentMethod(ctx context.Context, paymentMethodID int) error {
+	var driver RepoDriver
+	driver = pr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE payment_methods
+	SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+	WHERE id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, paymentMethodID)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to delete payment method",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (pr *PaymentRepositoryImpl) UnassignPaymentMethodFromAllMentor(ctx context.Context, paymentMethodID int) error {
+	var driver RepoDriver
+	driver = pr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+
+	query := `
+	UPDATE mentor_payments
+	SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+	WHERE payment_method_id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, paymentMethodID)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to delete payment method",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (pr *PaymentRepositoryImpl) FindPaymentMethodByName(ctx context.Context, paymentName string, count *int64) error {
 	var driver RepoDriver
 	driver = pr.DB

@@ -7,4 +7,7 @@ type (
 	CreatePaymentMethodRes struct {
 		ID int `json:"payment_method_id"`
 	}
+	DeletePaymentMethodRes struct {
+		ID int `json:"payment_method_id"`
+	}
 )

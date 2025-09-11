@@ -173,7 +173,11 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.MentorResource,
 		c.RBACRepository,
 	), c.MentorHandler.UpdateMentor)
-	v1.POST("/courses/:id/course-requests", c.CourseRequestHandler.CreateReservation)
+	v1.POST("/courses/:id/course-requests", middlewares.AuthorizationMiddleware(
+		constants.CreatePermission,
+		constants.CourseRequestResource,
+		c.RBACRepository,
+	), c.CourseRequestHandler.CreateReservation)
 	v1.GET("/course-requests/:id/approve", middlewares.AuthorizationMiddleware(
 		constants.UpdateAllPermission,
 		constants.CourseRequestResource,
@@ -222,6 +226,11 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.PaymentMethodResource,
 		c.RBACRepository,
 	), c.PaymentHandler.CreatePaymentMethod)
+	v1.DELETE("/payment-methods/:id", middlewares.AuthorizationMiddleware(
+		constants.DeleteAllPermission,
+		constants.PaymentMethodResource,
+		c.RBACRepository,
+	), c.PaymentHandler.DeletePaymentMethod)
 }
 
 func (c *RouteConfig) SetupWebsocketRoute() {

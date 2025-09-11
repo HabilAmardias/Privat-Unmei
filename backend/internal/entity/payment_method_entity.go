@@ -22,4 +22,8 @@ type (
 		AdminID    string
 		MethodName string
 	}
+	DeletePaymentMethodParam struct {
+		AdminID  string
+		MethodID int
+	}
 )

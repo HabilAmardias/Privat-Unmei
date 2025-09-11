@@ -46,4 +46,5 @@ VALUES
 (3, 1, 6), -- student can create chatroom
 (1, 1, 8), -- admin can create payment method
 (1, 5, 8), -- admin can update all payment method
-(1, 7, 8); -- admin can delete all payment method
+(1, 7, 8), -- admin can delete all payment method
+(3, 1, 5); -- student can create course request
