@@ -257,8 +257,14 @@ func (mh *MentorHandlerImpl) DeleteMentor(ctx *gin.Context) {
 		))
 		return
 	}
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 	param := entity.DeleteMentorParam{
-		ID: id,
+		ID:      id,
+		AdminID: claim.Subject,
 	}
 	if err := mh.ms.DeleteMentor(ctx, param); err != nil {
 		ctx.Error(err)
@@ -452,7 +458,13 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 	param := entity.AddNewMentorParam{
+		AdminID:           claim.Subject,
 		Name:              req.Name,
 		Email:             req.Email,
 		Password:          req.Password,

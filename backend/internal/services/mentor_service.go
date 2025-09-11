@@ -21,6 +21,7 @@ type MentorServiceImpl struct {
 	crr *repositories.CourseRequestRepositoryImpl
 	cr  *repositories.CourseRepositoryImpl
 	pr  *repositories.PaymentRepositoryImpl
+	ar  *repositories.AdminRepositoryImpl
 	bu  *utils.BcryptUtil
 	ju  *utils.JWTUtil
 	cu  *utils.CloudinaryUtil
@@ -37,12 +38,13 @@ func CreateMentorService(
 	crr *repositories.CourseRequestRepositoryImpl,
 	cr *repositories.CourseRepositoryImpl,
 	pr *repositories.PaymentRepositoryImpl,
+	ar *repositories.AdminRepositoryImpl,
 	bu *utils.BcryptUtil,
 	ju *utils.JWTUtil,
 	cu *utils.CloudinaryUtil,
 	gu *utils.GomailUtil,
 ) *MentorServiceImpl {
-	return &MentorServiceImpl{tmr, ur, mr, tr, ccr, car, crr, cr, pr, bu, ju, cu, gu}
+	return &MentorServiceImpl{tmr, ur, mr, tr, ccr, car, crr, cr, pr, ar, bu, ju, cu, gu}
 }
 
 func (ms *MentorServiceImpl) GetDOWAvailability(ctx context.Context, param entity.GetDOWAvailabilityParam) (*[]int, error) {
@@ -249,10 +251,14 @@ func (ms *MentorServiceImpl) GetMentorList(ctx context.Context, param entity.Lis
 func (ms *MentorServiceImpl) DeleteMentor(ctx context.Context, param entity.DeleteMentorParam) error {
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
+	admin := new(entity.Admin)
 	maxTransactionCount := new(int64)
 	courseIDs := new([]int)
 
 	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := ms.ar.FindByID(ctx, param.AdminID, admin); err != nil {
+			return err
+		}
 		if err := ms.ur.FindByID(ctx, param.ID, user); err != nil {
 			return err
 		}
@@ -406,8 +412,12 @@ func (ms *MentorServiceImpl) UpdateMentorForAdmin(ctx context.Context, param ent
 func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddNewMentorParam) error {
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
+	admin := new(entity.Admin)
 
 	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := ms.ar.FindByID(ctx, param.AdminID, admin); err != nil {
+			return err
+		}
 		if err := ms.ur.FindByEmail(ctx, param.Email, user); err != nil {
 			if err.Error() != customerrors.UserNotFound {
 				return err

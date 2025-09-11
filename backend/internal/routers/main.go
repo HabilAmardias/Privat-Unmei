@@ -91,19 +91,30 @@ func (c *RouteConfig) SetupPublicRoute() {
 	v1.GET("/courses/:id/reviews", c.CourseRatingHandler.GetCourseReview)
 }
 
-// TODO: need to find related user for route with authorization middleware
 func (c *RouteConfig) SetupPrivateRoute() {
 	v1 := c.App.Group("/api/v1")
 	v1.Use(middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForLogin))
-	v1.POST("/courses/:id/reviews", c.CourseRatingHandler.AddReview)
+	v1.POST("/courses/:id/reviews", middlewares.AuthorizationMiddleware(
+		constants.CreatePermission,
+		constants.CourseRatingResource,
+		c.RBACRepository,
+	), c.CourseRatingHandler.AddReview)
 	v1.GET("/verify/send", c.StudentHandler.SendVerificationEmail)
 	v1.PATCH("/courses/:id", middlewares.AuthorizationMiddleware(
 		constants.UpdateOwnPermission,
 		constants.CourseResource,
 		c.RBACRepository,
 	), c.CourseHandler.UpdateCourse)
-	v1.GET("/me", c.StudentHandler.GetStudentProfile)
-	v1.POST("/me/change-password", c.StudentHandler.ChangePassword)
+	v1.GET("/me", middlewares.AuthorizationMiddleware(
+		constants.ReadOwnPermission,
+		constants.StudentResource,
+		c.RBACRepository,
+	), c.StudentHandler.GetStudentProfile)
+	v1.POST("/me/change-password", middlewares.AuthorizationMiddleware(
+		constants.UpdateOwnPermission,
+		constants.StudentResource,
+		c.RBACRepository,
+	), c.StudentHandler.ChangePassword)
 	v1.GET("/students", middlewares.AuthorizationMiddleware(
 		constants.ReadAllPermission,
 		constants.StudentResource,
@@ -214,8 +225,16 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.CourseRequestResource,
 		c.RBACRepository,
 	), c.CourseRequestHandler.MentorCourseRequestDetail)
-	v1.GET("/me/course-requests", c.CourseRequestHandler.StudentCourseRequestList)
-	v1.GET("/me/course-requests/:id", c.CourseRequestHandler.StudentCourseRequestDetail)
+	v1.GET("/me/course-requests", middlewares.AuthorizationMiddleware(
+		constants.ReadOwnPermission,
+		constants.CourseRequestResource,
+		c.RBACRepository,
+	), c.CourseRequestHandler.StudentCourseRequestList)
+	v1.GET("/me/course-requests/:id", middlewares.AuthorizationMiddleware(
+		constants.ReadOwnPermission,
+		constants.CourseRequestResource,
+		c.RBACRepository,
+	), c.CourseRequestHandler.StudentCourseRequestDetail)
 	v1.POST("/chatrooms", middlewares.AuthorizationMiddleware(
 		constants.CreatePermission,
 		constants.ChatroomResource,

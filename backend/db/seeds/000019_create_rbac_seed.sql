@@ -23,7 +23,8 @@ VALUES
 (5, 'course_request', 'course request data'),
 (6, 'chatroom', 'chatroom data'),
 (7, 'payment_detail', 'payment detail data'),
-(8, 'payment_method', 'payment method data');
+(8, 'payment_method', 'payment method data'),
+(9, 'course_rating', 'course rating data')
 
 INSERT INTO rbac(role_id, permission_id, resource_id)
 VALUES
@@ -48,4 +49,8 @@ VALUES
 (1, 5, 8), -- admin can update all payment method
 (1, 7, 8), -- admin can delete all payment method
 (3, 1, 5), -- student can create course request
-(2, 2, 2); -- mentor can read their own profile
+(2, 2, 2), -- mentor can read their own profile
+(3, 2, 1), -- student can read their own profile
+(3, 4, 1), -- student can update their own profile
+(3, 2, 5), -- student can read their own course request
+(3, 1, 9); -- student can make course review

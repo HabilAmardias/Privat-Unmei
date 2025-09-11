@@ -33,8 +33,12 @@ func (cs *CourseServiceImpl) UpdateCourse(ctx context.Context, param entity.Upda
 	course := new(entity.Course)
 	orders := new([]entity.CourseRequest)
 	categories := new([]entity.CourseCategory)
+	mentor := new(entity.Mentor)
 	return cs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := cs.cr.FindByID(ctx, param.CourseID, course, true); err != nil {
+			return err
+		}
+		if err := cs.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
 			return err
 		}
 		if course.MentorID != param.MentorID {

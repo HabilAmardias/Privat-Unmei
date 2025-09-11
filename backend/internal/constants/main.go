@@ -60,6 +60,7 @@ const (
 	ChatroomResource
 	PaymentDetailResource
 	PaymentMethodResource
+	CourseRatingResource
 )
 
 const (

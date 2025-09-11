@@ -18,6 +18,7 @@ import (
 type StudentServiceImpl struct {
 	ur     *repositories.UserRepositoryImpl
 	sr     *repositories.StudentRepositoryImpl
+	ar     *repositories.AdminRepositoryImpl
 	tmr    *repositories.TransactionManagerRepositories
 	bu     *utils.BcryptUtil
 	gu     *utils.GomailUtil
@@ -29,6 +30,7 @@ type StudentServiceImpl struct {
 func CreateStudentService(
 	ur *repositories.UserRepositoryImpl,
 	sr *repositories.StudentRepositoryImpl,
+	ar *repositories.AdminRepositoryImpl,
 	tmr *repositories.TransactionManagerRepositories,
 	bu *utils.BcryptUtil,
 	gu *utils.GomailUtil,
@@ -36,7 +38,7 @@ func CreateStudentService(
 	ju *utils.JWTUtil,
 	goauth *utils.GoogleOauth,
 ) *StudentServiceImpl {
-	return &StudentServiceImpl{ur, sr, tmr, bu, gu, cu, ju, goauth}
+	return &StudentServiceImpl{ur, sr, ar, tmr, bu, gu, cu, ju, goauth}
 }
 
 func (us *StudentServiceImpl) GoogleLogin(oauthState string) string {
@@ -214,7 +216,10 @@ func (us *StudentServiceImpl) UpdateStudentProfile(ctx context.Context, param en
 func (us *StudentServiceImpl) GetStudentList(ctx context.Context, param entity.ListStudentParam) (*[]entity.ListStudentQuery, *int64, error) {
 	students := new([]entity.ListStudentQuery)
 	totalRow := new(int64)
-
+	admin := new(entity.Admin)
+	if err := us.ar.FindByID(ctx, param.AdminID, admin); err != nil {
+		return nil, nil, err
+	}
 	if err := us.sr.GetStudentList(ctx, totalRow, param.Limit, param.Page, students); err != nil {
 		return nil, nil, err
 	}

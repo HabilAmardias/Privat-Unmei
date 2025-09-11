@@ -46,6 +46,7 @@ type (
 		AccountNumber     string
 	}
 	AddNewMentorParam struct {
+		AdminID           string
 		Name              string
 		Email             string
 		Bio               string
@@ -81,7 +82,8 @@ type (
 		Campus            *string
 	}
 	DeleteMentorParam struct {
-		ID string
+		ID      string
+		AdminID string
 	}
 	ListMentorQuery struct {
 		ID                string

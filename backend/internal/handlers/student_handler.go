@@ -168,11 +168,17 @@ func (sh *StudentHandlerImpl) GetStudentList(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 	param := entity.ListStudentParam{
 		PaginatedParam: entity.PaginatedParam{
 			Limit: req.Limit,
 			Page:  req.Page,
 		},
+		AdminID: claim.Subject,
 	}
 	if param.Limit <= 0 || param.Limit > constants.MaxLimit {
 		param.Limit = constants.DefaultLimit
