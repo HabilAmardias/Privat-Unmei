@@ -12,6 +12,7 @@ type CourseServiceImpl struct {
 	cr  *repositories.CourseRepositoryImpl
 	ccr *repositories.CourseCategoryRepositoryImpl
 	tr  *repositories.TopicRepositoryImpl
+	mr  *repositories.MentorRepositoryImpl
 	tmr *repositories.TransactionManagerRepositories
 	cor *repositories.CourseRequestRepositoryImpl
 }
@@ -20,10 +21,11 @@ func CreateCourseService(
 	cr *repositories.CourseRepositoryImpl,
 	ccr *repositories.CourseCategoryRepositoryImpl,
 	tr *repositories.TopicRepositoryImpl,
+	mr *repositories.MentorRepositoryImpl,
 	tmr *repositories.TransactionManagerRepositories,
 	cor *repositories.CourseRequestRepositoryImpl,
 ) *CourseServiceImpl {
-	return &CourseServiceImpl{cr, ccr, tr, tmr, cor}
+	return &CourseServiceImpl{cr, ccr, tr, mr, tmr, cor}
 }
 
 func (cs *CourseServiceImpl) UpdateCourse(ctx context.Context, param entity.UpdateCourseParam) error {
@@ -155,6 +157,10 @@ func (cs *CourseServiceImpl) MostBoughtCourses(ctx context.Context) (*[]entity.C
 func (cs *CourseServiceImpl) MentorListCourse(ctx context.Context, param entity.MentorListCourseParam) (*[]entity.MentorListCourseQuery, *int64, error) {
 	query := new([]entity.MentorListCourseQuery)
 	totalRow := new(int64)
+	mentor := new(entity.Mentor)
+	if err := cs.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
+		return nil, nil, err
+	}
 	if err := cs.cr.MentorListCourse(ctx, query, totalRow, param); err != nil {
 		return nil, nil, err
 	}
@@ -163,8 +169,12 @@ func (cs *CourseServiceImpl) MentorListCourse(ctx context.Context, param entity.
 
 func (cs *CourseServiceImpl) DeleteCourse(ctx context.Context, param entity.DeleteCourseParam) error {
 	course := new(entity.Course)
+	mentor := new(entity.Mentor)
 	return cs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := cs.cr.FindByID(ctx, param.CourseID, course, false); err != nil {
+			return err
+		}
+		if err := cs.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
 			return err
 		}
 		if param.MentorID != course.MentorID {
@@ -198,8 +208,12 @@ func (cs *CourseServiceImpl) CreateCourse(ctx context.Context, param entity.Crea
 	course := new(entity.Course)
 	topics := new([]entity.CourseTopic)
 	categories := new([]entity.CourseCategory)
+	mentor := new(entity.Mentor)
 
 	err := cs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := cs.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
+			return err
+		}
 		if err := cs.cr.CreateCourse(
 			ctx,
 			param.MentorID,

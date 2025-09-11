@@ -12,21 +12,26 @@ import (
 type ChatServiceImpl struct {
 	chr *repositories.ChatRepositoryImpl
 	ur  *repositories.UserRepositoryImpl
+	sr  *repositories.StudentRepositoryImpl
 	mr  *repositories.MentorRepositoryImpl
 	tmr *repositories.TransactionManagerRepositories
 }
 
-func CreateChatService(chr *repositories.ChatRepositoryImpl, ur *repositories.UserRepositoryImpl, mr *repositories.MentorRepositoryImpl, tmr *repositories.TransactionManagerRepositories) *ChatServiceImpl {
-	return &ChatServiceImpl{chr, ur, mr, tmr}
+func CreateChatService(chr *repositories.ChatRepositoryImpl, ur *repositories.UserRepositoryImpl, sr *repositories.StudentRepositoryImpl, mr *repositories.MentorRepositoryImpl, tmr *repositories.TransactionManagerRepositories) *ChatServiceImpl {
+	return &ChatServiceImpl{chr, ur, sr, mr, tmr}
 }
 
 func (chs *ChatServiceImpl) CreateChatroom(ctx context.Context, param entity.CreateChatroomParam) (int, error) {
 	chatroom := new(entity.Chatroom)
 	user := new(entity.User)
+	student := new(entity.Student)
 	mentor := new(entity.Mentor)
 
 	if err := chs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := chs.ur.FindByID(ctx, param.StudentID, user); err != nil {
+			return err
+		}
+		if err := chs.sr.FindByID(ctx, param.StudentID, student); err != nil {
 			return err
 		}
 		if user.Status != constants.VerifiedStatus {

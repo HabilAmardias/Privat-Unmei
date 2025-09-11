@@ -91,6 +91,7 @@ func (c *RouteConfig) SetupPublicRoute() {
 	v1.GET("/courses/:id/reviews", c.CourseRatingHandler.GetCourseReview)
 }
 
+// TODO: need to find related user for route with authorization middleware
 func (c *RouteConfig) SetupPrivateRoute() {
 	v1 := c.App.Group("/api/v1")
 	v1.Use(middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForLogin))
@@ -179,17 +180,17 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		c.RBACRepository,
 	), c.CourseRequestHandler.CreateReservation)
 	v1.GET("/course-requests/:id/approve", middlewares.AuthorizationMiddleware(
-		constants.UpdateAllPermission,
+		constants.UpdateOwnPermission,
 		constants.CourseRequestResource,
 		c.RBACRepository,
 	), c.CourseRequestHandler.AcceptCourseRequest)
 	v1.GET("/course-requests/:id/reject", middlewares.AuthorizationMiddleware(
-		constants.UpdateAllPermission,
+		constants.UpdateOwnPermission,
 		constants.CourseRequestResource,
 		c.RBACRepository,
 	), c.CourseRequestHandler.RejectCourseRequest)
 	v1.GET("/course-requests/:id/confirm-payment", middlewares.AuthorizationMiddleware(
-		constants.UpdateAllPermission,
+		constants.UpdateOwnPermission,
 		constants.CourseRequestResource,
 		c.RBACRepository,
 	), c.CourseRequestHandler.ConfirmPayment)
@@ -198,7 +199,11 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.PaymentDetailResource,
 		c.RBACRepository,
 	), c.CourseRequestHandler.GetPaymentDetail)
-	v1.GET("/mentors/me", c.MentorHandler.GetProfileForMentor)
+	v1.GET("/mentors/me", middlewares.AuthorizationMiddleware(
+		constants.ReadOwnPermission,
+		constants.MentorResource,
+		c.RBACRepository,
+	), c.MentorHandler.GetProfileForMentor)
 	v1.GET("/mentors/me/course-requests", middlewares.AuthorizationMiddleware(
 		constants.ReadOwnPermission,
 		constants.CourseRequestResource,

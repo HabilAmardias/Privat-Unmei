@@ -30,11 +30,13 @@ type (
 		Name string
 	}
 	CreateCategoryParam struct {
-		Name string
+		Name    string
+		AdminID string
 	}
 	UpdateCategoryParam struct {
-		ID   int
-		Name *string
+		ID      int
+		AdminID string
+		Name    *string
 	}
 	GetCategoriesQuery struct {
 		CategoryID   int

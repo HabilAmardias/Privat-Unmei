@@ -195,6 +195,10 @@ func (crs *CourseRequestServiceImpl) MentorCourseRequestDetail(ctx context.Conte
 func (crs *CourseRequestServiceImpl) MentorCourseRequestList(ctx context.Context, param entity.MentorCourseRequestListParam) (*[]entity.MentorCourseRequestQuery, *int64, error) {
 	requests := new([]entity.MentorCourseRequestQuery)
 	totalRow := new(int64)
+	mentor := new(entity.Mentor)
+	if err := crs.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
+		return nil, nil, err
+	}
 	if err := crs.crr.MentorCourseRequestList(ctx, param.MentorID, param.Status, param.LastID, param.Limit, totalRow, requests); err != nil {
 		return nil, nil, err
 	}

@@ -40,11 +40,12 @@ VALUES
 (2, 2, 4), -- mentor can read their own course
 (2, 4, 4), -- mentor can update their own course
 (1, 1, 2), -- admin can create mentor data
-(2, 5, 5), -- mentor can update course request data
+(2, 4, 5), -- mentor can update their course request data
 (2, 2, 5), -- mentor can read their own course-related request
 (3, 2, 7), -- student can read their own payment detail
 (3, 1, 6), -- student can create chatroom
 (1, 1, 8), -- admin can create payment method
 (1, 5, 8), -- admin can update all payment method
 (1, 7, 8), -- admin can delete all payment method
-(3, 1, 5); -- student can create course request
+(3, 1, 5), -- student can create course request
+(2, 2, 2); -- mentor can read their own profile
