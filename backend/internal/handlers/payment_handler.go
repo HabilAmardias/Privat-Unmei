@@ -20,6 +20,39 @@ func CreatePaymentHandler(ps *services.PaymentServiceImpl) *PaymentHandlerImpl {
 	return &PaymentHandlerImpl{ps}
 }
 
+func (ph *PaymentHandlerImpl) UpdatePaymentMethod(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	methodID, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	var req dtos.UpdatePaymentMethodReq
+	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.UpdatePaymentMethodParam{
+		AdminID:       claim.Subject,
+		MethodID:      methodID,
+		MethodNewName: req.MethodNewName,
+	}
+	if err := ph.ps.UpdatePaymentMethod(ctx, param); err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.UpdatePaymentMethodRes{
+			ID: param.MethodID,
+		},
+	})
+}
+
 func (ph *PaymentHandlerImpl) DeletePaymentMethod(ctx *gin.Context) {
 	claim, err := getAuthenticationPayload(ctx)
 	if err != nil {

@@ -24,7 +24,7 @@ VALUES
 (6, 'chatroom', 'chatroom data'),
 (7, 'payment_detail', 'payment detail data'),
 (8, 'payment_method', 'payment method data'),
-(9, 'course_rating', 'course rating data')
+(9, 'course_rating', 'course rating data');
 
 INSERT INTO rbac(role_id, permission_id, resource_id)
 VALUES

@@ -10,4 +10,10 @@ type (
 	DeletePaymentMethodRes struct {
 		ID int `json:"payment_method_id"`
 	}
+	UpdatePaymentMethodReq struct {
+		MethodNewName *string `json:"payment_method_name"`
+	}
+	UpdatePaymentMethodRes struct {
+		ID int `json:"payment_method_id"`
+	}
 )

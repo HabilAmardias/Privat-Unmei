@@ -255,6 +255,11 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.PaymentMethodResource,
 		c.RBACRepository,
 	), c.PaymentHandler.DeletePaymentMethod)
+	v1.PATCH("/payment-methods/:id", middlewares.AuthorizationMiddleware(
+		constants.UpdateAllPermission,
+		constants.PaymentMethodResource,
+		c.RBACRepository,
+	), c.PaymentHandler.UpdatePaymentMethod)
 }
 
 func (c *RouteConfig) SetupWebsocketRoute() {

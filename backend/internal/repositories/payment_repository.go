@@ -18,6 +18,28 @@ func CreatePaymentRepository(db *db.CustomDB) *PaymentRepositoryImpl {
 	return &PaymentRepositoryImpl{db}
 }
 
+func (pr *PaymentRepositoryImpl) UpdatePaymentMethod(ctx context.Context, newName *string, id int) error {
+	var driver RepoDriver
+	driver = pr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE payment_methods
+	SET name = COALESCE($1, name)
+	WHERE id = $2 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, newName, id)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to update payment method",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (pr *PaymentRepositoryImpl) DeletePaymentMethod(ctx context.Context, paymentMethodID int) error {
 	var driver RepoDriver
 	driver = pr.DB

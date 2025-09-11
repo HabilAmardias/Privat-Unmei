@@ -26,4 +26,9 @@ type (
 		AdminID  string
 		MethodID int
 	}
+	UpdatePaymentMethodParam struct {
+		AdminID       string
+		MethodID      int
+		MethodNewName *string
+	}
 )

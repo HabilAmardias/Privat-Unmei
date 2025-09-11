@@ -24,6 +24,31 @@ func CreatePaymentService(
 	return &PaymentServiceImpl{pr, ar, ur, tmr}
 }
 
+func (ps *PaymentServiceImpl) UpdatePaymentMethod(ctx context.Context, param entity.UpdatePaymentMethodParam) error {
+	if param.MethodNewName == nil {
+		return nil
+	}
+	admin := new(entity.Admin)
+	count := new(int64)
+	if err := ps.ar.FindByID(ctx, param.AdminID, admin); err != nil {
+		return err
+	}
+	if err := ps.pr.FindPaymentMethodByName(ctx, *param.MethodNewName, count); err != nil {
+		return err
+	}
+	if *count > 0 {
+		return customerrors.NewError(
+			"payment method with same name already exist",
+			errors.New("payment method with same name already exist"),
+			customerrors.InvalidAction,
+		)
+	}
+	if err := ps.pr.UpdatePaymentMethod(ctx, param.MethodNewName, param.MethodID); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (ps *PaymentServiceImpl) DeletePaymentMethod(ctx context.Context, param entity.DeletePaymentMethodParam) error {
 	admin := new(entity.Admin)
 	method := new(entity.PaymentMethod)
