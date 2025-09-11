@@ -18,6 +18,79 @@ func CreatePaymentRepository(db *db.CustomDB) *PaymentRepositoryImpl {
 	return &PaymentRepositoryImpl{db}
 }
 
+func (pr *PaymentRepositoryImpl) GetAllPaymentMethod(
+	ctx context.Context,
+	search *string,
+	limit int,
+	lastID int,
+	totalRow *int64,
+	methods *[]entity.GetPaymentMethodQuery,
+) error {
+	var driver RepoDriver
+	driver = pr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	args := []any{lastID}
+	countArgs := []any{lastID}
+	query := `
+	SELECT
+		id,
+		name
+	FROM payment_methods
+	WHERE deleted_at IS NULL AND id < $1 AND
+	`
+	countQuery := `
+	SELECT count(*)
+	FROM payment_methods
+	WHERE deleted_at IS NULL AND id < $1 AND
+	`
+	if search != nil {
+		args = append(args, "%"+*search+"%")
+		countArgs = append(countArgs, "%"+*search+"%")
+		query += fmt.Sprintf(`
+		name ILIKE $%d
+		`, len(args))
+		countQuery += fmt.Sprintf(`
+		name ILIKE $%d
+		`, len(countArgs))
+	}
+	query += `ORDER BY id DESC`
+	args = append(args, limit)
+	query += fmt.Sprintf(` LIMIT $%d`, len(args))
+	if err := driver.QueryRow(countQuery, countArgs...).Scan(totalRow); err != nil {
+		return customerrors.NewError(
+			"failed to get payment method list",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	rows, err := driver.Query(query, args...)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to get payment method list",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var item entity.GetPaymentMethodQuery
+		if err := rows.Scan(
+			&item.ID,
+			&item.Name,
+		); err != nil {
+			return customerrors.NewError(
+				"failed to get payment method list",
+				err,
+				customerrors.DatabaseExecutionError,
+			)
+		}
+		*methods = append(*methods, item)
+	}
+	return nil
+}
+
 func (pr *PaymentRepositoryImpl) UpdatePaymentMethod(ctx context.Context, newName *string, id int) error {
 	var driver RepoDriver
 	driver = pr.DB

@@ -24,6 +24,15 @@ func CreatePaymentService(
 	return &PaymentServiceImpl{pr, ar, ur, tmr}
 }
 
+func (ps *PaymentServiceImpl) GetAllPaymentMethod(ctx context.Context, param entity.GetAllPaymentMethodParam) (*[]entity.GetPaymentMethodQuery, *int64, error) {
+	methods := new([]entity.GetPaymentMethodQuery)
+	totalRow := new(int64)
+	if err := ps.pr.GetAllPaymentMethod(ctx, param.Search, param.Limit, param.LastID, totalRow, methods); err != nil {
+		return nil, nil, err
+	}
+	return methods, totalRow, nil
+}
+
 func (ps *PaymentServiceImpl) UpdatePaymentMethod(ctx context.Context, param entity.UpdatePaymentMethodParam) error {
 	if param.MethodNewName == nil {
 		return nil

@@ -260,6 +260,7 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.PaymentMethodResource,
 		c.RBACRepository,
 	), c.PaymentHandler.UpdatePaymentMethod)
+	v1.GET("/payment-methods", c.PaymentHandler.GetAllPaymentMethod)
 }
 
 func (c *RouteConfig) SetupWebsocketRoute() {

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/entity"
@@ -18,6 +19,59 @@ type PaymentHandlerImpl struct {
 
 func CreatePaymentHandler(ps *services.PaymentServiceImpl) *PaymentHandlerImpl {
 	return &PaymentHandlerImpl{ps}
+}
+
+func (ph *PaymentHandlerImpl) GetAllPaymentMethod(ctx *gin.Context) {
+	var req dtos.GetAllPaymentMethodReq
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.GetAllPaymentMethodParam{
+		SeekPaginatedParam: entity.SeekPaginatedParam{
+			Limit:  req.Limit,
+			LastID: req.LastID,
+		},
+		Search: req.Search,
+	}
+	if param.Limit <= 0 || param.Limit > constants.MaxLimit {
+		param.Limit = constants.DefaultLimit
+	}
+	if param.LastID <= 0 {
+		param.LastID = constants.DefaultLastID
+	}
+	methods, totalRow, err := ph.ps.GetAllPaymentMethod(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	entries := []dtos.GetPaymentMethodRes{}
+	for _, method := range *methods {
+		entries = append(entries, dtos.GetPaymentMethodRes(method))
+	}
+	var filter []dtos.FilterInfo
+	if req.Search != nil {
+		filter = append(filter, dtos.FilterInfo{
+			Name:  "Search",
+			Value: *req.Search,
+		})
+	}
+	lastID := constants.DefaultLastID
+	if len(entries) > 0 {
+		lastID = entries[len(entries)-1].ID
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.SeekPaginatedResponse[dtos.GetPaymentMethodRes]{
+			Entries: entries,
+			PageInfo: dtos.SeekPaginatedInfo{
+				FilterBy: filter,
+				TotalRow: *totalRow,
+				Limit:    param.Limit,
+				LastID:   lastID,
+			},
+		},
+	})
 }
 
 func (ph *PaymentHandlerImpl) UpdatePaymentMethod(ctx *gin.Context) {

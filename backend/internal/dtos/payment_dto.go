@@ -16,4 +16,12 @@ type (
 	UpdatePaymentMethodRes struct {
 		ID int `json:"payment_method_id"`
 	}
+	GetAllPaymentMethodReq struct {
+		SeekPaginatedReq
+		Search *string `form:"search"`
+	}
+	GetPaymentMethodRes struct {
+		ID   int    `json:"payment_method_id"`
+		Name string `json:"payment_method_name"`
+	}
 )

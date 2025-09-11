@@ -31,4 +31,12 @@ type (
 		MethodID      int
 		MethodNewName *string
 	}
+	GetAllPaymentMethodParam struct {
+		SeekPaginatedParam
+		Search *string
+	}
+	GetPaymentMethodQuery struct {
+		ID   int
+		Name string
+	}
 )
