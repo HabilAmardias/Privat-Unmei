@@ -37,6 +37,8 @@ func CreateCourseRequestService(
 	return &CourseRequestServiceImpl{crr, cr, csr, mar, ur, sr, mr, pr, tmr}
 }
 
+// TODO: add number of participant to course request entity, add discount table for group reservation
+
 func (crs *CourseRequestServiceImpl) StudentCourseRequestDetail(ctx context.Context, param entity.StudentCourseRequestDetailParam) (*entity.StudentCourseRequestDetailQuery, error) {
 	courseRequest := new(entity.CourseRequest)
 	course := new(entity.Course)
