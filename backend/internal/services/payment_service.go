@@ -12,6 +12,7 @@ type PaymentServiceImpl struct {
 	pr  *repositories.PaymentRepositoryImpl
 	ar  *repositories.AdminRepositoryImpl
 	ur  *repositories.UserRepositoryImpl
+	mr  *repositories.MentorRepositoryImpl
 	tmr *repositories.TransactionManagerRepositories
 }
 
@@ -19,9 +20,33 @@ func CreatePaymentService(
 	pr *repositories.PaymentRepositoryImpl,
 	ar *repositories.AdminRepositoryImpl,
 	ur *repositories.UserRepositoryImpl,
+	mr *repositories.MentorRepositoryImpl,
 	tmr *repositories.TransactionManagerRepositories,
 ) *PaymentServiceImpl {
-	return &PaymentServiceImpl{pr, ar, ur, tmr}
+	return &PaymentServiceImpl{pr, ar, ur, mr, tmr}
+}
+
+func (ps *PaymentServiceImpl) GetMentorPaymentMethod(ctx context.Context, param entity.GetMentorPaymentMethodParam) (*[]entity.GetPaymentMethodQuery, error) {
+	user := new(entity.User)
+	mentor := new(entity.Mentor)
+	methods := new([]entity.GetPaymentMethodQuery)
+	if err := ps.ur.FindByID(ctx, param.UserID, user); err != nil {
+		return nil, err
+	}
+	if err := ps.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
+		return nil, err
+	}
+	if err := ps.pr.GetMentorPaymentMethod(ctx, param.MentorID, methods); err != nil {
+		return nil, err
+	}
+	if len(*methods) == 0 {
+		return nil, customerrors.NewError(
+			"mentor payment method not found",
+			errors.New("mentor payment method not found"),
+			customerrors.ItemNotExist,
+		)
+	}
+	return methods, nil
 }
 
 func (ps *PaymentServiceImpl) GetAllPaymentMethod(ctx context.Context, param entity.GetAllPaymentMethodParam) (*[]entity.GetPaymentMethodQuery, *int64, error) {

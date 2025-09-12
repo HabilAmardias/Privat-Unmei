@@ -18,6 +18,50 @@ func CreatePaymentRepository(db *db.CustomDB) *PaymentRepositoryImpl {
 	return &PaymentRepositoryImpl{db}
 }
 
+func (pr *PaymentRepositoryImpl) GetMentorPaymentMethod(
+	ctx context.Context,
+	mentorID string,
+	methods *[]entity.GetPaymentMethodQuery,
+) error {
+	var driver RepoDriver
+	driver = pr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	SELECT
+		mp.payment_method_id,
+		pm.name
+	FROM mentor_payments mp
+	JOIN payment_methods pm ON mp.payment_method_id = pm.id
+	WHERE mp.mentor_id = $1 AND mp.deleted_at IS NULL AND pm.deleted_at IS NULL
+	`
+	rows, err := driver.Query(query, mentorID)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to get mentor payment method",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var item entity.GetPaymentMethodQuery
+		if err := rows.Scan(
+			&item.ID,
+			&item.Name,
+		); err != nil {
+			return customerrors.NewError(
+				"failed to get mentor payment method",
+				err,
+				customerrors.DatabaseExecutionError,
+			)
+		}
+		*methods = append(*methods, item)
+	}
+	return nil
+}
+
 func (pr *PaymentRepositoryImpl) GetAllPaymentMethod(
 	ctx context.Context,
 	search *string,

@@ -12,13 +12,40 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// TODO: Add Payment Method CRUD feature for admin
 type PaymentHandlerImpl struct {
 	ps *services.PaymentServiceImpl
 }
 
 func CreatePaymentHandler(ps *services.PaymentServiceImpl) *PaymentHandlerImpl {
 	return &PaymentHandlerImpl{ps}
+}
+
+func (ph *PaymentHandlerImpl) GetMentorPaymentMethod(ctx *gin.Context) {
+	id := ctx.Param("id")
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.GetMentorPaymentMethodParam{
+		MentorID: id,
+		UserID:   claim.Subject,
+	}
+	methods, err := ph.ps.GetMentorPaymentMethod(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	entries := []dtos.GetPaymentMethodRes{}
+	for _, method := range *methods {
+		entries = append(entries, dtos.GetPaymentMethodRes(method))
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.ListResponse[dtos.GetPaymentMethodRes]{
+			Entries: entries,
+		},
+	})
 }
 
 func (ph *PaymentHandlerImpl) GetAllPaymentMethod(ctx *gin.Context) {

@@ -45,7 +45,7 @@ func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine, upg
 	courseRatingService := services.CreateCourseRatingService(courseRepo, courseRatingRepo, courseRequestRepo, mentorRepo, transactionManager)
 	courseRequestService := services.CreateCourseRequestService(courseRequestRepo, courseRepo, courseScheduleRepo, mentorAvailabilityRepo, userRepo, studentRepo, mentorRepo, paymentRepo, transactionManager)
 	chatService := services.CreateChatService(chatRepo, userRepo, studentRepo, mentorRepo, transactionManager)
-	paymentService := services.CreatePaymentService(paymentRepo, adminRepo, userRepo, transactionManager)
+	paymentService := services.CreatePaymentService(paymentRepo, adminRepo, userRepo, mentorRepo, transactionManager)
 
 	studentHandler := handlers.CreateStudentHandler(studentService)
 	adminHandler := handlers.CreateAdminHandler(adminService)
