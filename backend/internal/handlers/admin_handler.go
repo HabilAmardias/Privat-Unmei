@@ -38,7 +38,7 @@ func (ah *AdminHandlerImpl) Login(ctx *gin.Context) {
 		return
 	}
 	param := entity.AdminLoginParam(req)
-	token, err := ah.as.Login(ctx, param)
+	token, status, err := ah.as.Login(ctx, param)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -46,7 +46,8 @@ func (ah *AdminHandlerImpl) Login(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
 		Data: dtos.AdminLoginRes{
-			Token: token,
+			Token:  *token,
+			Status: *status,
 		},
 	})
 }

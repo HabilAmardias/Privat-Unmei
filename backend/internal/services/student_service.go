@@ -358,20 +358,23 @@ func (us *StudentServiceImpl) Verify(ctx context.Context, param entity.VerifyStu
 	})
 }
 
-func (us *StudentServiceImpl) Login(ctx context.Context, param entity.StudentLoginParam) (string, error) {
+func (us *StudentServiceImpl) Login(ctx context.Context, param entity.StudentLoginParam) (*string, *string, error) {
 	user := new(entity.User)
 	student := new(entity.Student)
 	token := new(string)
+	status := new(string)
 
 	if err := us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := us.ur.FindByEmail(ctx, param.Email, user); err != nil {
-			parsedErr := err.(*customerrors.CustomError)
-			if parsedErr.ErrUser == customerrors.UserNotFound {
-				return customerrors.NewError(
-					"invalid email or password",
-					errors.New("invalid email or password"),
-					customerrors.InvalidAction,
-				)
+			var parsedErr *customerrors.CustomError
+			if errors.As(err, &parsedErr) {
+				if parsedErr.ErrUser == customerrors.UserNotFound {
+					return customerrors.NewError(
+						"invalid email or password",
+						parsedErr.ErrLog,
+						customerrors.InvalidAction,
+					)
+				}
 			}
 			return err
 		}
@@ -379,20 +382,21 @@ func (us *StudentServiceImpl) Login(ctx context.Context, param entity.StudentLog
 			return err
 		}
 		if match := us.bu.ComparePassword(param.Password, user.Password); !match {
-			return customerrors.NewError("invalid email or password", errors.New("invalid email or password"), customerrors.InvalidAction)
+			return customerrors.NewError("invalid email or password", errors.New("password does not match"), customerrors.InvalidAction)
 		}
 		jwt, err := us.ju.GenerateJWT(student.ID, constants.StudentRole, constants.ForLogin, user.Status)
 		if err != nil {
 			return err
 		}
 		*token = jwt
+		*status = user.Status
 
 		return nil
 
 	}); err != nil {
-		return "", err
+		return nil, nil, err
 	}
-	return *token, nil
+	return token, status, nil
 }
 
 func (us *StudentServiceImpl) Register(ctx context.Context, param entity.StudentRegisterParam) error {

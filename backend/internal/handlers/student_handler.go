@@ -314,7 +314,7 @@ func (sh *StudentHandlerImpl) Login(ctx *gin.Context) {
 		Email:    req.Email,
 		Password: req.Password,
 	}
-	token, err := sh.ss.Login(ctx, param)
+	token, status, err := sh.ss.Login(ctx, param)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -322,7 +322,8 @@ func (sh *StudentHandlerImpl) Login(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
 		Data: dtos.LoginStudentRes{
-			Token: token,
+			Token:  *token,
+			Status: *status,
 		},
 	})
 }

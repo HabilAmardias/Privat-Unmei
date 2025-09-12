@@ -44,20 +44,23 @@ func (as *AdminServiceImpl) GenerateRandomPassword() (string, error) {
 	return pass, nil
 }
 
-func (as *AdminServiceImpl) Login(ctx context.Context, param entity.AdminLoginParam) (string, error) {
+func (as *AdminServiceImpl) Login(ctx context.Context, param entity.AdminLoginParam) (*string, *string, error) {
 	user := new(entity.User)
 	admin := new(entity.Admin)
+	status := new(string)
 	token := new(string)
 
 	if err := as.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := as.ur.FindByEmail(ctx, param.Email, user); err != nil {
-			parsedErr := err.(*customerrors.CustomError)
-			if parsedErr.ErrUser == customerrors.UserNotFound {
-				return customerrors.NewError(
-					"invalid email or password",
-					errors.New("invalid email or password"),
-					customerrors.InvalidAction,
-				)
+			var parsedErr *customerrors.CustomError
+			if errors.As(err, &parsedErr) {
+				if parsedErr.ErrUser == customerrors.UserNotFound {
+					return customerrors.NewError(
+						"invalid email or password",
+						parsedErr.ErrLog,
+						customerrors.InvalidAction,
+					)
+				}
 			}
 			return err
 		}
@@ -77,10 +80,11 @@ func (as *AdminServiceImpl) Login(ctx context.Context, param entity.AdminLoginPa
 		}
 
 		*token = loginToken
+		*status = user.Status
 
 		return nil
 	}); err != nil {
-		return "", err
+		return nil, nil, err
 	}
-	return *token, nil
+	return token, status, nil
 }
