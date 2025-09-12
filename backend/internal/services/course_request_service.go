@@ -20,6 +20,8 @@ type CourseRequestServiceImpl struct {
 	sr  *repositories.StudentRepositoryImpl
 	mr  *repositories.MentorRepositoryImpl
 	pr  *repositories.PaymentRepositoryImpl
+	dr  *repositories.DiscountRepositoryImpl
+	acr *repositories.AdditionalCostRepositoryImpl
 	tmr *repositories.TransactionManagerRepositories
 }
 
@@ -32,9 +34,11 @@ func CreateCourseRequestService(
 	sr *repositories.StudentRepositoryImpl,
 	mr *repositories.MentorRepositoryImpl,
 	pr *repositories.PaymentRepositoryImpl,
+	dr *repositories.DiscountRepositoryImpl,
+	acr *repositories.AdditionalCostRepositoryImpl,
 	tmr *repositories.TransactionManagerRepositories,
 ) *CourseRequestServiceImpl {
-	return &CourseRequestServiceImpl{crr, cr, csr, mar, ur, sr, mr, pr, tmr}
+	return &CourseRequestServiceImpl{crr, cr, csr, mar, ur, sr, mr, pr, dr, acr, tmr}
 }
 
 // TODO: add number of participant to course request entity, add discount table for group reservation and add additional costs table for operational
@@ -452,6 +456,8 @@ func (crs *CourseRequestServiceImpl) HandleCourseRequest(ctx context.Context, pa
 
 func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, param entity.CreateCourseRequestParam) (int, error) {
 	ongoingOrderCount := new(int64)
+	maxParticipant := new(int)
+	operationalCost := new(float64)
 	course := new(entity.Course)
 	newScheds := new([]entity.CreateRequestSchedule)
 	updateCourse := new(entity.UpdateCourseQuery)
@@ -461,6 +467,7 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 	availabilityRes := new(entity.AvailabilityResult)
 	conflictingScheds := new([]entity.ConflictingSchedule)
 	paymentInfo := new(entity.MentorPayment)
+	discount := new(entity.Discount)
 	dates := make([]time.Time, 0, len(param.PreferredSlots))
 	startTimes := make([]string, 0, len(param.PreferredSlots))
 	endTimes := make([]string, 0, len(param.PreferredSlots))
@@ -485,7 +492,7 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 		}
 		if user.Status != constants.VerifiedStatus {
 			return customerrors.NewError(
-				"you are not verified yet",
+				"user are not verified yet",
 				errors.New("user are not verified yet"),
 				customerrors.Unauthenticate,
 			)
@@ -505,7 +512,6 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 			if err != nil {
 				return err
 			}
-
 			dates = append(dates, slot.Date)
 			startTimes = append(startTimes, slot.StartTime.ToString())
 			endTimes = append(endTimes, endTime)
@@ -539,14 +545,30 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 		if err := crs.pr.GetPaymentInfoByMentorAndMethodID(ctx, course.MentorID, param.PaymentMethodID, paymentInfo); err != nil {
 			return err
 		}
+		if err := crs.dr.GetMaxParticipant(ctx, maxParticipant); err != nil {
+			return err
+		}
+		participant := param.NumberOfParticipant
+		if param.NumberOfParticipant > *maxParticipant {
+			participant = *maxParticipant
+		}
+		if err := crs.dr.GetDiscountByNumberOfParticipant(ctx, participant, discount); err != nil {
+			return err
+		}
+		if err := crs.acr.GetOperationalCost(ctx, operationalCost); err != nil {
+			return err
+		}
 
-		courseRequest.SubTotal = course.Price * float64(len(param.PreferredSlots))
-		courseRequest.OperationalCost = courseRequest.SubTotal * constants.OperationalCostPercentage
-		totalPrice := courseRequest.SubTotal + courseRequest.OperationalCost
+		pricePerSession := course.Price - discount.Amount
+		if course.Price <= discount.Amount {
+			pricePerSession = course.Price
+		}
 
+		courseRequest.SubTotal = pricePerSession * float64(len(param.PreferredSlots))
+		courseRequest.OperationalCost = *operationalCost * float64(len(param.PreferredSlots))
 		courseRequest.StudentID = param.StudentID
 		courseRequest.CourseID = param.CourseID
-		courseRequest.TotalPrice = totalPrice
+		courseRequest.TotalPrice = courseRequest.SubTotal + courseRequest.OperationalCost
 		courseRequest.NumberOfParticipant = param.NumberOfParticipant
 		courseRequest.PaymentMethodID = param.PaymentMethodID
 		courseRequest.NumberOfSessions = len(param.PreferredSlots)

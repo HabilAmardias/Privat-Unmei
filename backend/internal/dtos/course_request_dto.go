@@ -10,7 +10,7 @@ type (
 	CreateCourseRequestReq struct {
 		PreferredSlots      []PreferredSlot `json:"preferred_slots" binding:"dive"`
 		PaymentMethodID     int             `json:"payment_method_id" binding:"required"`
-		NumberOfParticipant int             `json:"number_of_participant" binding:"required,lte=1"`
+		NumberOfParticipant int             `json:"number_of_participant" binding:"required,gte=1"`
 	}
 	CreateCourseRequestRes struct {
 		CourseRequestID int `json:"id"`

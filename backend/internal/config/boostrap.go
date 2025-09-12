@@ -30,6 +30,8 @@ func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine, upg
 	courseScheduleRepo := repositories.CreateCourseScheduleRepository(db)
 	chatRepo := repositories.CreateChatRepository(db)
 	paymentRepo := repositories.CreatePaymentRepository(db)
+	discountRepo := repositories.CreateDiscountRepository(db)
+	additionalCostRepo := repositories.CreateAdditionalCostRepository(db)
 
 	bcryptUtil := utils.CreateBcryptUtil()
 	gomailUtil := utils.CreateGomailUtil()
@@ -43,7 +45,7 @@ func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine, upg
 	courseCategoryService := services.CreateCourseCategoryService(adminRepo, courseCategoryRepo, transactionManager)
 	courseService := services.CreateCourseService(courseRepo, courseCategoryRepo, topicRepo, mentorRepo, transactionManager, courseRequestRepo)
 	courseRatingService := services.CreateCourseRatingService(courseRepo, courseRatingRepo, courseRequestRepo, mentorRepo, transactionManager)
-	courseRequestService := services.CreateCourseRequestService(courseRequestRepo, courseRepo, courseScheduleRepo, mentorAvailabilityRepo, userRepo, studentRepo, mentorRepo, paymentRepo, transactionManager)
+	courseRequestService := services.CreateCourseRequestService(courseRequestRepo, courseRepo, courseScheduleRepo, mentorAvailabilityRepo, userRepo, studentRepo, mentorRepo, paymentRepo, discountRepo, additionalCostRepo, transactionManager)
 	chatService := services.CreateChatService(chatRepo, userRepo, studentRepo, mentorRepo, transactionManager)
 	paymentService := services.CreatePaymentService(paymentRepo, adminRepo, userRepo, mentorRepo, transactionManager)
 

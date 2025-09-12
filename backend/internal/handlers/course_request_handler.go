@@ -47,17 +47,18 @@ func (crh *CourseRequestHandlerImpl) StudentCourseRequestDetail(ctx *gin.Context
 		return
 	}
 	res := dtos.StudentCourseRequestDetailRes{
-		CourseRequestID:  param.CourseRequestID,
-		CourseName:       detail.CourseName,
-		MentorName:       detail.MentorName,
-		MentorEmail:      detail.MentorEmail,
-		TotalPrice:       detail.TotalPrice,
-		Subtotal:         detail.Subtotal,
-		OperationalCost:  detail.OperationalCost,
-		NumberOfSessions: detail.NumberOfSessions,
-		Status:           detail.Status,
-		ExpiredAt:        detail.ExpiredAt,
-		Schedules:        []dtos.CourseScheduleRes{},
+		CourseRequestID:     param.CourseRequestID,
+		CourseName:          detail.CourseName,
+		MentorName:          detail.MentorName,
+		MentorEmail:         detail.MentorEmail,
+		TotalPrice:          detail.TotalPrice,
+		Subtotal:            detail.Subtotal,
+		OperationalCost:     detail.OperationalCost,
+		NumberOfSessions:    detail.NumberOfSessions,
+		Status:              detail.Status,
+		ExpiredAt:           detail.ExpiredAt,
+		NumberOfParticipant: detail.NumberOfParticipant,
+		Schedules:           []dtos.CourseScheduleRes{},
 	}
 	for _, sc := range detail.Schedules {
 		res.Schedules = append(res.Schedules, dtos.CourseScheduleRes{
@@ -171,17 +172,18 @@ func (crh *CourseRequestHandlerImpl) MentorCourseRequestDetail(ctx *gin.Context)
 		return
 	}
 	res := dtos.MentorCourseRequestDetailRes{
-		CourseRequestID:  param.CourseRequestID,
-		CourseName:       detail.CourseName,
-		StudentName:      detail.StudentName,
-		StudentEmail:     detail.StudentEmail,
-		TotalPrice:       detail.TotalPrice,
-		Subtotal:         detail.Subtotal,
-		OperationalCost:  detail.OperationalCost,
-		NumberOfSessions: detail.NumberOfSessions,
-		Status:           detail.Status,
-		ExpiredAt:        detail.ExpiredAt,
-		Schedules:        []dtos.CourseScheduleRes{},
+		CourseRequestID:     param.CourseRequestID,
+		CourseName:          detail.CourseName,
+		StudentName:         detail.StudentName,
+		StudentEmail:        detail.StudentEmail,
+		TotalPrice:          detail.TotalPrice,
+		Subtotal:            detail.Subtotal,
+		OperationalCost:     detail.OperationalCost,
+		NumberOfSessions:    detail.NumberOfSessions,
+		Status:              detail.Status,
+		ExpiredAt:           detail.ExpiredAt,
+		NumberOfParticipant: detail.NumberOfParticipant,
+		Schedules:           []dtos.CourseScheduleRes{},
 	}
 	for _, sc := range detail.Schedules {
 		res.Schedules = append(res.Schedules, dtos.CourseScheduleRes{
