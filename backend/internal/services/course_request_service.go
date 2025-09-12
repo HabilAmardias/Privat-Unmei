@@ -37,7 +37,7 @@ func CreateCourseRequestService(
 	return &CourseRequestServiceImpl{crr, cr, csr, mar, ur, sr, mr, pr, tmr}
 }
 
-// TODO: add number of participant to course request entity, add discount table for group reservation
+// TODO: add number of participant to course request entity, add discount table for group reservation and add additional costs table for operational
 
 func (crs *CourseRequestServiceImpl) StudentCourseRequestDetail(ctx context.Context, param entity.StudentCourseRequestDetailParam) (*entity.StudentCourseRequestDetailQuery, error) {
 	courseRequest := new(entity.CourseRequest)
@@ -101,6 +101,7 @@ func (crs *CourseRequestServiceImpl) StudentCourseRequestDetail(ctx context.Cont
 	res.Subtotal = courseRequest.SubTotal
 	res.OperationalCost = courseRequest.OperationalCost
 	res.NumberOfSessions = courseRequest.NumberOfSessions
+	res.NumberOfParticipant = courseRequest.NumberOfParticipant
 	res.Status = courseRequest.Status
 	res.ExpiredAt = courseRequest.ExpiredAt
 	res.Schedules = *schedules
@@ -188,6 +189,7 @@ func (crs *CourseRequestServiceImpl) MentorCourseRequestDetail(ctx context.Conte
 	res.OperationalCost = courseRequest.OperationalCost
 	res.NumberOfSessions = courseRequest.NumberOfSessions
 	res.Status = courseRequest.Status
+	res.NumberOfParticipant = courseRequest.NumberOfParticipant
 	res.ExpiredAt = courseRequest.ExpiredAt
 	res.Schedules = *schedules
 
@@ -545,6 +547,7 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 		courseRequest.StudentID = param.StudentID
 		courseRequest.CourseID = param.CourseID
 		courseRequest.TotalPrice = totalPrice
+		courseRequest.NumberOfParticipant = param.NumberOfParticipant
 		courseRequest.PaymentMethodID = param.PaymentMethodID
 		courseRequest.NumberOfSessions = len(param.PreferredSlots)
 		eat := now.Add(constants.ExpiredInterval)

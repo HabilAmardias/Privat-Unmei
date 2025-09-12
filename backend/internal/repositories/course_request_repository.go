@@ -415,6 +415,7 @@ func (cr *CourseRequestRepositoryImpl) FindByID(ctx context.Context, id int, cou
 		total_price,
 		number_of_sessions,
 		payment_method_id,
+		number_of_participant,
 		expired_at,
 		created_at,
 		updated_at,
@@ -432,6 +433,7 @@ func (cr *CourseRequestRepositoryImpl) FindByID(ctx context.Context, id int, cou
 		&courseRequest.TotalPrice,
 		&courseRequest.NumberOfSessions,
 		&courseRequest.PaymentMethodID,
+		&courseRequest.NumberOfParticipant,
 		&courseRequest.ExpiredAt,
 		&courseRequest.CreatedAt,
 		&courseRequest.UpdatedAt,
@@ -480,9 +482,9 @@ func (cr *CourseRequestRepositoryImpl) CreateOrder(
 		driver = tx
 	}
 	query := `
-	INSERT INTO course_requests (student_id, course_id, subtotal, operational_cost, total_price, number_of_sessions, payment_method_id, expired_at)
+	INSERT INTO course_requests (student_id, course_id, subtotal, operational_cost, total_price, number_of_sessions, payment_method_id, number_of_participant, expired_at)
 	VALUES
-	($1, $2, $3, $4, $5, $6, $7, $8)
+	($1, $2, $3, $4, $5, $6, $7, $8, $9)
 	RETURNING (id)
 	`
 	row := driver.QueryRow(
@@ -494,6 +496,7 @@ func (cr *CourseRequestRepositoryImpl) CreateOrder(
 		courseRequest.TotalPrice,
 		courseRequest.NumberOfSessions,
 		courseRequest.PaymentMethodID,
+		courseRequest.NumberOfParticipant,
 		courseRequest.ExpiredAt,
 	)
 	if err := row.Scan(&courseRequest.ID); err != nil {

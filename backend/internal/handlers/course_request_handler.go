@@ -403,7 +403,7 @@ func (crh *CourseRequestHandlerImpl) CreateReservation(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	var req dtos.CreateCourseRequstReq
+	var req dtos.CreateCourseRequestReq
 	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
 		ctx.Error(err)
 		return
@@ -417,10 +417,11 @@ func (crh *CourseRequestHandlerImpl) CreateReservation(ctx *gin.Context) {
 		return
 	}
 	param := entity.CreateCourseRequestParam{
-		CourseID:        id,
-		StudentID:       claim.Subject,
-		PreferredSlots:  []entity.PreferredSlot{},
-		PaymentMethodID: req.PaymentMethodID,
+		CourseID:            id,
+		StudentID:           claim.Subject,
+		PreferredSlots:      []entity.PreferredSlot{},
+		PaymentMethodID:     req.PaymentMethodID,
+		NumberOfParticipant: req.NumberOfParticipant,
 	}
 	dateMap := make(map[time.Time]bool)
 	for _, slot := range req.PreferredSlots {
