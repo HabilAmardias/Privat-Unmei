@@ -25,4 +25,13 @@ type (
 		CostID  int
 		AdminID string
 	}
+	GetAdditionalCostQuery struct {
+		ID     int
+		Name   string
+		Amount float64
+	}
+	GetAllAdditionalCostParam struct {
+		PaginatedParam
+		AdminID string
+	}
 )

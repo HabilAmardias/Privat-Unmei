@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/entity"
@@ -17,6 +18,52 @@ type AdditionalCostHandlerImpl struct {
 
 func CreateAdditionalCostHandler(acs *services.AdditionalCostServiceImpl) *AdditionalCostHandlerImpl {
 	return &AdditionalCostHandlerImpl{acs}
+}
+
+func (ach *AdditionalCostHandlerImpl) GetAllAdditionalCost(ctx *gin.Context) {
+	var req dtos.GetAllAdditionalCostReq
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.GetAllAdditionalCostParam{
+		AdminID: claim.Subject,
+		PaginatedParam: entity.PaginatedParam{
+			Limit: req.Limit,
+			Page:  req.Page,
+		},
+	}
+	if param.Limit <= 0 || param.Limit > constants.MaxLimit {
+		param.Limit = constants.DefaultLimit
+	}
+	if param.Page <= 0 {
+		param.Page = constants.DefaultPage
+	}
+	discounts, totalRow, err := ach.acs.GetAllAdditionalCost(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	entries := []dtos.GetAdditionalCostRes{}
+	for _, d := range *discounts {
+		entries = append(entries, dtos.GetAdditionalCostRes(d))
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.PaginatedResponse[dtos.GetAdditionalCostRes]{
+			Entries: entries,
+			PageInfo: dtos.PaginatedInfo{
+				Limit:    param.Limit,
+				Page:     param.Page,
+				TotalRow: *totalRow,
+			},
+		},
+	})
 }
 
 func (ach *AdditionalCostHandlerImpl) DeleteCost(ctx *gin.Context) {

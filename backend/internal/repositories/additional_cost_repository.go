@@ -17,6 +17,64 @@ func CreateAdditionalCostRepository(db *db.CustomDB) *AdditionalCostRepositoryIm
 	return &AdditionalCostRepositoryImpl{db}
 }
 
+func (acr *AdditionalCostRepositoryImpl) GetAllAdditionalCost(ctx context.Context, limit int, page int, totalRow *int64, costs *[]entity.GetAdditionalCostQuery) error {
+	var driver RepoDriver = acr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	countQuery := `
+	SELECT
+		count(*)
+	FROM additional_costs
+	WHERE deleted_at IS NULL
+	`
+	if err := driver.QueryRow(countQuery).Scan(
+		totalRow,
+	); err != nil {
+		return customerrors.NewError(
+			"failed to get cost",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	query := `
+	SELECT
+		id,
+		name,
+		amount
+	FROM additional_costs
+	WHERE deleted_at IS NULL
+	LIMIT $1
+	OFFSET $2
+	`
+
+	rows, err := driver.Query(query, limit, limit*(page-1))
+	if err != nil {
+		return customerrors.NewError(
+			"failed to get cost",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var item entity.GetAdditionalCostQuery
+		if err := rows.Scan(
+			&item.ID,
+			&item.Name,
+			&item.Amount,
+		); err != nil {
+			return customerrors.NewError(
+				"failed to get cost",
+				err,
+				customerrors.DatabaseExecutionError,
+			)
+		}
+		*costs = append(*costs, item)
+	}
+	return nil
+}
+
 func (acr *AdditionalCostRepositoryImpl) DeleteCost(ctx context.Context, id int) error {
 	var driver RepoDriver = acr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
