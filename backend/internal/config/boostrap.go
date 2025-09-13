@@ -29,6 +29,9 @@ func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine, upg
 	courseRatingRepo := repositories.CreateCourseRatingRepository(db)
 	courseScheduleRepo := repositories.CreateCourseScheduleRepository(db)
 	chatRepo := repositories.CreateChatRepository(db)
+	paymentRepo := repositories.CreatePaymentRepository(db)
+	discountRepo := repositories.CreateDiscountRepository(db)
+	additionalCostRepo := repositories.CreateAdditionalCostRepository(db)
 
 	bcryptUtil := utils.CreateBcryptUtil()
 	gomailUtil := utils.CreateGomailUtil()
@@ -36,14 +39,17 @@ func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine, upg
 	jwtUtil := utils.CreateJWTUtil()
 	googleUtil := utils.CreateGoogleUtil()
 
-	mentorService := services.CreateMentorService(transactionManager, userRepo, mentorRepo, topicRepo, courseCategoryRepo, mentorAvailabilityRepo, courseRepo, bcryptUtil, jwtUtil, cloudinaryUtil, gomailUtil)
+	mentorService := services.CreateMentorService(transactionManager, userRepo, mentorRepo, topicRepo, courseCategoryRepo, mentorAvailabilityRepo, courseRequestRepo, courseRepo, paymentRepo, adminRepo, bcryptUtil, jwtUtil, cloudinaryUtil, gomailUtil)
 	adminService := services.CreateAdminService(userRepo, adminRepo, studentRepo, mentorRepo, transactionManager, cloudinaryUtil, bcryptUtil, jwtUtil, gomailUtil)
-	studentService := services.CreateStudentService(userRepo, studentRepo, transactionManager, bcryptUtil, gomailUtil, cloudinaryUtil, jwtUtil, googleUtil)
-	courseCategoryService := services.CreateCourseCategoryService(courseCategoryRepo, transactionManager)
-	courseService := services.CreateCourseService(courseRepo, courseCategoryRepo, topicRepo, transactionManager, courseRequestRepo)
+	studentService := services.CreateStudentService(userRepo, studentRepo, adminRepo, transactionManager, bcryptUtil, gomailUtil, cloudinaryUtil, jwtUtil, googleUtil)
+	courseCategoryService := services.CreateCourseCategoryService(adminRepo, courseCategoryRepo, transactionManager)
+	courseService := services.CreateCourseService(courseRepo, courseCategoryRepo, topicRepo, mentorRepo, transactionManager, courseRequestRepo)
 	courseRatingService := services.CreateCourseRatingService(courseRepo, courseRatingRepo, courseRequestRepo, mentorRepo, transactionManager)
-	courseRequestService := services.CreateCourseRequestService(courseRequestRepo, courseRepo, courseScheduleRepo, mentorAvailabilityRepo, userRepo, studentRepo, mentorRepo, transactionManager)
-	chatService := services.CreateChatService(chatRepo, userRepo, mentorRepo, transactionManager)
+	courseRequestService := services.CreateCourseRequestService(courseRequestRepo, courseRepo, courseScheduleRepo, mentorAvailabilityRepo, userRepo, studentRepo, mentorRepo, paymentRepo, discountRepo, additionalCostRepo, transactionManager)
+	chatService := services.CreateChatService(chatRepo, userRepo, studentRepo, mentorRepo, transactionManager)
+	paymentService := services.CreatePaymentService(paymentRepo, adminRepo, userRepo, mentorRepo, transactionManager)
+	discountService := services.CreateDiscountService(discountRepo, adminRepo, transactionManager)
+	additionalCostService := services.CreateAdditionalCostService(additionalCostRepo, adminRepo, transactionManager)
 
 	studentHandler := handlers.CreateStudentHandler(studentService)
 	adminHandler := handlers.CreateAdminHandler(adminService)
@@ -53,6 +59,9 @@ func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine, upg
 	courseRatingHandler := handlers.CreateCourseRatingHandler(courseRatingService)
 	courseRequestHandler := handlers.CreateCourseRequestHandler(courseRequestService)
 	chatHandler := handlers.CreateChatHandler(chatService, upg, chatHub, logger)
+	paymentHandler := handlers.CreatePaymentHandler(paymentService)
+	discountHandler := handlers.CreateDiscountHandler(discountService)
+	additionalCostHandler := handlers.CreateAdditionalCostHandler(additionalCostService)
 
 	cfg := routers.RouteConfig{
 		App:                   app,
@@ -64,6 +73,9 @@ func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine, upg
 		CourseRatingHandler:   courseRatingHandler,
 		CourseRequestHandler:  courseRequestHandler,
 		ChatHandler:           chatHandler,
+		PaymentHandler:        paymentHandler,
+		DiscountHandler:       discountHandler,
+		AdditionalCostHandler: additionalCostHandler,
 		RBACRepository:        rbacRepo,
 		TokenUtil:             jwtUtil,
 		Logger:                logger,

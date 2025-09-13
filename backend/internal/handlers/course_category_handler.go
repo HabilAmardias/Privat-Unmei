@@ -36,9 +36,15 @@ func (cch *CourseCategoryHandlerImpl) UpdateCategory(ctx *gin.Context) {
 		))
 		return
 	}
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 	param := entity.UpdateCategoryParam{
-		ID:   id,
-		Name: req.Name,
+		ID:      id,
+		Name:    req.Name,
+		AdminID: claim.Subject,
 	}
 	if err := cch.ccs.UpdateCategory(ctx, param); err != nil {
 		ctx.Error(err)
@@ -58,8 +64,14 @@ func (cch *CourseCategoryHandlerImpl) CreateCategory(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 	param := entity.CreateCategoryParam{
-		Name: req.Name,
+		Name:    req.Name,
+		AdminID: claim.Subject,
 	}
 	newCategory, err := cch.ccs.CreateCategory(ctx, param)
 	if err != nil {

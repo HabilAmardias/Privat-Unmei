@@ -9,12 +9,13 @@ import (
 )
 
 type CourseCategoryServiceImpl struct {
+	ar  *repositories.AdminRepositoryImpl
 	ccr *repositories.CourseCategoryRepositoryImpl
 	tmr *repositories.TransactionManagerRepositories
 }
 
-func CreateCourseCategoryService(ccr *repositories.CourseCategoryRepositoryImpl, tmr *repositories.TransactionManagerRepositories) *CourseCategoryServiceImpl {
-	return &CourseCategoryServiceImpl{ccr, tmr}
+func CreateCourseCategoryService(ar *repositories.AdminRepositoryImpl, ccr *repositories.CourseCategoryRepositoryImpl, tmr *repositories.TransactionManagerRepositories) *CourseCategoryServiceImpl {
+	return &CourseCategoryServiceImpl{ar, ccr, tmr}
 }
 
 func (ccs *CourseCategoryServiceImpl) GetCategoriesList(ctx context.Context, param entity.ListCourseCategoryParam) (*[]entity.ListCourseCategoryQuery, *int64, error) {
@@ -29,8 +30,12 @@ func (ccs *CourseCategoryServiceImpl) GetCategoriesList(ctx context.Context, par
 func (ccs *CourseCategoryServiceImpl) CreateCategory(ctx context.Context, param entity.CreateCategoryParam) (*entity.CreateCategoryQuery, error) {
 	category := new(entity.CourseCategory)
 	newCategory := new(entity.CreateCategoryQuery)
+	admin := new(entity.Admin)
 
 	if err := ccs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := ccs.ar.FindByID(ctx, param.AdminID, admin); err != nil {
+			return err
+		}
 		if err := ccs.ccr.FindByName(ctx, param.Name, category); err != nil {
 			if err.Error() != "category does not exist" {
 				return err
@@ -55,10 +60,14 @@ func (ccs *CourseCategoryServiceImpl) CreateCategory(ctx context.Context, param 
 
 func (ccs *CourseCategoryServiceImpl) UpdateCategory(ctx context.Context, param entity.UpdateCategoryParam) error {
 	category := new(entity.CourseCategory)
+	admin := new(entity.Admin)
 	if param.Name == nil {
 		return nil
 	}
 	return ccs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := ccs.ar.FindByID(ctx, param.AdminID, admin); err != nil {
+			return err
+		}
 		if err := ccs.ccr.FindByID(ctx, param.ID, category); err != nil {
 			return err
 		}

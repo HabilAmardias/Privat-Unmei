@@ -7,8 +7,10 @@ type (
 		Date      string   `json:"date" binding:"required"`
 		StartTime TimeOnly `json:"start_time" binding:"required"`
 	}
-	CreateCourseRequstReq struct {
-		PreferredSlots []PreferredSlot `json:"preferred_slots" binding:"dive"`
+	CreateCourseRequestReq struct {
+		PreferredSlots      []PreferredSlot `json:"preferred_slots" binding:"dive"`
+		PaymentMethodID     int             `json:"payment_method_id" binding:"required"`
+		NumberOfParticipant int             `json:"number_of_participant" binding:"required,gte=1"`
 	}
 	CreateCourseRequestRes struct {
 		CourseRequestID int `json:"id"`
@@ -20,9 +22,10 @@ type (
 		CourseRequestID int        `json:"id"`
 		MentorID        string     `json:"mentor_id"`
 		MentorName      string     `json:"mentor_name"`
-		GopayNumber     string     `json:"gopay_number"`
 		CourseID        int        `json:"course_id"`
 		CourseTitle     string     `json:"course_title"`
+		PaymentMethod   string     `json:"payment_method"`
+		AccountNumber   string     `json:"account_number"`
 		Subtotal        float64    `json:"subtotal"`
 		OperationalCost float64    `json:"operational_cost"`
 		TotalCost       float64    `json:"total_cost"`
@@ -43,17 +46,20 @@ type (
 		CourseName string  `json:"course_name"`
 	}
 	MentorCourseRequestDetailRes struct {
-		CourseRequestID  int                 `json:"course_request_id"`
-		CourseName       string              `json:"course_name"`
-		StudentName      string              `json:"student_name"`
-		StudentEmail     string              `json:"student_email"`
-		TotalPrice       float64             `json:"total_price"`
-		Subtotal         float64             `json:"subtotal"`
-		OperationalCost  float64             `json:"operational_cost"`
-		NumberOfSessions int                 `json:"number_of_sessions"`
-		Status           string              `json:"status"`
-		ExpiredAt        *time.Time          `json:"expired_at"`
-		Schedules        []CourseScheduleRes `json:"schedules"`
+		CourseRequestID     int                 `json:"course_request_id"`
+		CourseName          string              `json:"course_name"`
+		StudentName         string              `json:"student_name"`
+		StudentEmail        string              `json:"student_email"`
+		TotalPrice          float64             `json:"total_price"`
+		Subtotal            float64             `json:"subtotal"`
+		OperationalCost     float64             `json:"operational_cost"`
+		NumberOfSessions    int                 `json:"number_of_sessions"`
+		Status              string              `json:"status"`
+		ExpiredAt           *time.Time          `json:"expired_at"`
+		PaymentMethod       string              `json:"payment_method"`
+		AccountNumber       string              `json:"account_number"`
+		NumberOfParticipant int                 `json:"number_of_participant"`
+		Schedules           []CourseScheduleRes `json:"schedules"`
 	}
 	StudentCourseRequestListReq struct {
 		SeekPaginatedReq
@@ -71,16 +77,17 @@ type (
 		CourseName  string  `json:"course_name"`
 	}
 	StudentCourseRequestDetailRes struct {
-		CourseRequestID  int                 `json:"course_request_id"`
-		CourseName       string              `json:"course_name"`
-		MentorName       string              `json:"mentor_name"`
-		MentorEmail      string              `json:"mentor_email"`
-		TotalPrice       float64             `json:"total_price"`
-		Subtotal         float64             `json:"subtotal"`
-		OperationalCost  float64             `json:"operational_cost"`
-		NumberOfSessions int                 `json:"number_of_sessions"`
-		Status           string              `json:"status"`
-		ExpiredAt        *time.Time          `json:"expired_at"`
-		Schedules        []CourseScheduleRes `json:"schedules"`
+		CourseRequestID     int                 `json:"course_request_id"`
+		CourseName          string              `json:"course_name"`
+		MentorName          string              `json:"mentor_name"`
+		MentorEmail         string              `json:"mentor_email"`
+		TotalPrice          float64             `json:"total_price"`
+		Subtotal            float64             `json:"subtotal"`
+		OperationalCost     float64             `json:"operational_cost"`
+		NumberOfSessions    int                 `json:"number_of_sessions"`
+		Status              string              `json:"status"`
+		ExpiredAt           *time.Time          `json:"expired_at"`
+		NumberOfParticipant int                 `json:"number_of_participant"`
+		Schedules           []CourseScheduleRes `json:"schedules"`
 	}
 )

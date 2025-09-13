@@ -23,7 +23,6 @@ type (
 		RatingCount       int
 		Resume            string
 		YearsOfExperience int
-		GopayNumber       string
 		Degree            string
 		Major             string
 		Campus            string
@@ -41,14 +40,20 @@ type (
 		UpdatedAt time.Time
 		DeletedAt *time.Time
 	}
+	MentorPaymentInfo struct {
+		PaymentMethodID   int
+		PaymentMethodName string
+		AccountNumber     string
+	}
 	AddNewMentorParam struct {
+		AdminID           string
 		Name              string
 		Email             string
 		Bio               string
 		Password          string
 		ResumeFile        multipart.File
+		MentorPayments    []MentorPaymentInfo
 		YearsOfExperience int
-		GopayNumber       string
 		Degree            string
 		Major             string
 		Campus            string
@@ -61,10 +66,10 @@ type (
 		Name              *string
 		Bio               *string
 		YearsOfExperience *int
-		GopayNumber       *string
 		Degree            *string
 		Major             *string
 		Campus            *string
+		MentorPayments    []MentorPaymentInfo
 		MentorSchedules   []MentorSchedule
 	}
 	UpdateMentorQuery struct {
@@ -72,19 +77,18 @@ type (
 		RatingCount       *int
 		Resume            *string
 		YearsOfExperience *int
-		GopayNumber       *string
 		Degree            *string
 		Major             *string
 		Campus            *string
 	}
 	DeleteMentorParam struct {
-		ID string
+		ID      string
+		AdminID string
 	}
 	ListMentorQuery struct {
 		ID                string
 		Name              string
 		Email             string
-		GopayNumber       string
 		YearsOfExperience int
 	}
 	ListMentorParam struct {
@@ -109,11 +113,11 @@ type (
 		Name                 string
 		Bio                  string
 		YearsOfExperience    int
-		GopayNumber          string
 		Degree               string
 		Major                string
 		Campus               string
 		MentorAvailabilities []MentorSchedule
+		MentorPayments       []MentorPaymentInfo
 	}
 	GetMentorProfileForStudentParam struct {
 		MentorID string

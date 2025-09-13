@@ -6,7 +6,8 @@ type (
 		Password string `json:"password" binding:"required,containsany=!@#?,min=8"`
 	}
 	AdminLoginRes struct {
-		Token string `json:"token"`
+		Token  string `json:"token"`
+		Status string `json:"status"`
 	}
 	GetStudentListReq struct {
 		PaginatedReq

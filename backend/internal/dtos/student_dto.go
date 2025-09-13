@@ -13,7 +13,8 @@ type (
 	}
 
 	LoginStudentRes struct {
-		Token string `json:"token"`
+		Token  string `json:"token"`
+		Status string `json:"status"`
 	}
 	SendResetTokenEmailReq struct {
 		Email string `json:"email" binding:"required,email"`

@@ -9,17 +9,15 @@ RUN go mod download
 COPY ./backend .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o privat-unmei-backend main.go
-RUN CGO_ENABLED=0 GOOS=linux go build -o privat-unmei-migrate cmd/db/main.go
 
 FROM alpine:latest AS release-stage
 
 WORKDIR /
 
 COPY --from=build-stage /usr/share/zoneinfo /usr/share/zoneinfo
-COPY --from=build-stage /app/privat-unmei-migrate privat-unmei-migrate
 COPY --from=build-stage /app/privat-unmei-backend privat-unmei-backend
 COPY --from=build-stage /app/.env .env
-COPY --from=build-stage /app/db/migrations ./db/migrations 
-COPY --from=build-stage /app/db/seeds ./db/seeds 
 
 EXPOSE 8080
+
+ENTRYPOINT [ "/bin/sh", "-c", "/privat-unmei-backend"]

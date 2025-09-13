@@ -44,6 +44,7 @@ type (
 	}
 	ListStudentParam struct {
 		PaginatedParam
+		AdminID string
 	}
 	UpdateStudentParam struct {
 		ID           string

@@ -17,6 +17,8 @@ func CreateAdminHandler(as *services.AdminServiceImpl) *AdminHandlerImpl {
 	return &AdminHandlerImpl{as}
 }
 
+// TODO: Add change email and password admin for first login
+
 func (ah *AdminHandlerImpl) GenerateRandomPassword(ctx *gin.Context) {
 	pass, err := ah.as.GenerateRandomPassword()
 	if err != nil {
@@ -38,7 +40,7 @@ func (ah *AdminHandlerImpl) Login(ctx *gin.Context) {
 		return
 	}
 	param := entity.AdminLoginParam(req)
-	token, err := ah.as.Login(ctx, param)
+	token, status, err := ah.as.Login(ctx, param)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -46,7 +48,8 @@ func (ah *AdminHandlerImpl) Login(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
 		Data: dtos.AdminLoginRes{
-			Token: token,
+			Token:  *token,
+			Status: *status,
 		},
 	})
 }

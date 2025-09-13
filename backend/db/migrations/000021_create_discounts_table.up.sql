@@ -1,0 +1,8 @@
+CREATE TABLE discounts (
+    id SERIAL PRIMARY KEY,
+    number_of_participant INT NOT NULL UNIQUE,
+    amount NUMERIC NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
+);

@@ -18,7 +18,10 @@ type MentorServiceImpl struct {
 	tr  *repositories.TopicRepositoryImpl
 	ccr *repositories.CourseCategoryRepositoryImpl
 	car *repositories.MentorAvailabilityRepositoryImpl
+	crr *repositories.CourseRequestRepositoryImpl
 	cr  *repositories.CourseRepositoryImpl
+	pr  *repositories.PaymentRepositoryImpl
+	ar  *repositories.AdminRepositoryImpl
 	bu  *utils.BcryptUtil
 	ju  *utils.JWTUtil
 	cu  *utils.CloudinaryUtil
@@ -32,13 +35,16 @@ func CreateMentorService(
 	tr *repositories.TopicRepositoryImpl,
 	ccr *repositories.CourseCategoryRepositoryImpl,
 	car *repositories.MentorAvailabilityRepositoryImpl,
+	crr *repositories.CourseRequestRepositoryImpl,
 	cr *repositories.CourseRepositoryImpl,
+	pr *repositories.PaymentRepositoryImpl,
+	ar *repositories.AdminRepositoryImpl,
 	bu *utils.BcryptUtil,
 	ju *utils.JWTUtil,
 	cu *utils.CloudinaryUtil,
 	gu *utils.GomailUtil,
 ) *MentorServiceImpl {
-	return &MentorServiceImpl{tmr, ur, mr, tr, ccr, car, cr, bu, ju, cu, gu}
+	return &MentorServiceImpl{tmr, ur, mr, tr, ccr, car, crr, cr, pr, ar, bu, ju, cu, gu}
 }
 
 func (ms *MentorServiceImpl) GetDOWAvailability(ctx context.Context, param entity.GetDOWAvailabilityParam) (*[]int, error) {
@@ -120,6 +126,7 @@ func (ms *MentorServiceImpl) GetProfileForMentor(ctx context.Context, param enti
 	mentor := new(entity.Mentor)
 	mentorAvailability := new([]entity.MentorAvailability)
 	res := new(entity.GetProfileMentorQuery)
+	paymentInfo := new([]entity.MentorPaymentInfo)
 
 	if err := ms.ur.FindByID(ctx, param.MentorID, user); err != nil {
 		return nil, err
@@ -128,6 +135,9 @@ func (ms *MentorServiceImpl) GetProfileForMentor(ctx context.Context, param enti
 		return nil, err
 	}
 	if err := ms.car.GetAvailabilityByMentorID(ctx, mentor.ID, mentorAvailability); err != nil {
+		return nil, err
+	}
+	if err := ms.pr.MentorPaymentInfo(ctx, param.MentorID, paymentInfo); err != nil {
 		return nil, err
 	}
 	if len(*mentorAvailability) <= 0 {
@@ -142,7 +152,7 @@ func (ms *MentorServiceImpl) GetProfileForMentor(ctx context.Context, param enti
 	res.Bio = user.Bio
 	res.Campus = mentor.Campus
 	res.Degree = mentor.Degree
-	res.GopayNumber = mentor.GopayNumber
+	res.MentorPayments = *paymentInfo
 	res.Major = mentor.Major
 	res.Name = user.Name
 	res.YearsOfExperience = mentor.YearsOfExperience
@@ -241,10 +251,14 @@ func (ms *MentorServiceImpl) GetMentorList(ctx context.Context, param entity.Lis
 func (ms *MentorServiceImpl) DeleteMentor(ctx context.Context, param entity.DeleteMentorParam) error {
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
+	admin := new(entity.Admin)
 	maxTransactionCount := new(int64)
 	courseIDs := new([]int)
 
 	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := ms.ar.FindByID(ctx, param.AdminID, admin); err != nil {
+			return err
+		}
 		if err := ms.ur.FindByID(ctx, param.ID, user); err != nil {
 			return err
 		}
@@ -275,6 +289,9 @@ func (ms *MentorServiceImpl) DeleteMentor(ctx context.Context, param entity.Dele
 			if err := ms.cr.DeleteMentorCourse(ctx, param.ID); err != nil {
 				return err
 			}
+		}
+		if err := ms.pr.UnassignPaymentMethodFromMentor(ctx, param.ID); err != nil {
+			return err
 		}
 		if err := ms.car.DeleteAvailability(ctx, param.ID); err != nil {
 			return err
@@ -333,7 +350,6 @@ func (ms *MentorServiceImpl) UpdateMentorProfile(ctx context.Context, param enti
 		mentorQuery.Campus = param.Campus
 		mentorQuery.Degree = param.Degree
 		mentorQuery.Major = param.Major
-		mentorQuery.GopayNumber = param.GopayNumber
 		mentorQuery.YearsOfExperience = param.YearsOfExperience
 
 		if param.Resume != nil {
@@ -346,6 +362,25 @@ func (ms *MentorServiceImpl) UpdateMentorProfile(ctx context.Context, param enti
 		}
 		if err := ms.ur.UpdateUserProfile(ctx, userQuery, param.ID); err != nil {
 			return err
+		}
+		if len(param.MentorPayments) > 0 {
+			orderCount := new(int64)
+			if err := ms.crr.FindOngoingOrderByMentorID(ctx, param.ID, orderCount); err != nil {
+				return err
+			}
+			if *orderCount > 0 {
+				return customerrors.NewError(
+					"there is an ongoing order, cannot update payment method",
+					errors.New("there is an ongoing order, cannot update payment method"),
+					customerrors.InvalidAction,
+				)
+			}
+			if err := ms.pr.UnassignPaymentMethodFromMentor(ctx, param.ID); err != nil {
+				return err
+			}
+			if err := ms.pr.AssignPaymentMethodToMentor(ctx, param.ID, param.MentorPayments); err != nil {
+				return err
+			}
 		}
 		if err := ms.mr.UpdateMentor(ctx, param.ID, mentorQuery); err != nil {
 			return err
@@ -366,7 +401,6 @@ func (ms *MentorServiceImpl) UpdateMentorForAdmin(ctx context.Context, param ent
 		if err := ms.mr.FindByID(ctx, user.ID, mentor, false); err != nil {
 			return err
 		}
-		query.GopayNumber = param.GopayNumber
 		query.YearsOfExperience = param.YearsOfExperience
 		if err := ms.mr.UpdateMentor(ctx, mentor.ID, query); err != nil {
 			return err
@@ -378,19 +412,11 @@ func (ms *MentorServiceImpl) UpdateMentorForAdmin(ctx context.Context, param ent
 func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddNewMentorParam) error {
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
+	admin := new(entity.Admin)
 
 	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		// to be honest idk how to make this clean enough but for now it should work
-		if err := ms.mr.FindByGopay(ctx, param.GopayNumber, mentor); err != nil {
-			if err.Error() != customerrors.UserNotFound {
-				return err
-			}
-		} else {
-			return customerrors.NewError(
-				"user already exist",
-				customerrors.ErrItemAlreadyExist,
-				customerrors.ItemAlreadyExist,
-			)
+		if err := ms.ar.FindByID(ctx, param.AdminID, admin); err != nil {
+			return err
 		}
 		if err := ms.ur.FindByEmail(ctx, param.Email, user); err != nil {
 			if err.Error() != customerrors.UserNotFound {
@@ -426,7 +452,6 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 		mentor.Campus = param.Campus
 		mentor.Degree = param.Degree
 		mentor.Major = param.Major
-		mentor.GopayNumber = param.GopayNumber
 		mentor.YearsOfExperience = param.YearsOfExperience
 
 		newFilename := fmt.Sprintf("%s.pdf", mentor.ID)
@@ -452,7 +477,9 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 		if err := ms.car.CreateAvailability(ctx, schedules); err != nil {
 			return err
 		}
-
+		if err := ms.pr.AssignPaymentMethodToMentor(ctx, mentor.ID, param.MentorPayments); err != nil {
+			return err
+		}
 		emailParam := entity.SendEmailParams{
 			Receiver:  param.Email,
 			Subject:   "Login Credentials - Privat Unmei",

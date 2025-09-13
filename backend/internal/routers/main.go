@@ -26,6 +26,9 @@ type RouteConfig struct {
 	CourseRatingHandler   *handlers.CourseRatingHandlerImpl
 	CourseRequestHandler  *handlers.CourseRequestHandlerImpl
 	ChatHandler           *handlers.ChatHandlerImpl
+	PaymentHandler        *handlers.PaymentHandlerImpl
+	DiscountHandler       *handlers.DiscountHandlerImpl
+	AdditionalCostHandler *handlers.AdditionalCostHandlerImpl
 	RBACRepository        *repositories.RBACRepository
 	TokenUtil             *utils.JWTUtil
 	Logger                logger.CustomLogger
@@ -93,15 +96,27 @@ func (c *RouteConfig) SetupPublicRoute() {
 func (c *RouteConfig) SetupPrivateRoute() {
 	v1 := c.App.Group("/api/v1")
 	v1.Use(middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForLogin))
-	v1.POST("/courses/:id/reviews", c.CourseRatingHandler.AddReview)
+	v1.POST("/courses/:id/reviews", middlewares.AuthorizationMiddleware(
+		constants.CreatePermission,
+		constants.CourseRatingResource,
+		c.RBACRepository,
+	), c.CourseRatingHandler.AddReview)
 	v1.GET("/verify/send", c.StudentHandler.SendVerificationEmail)
 	v1.PATCH("/courses/:id", middlewares.AuthorizationMiddleware(
 		constants.UpdateOwnPermission,
 		constants.CourseResource,
 		c.RBACRepository,
 	), c.CourseHandler.UpdateCourse)
-	v1.GET("/me", c.StudentHandler.GetStudentProfile)
-	v1.POST("/me/change-password", c.StudentHandler.ChangePassword)
+	v1.GET("/me", middlewares.AuthorizationMiddleware(
+		constants.ReadOwnPermission,
+		constants.StudentResource,
+		c.RBACRepository,
+	), c.StudentHandler.GetStudentProfile)
+	v1.POST("/me/change-password", middlewares.AuthorizationMiddleware(
+		constants.UpdateOwnPermission,
+		constants.StudentResource,
+		c.RBACRepository,
+	), c.StudentHandler.ChangePassword)
 	v1.GET("/students", middlewares.AuthorizationMiddleware(
 		constants.ReadAllPermission,
 		constants.StudentResource,
@@ -172,19 +187,23 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.MentorResource,
 		c.RBACRepository,
 	), c.MentorHandler.UpdateMentor)
-	v1.POST("/courses/:id/course-requests", c.CourseRequestHandler.CreateReservation)
+	v1.POST("/courses/:id/course-requests", middlewares.AuthorizationMiddleware(
+		constants.CreatePermission,
+		constants.CourseRequestResource,
+		c.RBACRepository,
+	), c.CourseRequestHandler.CreateReservation)
 	v1.GET("/course-requests/:id/approve", middlewares.AuthorizationMiddleware(
-		constants.UpdateAllPermission,
+		constants.UpdateOwnPermission,
 		constants.CourseRequestResource,
 		c.RBACRepository,
 	), c.CourseRequestHandler.AcceptCourseRequest)
 	v1.GET("/course-requests/:id/reject", middlewares.AuthorizationMiddleware(
-		constants.UpdateAllPermission,
+		constants.UpdateOwnPermission,
 		constants.CourseRequestResource,
 		c.RBACRepository,
 	), c.CourseRequestHandler.RejectCourseRequest)
 	v1.GET("/course-requests/:id/confirm-payment", middlewares.AuthorizationMiddleware(
-		constants.UpdateAllPermission,
+		constants.UpdateOwnPermission,
 		constants.CourseRequestResource,
 		c.RBACRepository,
 	), c.CourseRequestHandler.ConfirmPayment)
@@ -193,7 +212,11 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.PaymentDetailResource,
 		c.RBACRepository,
 	), c.CourseRequestHandler.GetPaymentDetail)
-	v1.GET("/mentors/me", c.MentorHandler.GetProfileForMentor)
+	v1.GET("/mentors/me", middlewares.AuthorizationMiddleware(
+		constants.ReadOwnPermission,
+		constants.MentorResource,
+		c.RBACRepository,
+	), c.MentorHandler.GetProfileForMentor)
 	v1.GET("/mentors/me/course-requests", middlewares.AuthorizationMiddleware(
 		constants.ReadOwnPermission,
 		constants.CourseRequestResource,
@@ -204,8 +227,16 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.CourseRequestResource,
 		c.RBACRepository,
 	), c.CourseRequestHandler.MentorCourseRequestDetail)
-	v1.GET("/me/course-requests", c.CourseRequestHandler.StudentCourseRequestList)
-	v1.GET("/me/course-requests/:id", c.CourseRequestHandler.StudentCourseRequestDetail)
+	v1.GET("/me/course-requests", middlewares.AuthorizationMiddleware(
+		constants.ReadOwnPermission,
+		constants.CourseRequestResource,
+		c.RBACRepository,
+	), c.CourseRequestHandler.StudentCourseRequestList)
+	v1.GET("/me/course-requests/:id", middlewares.AuthorizationMiddleware(
+		constants.ReadOwnPermission,
+		constants.CourseRequestResource,
+		c.RBACRepository,
+	), c.CourseRequestHandler.StudentCourseRequestDetail)
 	v1.POST("/chatrooms", middlewares.AuthorizationMiddleware(
 		constants.CreatePermission,
 		constants.ChatroomResource,
@@ -216,6 +247,63 @@ func (c *RouteConfig) SetupPrivateRoute() {
 	v1.GET("/chatrooms/:id/messages", c.ChatHandler.GetMessages)
 	v1.POST("/chatrooms/:id/messages", c.ChatHandler.SendMessage)
 	v1.GET("/courses/:id/mentor-availability", c.MentorHandler.GetDOWAvailability)
+	v1.POST("/payment-methods", middlewares.AuthorizationMiddleware(
+		constants.CreatePermission,
+		constants.PaymentMethodResource,
+		c.RBACRepository,
+	), c.PaymentHandler.CreatePaymentMethod)
+	v1.DELETE("/payment-methods/:id", middlewares.AuthorizationMiddleware(
+		constants.DeleteAllPermission,
+		constants.PaymentMethodResource,
+		c.RBACRepository,
+	), c.PaymentHandler.DeletePaymentMethod)
+	v1.PATCH("/payment-methods/:id", middlewares.AuthorizationMiddleware(
+		constants.UpdateAllPermission,
+		constants.PaymentMethodResource,
+		c.RBACRepository,
+	), c.PaymentHandler.UpdatePaymentMethod)
+	v1.GET("/payment-methods", c.PaymentHandler.GetAllPaymentMethod)
+	v1.GET("/mentors/:id/payment-methods", c.PaymentHandler.GetMentorPaymentMethod)
+	v1.POST("/discounts", middlewares.AuthorizationMiddleware(
+		constants.CreatePermission,
+		constants.DiscountResource,
+		c.RBACRepository,
+	), c.DiscountHandler.CreateNewDiscount)
+	v1.PATCH("/discounts/:id", middlewares.AuthorizationMiddleware(
+		constants.UpdateAllPermission,
+		constants.DiscountResource,
+		c.RBACRepository,
+	), c.DiscountHandler.UpdateDiscountAmount)
+	v1.DELETE("/discounts/:id", middlewares.AuthorizationMiddleware(
+		constants.DeleteAllPermission,
+		constants.DiscountResource,
+		c.RBACRepository,
+	), c.DiscountHandler.DeleteDiscount)
+	v1.GET("/discounts", middlewares.AuthorizationMiddleware(
+		constants.ReadAllPermission,
+		constants.DiscountResource,
+		c.RBACRepository,
+	), c.DiscountHandler.GetAllDiscount)
+	v1.POST("/additional-costs", middlewares.AuthorizationMiddleware(
+		constants.CreatePermission,
+		constants.AdditionalCostResource,
+		c.RBACRepository,
+	), c.AdditionalCostHandler.CreateNewAdditionalCost)
+	v1.PATCH("/additional-costs/:id", middlewares.AuthorizationMiddleware(
+		constants.UpdateAllPermission,
+		constants.AdditionalCostResource,
+		c.RBACRepository,
+	), c.AdditionalCostHandler.UpdateCostAmount)
+	v1.DELETE("/additional-costs/:id", middlewares.AuthorizationMiddleware(
+		constants.DeleteAllPermission,
+		constants.AdditionalCostResource,
+		c.RBACRepository,
+	), c.AdditionalCostHandler.DeleteCost)
+	v1.GET("/additional-costs", middlewares.AuthorizationMiddleware(
+		constants.ReadAllPermission,
+		constants.AdditionalCostResource,
+		c.RBACRepository,
+	), c.AdditionalCostHandler.GetAllAdditionalCost)
 }
 
 func (c *RouteConfig) SetupWebsocketRoute() {

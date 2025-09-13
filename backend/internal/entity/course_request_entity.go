@@ -6,27 +6,31 @@ import (
 
 type (
 	CourseRequest struct {
-		ID               int
-		StudentID        string
-		CourseID         int
-		Status           string
-		SubTotal         float64
-		OperationalCost  float64
-		TotalPrice       float64
-		NumberOfSessions int
-		ExpiredAt        *time.Time
-		CreatedAt        time.Time
-		UpdatedAt        time.Time
-		DeletedAt        *time.Time
+		ID                  int
+		StudentID           string
+		CourseID            int
+		Status              string
+		NumberOfParticipant int
+		SubTotal            float64
+		OperationalCost     float64
+		TotalPrice          float64
+		PaymentMethodID     int
+		NumberOfSessions    int
+		ExpiredAt           *time.Time
+		CreatedAt           time.Time
+		UpdatedAt           time.Time
+		DeletedAt           *time.Time
 	}
 	PreferredSlot struct {
 		Date      time.Time
 		StartTime TimeOnly
 	}
 	CreateCourseRequestParam struct {
-		CourseID       int
-		StudentID      string
-		PreferredSlots []PreferredSlot
+		CourseID            int
+		StudentID           string
+		NumberOfParticipant int
+		PreferredSlots      []PreferredSlot
+		PaymentMethodID     int
 	}
 	HandleCourseRequestParam struct {
 		MentorID        string
@@ -45,9 +49,10 @@ type (
 		CourseRequestID int
 		MentorID        string
 		MentorName      string
-		GopayNumber     string
 		CourseID        int
 		CourseTitle     string
+		PaymentMethod   string
+		AccountNumber   string
 		Subtotal        float64
 		OperationalCost float64
 		TotalCost       float64
@@ -73,17 +78,18 @@ type (
 		MentorID        string
 	}
 	MentorCourseRequestDetailQuery struct {
-		CourseRequestID  int
-		CourseName       string
-		StudentName      string
-		StudentEmail     string
-		TotalPrice       float64
-		Subtotal         float64
-		OperationalCost  float64
-		NumberOfSessions int
-		Status           string
-		ExpiredAt        *time.Time
-		Schedules        []CourseRequestSchedule
+		CourseRequestID     int
+		CourseName          string
+		StudentName         string
+		StudentEmail        string
+		NumberOfParticipant int
+		TotalPrice          float64
+		Subtotal            float64
+		OperationalCost     float64
+		NumberOfSessions    int
+		Status              string
+		ExpiredAt           *time.Time
+		Schedules           []CourseRequestSchedule
 	}
 	StudentCourseRequestQuery struct {
 		ID          int
@@ -106,16 +112,17 @@ type (
 		StudentID       string
 	}
 	StudentCourseRequestDetailQuery struct {
-		CourseRequestID  int
-		CourseName       string
-		MentorName       string
-		MentorEmail      string
-		TotalPrice       float64
-		Subtotal         float64
-		OperationalCost  float64
-		NumberOfSessions int
-		Status           string
-		ExpiredAt        *time.Time
-		Schedules        []CourseRequestSchedule
+		CourseRequestID     int
+		CourseName          string
+		MentorName          string
+		MentorEmail         string
+		TotalPrice          float64
+		Subtotal            float64
+		OperationalCost     float64
+		NumberOfSessions    int
+		Status              string
+		NumberOfParticipant int
+		ExpiredAt           *time.Time
+		Schedules           []CourseRequestSchedule
 	}
 )

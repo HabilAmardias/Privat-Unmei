@@ -20,6 +20,32 @@ func CreateCourseRequestRepository(db *db.CustomDB) *CourseRequestRepositoryImpl
 	return &CourseRequestRepositoryImpl{db}
 }
 
+func (cr *CourseRequestRepositoryImpl) FindOngoingOrderByMentorID(ctx context.Context, mentorID string, count *int64) error {
+	var driver RepoDriver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	SELECT COUNT(*)
+	FROM course_requests cr
+	JOIN courses c ON cr.course_id = c.id
+	JOIN mentors m ON c.mentor_id = m.id
+	WHERE cr.status IN ('reserved','pending payment') AND
+	cr.deleted_at IS NULL AND cr.expired_at > CURRENT_TIMESTAMP AND
+	c.deleted_at IS NULL AND
+	m.deleted_at IS NULL AND
+	c.mentor_id = $1
+	`
+	if err := driver.QueryRow(query, mentorID).Scan(count); err != nil {
+		return customerrors.NewError(
+			"failed to get ongoing order",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (cr *CourseRequestRepositoryImpl) StudentCourseRequestList(
 	ctx context.Context,
 	studentID string,
@@ -260,6 +286,7 @@ func (cr *CourseRequestRepositoryImpl) GetPaymentDetail(ctx context.Context, id 
 		subtotal,
 		operational_cost,
 		total_price,
+		payment_method_id,
 		expired_at
 	FROM course_requests
 	WHERE id = $1 AND deleted_at IS NULL
@@ -271,6 +298,7 @@ func (cr *CourseRequestRepositoryImpl) GetPaymentDetail(ctx context.Context, id 
 		&cre.SubTotal,
 		&cre.OperationalCost,
 		&cre.TotalPrice,
+		&cre.PaymentMethodID,
 		&cre.ExpiredAt,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -386,6 +414,8 @@ func (cr *CourseRequestRepositoryImpl) FindByID(ctx context.Context, id int, cou
 		operational_cost,
 		total_price,
 		number_of_sessions,
+		payment_method_id,
+		number_of_participant,
 		expired_at,
 		created_at,
 		updated_at,
@@ -402,6 +432,8 @@ func (cr *CourseRequestRepositoryImpl) FindByID(ctx context.Context, id int, cou
 		&courseRequest.OperationalCost,
 		&courseRequest.TotalPrice,
 		&courseRequest.NumberOfSessions,
+		&courseRequest.PaymentMethodID,
+		&courseRequest.NumberOfParticipant,
 		&courseRequest.ExpiredAt,
 		&courseRequest.CreatedAt,
 		&courseRequest.UpdatedAt,
@@ -428,6 +460,7 @@ func (cr *CourseRequestRepositoryImpl) FindOngoingByCourseIDAndStudentID(ctx con
 		student_id = $1 AND
 		course_id = $2 AND
 		status IN ('reserved','pending payment', 'scheduled') AND
+		expired_at > CURRENT_TIMESTAMP AND
 		deleted_at IS NULL
 	`
 	if err := driver.QueryRow(query, studentID, courseID).Scan(count); err != nil {
@@ -449,9 +482,9 @@ func (cr *CourseRequestRepositoryImpl) CreateOrder(
 		driver = tx
 	}
 	query := `
-	INSERT INTO course_requests (student_id, course_id, subtotal, operational_cost, total_price, number_of_sessions, expired_at)
+	INSERT INTO course_requests (student_id, course_id, subtotal, operational_cost, total_price, number_of_sessions, payment_method_id, number_of_participant, expired_at)
 	VALUES
-	($1, $2, $3, $4, $5, $6, $7)
+	($1, $2, $3, $4, $5, $6, $7, $8, $9)
 	RETURNING (id)
 	`
 	row := driver.QueryRow(
@@ -462,6 +495,8 @@ func (cr *CourseRequestRepositoryImpl) CreateOrder(
 		courseRequest.OperationalCost,
 		courseRequest.TotalPrice,
 		courseRequest.NumberOfSessions,
+		courseRequest.PaymentMethodID,
+		courseRequest.NumberOfParticipant,
 		courseRequest.ExpiredAt,
 	)
 	if err := row.Scan(&courseRequest.ID); err != nil {
@@ -487,12 +522,13 @@ func (cr *CourseRequestRepositoryImpl) FindOngoingByCourseID(ctx context.Context
 		status,
 		total_price,
 		number_of_sessions,
+		payment_method_id,
 		expired_at,
 		created_at,
 		updated_at,
 		deleted_at
 	FROM course_requests
-	WHERE course_id = $1 AND status NOT IN ('completed', 'cancelled') AND deleted_at IS NULL
+	WHERE course_id = $1 AND status NOT IN ('scheduled', 'completed', 'cancelled') AND deleted_at IS NULL AND expired_at > CURRENT_TIMESTAMP
 	`
 	rows, err := driver.Query(query, courseID)
 	if err != nil {
@@ -512,6 +548,7 @@ func (cr *CourseRequestRepositoryImpl) FindOngoingByCourseID(ctx context.Context
 			&item.Status,
 			&item.TotalPrice,
 			&item.NumberOfSessions,
+			&item.PaymentMethodID,
 			&item.ExpiredAt,
 			&item.CreatedAt,
 			&item.UpdatedAt,
@@ -541,6 +578,7 @@ func (cr *CourseRequestRepositoryImpl) FindCompletedByStudentIDAndCourseID(ctx c
 		status,
 		total_price,
 		number_of_sessions,
+		payment_method_id,
 		expired_at,
 		created_at,
 		updated_at,
@@ -566,6 +604,7 @@ func (cr *CourseRequestRepositoryImpl) FindCompletedByStudentIDAndCourseID(ctx c
 			&item.Status,
 			&item.TotalPrice,
 			&item.NumberOfSessions,
+			&item.PaymentMethodID,
 			&item.ExpiredAt,
 			&item.CreatedAt,
 			&item.UpdatedAt,

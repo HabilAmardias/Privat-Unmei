@@ -42,4 +42,7 @@ type (
 		Entries  []T               `json:"entries"`
 		PageInfo SeekPaginatedInfo `json:"page_info"`
 	}
+	ListResponse[T interface{}] struct {
+		Entries []T `json:"entries"`
+	}
 )

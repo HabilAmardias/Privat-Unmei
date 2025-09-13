@@ -19,6 +19,9 @@ type CourseRequestServiceImpl struct {
 	ur  *repositories.UserRepositoryImpl
 	sr  *repositories.StudentRepositoryImpl
 	mr  *repositories.MentorRepositoryImpl
+	pr  *repositories.PaymentRepositoryImpl
+	dr  *repositories.DiscountRepositoryImpl
+	acr *repositories.AdditionalCostRepositoryImpl
 	tmr *repositories.TransactionManagerRepositories
 }
 
@@ -30,9 +33,12 @@ func CreateCourseRequestService(
 	ur *repositories.UserRepositoryImpl,
 	sr *repositories.StudentRepositoryImpl,
 	mr *repositories.MentorRepositoryImpl,
+	pr *repositories.PaymentRepositoryImpl,
+	dr *repositories.DiscountRepositoryImpl,
+	acr *repositories.AdditionalCostRepositoryImpl,
 	tmr *repositories.TransactionManagerRepositories,
 ) *CourseRequestServiceImpl {
-	return &CourseRequestServiceImpl{crr, cr, csr, mar, ur, sr, mr, tmr}
+	return &CourseRequestServiceImpl{crr, cr, csr, mar, ur, sr, mr, pr, dr, acr, tmr}
 }
 
 func (crs *CourseRequestServiceImpl) StudentCourseRequestDetail(ctx context.Context, param entity.StudentCourseRequestDetailParam) (*entity.StudentCourseRequestDetailQuery, error) {
@@ -97,6 +103,7 @@ func (crs *CourseRequestServiceImpl) StudentCourseRequestDetail(ctx context.Cont
 	res.Subtotal = courseRequest.SubTotal
 	res.OperationalCost = courseRequest.OperationalCost
 	res.NumberOfSessions = courseRequest.NumberOfSessions
+	res.NumberOfParticipant = courseRequest.NumberOfParticipant
 	res.Status = courseRequest.Status
 	res.ExpiredAt = courseRequest.ExpiredAt
 	res.Schedules = *schedules
@@ -184,6 +191,7 @@ func (crs *CourseRequestServiceImpl) MentorCourseRequestDetail(ctx context.Conte
 	res.OperationalCost = courseRequest.OperationalCost
 	res.NumberOfSessions = courseRequest.NumberOfSessions
 	res.Status = courseRequest.Status
+	res.NumberOfParticipant = courseRequest.NumberOfParticipant
 	res.ExpiredAt = courseRequest.ExpiredAt
 	res.Schedules = *schedules
 
@@ -193,6 +201,10 @@ func (crs *CourseRequestServiceImpl) MentorCourseRequestDetail(ctx context.Conte
 func (crs *CourseRequestServiceImpl) MentorCourseRequestList(ctx context.Context, param entity.MentorCourseRequestListParam) (*[]entity.MentorCourseRequestQuery, *int64, error) {
 	requests := new([]entity.MentorCourseRequestQuery)
 	totalRow := new(int64)
+	mentor := new(entity.Mentor)
+	if err := crs.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
+		return nil, nil, err
+	}
 	if err := crs.crr.MentorCourseRequestList(ctx, param.MentorID, param.Status, param.LastID, param.Limit, totalRow, requests); err != nil {
 		return nil, nil, err
 	}
@@ -207,6 +219,8 @@ func (crs *CourseRequestServiceImpl) GetPaymentDetail(ctx context.Context, param
 	userStudent := new(entity.User)
 	student := new(entity.Student)
 	query := new(entity.PaymentDetailQuery)
+	mentorPaymentInfo := new(entity.MentorPayment)
+	paymentMethod := new(entity.PaymentMethod)
 	now := time.Now()
 
 	if err := crs.ur.FindByID(ctx, param.UserID, userStudent); err != nil {
@@ -215,16 +229,14 @@ func (crs *CourseRequestServiceImpl) GetPaymentDetail(ctx context.Context, param
 	if err := crs.sr.FindByID(ctx, userStudent.ID, student); err != nil {
 		return nil, err
 	}
+	if userStudent.Status != constants.VerifiedStatus {
+		return nil, customerrors.NewError(
+			"need to verify account",
+			errors.New("user is still unverified"),
+			customerrors.Unauthenticate,
+		)
+	}
 	if err := crs.crr.GetPaymentDetail(ctx, param.CourseRequestID, courseRequest); err != nil {
-		return nil, err
-	}
-	if err := crs.cr.FindByID(ctx, courseRequest.CourseID, course, false); err != nil {
-		return nil, err
-	}
-	if err := crs.ur.FindByID(ctx, course.MentorID, userMentor); err != nil {
-		return nil, err
-	}
-	if err := crs.mr.FindByID(ctx, userMentor.ID, mentor, false); err != nil {
 		return nil, err
 	}
 	if courseRequest.ExpiredAt != nil {
@@ -243,19 +255,35 @@ func (crs *CourseRequestServiceImpl) GetPaymentDetail(ctx context.Context, param
 			customerrors.Unauthenticate,
 		)
 	}
-	if userStudent.Status != constants.VerifiedStatus {
+	if !isOngoing(courseRequest.Status) {
 		return nil, customerrors.NewError(
-			"need to verify account",
-			errors.New("user is still unverified"),
+			"unauthorized",
+			errors.New("cannot see payment detail of completed transaction"),
 			customerrors.Unauthenticate,
 		)
+	}
+	if err := crs.cr.FindByID(ctx, courseRequest.CourseID, course, false); err != nil {
+		return nil, err
+	}
+	if err := crs.ur.FindByID(ctx, course.MentorID, userMentor); err != nil {
+		return nil, err
+	}
+	if err := crs.mr.FindByID(ctx, userMentor.ID, mentor, false); err != nil {
+		return nil, err
+	}
+	if err := crs.pr.GetPaymentInfoByMentorAndMethodID(ctx, course.MentorID, courseRequest.PaymentMethodID, mentorPaymentInfo); err != nil {
+		return nil, err
+	}
+	if err := crs.pr.FindPaymentMethodByID(ctx, courseRequest.PaymentMethodID, paymentMethod); err != nil {
+		return nil, err
 	}
 
 	query.CourseID = course.ID
 	query.CourseRequestID = param.CourseRequestID
 	query.CourseTitle = course.Title
 	query.ExpiredAt = courseRequest.ExpiredAt
-	query.GopayNumber = mentor.GopayNumber
+	query.AccountNumber = mentorPaymentInfo.AccountNumber
+	query.PaymentMethod = paymentMethod.Name
 	query.MentorID = mentor.ID
 	query.MentorName = userMentor.Name
 	query.OperationalCost = courseRequest.OperationalCost
@@ -426,6 +454,8 @@ func (crs *CourseRequestServiceImpl) HandleCourseRequest(ctx context.Context, pa
 
 func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, param entity.CreateCourseRequestParam) (int, error) {
 	ongoingOrderCount := new(int64)
+	maxParticipant := new(int)
+	operationalCost := new(float64)
 	course := new(entity.Course)
 	newScheds := new([]entity.CreateRequestSchedule)
 	updateCourse := new(entity.UpdateCourseQuery)
@@ -434,6 +464,8 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 	courseRequest := new(entity.CourseRequest)
 	availabilityRes := new(entity.AvailabilityResult)
 	conflictingScheds := new([]entity.ConflictingSchedule)
+	paymentInfo := new(entity.MentorPayment)
+	discount := new(entity.Discount)
 	dates := make([]time.Time, 0, len(param.PreferredSlots))
 	startTimes := make([]string, 0, len(param.PreferredSlots))
 	endTimes := make([]string, 0, len(param.PreferredSlots))
@@ -458,7 +490,7 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 		}
 		if user.Status != constants.VerifiedStatus {
 			return customerrors.NewError(
-				"you are not verified yet",
+				"user are not verified yet",
 				errors.New("user are not verified yet"),
 				customerrors.Unauthenticate,
 			)
@@ -478,7 +510,6 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 			if err != nil {
 				return err
 			}
-
 			dates = append(dates, slot.Date)
 			startTimes = append(startTimes, slot.StartTime.ToString())
 			endTimes = append(endTimes, endTime)
@@ -509,13 +540,40 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 			)
 		}
 
-		courseRequest.SubTotal = course.Price * float64(len(param.PreferredSlots))
-		courseRequest.OperationalCost = courseRequest.SubTotal * constants.OperationalCostPercentage
-		totalPrice := courseRequest.SubTotal + courseRequest.OperationalCost
+		if err := crs.pr.GetPaymentInfoByMentorAndMethodID(ctx, course.MentorID, param.PaymentMethodID, paymentInfo); err != nil {
+			return err
+		}
+		if err := crs.dr.GetMaxParticipant(ctx, maxParticipant); err != nil {
+			return err
+		}
+		participant := param.NumberOfParticipant
+		if param.NumberOfParticipant > *maxParticipant {
+			participant = *maxParticipant
+		}
+		if err := crs.dr.GetDiscountByNumberOfParticipant(ctx, participant, discount); err != nil {
+			var parsedErr *customerrors.CustomError
+			if errors.As(err, &parsedErr) {
+				if parsedErr.ErrCode != customerrors.ItemNotExist {
+					return err
+				}
+			}
+		}
+		if err := crs.acr.GetOperationalCost(ctx, operationalCost); err != nil {
+			return err
+		}
 
+		pricePerSession := course.Price - discount.Amount
+		if course.Price <= discount.Amount {
+			pricePerSession = course.Price
+		}
+
+		courseRequest.SubTotal = pricePerSession * float64(len(param.PreferredSlots))
+		courseRequest.OperationalCost = *operationalCost * float64(len(param.PreferredSlots))
 		courseRequest.StudentID = param.StudentID
 		courseRequest.CourseID = param.CourseID
-		courseRequest.TotalPrice = totalPrice
+		courseRequest.TotalPrice = courseRequest.SubTotal + courseRequest.OperationalCost
+		courseRequest.NumberOfParticipant = param.NumberOfParticipant
+		courseRequest.PaymentMethodID = param.PaymentMethodID
 		courseRequest.NumberOfSessions = len(param.PreferredSlots)
 		eat := now.Add(constants.ExpiredInterval)
 		courseRequest.ExpiredAt = &eat

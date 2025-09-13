@@ -7,22 +7,21 @@ import (
 )
 
 const (
-	FileSizeThreshold                 = 1_000_000 // 1MB
-	PNGType                           = "image/png"
-	JPGType                           = "image/jpeg"
-	PDFType                           = "application/pdf"
-	UnverifiedStatus                  = "unverified"
-	VerifiedStatus                    = "verified"
-	CTX_AUTH_PAYLOAD_KEY              = "auth_payload"
-	CTX_AUTH_TOKEN_KEY                = "auth_token"
-	DefaultAvatar                     = "https://res.cloudinary.com/dk8rlicon/image/upload/v1753881263/default-avatar-icon-of-social-media-user-vector_j8obqd.jpg"
-	AvatarFolder                      = "Avatars/"
-	ResumeFolder                      = "Resumes/"
-	OperationalCostPercentage float64 = 0.1
-	MaxCourseCategories               = 5
-	ExpiredInterval                   = 15 * time.Minute // 15 minute for development and testing
-	NoRating                          = 0
-	MaxLimit                          = 25
+	FileSizeThreshold    = 1_000_000 // 1MB
+	PNGType              = "image/png"
+	JPGType              = "image/jpeg"
+	PDFType              = "application/pdf"
+	UnverifiedStatus     = "unverified"
+	VerifiedStatus       = "verified"
+	CTX_AUTH_PAYLOAD_KEY = "auth_payload"
+	CTX_AUTH_TOKEN_KEY   = "auth_token"
+	DefaultAvatar        = "https://res.cloudinary.com/dk8rlicon/image/upload/v1753881263/default-avatar-icon-of-social-media-user-vector_j8obqd.jpg"
+	AvatarFolder         = "Avatars/"
+	ResumeFolder         = "Resumes/"
+	MaxCourseCategories  = 5
+	ExpiredInterval      = 15 * time.Minute // 15 minute for development and testing
+	NoRating             = 0
+	MaxLimit             = 25
 )
 
 const (
@@ -59,6 +58,10 @@ const (
 	CourseRequestResource
 	ChatroomResource
 	PaymentDetailResource
+	PaymentMethodResource
+	CourseRatingResource
+	DiscountResource
+	AdditionalCostResource
 )
 
 const (

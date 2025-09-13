@@ -114,7 +114,7 @@ func (mh *MentorHandlerImpl) GetProfileForMentor(ctx *gin.Context) {
 		Name:                 res.Name,
 		Bio:                  res.Bio,
 		YearsOfExperience:    res.YearsOfExperience,
-		GopayNumber:          res.GopayNumber,
+		MentorPayments:       []dtos.MentorPaymentInfoRes{},
 		Degree:               res.Degree,
 		Major:                res.Major,
 		Campus:               res.Campus,
@@ -126,6 +126,9 @@ func (mh *MentorHandlerImpl) GetProfileForMentor(ctx *gin.Context) {
 			StartTime: dtos.TimeOnly(sched.StartTime),
 			EndTime:   dtos.TimeOnly(sched.EndTime),
 		})
+	}
+	for _, info := range res.MentorPayments {
+		profile.MentorPayments = append(profile.MentorPayments, dtos.MentorPaymentInfoRes(info))
 	}
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
@@ -254,8 +257,14 @@ func (mh *MentorHandlerImpl) DeleteMentor(ctx *gin.Context) {
 		))
 		return
 	}
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 	param := entity.DeleteMentorParam{
-		ID: id,
+		ID:      id,
+		AdminID: claim.Subject,
 	}
 	if err := mh.ms.DeleteMentor(ctx, param); err != nil {
 		ctx.Error(err)
@@ -284,15 +293,8 @@ func (mh *MentorHandlerImpl) UpdateMentorForAdmin(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	if req.GopayNumber != nil {
-		if err := ValidatePhoneNumber(*req.GopayNumber); err != nil {
-			ctx.Error(err)
-			return
-		}
-	}
 	param := entity.UpdateMentorParam{
 		ID:                id,
-		GopayNumber:       req.GopayNumber,
 		YearsOfExperience: req.YearsOfExperience,
 	}
 	if err := mh.ms.UpdateMentorForAdmin(ctx, param); err != nil {
@@ -331,12 +333,6 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	if req.GopayNumber != nil {
-		if err := ValidatePhoneNumber(*req.GopayNumber); err != nil {
-			ctx.Error(err)
-			return
-		}
-	}
 	if req.Degree != nil {
 		if err := ValidateDegree(*req.Degree); err != nil {
 			ctx.Error(err)
@@ -351,11 +347,29 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 		Name:              req.Name,
 		Bio:               req.Bio,
 		YearsOfExperience: req.YearsOfExperience,
-		GopayNumber:       req.GopayNumber,
+		MentorPayments:    []entity.MentorPaymentInfo{},
 		Degree:            req.Degree,
 		Major:             req.Major,
 		Campus:            req.Campus,
 		MentorSchedules:   []entity.MentorSchedule{},
+	}
+	if len(req.MentorPayments) > 0 {
+		for _, info := range req.MentorPayments {
+			var payment dtos.MentorPaymentInfoReq
+			if err := json.Unmarshal([]byte(info), &payment); err != nil {
+				ctx.Error(customerrors.NewError(
+					"failed to parse input",
+					err,
+					customerrors.InvalidAction,
+				))
+				return
+			}
+			if err := binding.Validator.ValidateStruct(payment); err != nil {
+				ctx.Error(err)
+				return
+			}
+			param.MentorPayments = append(param.MentorPayments, entity.MentorPaymentInfo(payment))
+		}
 	}
 	if len(req.MentorSchedules) > 0 {
 		dowsMap := make(map[int]bool)
@@ -365,7 +379,7 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 				ctx.Error(customerrors.NewError(
 					"failed to parse input",
 					err,
-					customerrors.CommonErr,
+					customerrors.InvalidAction,
 				))
 				return
 			}
@@ -412,8 +426,12 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	if err := ValidatePhoneNumber(req.GopayNumber); err != nil {
-		ctx.Error(err)
+	if len(req.MentorPayments) <= 0 {
+		ctx.Error(customerrors.NewError(
+			"mentor need to submit their payment method",
+			errors.New("mentor need to submit their payment method"),
+			customerrors.InvalidAction,
+		))
 		return
 	}
 	if len(req.MentorSchedules) <= 0 {
@@ -440,18 +458,40 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 	param := entity.AddNewMentorParam{
+		AdminID:           claim.Subject,
 		Name:              req.Name,
 		Email:             req.Email,
 		Password:          req.Password,
 		ResumeFile:        file,
 		Bio:               req.Bio,
 		YearsOfExperience: req.YearsOfExperience,
-		GopayNumber:       req.GopayNumber,
+		MentorPayments:    []entity.MentorPaymentInfo{},
 		Degree:            req.Degree,
 		Major:             req.Major,
 		Campus:            req.Campus,
 		MentorSchedules:   []entity.MentorSchedule{},
+	}
+	for _, info := range req.MentorPayments {
+		var payment dtos.MentorPaymentInfoReq
+		if err := json.Unmarshal([]byte(info), &payment); err != nil {
+			ctx.Error(customerrors.NewError(
+				"failed to parse input",
+				err,
+				customerrors.InvalidAction,
+			))
+			return
+		}
+		if err := binding.Validator.ValidateStruct(payment); err != nil {
+			ctx.Error(err)
+			return
+		}
+		param.MentorPayments = append(param.MentorPayments, entity.MentorPaymentInfo(payment))
 	}
 	dowsMap := make(map[int]bool)
 	for _, sched := range req.MentorSchedules {
