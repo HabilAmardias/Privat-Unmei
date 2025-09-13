@@ -16,4 +16,9 @@ type (
 		Amount  float64
 		AdminID string
 	}
+	UpdateAdditonalCostParam struct {
+		Amount  *float64
+		CostID  int
+		AdminID string
+	}
 )

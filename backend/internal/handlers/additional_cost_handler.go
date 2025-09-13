@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"net/http"
+	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/services"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,6 +17,43 @@ type AdditionalCostHandlerImpl struct {
 
 func CreateAdditionalCostHandler(acs *services.AdditionalCostServiceImpl) *AdditionalCostHandlerImpl {
 	return &AdditionalCostHandlerImpl{acs}
+}
+
+func (ach *AdditionalCostHandlerImpl) UpdateCostAmount(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	costID, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.Error(customerrors.NewError(
+			"invalid cost",
+			err,
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	var req dtos.UpdateAdditionalCostReq
+	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.UpdateAdditonalCostParam{
+		AdminID: claim.Subject,
+		CostID:  costID,
+		Amount:  req.Amount,
+	}
+	if err := ach.acs.UpdateCostAmount(ctx, param); err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.AdditionalCostIDRes{
+			ID: param.CostID,
+		},
+	})
 }
 
 func (ach *AdditionalCostHandlerImpl) CreateNewAdditionalCost(ctx *gin.Context) {

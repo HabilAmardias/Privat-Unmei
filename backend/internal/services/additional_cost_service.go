@@ -45,3 +45,18 @@ func (acs *AdditionalCostServiceImpl) CreateNewAdditionalCost(ctx context.Contex
 	}
 	return *id, nil
 }
+func (acs *AdditionalCostServiceImpl) UpdateCostAmount(ctx context.Context, param entity.UpdateAdditonalCostParam) error {
+	admin := new(entity.Admin)
+	cost := new(entity.AdditionalCost)
+
+	if err := acs.ar.FindByID(ctx, param.AdminID, admin); err != nil {
+		return err
+	}
+	if err := acs.acr.FindByID(ctx, param.CostID, cost); err != nil {
+		return err
+	}
+	if err := acs.acr.UpdateCostAmount(ctx, param.CostID, param.Amount); err != nil {
+		return err
+	}
+	return nil
+}
