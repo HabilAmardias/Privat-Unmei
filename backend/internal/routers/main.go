@@ -27,6 +27,7 @@ type RouteConfig struct {
 	CourseRequestHandler  *handlers.CourseRequestHandlerImpl
 	ChatHandler           *handlers.ChatHandlerImpl
 	PaymentHandler        *handlers.PaymentHandlerImpl
+	DiscountHandler       *handlers.DiscountHandlerImpl
 	RBACRepository        *repositories.RBACRepository
 	TokenUtil             *utils.JWTUtil
 	Logger                logger.CustomLogger
@@ -262,6 +263,26 @@ func (c *RouteConfig) SetupPrivateRoute() {
 	), c.PaymentHandler.UpdatePaymentMethod)
 	v1.GET("/payment-methods", c.PaymentHandler.GetAllPaymentMethod)
 	v1.GET("/mentors/:id/payment-methods", c.PaymentHandler.GetMentorPaymentMethod)
+	v1.POST("/discounts", middlewares.AuthorizationMiddleware(
+		constants.CreatePermission,
+		constants.DiscountResource,
+		c.RBACRepository,
+	), c.DiscountHandler.CreateNewDiscount)
+	v1.PATCH("/discounts/:id", middlewares.AuthorizationMiddleware(
+		constants.UpdateAllPermission,
+		constants.DiscountResource,
+		c.RBACRepository,
+	), c.DiscountHandler.UpdateDiscountAmount)
+	v1.DELETE("/discounts/:id", middlewares.AuthorizationMiddleware(
+		constants.DeleteAllPermission,
+		constants.DiscountResource,
+		c.RBACRepository,
+	), c.DiscountHandler.DeleteDiscount)
+	v1.GET("/discounts", middlewares.AuthorizationMiddleware(
+		constants.ReadAllPermission,
+		constants.DiscountResource,
+		c.RBACRepository,
+	), c.DiscountHandler.GetAllDiscount)
 }
 
 func (c *RouteConfig) SetupWebsocketRoute() {

@@ -24,7 +24,8 @@ VALUES
 (6, 'chatroom', 'chatroom data'),
 (7, 'payment_detail', 'payment detail data'),
 (8, 'payment_method', 'payment method data'),
-(9, 'course_rating', 'course rating data');
+(9, 'course_rating', 'course rating data'),
+(10, 'discount', 'discount data');
 
 INSERT INTO rbac(role_id, permission_id, resource_id)
 VALUES
@@ -53,4 +54,8 @@ VALUES
 (3, 2, 1), -- student can read their own profile
 (3, 4, 1), -- student can update their own profile
 (3, 2, 5), -- student can read their own course request
-(3, 1, 9); -- student can make course review
+(3, 1, 9), -- student can make course review
+(1, 1, 10), -- admin can create new discount
+(1, 3, 10), -- admin can read all discount
+(1, 5, 10), -- admin can update all discount amount
+(1, 7, 10); -- admin can delete all discount amount
