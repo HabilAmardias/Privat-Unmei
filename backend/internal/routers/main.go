@@ -28,6 +28,7 @@ type RouteConfig struct {
 	ChatHandler           *handlers.ChatHandlerImpl
 	PaymentHandler        *handlers.PaymentHandlerImpl
 	DiscountHandler       *handlers.DiscountHandlerImpl
+	AdditionalCostHandler *handlers.AdditionalCostHandlerImpl
 	RBACRepository        *repositories.RBACRepository
 	TokenUtil             *utils.JWTUtil
 	Logger                logger.CustomLogger
@@ -283,6 +284,11 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.DiscountResource,
 		c.RBACRepository,
 	), c.DiscountHandler.GetAllDiscount)
+	v1.POST("/additional-costs", middlewares.AuthorizationMiddleware(
+		constants.CreatePermission,
+		constants.AdditionalCostResource,
+		c.RBACRepository,
+	), c.AdditionalCostHandler.CreateNewAdditionalCost)
 }
 
 func (c *RouteConfig) SetupWebsocketRoute() {

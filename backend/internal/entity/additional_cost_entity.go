@@ -11,4 +11,9 @@ type (
 		UpdatedAt time.Time
 		DeletedAt *time.Time
 	}
+	CreateAdditionalCostParam struct {
+		Name    string
+		Amount  float64
+		AdminID string
+	}
 )

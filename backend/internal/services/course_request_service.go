@@ -553,7 +553,12 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 			participant = *maxParticipant
 		}
 		if err := crs.dr.GetDiscountByNumberOfParticipant(ctx, participant, discount); err != nil {
-			return err
+			var parsedErr *customerrors.CustomError
+			if errors.As(err, &parsedErr) {
+				if parsedErr.ErrCode != customerrors.ItemNotExist {
+					return err
+				}
+			}
 		}
 		if err := crs.acr.GetOperationalCost(ctx, operationalCost); err != nil {
 			return err

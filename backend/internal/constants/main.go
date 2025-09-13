@@ -61,6 +61,7 @@ const (
 	PaymentMethodResource
 	CourseRatingResource
 	DiscountResource
+	AdditionalCostResource
 )
 
 const (
