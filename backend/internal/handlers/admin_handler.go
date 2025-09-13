@@ -17,6 +17,8 @@ func CreateAdminHandler(as *services.AdminServiceImpl) *AdminHandlerImpl {
 	return &AdminHandlerImpl{as}
 }
 
+// TODO: Add change email and password admin for first login
+
 func (ah *AdminHandlerImpl) GenerateRandomPassword(ctx *gin.Context) {
 	pass, err := ah.as.GenerateRandomPassword()
 	if err != nil {
