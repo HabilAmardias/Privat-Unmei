@@ -22,6 +22,22 @@ func CreateAdditionalCostService(
 	return &AdditionalCostServiceImpl{acr, ar, tmr}
 }
 
+func (acs *AdditionalCostServiceImpl) DeleteCost(ctx context.Context, param entity.DeleteAdditionalCostParam) error {
+	admin := new(entity.Admin)
+	cost := new(entity.AdditionalCost)
+
+	if err := acs.ar.FindByID(ctx, param.AdminID, admin); err != nil {
+		return err
+	}
+	if err := acs.acr.FindByID(ctx, param.CostID, cost); err != nil {
+		return err
+	}
+	if err := acs.acr.DeleteCost(ctx, param.CostID); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (acs *AdditionalCostServiceImpl) CreateNewAdditionalCost(ctx context.Context, param entity.CreateAdditionalCostParam) (int, error) {
 	admin := new(entity.Admin)
 	id := new(int)

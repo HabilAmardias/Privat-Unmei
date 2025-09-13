@@ -294,6 +294,11 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.AdditionalCostResource,
 		c.RBACRepository,
 	), c.AdditionalCostHandler.UpdateCostAmount)
+	v1.DELETE("/additional-costs/:id", middlewares.AuthorizationMiddleware(
+		constants.DeleteAllPermission,
+		constants.AdditionalCostResource,
+		c.RBACRepository,
+	), c.AdditionalCostHandler.DeleteCost)
 }
 
 func (c *RouteConfig) SetupWebsocketRoute() {

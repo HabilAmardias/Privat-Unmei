@@ -21,4 +21,8 @@ type (
 		CostID  int
 		AdminID string
 	}
+	DeleteAdditionalCostParam struct {
+		CostID  int
+		AdminID string
+	}
 )

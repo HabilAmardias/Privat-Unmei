@@ -19,6 +19,37 @@ func CreateAdditionalCostHandler(acs *services.AdditionalCostServiceImpl) *Addit
 	return &AdditionalCostHandlerImpl{acs}
 }
 
+func (ach *AdditionalCostHandlerImpl) DeleteCost(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	costID, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.Error(customerrors.NewError(
+			"invalid cost",
+			err,
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	param := entity.DeleteAdditionalCostParam{
+		CostID:  costID,
+		AdminID: claim.Subject,
+	}
+	if err := ach.acs.DeleteCost(ctx, param); err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.AdditionalCostIDRes{
+			ID: costID,
+		},
+	})
+}
+
 func (ach *AdditionalCostHandlerImpl) UpdateCostAmount(ctx *gin.Context) {
 	claim, err := getAuthenticationPayload(ctx)
 	if err != nil {

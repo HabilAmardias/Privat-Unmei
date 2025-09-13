@@ -17,6 +17,29 @@ func CreateAdditionalCostRepository(db *db.CustomDB) *AdditionalCostRepositoryIm
 	return &AdditionalCostRepositoryImpl{db}
 }
 
+func (acr *AdditionalCostRepositoryImpl) DeleteCost(ctx context.Context, id int) error {
+	var driver RepoDriver = acr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE additional_costs
+	SET
+		deleted_at = CURRENT_TIMESTAMP,
+		updated_at = CURRENT_TIMESTAMP
+	WHERE id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, id)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to delete cost",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (acr *AdditionalCostRepositoryImpl) UpdateCostAmount(ctx context.Context, id int, amount *float64) error {
 	var driver RepoDriver = acr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
