@@ -182,6 +182,8 @@ func (crh *CourseRequestHandlerImpl) MentorCourseRequestDetail(ctx *gin.Context)
 		NumberOfSessions:    detail.NumberOfSessions,
 		Status:              detail.Status,
 		ExpiredAt:           detail.ExpiredAt,
+		PaymentMethod:       detail.PaymentMethod,
+		AccountNumber:       detail.AccountNumber,
 		NumberOfParticipant: detail.NumberOfParticipant,
 		Schedules:           []dtos.CourseScheduleRes{},
 	}

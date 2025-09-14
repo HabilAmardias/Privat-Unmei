@@ -86,6 +86,8 @@ type (
 		TotalPrice          float64
 		Subtotal            float64
 		OperationalCost     float64
+		PaymentMethod       string
+		AccountNumber       string
 		NumberOfSessions    int
 		Status              string
 		ExpiredAt           *time.Time
