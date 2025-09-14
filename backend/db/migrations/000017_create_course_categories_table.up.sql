@@ -5,3 +5,5 @@ CREATE TABLE course_categories (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMPTZ
 );
+
+CREATE INDEX idx_categories_gin ON course_categories USING GIN (name gin_trgm_ops);

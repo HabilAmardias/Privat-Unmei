@@ -89,7 +89,7 @@ func (ar *AdminRepositoryImpl) FindByID(ctx context.Context, id string, admin *e
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return customerrors.NewError(
-				customerrors.UserNotFound,
+				"user not found",
 				err,
 				customerrors.ItemNotExist,
 			)

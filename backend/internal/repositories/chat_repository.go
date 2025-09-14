@@ -76,7 +76,7 @@ func (chr *ChatRepositoryImpl) GetChatroom(ctx context.Context, mentorID string,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return customerrors.NewError(
-				customerrors.ChatroomNotFound,
+				"chatroom not found",
 				err,
 				customerrors.ItemNotExist,
 			)
@@ -321,7 +321,7 @@ func (chr *ChatRepositoryImpl) FindByID(ctx context.Context, chatroomID int, cha
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return customerrors.NewError(
-				customerrors.ChatroomNotFound,
+				"chatroom not found",
 				err,
 				customerrors.ItemNotExist,
 			)

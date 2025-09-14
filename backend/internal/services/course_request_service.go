@@ -144,6 +144,8 @@ func (crs *CourseRequestServiceImpl) MentorCourseRequestDetail(ctx context.Conte
 	student := new(entity.Student)
 	schedules := new([]entity.CourseRequestSchedule)
 	res := new(entity.MentorCourseRequestDetailQuery)
+	mentorPaymentInfo := new(entity.MentorPayment)
+	paymentMethod := new(entity.PaymentMethod)
 
 	if err := crs.crr.FindByID(ctx, param.CourseRequestID, courseRequest); err != nil {
 		return nil, err
@@ -182,6 +184,13 @@ func (crs *CourseRequestServiceImpl) MentorCourseRequestDetail(ctx context.Conte
 		)
 	}
 
+	if err := crs.pr.FindPaymentMethodByID(ctx, courseRequest.PaymentMethodID, paymentMethod); err != nil {
+		return nil, err
+	}
+	if err := crs.pr.GetPaymentInfoByMentorAndMethodID(ctx, course.MentorID, courseRequest.PaymentMethodID, mentorPaymentInfo); err != nil {
+		return nil, err
+	}
+
 	res.CourseRequestID = courseRequest.ID
 	res.CourseName = course.Title
 	res.StudentName = userStudent.Name
@@ -190,6 +199,8 @@ func (crs *CourseRequestServiceImpl) MentorCourseRequestDetail(ctx context.Conte
 	res.Subtotal = courseRequest.SubTotal
 	res.OperationalCost = courseRequest.OperationalCost
 	res.NumberOfSessions = courseRequest.NumberOfSessions
+	res.PaymentMethod = paymentMethod.Name
+	res.AccountNumber = mentorPaymentInfo.AccountNumber
 	res.Status = courseRequest.Status
 	res.NumberOfParticipant = courseRequest.NumberOfParticipant
 	res.ExpiredAt = courseRequest.ExpiredAt

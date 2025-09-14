@@ -12,14 +12,10 @@ type (
 	CreateCategoryReq struct {
 		Name string `json:"name" binding:"required"`
 	}
-	CreateCategoryRes struct {
-		ID   int    `json:"id"`
-		Name string `json:"name"`
-	}
 	UpdateCategoryReq struct {
 		Name *string `json:"name"`
 	}
-	UpdateCategoryRes struct {
+	CategoryIDRes struct {
 		ID int `json:"id"`
 	}
 )

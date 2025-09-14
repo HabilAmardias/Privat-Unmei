@@ -17,6 +17,20 @@ func CreateUserRepository(db *db.CustomDB) *UserRepositoryImpl {
 	return &UserRepositoryImpl{db}
 }
 
+func (ur *UserRepositoryImpl) HardDeleteUser(ctx context.Context, id string) error {
+	var driver RepoDriver
+	driver = ur.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	DELETE FROM users
+	WHERE id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, id)
+	return err
+}
+
 func (ur *UserRepositoryImpl) UpdateUserProfile(ctx context.Context, queryEntity *entity.UpdateUserQuery, id string) error {
 	var driver RepoDriver
 	driver = ur.DB
@@ -145,7 +159,7 @@ func (ur *UserRepositoryImpl) FindByID(ctx context.Context, id string, user *ent
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return customerrors.NewError(
-				customerrors.UserNotFound,
+				"user not found",
 				err,
 				customerrors.ItemNotExist,
 			)
@@ -184,7 +198,7 @@ func (ur *UserRepositoryImpl) FindByEmail(ctx context.Context, email string, use
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return customerrors.NewError(
-				customerrors.UserNotFound,
+				"user not found",
 				err,
 				customerrors.ItemNotExist,
 			)

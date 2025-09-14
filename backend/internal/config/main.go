@@ -10,6 +10,7 @@ import (
 	"privat-unmei/internal/db"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/logger"
+	"privat-unmei/internal/redis"
 	"privat-unmei/internal/upgrader"
 	"strconv"
 	"syscall"
@@ -34,7 +35,7 @@ func Run() {
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-
+	rc := redis.ConnectRedis()
 	driver, err := db.ConnectDB(zl)
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -47,7 +48,7 @@ func Run() {
 	hub := entity.CreateChatHub()
 	go hub.Run()
 
-	Bootstrap(driver, zl, app, upg, hub)
+	Bootstrap(driver, rc, zl, app, upg, hub)
 
 	port := ":" + os.Getenv("SERVER_PORT")
 	server := &http.Server{

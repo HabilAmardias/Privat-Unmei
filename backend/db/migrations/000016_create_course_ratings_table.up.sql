@@ -8,3 +8,5 @@ CREATE TABLE course_ratings (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMPTZ
 );
+
+CREATE INDEX idx_course_ratings ON course_ratings (student_id,course_id);

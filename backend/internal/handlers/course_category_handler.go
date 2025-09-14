@@ -20,6 +20,37 @@ func CreateCourseCategoryHandler(ccs *services.CourseCategoryServiceImpl) *Cours
 	return &CourseCategoryHandlerImpl{ccs}
 }
 
+func (cch *CourseCategoryHandlerImpl) DeleteCategory(ctx *gin.Context) {
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.Error(customerrors.NewError(
+			"invalid category",
+			err,
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.DeleteCategoryParam{
+		AdminID: claim.Subject,
+		ID:      id,
+	}
+	if err := cch.ccs.DeleteCategory(ctx, param); err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.CategoryIDRes{
+			ID: id,
+		},
+	})
+}
+
 func (cch *CourseCategoryHandlerImpl) UpdateCategory(ctx *gin.Context) {
 	var req dtos.UpdateCategoryReq
 	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
@@ -52,7 +83,7 @@ func (cch *CourseCategoryHandlerImpl) UpdateCategory(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
-		Data: dtos.UpdateCategoryRes{
+		Data: dtos.CategoryIDRes{
 			ID: id,
 		},
 	})
@@ -80,9 +111,8 @@ func (cch *CourseCategoryHandlerImpl) CreateCategory(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusCreated, dtos.Response{
 		Success: true,
-		Data: dtos.CreateCategoryRes{
-			ID:   newCategory.ID,
-			Name: newCategory.Name,
+		Data: dtos.CategoryIDRes{
+			ID: newCategory.ID,
 		},
 	})
 }

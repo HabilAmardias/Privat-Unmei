@@ -42,4 +42,8 @@ type (
 		CategoryID   int
 		CategoryName string
 	}
+	DeleteCategoryParam struct {
+		ID      int
+		AdminID string
+	}
 )

@@ -1,1 +1,2 @@
+DROP INDEX IF EXISTS idx_topics;
 DROP TABLE IF EXISTS topics;

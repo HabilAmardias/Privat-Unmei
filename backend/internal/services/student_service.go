@@ -138,7 +138,9 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 	user := new(entity.User)
 	student := new(entity.Student)
 	if err := us.ur.FindByEmail(ctx, email, user); err != nil {
-		if err.Error() == customerrors.UserNotFound {
+		var parsedErr *customerrors.CustomError
+		errors.As(err, &parsedErr)
+		if parsedErr.ErrCode == customerrors.ItemNotExist {
 			pass, err := generateRandomPassword()
 			if err != nil {
 				return "", customerrors.NewError(
@@ -216,7 +218,18 @@ func (us *StudentServiceImpl) UpdateStudentProfile(ctx context.Context, param en
 func (us *StudentServiceImpl) GetStudentList(ctx context.Context, param entity.ListStudentParam) (*[]entity.ListStudentQuery, *int64, error) {
 	students := new([]entity.ListStudentQuery)
 	totalRow := new(int64)
+	user := new(entity.User)
 	admin := new(entity.Admin)
+	if err := us.ur.FindByID(ctx, param.AdminID, user); err != nil {
+		return nil, nil, err
+	}
+	if user.Status == constants.UnverifiedStatus {
+		return nil, nil, customerrors.NewError(
+			"unauthorized",
+			errors.New("admin is not verified"),
+			customerrors.Unauthenticate,
+		)
+	}
 	if err := us.ar.FindByID(ctx, param.AdminID, admin); err != nil {
 		return nil, nil, err
 	}
@@ -368,7 +381,7 @@ func (us *StudentServiceImpl) Login(ctx context.Context, param entity.StudentLog
 		if err := us.ur.FindByEmail(ctx, param.Email, user); err != nil {
 			var parsedErr *customerrors.CustomError
 			if errors.As(err, &parsedErr) {
-				if parsedErr.ErrUser == customerrors.UserNotFound {
+				if parsedErr.ErrCode == customerrors.ItemNotExist {
 					return customerrors.NewError(
 						"invalid email or password",
 						parsedErr.ErrLog,
@@ -405,13 +418,16 @@ func (us *StudentServiceImpl) Register(ctx context.Context, param entity.Student
 
 	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := us.ur.FindByEmail(ctx, param.Email, user); err != nil {
-			if err.Error() != customerrors.UserNotFound {
-				return err
+			var parsedErr *customerrors.CustomError
+			if errors.As(err, &parsedErr) {
+				if parsedErr.ErrCode != customerrors.ItemNotExist {
+					return err
+				}
 			}
 		} else {
 			return customerrors.NewError(
 				"user already exist",
-				customerrors.ErrItemAlreadyExist,
+				errors.New("user already exist"),
 				customerrors.ItemAlreadyExist,
 			)
 		}

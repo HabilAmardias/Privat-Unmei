@@ -1,7 +1,5 @@
 package customerrors
 
-import "errors"
-
 const (
 	ItemAlreadyExist       int = 4001
 	ItemNotExist           int = 4041
@@ -9,16 +7,6 @@ const (
 	CommonErr              int = 5002
 	InvalidAction          int = 4002
 	Unauthenticate         int = 4011
-)
-
-const (
-	UserNotFound     = "user not found"
-	ChatroomNotFound = "chatroom does not exist"
-)
-
-var (
-	ErrRecordNotFound   = errors.New("record not found")
-	ErrItemAlreadyExist = errors.New("item already exist")
 )
 
 type CustomError struct {

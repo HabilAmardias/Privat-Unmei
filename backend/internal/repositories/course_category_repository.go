@@ -20,6 +20,54 @@ func CreateCourseCategoryRepository(db *db.CustomDB) *CourseCategoryRepositoryIm
 	return &CourseCategoryRepositoryImpl{db}
 }
 
+func (ccr *CourseCategoryRepositoryImpl) DeleteCategory(ctx context.Context, categoryID int) error {
+	var driver RepoDriver
+	driver = ccr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE course_categories
+	SET
+		deleted_at = CURRENT_TIMESTAMP,
+		updated_at = CURRENT_TIMESTAMP
+	WHERE id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, categoryID)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to delete category",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (ccr *CourseCategoryRepositoryImpl) UnassignCategoriesByCategoryID(ctx context.Context, categoryID int) error {
+	var driver RepoDriver
+	driver = ccr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE course_category_assignments
+	SET
+		deleted_at = CURRENT_TIMESTAMP,
+		updated_at = CURRENT_TIMESTAMP
+	WHERE category_id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, categoryID)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to delete category",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (ccr *CourseCategoryRepositoryImpl) GetCategoriesByCourseID(ctx context.Context, courseID int, categories *[]entity.GetCategoriesQuery) error {
 	var driver RepoDriver
 	driver = ccr.DB

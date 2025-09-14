@@ -65,4 +65,5 @@ VALUES
 (1, 3, 11), -- admin can read all additional cost
 (1, 5, 11), -- admin can update all additional cost amount
 (1, 7, 11), -- admin can delete all additional cost amount
-(1, 4, 12); -- admin can update their own profile
+(1, 4, 12), -- admin can update their own profile
+(1, 7, 3); -- admin can delete all course category

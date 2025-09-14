@@ -39,6 +39,5 @@ CREATE TABLE IF NOT EXISTS rbac(
   FOREIGN KEY (permission_id) REFERENCES permissions(id),
   FOREIGN KEY (resource_id) REFERENCES resources(id)
 );
-
-
+CREATE INDEX idx_rbac ON rbac (role_id, permission_id, resource_id);
 COMMIT;

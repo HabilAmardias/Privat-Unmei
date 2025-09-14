@@ -1,3 +1,5 @@
+CREATE EXTENSION pg_trgm;
+
 CREATE TABLE users (
     id UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
@@ -10,3 +12,6 @@ CREATE TABLE users (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMPTZ
 );
+
+CREATE INDEX idx_username_gin ON users USING GIN (name gin_trgm_ops);
+CREATE INDEX idx_useremail_gin ON users USING GIN (email gin_trgm_ops);

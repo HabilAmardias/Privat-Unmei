@@ -15,3 +15,6 @@ CREATE TABLE course_requests (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMPTZ
 );
+
+CREATE INDEX idx_course_request_student ON course_requests (student_id);
+CREATE INDEX idx_course_request_course ON course_requests (course_id);

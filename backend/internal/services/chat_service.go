@@ -45,8 +45,11 @@ func (chs *ChatServiceImpl) CreateChatroom(ctx context.Context, param entity.Cre
 			return err
 		}
 		if err := chs.chr.GetChatroom(ctx, param.MentorID, param.StudentID, chatroom); err != nil {
-			if err.Error() != customerrors.ChatroomNotFound {
-				return err
+			var parsedErr *customerrors.CustomError
+			if errors.As(err, &parsedErr) {
+				if parsedErr.ErrCode != customerrors.ItemNotExist {
+					return err
+				}
 			}
 		} else {
 			return customerrors.NewError(

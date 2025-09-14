@@ -7,6 +7,7 @@ import (
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
+	"privat-unmei/internal/logger"
 	"privat-unmei/internal/repositories"
 	"privat-unmei/internal/utils"
 )
@@ -26,6 +27,7 @@ type MentorServiceImpl struct {
 	ju  *utils.JWTUtil
 	cu  *utils.CloudinaryUtil
 	gu  *utils.GomailUtil
+	lg  logger.CustomLogger
 }
 
 func CreateMentorService(
@@ -43,8 +45,9 @@ func CreateMentorService(
 	ju *utils.JWTUtil,
 	cu *utils.CloudinaryUtil,
 	gu *utils.GomailUtil,
+	lg logger.CustomLogger,
 ) *MentorServiceImpl {
-	return &MentorServiceImpl{tmr, ur, mr, tr, ccr, car, crr, cr, pr, ar, bu, ju, cu, gu}
+	return &MentorServiceImpl{tmr, ur, mr, tr, ccr, car, crr, cr, pr, ar, bu, ju, cu, gu, lg}
 }
 
 func (ms *MentorServiceImpl) GetDOWAvailability(ctx context.Context, param entity.GetDOWAvailabilityParam) (*[]int, error) {
@@ -207,15 +210,17 @@ func (ms *MentorServiceImpl) Login(ctx context.Context, param entity.LoginMentor
 	token := new(string)
 	if err := ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := ms.ur.FindByEmail(ctx, param.Email, user); err != nil {
-			parsedErr := err.(*customerrors.CustomError)
-			if parsedErr.ErrUser == customerrors.UserNotFound {
-				return customerrors.NewError(
-					"invalid email or password",
-					errors.New("invalid email or password"),
-					customerrors.InvalidAction,
-				)
+			var parsedErr *customerrors.CustomError
+			if errors.As(err, &parsedErr) {
+				if parsedErr.ErrCode == customerrors.ItemNotExist {
+					return customerrors.NewError(
+						"invalid email or password",
+						errors.New("invalid email or password"),
+						customerrors.InvalidAction,
+					)
+				}
+				return err
 			}
-			return err
 		}
 		if err := ms.mr.FindByID(ctx, user.ID, mentor, false); err != nil {
 			return err
@@ -242,6 +247,17 @@ func (ms *MentorServiceImpl) Login(ctx context.Context, param entity.LoginMentor
 func (ms *MentorServiceImpl) GetMentorList(ctx context.Context, param entity.ListMentorParam) (*[]entity.ListMentorQuery, *int64, error) {
 	mentors := new([]entity.ListMentorQuery)
 	totalRow := new(int64)
+	user := new(entity.User)
+	if err := ms.ur.FindByID(ctx, param.UserID, user); err != nil {
+		return nil, nil, err
+	}
+	if user.Status == constants.UnverifiedStatus {
+		return nil, nil, customerrors.NewError(
+			"unauthorized",
+			errors.New("user is not verified yet"),
+			customerrors.Unauthenticate,
+		)
+	}
 	if err := ms.mr.GetMentorList(ctx, mentors, totalRow, param); err != nil {
 		return nil, nil, err
 	}
@@ -251,11 +267,22 @@ func (ms *MentorServiceImpl) GetMentorList(ctx context.Context, param entity.Lis
 func (ms *MentorServiceImpl) DeleteMentor(ctx context.Context, param entity.DeleteMentorParam) error {
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
+	userAdmin := new(entity.User)
 	admin := new(entity.Admin)
 	maxTransactionCount := new(int64)
 	courseIDs := new([]int)
 
 	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := ms.ur.FindByID(ctx, param.AdminID, userAdmin); err != nil {
+			return err
+		}
+		if userAdmin.Status == constants.UnverifiedStatus {
+			return customerrors.NewError(
+				"unauthorized",
+				errors.New("admin is not verified"),
+				customerrors.Unauthenticate,
+			)
+		}
 		if err := ms.ar.FindByID(ctx, param.AdminID, admin); err != nil {
 			return err
 		}
@@ -411,21 +438,35 @@ func (ms *MentorServiceImpl) UpdateMentorForAdmin(ctx context.Context, param ent
 
 func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddNewMentorParam) error {
 	user := new(entity.User)
+	userAdmin := new(entity.User)
 	mentor := new(entity.Mentor)
 	admin := new(entity.Admin)
 
 	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := ms.ur.FindByID(ctx, param.AdminID, userAdmin); err != nil {
+			return err
+		}
+		if userAdmin.Status == constants.UnverifiedStatus {
+			return customerrors.NewError(
+				"unauthorized",
+				errors.New("admin is unverified"),
+				customerrors.Unauthenticate,
+			)
+		}
 		if err := ms.ar.FindByID(ctx, param.AdminID, admin); err != nil {
 			return err
 		}
 		if err := ms.ur.FindByEmail(ctx, param.Email, user); err != nil {
-			if err.Error() != customerrors.UserNotFound {
-				return err
+			var parsedErr *customerrors.CustomError
+			if errors.As(err, &parsedErr) {
+				if parsedErr.ErrCode != customerrors.ItemNotExist {
+					return err
+				}
 			}
 		} else {
 			return customerrors.NewError(
 				"user already exist",
-				customerrors.ErrItemAlreadyExist,
+				errors.New("user already exist"),
 				customerrors.ItemAlreadyExist,
 			)
 		}
@@ -480,14 +521,34 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 		if err := ms.pr.AssignPaymentMethodToMentor(ctx, mentor.ID, param.MentorPayments); err != nil {
 			return err
 		}
-		emailParam := entity.SendEmailParams{
-			Receiver:  param.Email,
-			Subject:   "Login Credentials - Privat Unmei",
-			EmailBody: constants.SendMentorAccEmailBody(param.Email, param.Password),
-		}
-		if err := ms.gu.SendEmail(emailParam); err != nil {
-			return err
-		}
+		go func() {
+			emailParam := entity.SendEmailParams{
+				Receiver:  param.Email,
+				Subject:   "Login Credentials - Privat Unmei",
+				EmailBody: constants.SendMentorAccEmailBody(param.Email, param.Password),
+			}
+			if err := ms.gu.SendEmail(emailParam); err != nil {
+				ms.lg.Errorln(err.Error())
+				newCtx := context.Background()
+				if tErr := ms.tmr.WithTransaction(newCtx, func(ctx context.Context) error {
+					if err := ms.pr.HardDeleteMentorPayment(ctx, mentor.ID); err != nil {
+						return err
+					}
+					if err := ms.car.HardDeleteAvailability(ctx, mentor.ID); err != nil {
+						return err
+					}
+					if err := ms.mr.HardDeleteMentor(ctx, mentor.ID); err != nil {
+						return err
+					}
+					if err := ms.ur.HardDeleteUser(ctx, user.ID); err != nil {
+						return err
+					}
+					return nil
+				}); tErr != nil {
+					ms.lg.Errorln(tErr.Error())
+				}
+			}
+		}()
 
 		return nil
 	})
