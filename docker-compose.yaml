@@ -23,91 +23,91 @@ services:
     depends_on:
       database:
         condition: service_healthy
-  # migrate:
-  #   build:
-  #     dockerfile: ./backend/Dockerfile.migrate
-  #   env_file:
-  #     - backend/.env
-  #   restart: "no"
-  #   depends_on:
-  #     database:
-  #       condition: service_healthy
-  # backend:
-  #   build:
-  #     dockerfile: ./backend/Dockerfile.web
-  #   depends_on:
-  #     database:
-  #       condition: service_healthy
-  #   env_file:
-  #     - backend/.env
-  #   ports:
-  #     - "8080:8080"
-  #   restart: unless-stopped
+  migrate:
+    build:
+      dockerfile: ./backend/Dockerfile.migrate
+    env_file:
+      - backend/.env
+    restart: "no"
+    depends_on:
+      database:
+        condition: service_healthy
+  backend:
+    build:
+      dockerfile: ./backend/Dockerfile.web
+    depends_on:
+      database:
+        condition: service_healthy
+    env_file:
+      - backend/.env
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
 
-  # cron:
-  #   build:
-  #     dockerfile: ./backend/Dockerfile.cron
-  #   env_file:
-  #     - backend/.env
-  #   depends_on:
-  #     - backend
-  # postgres-exporter:
-  #   image: prometheuscommunity/postgres-exporter
-  #   container_name: postgres-exporter
-  #   restart: always
-  #   ports:
-  #     - "9187:9187"
-  #   env_file:
-  #     - backend/.env
-  #   depends_on:
-  #     database:
-  #       condition: service_healthy
+  cron:
+    build:
+      dockerfile: ./backend/Dockerfile.cron
+    env_file:
+      - backend/.env
+    depends_on:
+      - backend
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter
+    container_name: postgres-exporter
+    restart: always
+    ports:
+      - "9187:9187"
+    env_file:
+      - backend/.env
+    depends_on:
+      database:
+        condition: service_healthy
 
-  # loki:
-  #   image: grafana/loki:latest
-  #   restart: unless-stopped
-  #   ports:
-  #     - 3100:3100
-  #   command: -config.file=/etc/loki/loki-config.yaml
-  #   volumes:
-  #     - ./backend/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
-  #     - loki-data:/loki
+  loki:
+    image: grafana/loki:latest
+    restart: unless-stopped
+    ports:
+      - 3100:3100
+    command: -config.file=/etc/loki/loki-config.yaml
+    volumes:
+      - ./backend/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      - loki-data:/loki
 
-  # promtail:
-  #   image: grafana/promtail:latest
-  #   restart: unless-stopped
-  #   user: root
-  #   ports:
-  #     - "9080:9080"
-  #   volumes:
-  #     - ./backend/promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml:ro
-  #     - /var/run/docker.sock:/var/run/docker.sock:ro 
-  #   depends_on:
-  #     - loki
-  #   command: -config.file=/etc/promtail/promtail-config.yaml
+  promtail:
+    image: grafana/promtail:latest
+    restart: unless-stopped
+    user: root
+    ports:
+      - "9080:9080"
+    volumes:
+      - ./backend/promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro 
+    depends_on:
+      - loki
+    command: -config.file=/etc/promtail/promtail-config.yaml
 
-  # prometheus:
-  #   image: prom/prometheus:latest
-  #   restart: unless-stopped
-  #   container_name: prometheus
-  #   ports:
-  #     - "9090:9090"
-  #   volumes:
-  #     - ./backend/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml:ro
-  #   depends_on:
-  #     - postgres-exporter
-  #     - backend
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./backend/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - postgres-exporter
+      - backend
 
-  # grafana:
-  #   image: grafana/grafana
-  #   restart: unless-stopped
-  #   ports:
-  #     - 3000:3000
-  #   depends_on:
-  #     - loki
-  #     - prometheus
-  #   volumes:
-  #     - grafana-storage:/var/lib/grafana
+  grafana:
+    image: grafana/grafana
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    depends_on:
+      - loki
+      - prometheus
+    volumes:
+      - grafana-storage:/var/lib/grafana
 
 volumes:
   privat-unmei-data:
