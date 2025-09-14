@@ -183,6 +183,13 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		c.RBACCacheRepository,
 		c.Logger,
 	), c.CourseCategoryHandler.UpdateCategory)
+	v1.DELETE("/course-categories/:id", middlewares.AuthorizationMiddleware(
+		constants.DeleteAllPermission,
+		constants.CourseCategoryResource,
+		c.RBACRepository,
+		c.RBACCacheRepository,
+		c.Logger,
+	), c.CourseCategoryHandler.DeleteCategory)
 	v1.POST("/mentors/me/change-password", middlewares.AuthorizationMiddleware(
 		constants.UpdateOwnPermission,
 		constants.MentorResource,

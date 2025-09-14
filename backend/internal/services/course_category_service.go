@@ -20,6 +20,37 @@ func CreateCourseCategoryService(ur *repositories.UserRepositoryImpl, ar *reposi
 	return &CourseCategoryServiceImpl{ur, ar, ccr, tmr}
 }
 
+func (ccs *CourseCategoryServiceImpl) DeleteCategory(ctx context.Context, param entity.DeleteCategoryParam) error {
+	admin := new(entity.Admin)
+	user := new(entity.User)
+	category := new(entity.CourseCategory)
+	return ccs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := ccs.ur.FindByID(ctx, param.AdminID, user); err != nil {
+			return err
+		}
+		if user.Status == constants.UnverifiedStatus {
+			return customerrors.NewError(
+				"unauthorized",
+				errors.New("admin is not verified"),
+				customerrors.Unauthenticate,
+			)
+		}
+		if err := ccs.ar.FindByID(ctx, param.AdminID, admin); err != nil {
+			return err
+		}
+		if err := ccs.ccr.FindByID(ctx, param.ID, category); err != nil {
+			return err
+		}
+		if err := ccs.ccr.UnassignCategoriesByCategoryID(ctx, param.ID); err != nil {
+			return err
+		}
+		if err := ccs.ccr.DeleteCategory(ctx, param.ID); err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
 func (ccs *CourseCategoryServiceImpl) GetCategoriesList(ctx context.Context, param entity.ListCourseCategoryParam) (*[]entity.ListCourseCategoryQuery, *int64, error) {
 	categories := new([]entity.ListCourseCategoryQuery)
 	totalRow := new(int64)
