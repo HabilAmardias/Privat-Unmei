@@ -88,7 +88,7 @@ func (mr *MentorRepositoryImpl) GetMentorList(ctx context.Context, mentors *[]en
 	if err := row.Scan(totalRow); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return customerrors.NewError(
-				customerrors.UserNotFound,
+				"user not found",
 				err,
 				customerrors.ItemNotExist,
 			)
@@ -173,7 +173,7 @@ func (mr *MentorRepositoryImpl) FindByID(ctx context.Context, id string, mentor 
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return customerrors.NewError(
-				customerrors.UserNotFound,
+				"user not found",
 				err,
 				customerrors.ItemNotExist,
 			)

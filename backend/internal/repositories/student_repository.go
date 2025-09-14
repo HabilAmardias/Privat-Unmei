@@ -45,7 +45,7 @@ func (sr *StudentRepositoryImpl) GetStudentList(ctx context.Context, totalRow *i
 	if err := row.Scan(totalRow); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return customerrors.NewError(
-				customerrors.UserNotFound,
+				"user not found",
 				err,
 				customerrors.ItemNotExist,
 			)
@@ -156,7 +156,7 @@ func (sr *StudentRepositoryImpl) FindByID(ctx context.Context, id string, studen
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return customerrors.NewError(
-				customerrors.UserNotFound,
+				"user not found",
 				err,
 				customerrors.ItemNotExist,
 			)

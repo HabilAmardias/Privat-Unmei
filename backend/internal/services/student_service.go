@@ -138,7 +138,9 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 	user := new(entity.User)
 	student := new(entity.Student)
 	if err := us.ur.FindByEmail(ctx, email, user); err != nil {
-		if err.Error() == customerrors.UserNotFound {
+		var parsedErr *customerrors.CustomError
+		errors.As(err, &parsedErr)
+		if parsedErr.ErrCode == customerrors.ItemNotExist {
 			pass, err := generateRandomPassword()
 			if err != nil {
 				return "", customerrors.NewError(
@@ -368,7 +370,7 @@ func (us *StudentServiceImpl) Login(ctx context.Context, param entity.StudentLog
 		if err := us.ur.FindByEmail(ctx, param.Email, user); err != nil {
 			var parsedErr *customerrors.CustomError
 			if errors.As(err, &parsedErr) {
-				if parsedErr.ErrUser == customerrors.UserNotFound {
+				if parsedErr.ErrCode == customerrors.ItemNotExist {
 					return customerrors.NewError(
 						"invalid email or password",
 						parsedErr.ErrLog,
@@ -405,13 +407,16 @@ func (us *StudentServiceImpl) Register(ctx context.Context, param entity.Student
 
 	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := us.ur.FindByEmail(ctx, param.Email, user); err != nil {
-			if err.Error() != customerrors.UserNotFound {
-				return err
+			var parsedErr *customerrors.CustomError
+			if errors.As(err, &parsedErr) {
+				if parsedErr.ErrCode != customerrors.ItemNotExist {
+					return err
+				}
 			}
 		} else {
 			return customerrors.NewError(
 				"user already exist",
-				customerrors.ErrItemAlreadyExist,
+				errors.New("user already exist"),
 				customerrors.ItemAlreadyExist,
 			)
 		}

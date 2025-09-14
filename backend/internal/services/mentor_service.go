@@ -210,15 +210,17 @@ func (ms *MentorServiceImpl) Login(ctx context.Context, param entity.LoginMentor
 	token := new(string)
 	if err := ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := ms.ur.FindByEmail(ctx, param.Email, user); err != nil {
-			parsedErr := err.(*customerrors.CustomError)
-			if parsedErr.ErrUser == customerrors.UserNotFound {
-				return customerrors.NewError(
-					"invalid email or password",
-					errors.New("invalid email or password"),
-					customerrors.InvalidAction,
-				)
+			var parsedErr *customerrors.CustomError
+			if errors.As(err, &parsedErr) {
+				if parsedErr.ErrCode == customerrors.ItemNotExist {
+					return customerrors.NewError(
+						"invalid email or password",
+						errors.New("invalid email or password"),
+						customerrors.InvalidAction,
+					)
+				}
+				return err
 			}
-			return err
 		}
 		if err := ms.mr.FindByID(ctx, user.ID, mentor, false); err != nil {
 			return err
@@ -422,13 +424,16 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 			return err
 		}
 		if err := ms.ur.FindByEmail(ctx, param.Email, user); err != nil {
-			if err.Error() != customerrors.UserNotFound {
-				return err
+			var parsedErr *customerrors.CustomError
+			if errors.As(err, &parsedErr) {
+				if parsedErr.ErrCode != customerrors.ItemNotExist {
+					return err
+				}
 			}
 		} else {
 			return customerrors.NewError(
 				"user already exist",
-				customerrors.ErrItemAlreadyExist,
+				errors.New("user already exist"),
 				customerrors.ItemAlreadyExist,
 			)
 		}

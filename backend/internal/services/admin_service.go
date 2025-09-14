@@ -120,7 +120,7 @@ func (as *AdminServiceImpl) Login(ctx context.Context, param entity.AdminLoginPa
 		if err := as.ur.FindByEmail(ctx, param.Email, user); err != nil {
 			var parsedErr *customerrors.CustomError
 			if errors.As(err, &parsedErr) {
-				if parsedErr.ErrUser == customerrors.UserNotFound {
+				if parsedErr.ErrCode == customerrors.ItemNotExist {
 					return customerrors.NewError(
 						"invalid email or password",
 						parsedErr.ErrLog,

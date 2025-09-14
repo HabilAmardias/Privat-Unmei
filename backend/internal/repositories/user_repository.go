@@ -159,7 +159,7 @@ func (ur *UserRepositoryImpl) FindByID(ctx context.Context, id string, user *ent
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return customerrors.NewError(
-				customerrors.UserNotFound,
+				"user not found",
 				err,
 				customerrors.ItemNotExist,
 			)
@@ -198,7 +198,7 @@ func (ur *UserRepositoryImpl) FindByEmail(ctx context.Context, email string, use
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return customerrors.NewError(
-				customerrors.UserNotFound,
+				"user not found",
 				err,
 				customerrors.ItemNotExist,
 			)
