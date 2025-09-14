@@ -8,4 +8,5 @@ datadown:
 	docker volume prune --force && \
 	docker volume rm privat-unmei_grafana-storage && \
 	docker volume rm privat-unmei_privat-unmei-data && \
-	docker volume rm privat-unmei_loki-data
+	docker volume rm privat-unmei_loki-data && \
+	docker volume rm privat-unmei_redis-data
