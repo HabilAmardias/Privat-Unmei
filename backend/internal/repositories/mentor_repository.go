@@ -18,6 +18,20 @@ func CreateMentorRepositoryImpl(db *db.CustomDB) *MentorRepositoryImpl {
 	return &MentorRepositoryImpl{db}
 }
 
+func (mr *MentorRepositoryImpl) HardDeleteMentor(ctx context.Context, id string) error {
+	var driver RepoDriver
+	driver = mr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	DELETE FROM mentors
+	WHERE id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, id)
+	return err
+}
+
 func (mr *MentorRepositoryImpl) GetMentorList(ctx context.Context, mentors *[]entity.ListMentorQuery, totalRow *int64, param entity.ListMentorParam) error {
 	var driver RepoDriver
 	driver = mr.DB

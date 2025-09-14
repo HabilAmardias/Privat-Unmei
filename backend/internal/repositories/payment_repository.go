@@ -18,6 +18,20 @@ func CreatePaymentRepository(db *db.CustomDB) *PaymentRepositoryImpl {
 	return &PaymentRepositoryImpl{db}
 }
 
+func (pr *PaymentRepositoryImpl) HardDeleteMentorPayment(ctx context.Context, mentorID string) error {
+	var driver RepoDriver
+	driver = pr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	DELETE FROM mentor_payments
+	WHERE mentor_id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, mentorID)
+	return err
+}
+
 func (pr *PaymentRepositoryImpl) GetMentorPaymentMethod(
 	ctx context.Context,
 	mentorID string,

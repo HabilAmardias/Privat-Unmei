@@ -7,6 +7,7 @@ import (
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
+	"privat-unmei/internal/logger"
 	"privat-unmei/internal/repositories"
 	"privat-unmei/internal/utils"
 )
@@ -26,6 +27,7 @@ type MentorServiceImpl struct {
 	ju  *utils.JWTUtil
 	cu  *utils.CloudinaryUtil
 	gu  *utils.GomailUtil
+	lg  logger.CustomLogger
 }
 
 func CreateMentorService(
@@ -43,8 +45,9 @@ func CreateMentorService(
 	ju *utils.JWTUtil,
 	cu *utils.CloudinaryUtil,
 	gu *utils.GomailUtil,
+	lg logger.CustomLogger,
 ) *MentorServiceImpl {
-	return &MentorServiceImpl{tmr, ur, mr, tr, ccr, car, crr, cr, pr, ar, bu, ju, cu, gu}
+	return &MentorServiceImpl{tmr, ur, mr, tr, ccr, car, crr, cr, pr, ar, bu, ju, cu, gu, lg}
 }
 
 func (ms *MentorServiceImpl) GetDOWAvailability(ctx context.Context, param entity.GetDOWAvailabilityParam) (*[]int, error) {
@@ -480,14 +483,34 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 		if err := ms.pr.AssignPaymentMethodToMentor(ctx, mentor.ID, param.MentorPayments); err != nil {
 			return err
 		}
-		emailParam := entity.SendEmailParams{
-			Receiver:  param.Email,
-			Subject:   "Login Credentials - Privat Unmei",
-			EmailBody: constants.SendMentorAccEmailBody(param.Email, param.Password),
-		}
-		if err := ms.gu.SendEmail(emailParam); err != nil {
-			return err
-		}
+		go func() {
+			emailParam := entity.SendEmailParams{
+				Receiver:  param.Email,
+				Subject:   "Login Credentials - Privat Unmei",
+				EmailBody: constants.SendMentorAccEmailBody(param.Email, param.Password),
+			}
+			if err := ms.gu.SendEmail(emailParam); err != nil {
+				ms.lg.Errorln(err.Error())
+				newCtx := context.Background()
+				if tErr := ms.tmr.WithTransaction(newCtx, func(ctx context.Context) error {
+					if err := ms.pr.HardDeleteMentorPayment(ctx, mentor.ID); err != nil {
+						return err
+					}
+					if err := ms.car.HardDeleteAvailability(ctx, mentor.ID); err != nil {
+						return err
+					}
+					if err := ms.mr.HardDeleteMentor(ctx, mentor.ID); err != nil {
+						return err
+					}
+					if err := ms.ur.HardDeleteUser(ctx, user.ID); err != nil {
+						return err
+					}
+					return nil
+				}); tErr != nil {
+					ms.lg.Errorln(tErr.Error())
+				}
+			}
+		}()
 
 		return nil
 	})

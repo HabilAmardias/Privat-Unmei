@@ -20,6 +20,20 @@ func CreateCourseAvailabilityRepository(db *db.CustomDB) *MentorAvailabilityRepo
 	return &MentorAvailabilityRepositoryImpl{db}
 }
 
+func (car *MentorAvailabilityRepositoryImpl) HardDeleteAvailability(ctx context.Context, mentorID string) error {
+	var driver RepoDriver
+	driver = car.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	DELETE FROM mentor_availability
+	WHERE mentor_id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, mentorID)
+	return err
+}
+
 func (car *MentorAvailabilityRepositoryImpl) GetDOWAvailability(ctx context.Context, mentorID string, dows *[]int) error {
 	var driver RepoDriver
 	driver = car.DB
