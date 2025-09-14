@@ -14,7 +14,7 @@ type (
 		Password string `json:"password" binding:"required,containsany=!@#?,min=8"`
 	}
 	AdminUpdatePasswordReq struct {
-		Password *string `json:"password" binding:"omitempty,containsany=!@#?,min=8"`
+		Password string `json:"password" binding:"required,containsany=!@#?,min=8"`
 	}
 	GetStudentListReq struct {
 		PaginatedReq

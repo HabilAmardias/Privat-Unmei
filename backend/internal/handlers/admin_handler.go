@@ -17,7 +17,32 @@ func CreateAdminHandler(as *services.AdminServiceImpl) *AdminHandlerImpl {
 	return &AdminHandlerImpl{as}
 }
 
-// TODO: Add change email and password admin for first login
+func (ah *AdminHandlerImpl) ChangePassword(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	var req dtos.AdminUpdatePasswordReq
+	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.AdminUpdatePasswordParam{
+		AdminID:  claim.Subject,
+		Password: req.Password,
+	}
+	if err := ah.as.UpdatePassword(ctx, param); err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.AdminIDRes{
+			ID: param.AdminID,
+		},
+	})
+}
 
 func (ah *AdminHandlerImpl) VerifyAdmin(ctx *gin.Context) {
 	claim, err := getAuthenticationPayload(ctx)

@@ -20,6 +20,6 @@ type (
 	}
 	AdminUpdatePasswordParam struct {
 		AdminID  string
-		Password *string
+		Password string
 	}
 )

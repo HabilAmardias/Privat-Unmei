@@ -309,6 +309,11 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.AdminResource,
 		c.RBACRepository,
 	), c.AdminHandler.VerifyAdmin)
+	v1.POST("/admins/me/change-password", middlewares.AuthorizationMiddleware(
+		constants.UpdateOwnPermission,
+		constants.AdminResource,
+		c.RBACRepository,
+	), c.AdminHandler.ChangePassword)
 }
 
 func (c *RouteConfig) SetupWebsocketRoute() {
