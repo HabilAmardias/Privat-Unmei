@@ -6,15 +6,17 @@ import (
 	"privat-unmei/internal/handlers"
 	"privat-unmei/internal/logger"
 	"privat-unmei/internal/repositories"
+	"privat-unmei/internal/repositories/cache"
 	"privat-unmei/internal/routers"
 	"privat-unmei/internal/services"
 	"privat-unmei/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/redis/go-redis/v9"
 )
 
-func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine, upg *websocket.Upgrader, chatHub *entity.ChatHub) {
+func Bootstrap(db *db.CustomDB, rc *redis.Client, logger logger.CustomLogger, app *gin.Engine, upg *websocket.Upgrader, chatHub *entity.ChatHub) {
 	userRepo := repositories.CreateUserRepository(db)
 	studentRepo := repositories.CreateStudentRepository(db)
 	adminRepo := repositories.CreateAdminRepository(db)
@@ -32,6 +34,7 @@ func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine, upg
 	paymentRepo := repositories.CreatePaymentRepository(db)
 	discountRepo := repositories.CreateDiscountRepository(db)
 	additionalCostRepo := repositories.CreateAdditionalCostRepository(db)
+	rbaccache := cache.CreateRBACCache(rc)
 
 	bcryptUtil := utils.CreateBcryptUtil()
 	gomailUtil := utils.CreateGomailUtil()
@@ -77,6 +80,7 @@ func Bootstrap(db *db.CustomDB, logger logger.CustomLogger, app *gin.Engine, upg
 		DiscountHandler:       discountHandler,
 		AdditionalCostHandler: additionalCostHandler,
 		RBACRepository:        rbacRepo,
+		RBACCacheRepository:   rbaccache,
 		TokenUtil:             jwtUtil,
 		Logger:                logger,
 	}

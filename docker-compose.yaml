@@ -13,6 +13,16 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+  redis:
+    image: redis
+    ports:
+      - "6378:6379"
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    depends_on:
+      database:
+        condition: service_healthy
   # migrate:
   #   build:
   #     dockerfile: ./backend/Dockerfile.migrate
@@ -103,3 +113,4 @@ volumes:
   privat-unmei-data:
   grafana-storage:
   loki-data:
+  redis-data:
