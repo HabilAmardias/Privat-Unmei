@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/repositories"
@@ -10,22 +11,34 @@ import (
 
 type DiscountServiceImpl struct {
 	dr  *repositories.DiscountRepositoryImpl
+	ur  *repositories.UserRepositoryImpl
 	ar  *repositories.AdminRepositoryImpl
 	tmr *repositories.TransactionManagerRepositories
 }
 
 func CreateDiscountService(
 	dr *repositories.DiscountRepositoryImpl,
+	ur *repositories.UserRepositoryImpl,
 	ar *repositories.AdminRepositoryImpl,
 	tmr *repositories.TransactionManagerRepositories,
 ) *DiscountServiceImpl {
-	return &DiscountServiceImpl{dr, ar, tmr}
+	return &DiscountServiceImpl{dr, ur, ar, tmr}
 }
 
 func (ds *DiscountServiceImpl) GetAllDiscount(ctx context.Context, param entity.GetAllDiscountParam) (*[]entity.GetDiscountQuery, *int64, error) {
 	admin := new(entity.Admin)
 	totalRow := new(int64)
 	discounts := new([]entity.GetDiscountQuery)
+	user := new(entity.User)
+	if err := ds.ur.FindByID(ctx, param.AdminID, user); err != nil {
+		if user.Status == constants.UnverifiedStatus {
+			return nil, nil, customerrors.NewError(
+				"unauthenticate",
+				errors.New("admin is not verified"),
+				customerrors.Unauthenticate,
+			)
+		}
+	}
 	if err := ds.ar.FindByID(ctx, param.AdminID, admin); err != nil {
 		return nil, nil, err
 	}
@@ -38,6 +51,17 @@ func (ds *DiscountServiceImpl) GetAllDiscount(ctx context.Context, param entity.
 func (ds *DiscountServiceImpl) DeleteDiscount(ctx context.Context, param entity.DeleteDiscountParam) error {
 	admin := new(entity.Admin)
 	discount := new(entity.Discount)
+	user := new(entity.User)
+	if err := ds.ur.FindByID(ctx, param.AdminID, user); err != nil {
+		return err
+	}
+	if user.Status == constants.UnverifiedStatus {
+		return customerrors.NewError(
+			"unauthenticate",
+			errors.New("admin is not verified"),
+			customerrors.Unauthenticate,
+		)
+	}
 	if err := ds.ar.FindByID(ctx, param.AdminID, admin); err != nil {
 		return err
 	}
@@ -53,6 +77,17 @@ func (ds *DiscountServiceImpl) DeleteDiscount(ctx context.Context, param entity.
 func (ds *DiscountServiceImpl) UpdateDiscountAmount(ctx context.Context, param entity.UpdateDiscountParam) error {
 	admin := new(entity.Admin)
 	discount := new(entity.Discount)
+	user := new(entity.User)
+	if err := ds.ur.FindByID(ctx, param.AdminID, user); err != nil {
+		return err
+	}
+	if user.Status == constants.UnverifiedStatus {
+		return customerrors.NewError(
+			"unauthenticate",
+			errors.New("admin is not verified"),
+			customerrors.Unauthenticate,
+		)
+	}
 	if err := ds.ar.FindByID(ctx, param.AdminID, admin); err != nil {
 		return err
 	}
@@ -69,8 +104,19 @@ func (ds *DiscountServiceImpl) CreateNewDiscount(ctx context.Context, param enti
 	admin := new(entity.Admin)
 	id := new(int)
 	discount := new(entity.Discount)
+	user := new(entity.User)
+	if err := ds.ur.FindByID(ctx, param.AdminID, user); err != nil {
+		return 0, err
+	}
+	if user.Status == constants.UnverifiedStatus {
+		return 0, customerrors.NewError(
+			"unauthenticate",
+			errors.New("admin is not verified"),
+			customerrors.Unauthenticate,
+		)
+	}
 	if err := ds.ar.FindByID(ctx, param.AdminID, admin); err != nil {
-		return 0, nil
+		return 0, err
 	}
 	if err := ds.dr.GetDiscountByNumberOfParticipant(ctx, param.NumberOfParticipant, discount); err != nil {
 		var parsedErr *customerrors.CustomError

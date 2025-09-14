@@ -218,7 +218,18 @@ func (us *StudentServiceImpl) UpdateStudentProfile(ctx context.Context, param en
 func (us *StudentServiceImpl) GetStudentList(ctx context.Context, param entity.ListStudentParam) (*[]entity.ListStudentQuery, *int64, error) {
 	students := new([]entity.ListStudentQuery)
 	totalRow := new(int64)
+	user := new(entity.User)
 	admin := new(entity.Admin)
+	if err := us.ur.FindByID(ctx, param.AdminID, user); err != nil {
+		return nil, nil, err
+	}
+	if user.Status == constants.UnverifiedStatus {
+		return nil, nil, customerrors.NewError(
+			"unauthorized",
+			errors.New("admin is not verified"),
+			customerrors.Unauthenticate,
+		)
+	}
 	if err := us.ar.FindByID(ctx, param.AdminID, admin); err != nil {
 		return nil, nil, err
 	}

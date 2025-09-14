@@ -3,19 +3,21 @@ package services
 import (
 	"context"
 	"errors"
+	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/repositories"
 )
 
 type CourseCategoryServiceImpl struct {
+	ur  *repositories.UserRepositoryImpl
 	ar  *repositories.AdminRepositoryImpl
 	ccr *repositories.CourseCategoryRepositoryImpl
 	tmr *repositories.TransactionManagerRepositories
 }
 
-func CreateCourseCategoryService(ar *repositories.AdminRepositoryImpl, ccr *repositories.CourseCategoryRepositoryImpl, tmr *repositories.TransactionManagerRepositories) *CourseCategoryServiceImpl {
-	return &CourseCategoryServiceImpl{ar, ccr, tmr}
+func CreateCourseCategoryService(ur *repositories.UserRepositoryImpl, ar *repositories.AdminRepositoryImpl, ccr *repositories.CourseCategoryRepositoryImpl, tmr *repositories.TransactionManagerRepositories) *CourseCategoryServiceImpl {
+	return &CourseCategoryServiceImpl{ur, ar, ccr, tmr}
 }
 
 func (ccs *CourseCategoryServiceImpl) GetCategoriesList(ctx context.Context, param entity.ListCourseCategoryParam) (*[]entity.ListCourseCategoryQuery, *int64, error) {
@@ -31,13 +33,26 @@ func (ccs *CourseCategoryServiceImpl) CreateCategory(ctx context.Context, param 
 	category := new(entity.CourseCategory)
 	newCategory := new(entity.CreateCategoryQuery)
 	admin := new(entity.Admin)
+	user := new(entity.User)
 
 	if err := ccs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := ccs.ur.FindByID(ctx, param.AdminID, user); err != nil {
+			return err
+		}
+		if user.Status == constants.UnverifiedStatus {
+			return customerrors.NewError(
+				"unauthenticate",
+				errors.New("admin is not verified"),
+				customerrors.Unauthenticate,
+			)
+		}
 		if err := ccs.ar.FindByID(ctx, param.AdminID, admin); err != nil {
 			return err
 		}
 		if err := ccs.ccr.FindByName(ctx, param.Name, category); err != nil {
-			if err.Error() != "category does not exist" {
+			var parsedErr *customerrors.CustomError
+			errors.As(err, &parsedErr)
+			if parsedErr.ErrCode != customerrors.ItemNotExist {
 				return err
 			}
 		} else {
@@ -61,10 +76,21 @@ func (ccs *CourseCategoryServiceImpl) CreateCategory(ctx context.Context, param 
 func (ccs *CourseCategoryServiceImpl) UpdateCategory(ctx context.Context, param entity.UpdateCategoryParam) error {
 	category := new(entity.CourseCategory)
 	admin := new(entity.Admin)
+	user := new(entity.User)
 	if param.Name == nil {
 		return nil
 	}
 	return ccs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := ccs.ur.FindByID(ctx, param.AdminID, user); err != nil {
+			return err
+		}
+		if user.Status == constants.UnverifiedStatus {
+			return customerrors.NewError(
+				"unauthenticate",
+				errors.New("admin is not verified"),
+				customerrors.Unauthenticate,
+			)
+		}
 		if err := ccs.ar.FindByID(ctx, param.AdminID, admin); err != nil {
 			return err
 		}
@@ -72,7 +98,9 @@ func (ccs *CourseCategoryServiceImpl) UpdateCategory(ctx context.Context, param 
 			return err
 		}
 		if err := ccs.ccr.FindByName(ctx, *param.Name, category); err != nil {
-			if err.Error() != "category does not exist" {
+			var parsedErr *customerrors.CustomError
+			errors.As(err, &parsedErr)
+			if parsedErr.ErrCode != customerrors.ItemNotExist {
 				return err
 			}
 		} else {

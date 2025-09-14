@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/repositories"
@@ -64,6 +65,17 @@ func (ps *PaymentServiceImpl) UpdatePaymentMethod(ctx context.Context, param ent
 	}
 	admin := new(entity.Admin)
 	count := new(int64)
+	user := new(entity.User)
+	if err := ps.ur.FindByID(ctx, param.AdminID, user); err != nil {
+		return err
+	}
+	if user.Status == constants.UnverifiedStatus {
+		return customerrors.NewError(
+			"unauthenticate",
+			errors.New("admin is not verified"),
+			customerrors.Unauthenticate,
+		)
+	}
 	if err := ps.ar.FindByID(ctx, param.AdminID, admin); err != nil {
 		return err
 	}
@@ -86,7 +98,18 @@ func (ps *PaymentServiceImpl) UpdatePaymentMethod(ctx context.Context, param ent
 func (ps *PaymentServiceImpl) DeletePaymentMethod(ctx context.Context, param entity.DeletePaymentMethodParam) error {
 	admin := new(entity.Admin)
 	method := new(entity.PaymentMethod)
+	user := new(entity.User)
 	return ps.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := ps.ur.FindByID(ctx, param.AdminID, user); err != nil {
+			return err
+		}
+		if user.Status == constants.UnverifiedStatus {
+			return customerrors.NewError(
+				"unauthenticate",
+				errors.New("admin is not verified"),
+				customerrors.Unauthenticate,
+			)
+		}
 		if err := ps.ar.FindByID(ctx, param.AdminID, admin); err != nil {
 			return err
 		}
@@ -107,6 +130,17 @@ func (ps *PaymentServiceImpl) CreatePaymentMethod(ctx context.Context, param ent
 	admin := new(entity.Admin)
 	paymentMethod := new(entity.PaymentMethod)
 	count := new(int64)
+	user := new(entity.User)
+	if err := ps.ur.FindByID(ctx, param.AdminID, user); err != nil {
+		return nil, err
+	}
+	if user.Status == constants.UnverifiedStatus {
+		return nil, customerrors.NewError(
+			"unauthenticate",
+			errors.New("admin is not verified"),
+			customerrors.Unauthenticate,
+		)
+	}
 	if err := ps.ar.FindByID(ctx, param.AdminID, admin); err != nil {
 		return nil, err
 	}

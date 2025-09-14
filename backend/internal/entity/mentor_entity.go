@@ -95,6 +95,7 @@ type (
 		PaginatedParam
 		Search               *string
 		SortYearOfExperience *bool
+		UserID               string
 	}
 	LoginMentorParam struct {
 		Email    string

@@ -247,6 +247,17 @@ func (ms *MentorServiceImpl) Login(ctx context.Context, param entity.LoginMentor
 func (ms *MentorServiceImpl) GetMentorList(ctx context.Context, param entity.ListMentorParam) (*[]entity.ListMentorQuery, *int64, error) {
 	mentors := new([]entity.ListMentorQuery)
 	totalRow := new(int64)
+	user := new(entity.User)
+	if err := ms.ur.FindByID(ctx, param.UserID, user); err != nil {
+		return nil, nil, err
+	}
+	if user.Status == constants.UnverifiedStatus {
+		return nil, nil, customerrors.NewError(
+			"unauthorized",
+			errors.New("user is not verified yet"),
+			customerrors.Unauthenticate,
+		)
+	}
 	if err := ms.mr.GetMentorList(ctx, mentors, totalRow, param); err != nil {
 		return nil, nil, err
 	}
@@ -256,11 +267,22 @@ func (ms *MentorServiceImpl) GetMentorList(ctx context.Context, param entity.Lis
 func (ms *MentorServiceImpl) DeleteMentor(ctx context.Context, param entity.DeleteMentorParam) error {
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
+	userAdmin := new(entity.User)
 	admin := new(entity.Admin)
 	maxTransactionCount := new(int64)
 	courseIDs := new([]int)
 
 	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := ms.ur.FindByID(ctx, param.AdminID, userAdmin); err != nil {
+			return err
+		}
+		if userAdmin.Status == constants.UnverifiedStatus {
+			return customerrors.NewError(
+				"unauthorized",
+				errors.New("admin is not verified"),
+				customerrors.Unauthenticate,
+			)
+		}
 		if err := ms.ar.FindByID(ctx, param.AdminID, admin); err != nil {
 			return err
 		}
@@ -416,10 +438,21 @@ func (ms *MentorServiceImpl) UpdateMentorForAdmin(ctx context.Context, param ent
 
 func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddNewMentorParam) error {
 	user := new(entity.User)
+	userAdmin := new(entity.User)
 	mentor := new(entity.Mentor)
 	admin := new(entity.Admin)
 
 	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := ms.ur.FindByID(ctx, param.AdminID, userAdmin); err != nil {
+			return err
+		}
+		if userAdmin.Status == constants.UnverifiedStatus {
+			return customerrors.NewError(
+				"unauthorized",
+				errors.New("admin is unverified"),
+				customerrors.Unauthenticate,
+			)
+		}
 		if err := ms.ar.FindByID(ctx, param.AdminID, admin); err != nil {
 			return err
 		}
