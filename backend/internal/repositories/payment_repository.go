@@ -247,6 +247,11 @@ func (pr *PaymentRepositoryImpl) CreatePaymentMethod(ctx context.Context, paymen
 	INSERT INTO payment_methods (name)
 	VALUES
 	($1)
+	ON CONFLICT (name) 
+	DO UPDATE SET
+		deleted_at = NULL,
+		updated_at = CURRENT_TIMESTAMP,
+		name = EXCLUDED.name
 	RETURNING id, name, created_at, updated_at, deleted_at
 	`
 	if err := driver.QueryRow(query, paymentName).Scan(
