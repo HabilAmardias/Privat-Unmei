@@ -16,4 +16,5 @@ CREATE TABLE course_requests (
     deleted_at TIMESTAMPTZ
 );
 
-CREATE INDEX idx_course_request ON course_requests (student_id, course_id);
+CREATE INDEX idx_course_request_student ON course_requests (student_id);
+CREATE INDEX idx_course_request_course ON course_requests (course_id);
