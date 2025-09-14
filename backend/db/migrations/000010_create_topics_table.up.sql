@@ -7,3 +7,5 @@ CREATE TABLE topics (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMPTZ
 );
+
+CREATE INDEX idx_topics ON topics (course_id);

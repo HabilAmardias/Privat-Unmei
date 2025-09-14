@@ -1,5 +1,7 @@
 BEGIN;
 
+DROP INDEX IF EXISTS idx_rbac;
+
 DROP TABLE IF EXISTS rbac;
 DROP TABLE IF EXISTS resources;
 DROP TABLE IF EXISTS permissions;

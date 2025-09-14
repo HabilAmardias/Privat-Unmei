@@ -16,3 +16,5 @@ CREATE TABLE courses (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMPTZ
 );
+CREATE INDEX idx_courses_mentor ON courses (mentor_id);
+CREATE INDEX idx_courses_gin ON courses USING GIN (title gin_trgm_ops);

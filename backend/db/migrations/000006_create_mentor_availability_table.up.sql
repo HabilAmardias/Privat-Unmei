@@ -9,3 +9,5 @@ CREATE TABLE mentor_availability (
     deleted_at TIMESTAMPTZ,
     UNIQUE(mentor_id, day_of_week, start_time, end_time)
 );
+
+CREATE INDEX idx_mentor_availability ON mentor_availability (mentor_id);
