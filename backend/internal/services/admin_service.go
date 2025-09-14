@@ -36,12 +36,78 @@ func CreateAdminService(
 	return &AdminServiceImpl{ur, ar, sr, mr, tmr, cu, bu, ju, gu}
 }
 
+func (as *AdminServiceImpl) UpdatePassword(ctx context.Context, param entity.AdminUpdatePasswordParam) error {
+	user := new(entity.User)
+	admin := new(entity.Admin)
+	if err := as.ur.FindByID(ctx, param.AdminID, user); err != nil {
+		return err
+	}
+	if user.Status != constants.VerifiedStatus {
+		return customerrors.NewError(
+			"admin is unverified",
+			errors.New("admin is unverified"),
+			customerrors.Unauthenticate,
+		)
+	}
+	if err := as.ar.FindByID(ctx, param.AdminID, admin); err != nil {
+		return err
+	}
+	if match := as.bu.ComparePassword(param.Password, user.Password); match {
+		return customerrors.NewError(
+			"cannot change into same password",
+			errors.New("cannot change into same password"),
+			customerrors.InvalidAction,
+		)
+	}
+	hashedPass, err := as.bu.HashPassword(param.Password)
+	if err != nil {
+		return err
+	}
+	if err := as.ar.ChangePassword(ctx, param.AdminID, hashedPass); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (as *AdminServiceImpl) GenerateRandomPassword() (string, error) {
 	pass, err := generateRandomPassword()
 	if err != nil {
 		return "", customerrors.NewError("failed to generate password", err, customerrors.CommonErr)
 	}
 	return pass, nil
+}
+
+func (as *AdminServiceImpl) VerifyAdmin(ctx context.Context, param entity.AdminVerificationParam) error {
+	user := new(entity.User)
+	admin := new(entity.Admin)
+	if err := as.ur.FindByID(ctx, param.AdminID, user); err != nil {
+		return err
+	}
+	if user.Status == constants.VerifiedStatus {
+		return customerrors.NewError(
+			"admin is already verified",
+			errors.New("admin is already verified"),
+			customerrors.InvalidAction,
+		)
+	}
+	if err := as.ar.FindByID(ctx, param.AdminID, admin); err != nil {
+		return err
+	}
+	if match := as.bu.ComparePassword(param.Password, user.Password); match {
+		return customerrors.NewError(
+			"cannot change into same password",
+			errors.New("cannot change into same password"),
+			customerrors.InvalidAction,
+		)
+	}
+	hashedPass, err := as.bu.HashPassword(param.Password)
+	if err != nil {
+		return err
+	}
+	if err := as.ar.VerifyAdmin(ctx, param.AdminID, param.Email, hashedPass); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (as *AdminServiceImpl) Login(ctx context.Context, param entity.AdminLoginParam) (*string, *string, error) {

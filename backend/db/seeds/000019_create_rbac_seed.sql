@@ -26,7 +26,8 @@ VALUES
 (8, 'payment_method', 'payment method data'),
 (9, 'course_rating', 'course rating data'),
 (10, 'discount', 'discount data'),
-(11, 'additional_cost', 'additional cost data');
+(11, 'additional_cost', 'additional cost data'),
+(12, 'admin', 'admin profile data');
 
 INSERT INTO rbac(role_id, permission_id, resource_id)
 VALUES
@@ -63,4 +64,5 @@ VALUES
 (1, 1, 11), -- admin can create new additional cost
 (1, 3, 11), -- admin can read all additional cost
 (1, 5, 11), -- admin can update all additional cost amount
-(1, 7, 11); -- admin can delete all additional cost amount
+(1, 7, 11), -- admin can delete all additional cost amount
+(1, 4, 12); -- admin can update their own profile

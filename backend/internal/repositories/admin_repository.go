@@ -17,6 +17,56 @@ func CreateAdminRepository(db *db.CustomDB) *AdminRepositoryImpl {
 	return &AdminRepositoryImpl{db}
 }
 
+func (ar *AdminRepositoryImpl) ChangePassword(ctx context.Context, id string, password string) error {
+	var driver RepoDriver
+	driver = ar.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE users
+	SET
+		password_hash = $1,
+		updated_at = CURRENT_TIMESTAMP
+	WHERE id = $2 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, password, id)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to update password",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (ar *AdminRepositoryImpl) VerifyAdmin(ctx context.Context, id string, email string, password string) error {
+	var driver RepoDriver
+	driver = ar.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE users
+	SET
+		email = $1,
+		password_hash = $2,
+		status = 'verified',
+		updated_at = CURRENT_TIMESTAMP
+	WHERE id = $3 AND deleted_at IS NULL AND status = 'unverified'
+	`
+	_, err := driver.Exec(query, email, password, id)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to verify user",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (ar *AdminRepositoryImpl) FindByID(ctx context.Context, id string, admin *entity.Admin) error {
 	var driver RepoDriver
 	driver = ar.DB

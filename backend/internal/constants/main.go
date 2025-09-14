@@ -62,6 +62,7 @@ const (
 	CourseRatingResource
 	DiscountResource
 	AdditionalCostResource
+	AdminResource
 )
 
 const (

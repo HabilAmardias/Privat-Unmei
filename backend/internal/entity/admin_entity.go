@@ -13,4 +13,13 @@ type (
 		Email    string
 		Password string
 	}
+	AdminVerificationParam struct {
+		AdminID  string
+		Email    string
+		Password string
+	}
+	AdminUpdatePasswordParam struct {
+		AdminID  string
+		Password string
+	}
 )
