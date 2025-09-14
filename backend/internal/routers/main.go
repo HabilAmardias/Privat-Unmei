@@ -59,6 +59,7 @@ func (c *RouteConfig) Setup() {
 		AllowMethods:    []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
 		AllowHeaders:    []string{"Content-Type", "Authorization"},
 	}
+	// TODO: Add Global Rate Limiter Middleware and Captcha Middleware for Register endpoint
 	c.App.Use(cors.New(config))
 	c.App.Use(middlewares.PrometheusMiddleware(httpRequestsTotal, httpRequestDuration))
 	c.App.Use(middlewares.LoggerMiddleware(c.Logger))
