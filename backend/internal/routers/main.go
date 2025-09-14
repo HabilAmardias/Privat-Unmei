@@ -304,6 +304,11 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		constants.AdditionalCostResource,
 		c.RBACRepository,
 	), c.AdditionalCostHandler.GetAllAdditionalCost)
+	v1.POST("/admins/me/verify", middlewares.AuthorizationMiddleware(
+		constants.UpdateOwnPermission,
+		constants.AdminResource,
+		c.RBACRepository,
+	), c.AdminHandler.VerifyAdmin)
 }
 
 func (c *RouteConfig) SetupWebsocketRoute() {
