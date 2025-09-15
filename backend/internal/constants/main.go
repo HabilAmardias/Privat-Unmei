@@ -39,6 +39,11 @@ const (
 )
 
 const (
+	RequestPerSecond = 10
+	BurstSize        = 20
+)
+
+const (
 	DefaultLimit  = 15
 	DefaultPage   = 1
 	DefaultLastID = 15
