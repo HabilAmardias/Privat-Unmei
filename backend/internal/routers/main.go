@@ -59,10 +59,8 @@ func (c *RouteConfig) Setup() {
 		AllowMethods:    []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
 		AllowHeaders:    []string{"Content-Type", "Authorization"},
 	}
-	limiters := make(map[string]*middlewares.RateLimiter)
 
 	c.App.Use(cors.New(config))
-	c.App.Use(middlewares.RateLimiterMiddleware(limiters))
 	c.App.Use(middlewares.PrometheusMiddleware(httpRequestsTotal, httpRequestDuration))
 	c.App.Use(middlewares.LoggerMiddleware(c.Logger))
 	c.App.Use(middlewares.ErrorMiddleware(c.Logger))
