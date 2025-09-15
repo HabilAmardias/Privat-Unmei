@@ -329,11 +329,22 @@ func (sh *StudentHandlerImpl) Login(ctx *gin.Context) {
 }
 
 func (sh *StudentHandlerImpl) Register(ctx *gin.Context) {
-	var req dtos.RegisterStudentReq
-
-	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
-		ctx.Error(err)
+	reg, exists := ctx.Get("validated_request")
+	if !exists {
+		ctx.Error(customerrors.NewError(
+			"something went wrong",
+			errors.New("request body not found"),
+			customerrors.CommonErr,
+		))
 		return
+	}
+	req, ok := reg.(dtos.RegisterStudentReq)
+	if !ok {
+		ctx.Error(customerrors.NewError(
+			"invalid request",
+			errors.New("invalid request body"),
+			customerrors.CommonErr,
+		))
 	}
 	param := entity.StudentRegisterParam{
 		Name:     req.Name,

@@ -59,7 +59,7 @@ func (c *RouteConfig) Setup() {
 		AllowMethods:    []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
 		AllowHeaders:    []string{"Content-Type", "Authorization"},
 	}
-	// TODO: Add Global Rate Limiter Middleware and Captcha Middleware for Register endpoint
+
 	c.App.Use(cors.New(config))
 	c.App.Use(middlewares.PrometheusMiddleware(httpRequestsTotal, httpRequestDuration))
 	c.App.Use(middlewares.LoggerMiddleware(c.Logger))
@@ -79,7 +79,7 @@ func (c *RouteConfig) SetupPublicRoute() {
 			Data:    "Welcome to Privat Unmei API",
 		})
 	})
-	v1.POST("/register", c.StudentHandler.Register)
+	v1.POST("/register", middlewares.CaptchaMiddleware(), c.StudentHandler.Register)
 	v1.POST("/login", c.StudentHandler.Login)
 	v1.GET("/verify", middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForVerification), c.StudentHandler.Verify)
 	v1.POST("/reset-password/send", c.StudentHandler.SendResetTokenEmail)

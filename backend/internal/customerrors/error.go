@@ -7,6 +7,7 @@ const (
 	CommonErr              int = 5002
 	InvalidAction          int = 4002
 	Unauthenticate         int = 4011
+	TooManyRequest         int = 4291
 )
 
 type CustomError struct {
