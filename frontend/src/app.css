@@ -5,14 +5,16 @@
 
 
 :root{
-    --text-color: #0F1035;
-    --background--color: #DCF2F1;
+    --dark-color: #0F1035;
+    --secondary-color: #DCF2F1;
+    --primary-color: #7FC7D9;
+    --tertiary-color: #365486;
 }
 
 p{
-    color: var(--text-color);
+    color: var(--dark-color);
 }
 
 body{
-    background-color: var(--background--color);
+    background-color: var(--secondary-color);
 }

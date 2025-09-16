@@ -9,6 +9,6 @@
     let {children, onClick} : ButtonProps = $props()
 </script>
 
-<Button.Root onclick={onClick} class="rounded-md bg-[#365486] p-2 font-light text-sm text-[#DCF2F1] border border-[#365486] hover:border-[#7FC7D9]">
+<Button.Root onclick={onClick} class="rounded-md bg-[var(--tertiary-color)] p-2 font-light text-sm text-[var(--secondary-color)] border border-[--tertiary-color] hover:border-[var(--primary-color)]">
     {@render children()}
 </Button.Root>
