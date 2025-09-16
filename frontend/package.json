@@ -46,6 +46,7 @@
 	},
 	"dependencies": {
 		"@internationalized/date": "^3.9.0",
-		"bits-ui": "^2.9.8"
+		"bits-ui": "^2.9.8",
+		"svelte-french-toast": "^1.2.0"
 	}
 }

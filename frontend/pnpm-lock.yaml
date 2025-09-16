@@ -14,6 +14,9 @@ importers:
       bits-ui:
         specifier: ^2.9.8
         version: 2.9.8(@internationalized/date@3.9.0)(svelte@5.38.10)
+      svelte-french-toast:
+        specifier: ^1.2.0
+        version: 1.2.0(svelte@5.38.10)
     devDependencies:
       '@eslint/compat':
         specifier: ^1.2.5
@@ -1391,11 +1394,21 @@ packages:
       svelte:
         optional: true
 
+  svelte-french-toast@1.2.0:
+    resolution: {integrity: sha512-5PW+6RFX3xQPbR44CngYAP1Sd9oCq9P2FOox4FZffzJuZI2mHOB7q5gJBVnOiLF5y3moVGZ7u2bYt7+yPAgcEQ==}
+    peerDependencies:
+      svelte: ^3.57.0 || ^4.0.0
+
   svelte-toolbelt@0.9.3:
     resolution: {integrity: sha512-HCSWxCtVmv+c6g1ACb8LTwHVbDqLKJvHpo6J8TaqwUme2hj9ATJCpjCPNISR1OCq2Q4U1KT41if9ON0isINQZw==}
     engines: {node: '>=18', pnpm: '>=8.7.0'}
     peerDependencies:
       svelte: ^5.30.2
+
+  svelte-writable-derived@3.1.1:
+    resolution: {integrity: sha512-w4LR6/bYZEuCs7SGr+M54oipk/UQKtiMadyOhW0PTwAtJ/Ai12QS77sLngEcfBx2q4H8ZBQucc9ktSA5sUGZWw==}
+    peerDependencies:
+      svelte: ^3.2.1 || ^4.0.0-next.1 || ^5.0.0-next.94
 
   svelte@5.38.10:
     resolution: {integrity: sha512-UY+OhrWK7WI22bCZ00P/M3HtyWgwJPi9IxSRkoAE2MeAy6kl7ZlZWJZ8RaB+X4KD/G+wjis+cGVnVYaoqbzBqg==}
@@ -2652,11 +2665,20 @@ snapshots:
     optionalDependencies:
       svelte: 5.38.10
 
+  svelte-french-toast@1.2.0(svelte@5.38.10):
+    dependencies:
+      svelte: 5.38.10
+      svelte-writable-derived: 3.1.1(svelte@5.38.10)
+
   svelte-toolbelt@0.9.3(svelte@5.38.10):
     dependencies:
       clsx: 2.1.1
       runed: 0.29.2(svelte@5.38.10)
       style-to-object: 1.0.9
+      svelte: 5.38.10
+
+  svelte-writable-derived@3.1.1(svelte@5.38.10):
+    dependencies:
       svelte: 5.38.10
 
   svelte@5.38.10:
