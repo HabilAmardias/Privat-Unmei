@@ -7,13 +7,14 @@
         rounded?: boolean
     }
     let {height=32, width=32, src, alt, rounded} : imageProps = $props()
-    let containerClass = $state<string>(`h-${height} w-${width} `)
+    let containerStyle = `height: ${height}px; width: ${width}px;`
+    let containerClass = $state<string>(`inline-block overflow-hidden flex-none`)
     if (rounded){
-        containerClass += `rounded-full `
+        containerClass += ` rounded-full `
     }
-    let imageClass = "h-full w-full"
+    let imageClass = "h-full w-full object-cover"
 </script>
 
-<div class={containerClass}>
-    <img class={imageClass} src={src} alt={alt}/>
+<div class={containerClass} style={containerStyle}>
+    <img width={width} height={height} class={imageClass} src={src} alt={alt}/>
 </div>

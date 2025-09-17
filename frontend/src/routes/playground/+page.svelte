@@ -1,6 +1,6 @@
 <script lang="ts">
     import Button from "$lib/components/button/Button.svelte";
-    import Anchor from "$lib/components/button/Anchor.svelte";
+    import Link from "$lib/components/button/Link.svelte";
     import toast, { Toaster } from 'svelte-french-toast';
     import Image from "$lib/components/image/Image.svelte";
     import srcImg from '$lib/images/svelte-welcome.png'
@@ -19,9 +19,16 @@
     <Button onClick={openToastSuccess}>
         Click for success toast
     </Button>
-    <Anchor href="/">
-        Home
-    </Anchor>
+    <span class="bg[var(--secondary-color)] p-2 rounded-md">
+        <Link href="/">
+            Home
+        </Link>
+    </span>
+    <span class="bg-[var(--tertiary-color)] p-2 rounded-md">
+        <Link href="/" inverted={true}>
+            Home
+        </Link>
+    </span>
     <Image src={srcImg} alt="test-image" rounded={true}/>
 </div>
 
