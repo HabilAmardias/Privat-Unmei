@@ -3,12 +3,13 @@
 	import type { Snippet } from "svelte";
     export type ButtonProps = {
         children: Snippet
-        onClick: () => void
+        onClick?: () => void
+        formAction? : string
     }
 
-    let {children, onClick} : ButtonProps = $props()
+    let {children, onClick, formAction} : ButtonProps = $props()
 </script>
 
-<Button.Root onclick={onClick} class="rounded-md bg-[var(--tertiary-color)] p-2 font-light text-sm text-[var(--secondary-color)] border border-[--tertiary-color] hover:border-[var(--primary-color)]">
+<Button.Root formaction={formAction} onclick={onClick} class="rounded-md bg-[var(--tertiary-color)] p-2 font-light text-sm text-[var(--secondary-color)] border border-[--tertiary-color] hover:border-[var(--primary-color)] hover:text-[var(--primary-color)] hover:cursor-pointer">
     {@render children()}
 </Button.Root>
