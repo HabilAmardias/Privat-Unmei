@@ -2,6 +2,7 @@
 	import '../app.css';
 
 	let { children } = $props();
+	import { Toaster } from 'svelte-french-toast';
 </script>
 
 <div class="app">
@@ -9,6 +10,7 @@
 	<main>
 		{@render children()}
 	</main>
+	<Toaster/>
 </div>
 
 <style>
