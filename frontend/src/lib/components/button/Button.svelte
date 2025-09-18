@@ -4,12 +4,13 @@
     export type ButtonProps = {
         children: Snippet
         onClick?: () => void
+        className: string
         formAction? : string
     }
 
-    let {children, onClick, formAction} : ButtonProps = $props()
+    let {children, onClick, formAction, className} : ButtonProps = $props()
 </script>
 
-<Button.Root formaction={formAction} onclick={onClick} class="rounded-md bg-[var(--tertiary-color)] p-2 font-light text-sm text-[var(--secondary-color)] border border-[--tertiary-color] hover:border-[var(--primary-color)] hover:text-[var(--primary-color)] hover:cursor-pointer">
+<Button.Root formaction={formAction} onclick={onClick} class={className}>
     {@render children()}
 </Button.Root>

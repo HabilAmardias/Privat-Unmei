@@ -3,18 +3,13 @@
 	import type { Snippet } from "svelte";
     type anchorProps = {
         href: string
-        inverted?: boolean
+        className: string
         children: Snippet
     }
-    let {href, children, inverted = false} : anchorProps = $props()
-    
-    let anchorClass = $state<string>("text-[var(--tertiary-color)] hover:text-[var(--secondary-color)]")
-    if (inverted){
-        anchorClass = "text-[var(--secondary-color)] hover:text-[var(--tertiary-color)]"
-    }
+    let {href, children, className} : anchorProps = $props()
 </script>
 
 
-<Button.Root href={href} class={anchorClass}>
+<Button.Root href={href} class={className}>
     {@render children()}
 </Button.Root>

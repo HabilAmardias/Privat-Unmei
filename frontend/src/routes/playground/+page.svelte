@@ -3,9 +3,9 @@
     import Link from "$lib/components/button/Link.svelte";
     import toast from 'svelte-french-toast';
     import Image from "$lib/components/image/Image.svelte";
-    import srcImg from '$lib/images/svelte-welcome.png'
 	import Menubar from "$lib/components/menubar/Menubar.svelte";
 	import Menu from "$lib/components/menubar/Menu.svelte";
+    import imageSrc from "$lib/images/svelte-welcome.png"
 
     function openToastSuccess(){
         toast.success("Success!",{
@@ -15,31 +15,31 @@
 </script>
 
 <div>
-    <Button>
+    <Button className="bg-[var(--tertiary-color)] p-2 text-[var(--secondary-color)] hover:text-[var(--primary-color)] cursor-pointer rounded-md">
         Button Example
     </Button>
-    <Button onClick={openToastSuccess}>
+    <Button className="bg-[var(--tertiary-color)] p-2 text-[var(--secondary-color)] hover:text-[var(--primary-color)] cursor-pointer rounded-md" onClick={openToastSuccess}>
         Click for success toast
     </Button>
     <span class="bg[var(--secondary-color)] p-2 rounded-md">
-        <Link href="/">
+        <Link className="text-[var(--tertiary-color)] hover:text-[var(--primary-color)]" href="/">
             Home
         </Link>
     </span>
     <span class="bg-[var(--tertiary-color)] p-2 rounded-md">
-        <Link href="/" inverted={true}>
+        <Link href="/" className="text-[var(--secondary-color)] hover:text-[var(--primary-color)]">
             Home
         </Link>
     </span>
-    <Image src={srcImg} alt="test-image" rounded={true}/>
-    <Menubar>
+    <Image src={imageSrc} alt="test-image" className="rounded-full" height={32} width={32}/>
+    <Menubar className="bg-[var(--tertiary-color)] p-2 flex gap-1">
         <Menu separator={true}>
-            <Link href="/home" inverted={true}>
+            <Link href="/home" className="text-[var(--secondary-color)] hover:text-[var(--primary-color)]">
                 Home
             </Link>
         </Menu>
         <Menu>
-            <Link href="/playground" inverted={true}>
+            <Link href="/playground" className="text-[var(--secondary-color)] hover:text-[var(--primary-color)]">
                 Playground
             </Link>
         </Menu>

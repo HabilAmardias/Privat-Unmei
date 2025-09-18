@@ -3,10 +3,11 @@
 	import type { Snippet } from "svelte";
     type menubarProps = {
         children: Snippet
+        className: string
     }
-    let {children} : menubarProps = $props()
+    let {children, className} : menubarProps = $props()
 </script>
 
-<Menubar.Root class="bg-[var(--tertiary-color)] p-2 flex gap-1">
+<Menubar.Root class={className}>
     {@render children()}
 </Menubar.Root>
