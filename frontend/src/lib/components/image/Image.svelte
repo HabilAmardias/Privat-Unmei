@@ -12,7 +12,7 @@
 </script>
 
 <div class={className} style={containerStyle}>
-    <img style:display={isLoading? "none" : "inline"} class="h-full w-full object-cover" src={src} alt={alt} onload={() =>{
+    <img style:display={isLoading? "none" : "inline"} class="h-full w-full object-cover" src={src} alt={alt} height={height} width={width} onload={() =>{
             isLoading = false
         }}/>
     {#if isLoading}
