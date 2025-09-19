@@ -45,5 +45,5 @@
             </Link>
         </Menu>
     </Menubar>
-    <Datepicker label="test" />
+    <Datepicker dows={[0,1,2]} label="Pick Your Reservation Date" />
 </div>
