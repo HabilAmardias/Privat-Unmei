@@ -4,14 +4,18 @@
         width?: number
         src: string
         alt?: string
-        className: string
+        round?: "sm" | "full" | "lg"
     }
-    let {height=32, width=32, src, alt, className} : imageProps = $props()
+    let {height=32, width=32, src, alt, round} : imageProps = $props()
     let containerStyle = `height: ${height}px; width: ${width}px;`
+    let containerClass = $state<string>("")
+    if (round){
+        containerClass = `rounded-${round} overflow-hidden`
+    }
     let isLoading = $state<boolean>(true)
 </script>
 
-<div class={className} style={containerStyle}>
+<div class={containerClass} style={containerStyle}>
     <img style:display={isLoading? "none" : "inline"} class="h-full w-full object-cover" src={src} alt={alt} height={height} width={width} onload={() =>{
             isLoading = false
         }}/>

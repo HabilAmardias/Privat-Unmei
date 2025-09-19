@@ -5,8 +5,13 @@
         alt?: string
         width?: number
         height?: number
+        round? :"sm" | "lg" | "full"
     }
-    let {src, alt, width = 32, height = 32} : cldImageProps = $props()
+    let {src, alt, width = 32, height = 32, round} : cldImageProps = $props()
+    let className = $state<string>("")
+    if (round){
+        className = `rounded-${round}`
+    }
 </script>
 
 <CldImage
@@ -14,4 +19,5 @@
     alt={alt}
     width={width}
     height={height}
+    class={className}
 />

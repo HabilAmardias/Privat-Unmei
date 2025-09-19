@@ -3,10 +3,16 @@
 	import type { Snippet } from "svelte";
     type anchorProps = {
         href: string
-        className: string
         children: Snippet
+        theme?: "light" | "dark"
     }
-    let {href, children, className} : anchorProps = $props()
+    let {href, children, theme = "light"} : anchorProps = $props()
+
+    let className = $state<string>("text-[var(--secondary-color)] hover:text-[var(--primary-color)]")
+    if(theme === "dark"){
+        className = "text-[var(--tertiary-color)] hover:text-[var(--primary-color)]"
+    }
+
 </script>
 
 

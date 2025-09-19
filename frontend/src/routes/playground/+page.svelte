@@ -6,6 +6,7 @@
 	import Menubar from "$lib/components/menubar/Menubar.svelte";
 	import Menu from "$lib/components/menubar/Menu.svelte";
     import imageSrc from "$lib/images/svelte-welcome.png"
+	import Datepicker from "$lib/components/calendar/Datepicker.svelte";
 
     function openToastSuccess(){
         toast.success("Success!",{
@@ -15,33 +16,34 @@
 </script>
 
 <div>
-    <Button className="bg-[var(--tertiary-color)] p-2 text-[var(--secondary-color)] hover:text-[var(--primary-color)] cursor-pointer rounded-md">
+    <Button>
         Button Example
     </Button>
-    <Button className="bg-[var(--tertiary-color)] p-2 text-[var(--secondary-color)] hover:text-[var(--primary-color)] cursor-pointer rounded-md" onClick={openToastSuccess}>
+    <Button onClick={openToastSuccess}>
         Click for success toast
     </Button>
     <span class="bg[var(--secondary-color)] p-2 rounded-md">
-        <Link className="text-[var(--tertiary-color)] hover:text-[var(--primary-color)]" href="/">
+        <Link theme="dark" href="/">
             Home
         </Link>
     </span>
     <span class="bg-[var(--tertiary-color)] p-2 rounded-md">
-        <Link href="/" className="text-[var(--secondary-color)] hover:text-[var(--primary-color)]">
+        <Link href="/">
             Home
         </Link>
     </span>
-    <Image src={imageSrc} alt="test-image" className="rounded-full" height={32} width={32}/>
-    <Menubar className="bg-[var(--tertiary-color)] p-2 flex gap-1">
+    <Image src={imageSrc} alt="test-image" height={256} width={256} round="full"/>
+    <Menubar>
         <Menu separator={true}>
-            <Link href="/home" className="text-[var(--secondary-color)] hover:text-[var(--primary-color)]">
+            <Link href="/">
                 Home
             </Link>
         </Menu>
         <Menu>
-            <Link href="/playground" className="text-[var(--secondary-color)] hover:text-[var(--primary-color)]">
+            <Link href="/playground">
                 Playground
             </Link>
         </Menu>
     </Menubar>
+    <Datepicker label="test" />
 </div>
