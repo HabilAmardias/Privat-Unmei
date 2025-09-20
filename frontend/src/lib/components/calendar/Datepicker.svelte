@@ -6,15 +6,16 @@
 	type datePickerProps = {
 		label: string;
 		dows: number[];
+    onChange?: (date: DateValue | undefined) => void
 	};
-	let { label, dows }: datePickerProps = $props();
+	let { label, dows, onChange }: datePickerProps = $props();
 
 	function disabledDates(date: DateValue){
 		return !dows.includes(getDayOfWeek(date, 'id-ID'))
 	}
 </script>
 
-<DatePicker.Root isDateDisabled={disabledDates} weekdayFormat="short" fixedWeeks={true}>
+<DatePicker.Root onValueChange={onChange} isDateDisabled={disabledDates} weekdayFormat="short" fixedWeeks={true}>
   <div class="flex w-full max-w-[232px] flex-col gap-1.5">
     <DatePicker.Label class="block select-none text-sm font-medium"
       >{label}</DatePicker.Label

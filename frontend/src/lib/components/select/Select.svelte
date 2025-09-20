@@ -1,0 +1,64 @@
+<script lang="ts">
+  import { Select } from "bits-ui";
+  import { Check, ChevronsUpDown, ChevronsDown, ChevronsUp } from "@lucide/svelte";
+
+  type selectProps = {
+    value: string
+    options: {value: string, label: string}[]
+    onChange?: (val: string) => void
+  }
+
+  let {value, options, onChange} : selectProps = $props()
+ 
+  const selectedLabel = $derived(
+    value
+      ? options.find((opt) => opt.value === value)?.label
+      : "Select one of the option"
+  );
+</script>
+ 
+<Select.Root
+  type="single"
+  onValueChange={onChange}
+  items={options}
+  allowDeselect={true}
+>
+  <Select.Trigger
+    class="text-[var(--secondary-color)] bg-[var(--tertiary-color)] border-[var(--tertiary-color)] rounded-lg p-3 h-input rounded-9px border-border-input bg-background data-placeholder:text-foreground-alt/50 inline-flex w-[296px] touch-none select-none items-center border px-[11px] text-sm transition-colors"
+    aria-label="Select a theme"
+  >
+    {selectedLabel}
+    <ChevronsUpDown class="cursor-pointer hover:text-[var(--primary-color)] text-muted-foreground ml-auto size-6" />
+  </Select.Trigger>
+  <Select.Portal>
+    <Select.Content
+      class="bg-[var(--tertiary-color)] focus-override border-muted bg-background shadow-popover data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 outline-hidden z-50 h-96 max-h-[var(--bits-select-content-available-height)] w-[var(--bits-select-anchor-width)] min-w-[var(--bits-select-anchor-width)] select-none rounded-xl border px-1 py-3 data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1"
+      sideOffset={10}
+    >
+      <Select.ScrollUpButton class="flex w-full items-center justify-center">
+        <ChevronsUp class="size-3 text-[var(--secondary-color)]" />
+      </Select.ScrollUpButton>
+      <Select.Viewport class="p-1">
+        {#each options as opt, i (i + opt.value)}
+          <Select.Item
+            class="text-[var(--secondary-color)] cursor-pointer hover:text-[var(--primary-color)] rounded-button data-highlighted:bg-muted outline-hidden data-disabled:opacity-50 data-disabled:text-[var(--secondary-color)] data-disabled:cursor-not-allowed flex h-10 w-full select-none items-center py-3 pl-5 pr-1.5 text-sm capitalize"
+            value={opt.value}
+            label={opt.label}
+          >
+            {#snippet children({ selected })}
+              {opt.label}
+              {#if selected}
+                <div class="ml-auto">
+                  <Check aria-label="check" />
+                </div>
+              {/if}
+            {/snippet}
+          </Select.Item>
+        {/each}
+      </Select.Viewport>
+      <Select.ScrollDownButton class="flex w-full items-center justify-center">
+        <ChevronsDown class="size-3 text-[var(--secondary-color)]" />
+      </Select.ScrollDownButton>
+    </Select.Content>
+  </Select.Portal>
+</Select.Root>

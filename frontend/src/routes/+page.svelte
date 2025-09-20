@@ -1,6 +1,7 @@
 <script lang="ts">
 	import welcome from '$lib/images/svelte-welcome.webp';
 	import welcomeFallback from '$lib/images/svelte-welcome.png';
+	import Link from '$lib/components/button/Link.svelte';
 </script>
 
 <svelte:head>
@@ -20,9 +21,7 @@
 		to your new<br />SvelteKit app
 	</h1>
 
-	<h2>
-		try editing <strong>src/routes/+page.svelte</strong>
-	</h2>
+	<Link href="/playground" theme="dark">Playground</Link>
 </section>
 
 <style>
