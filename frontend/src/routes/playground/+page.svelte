@@ -9,11 +9,15 @@
 	import Datepicker from '$lib/components/calendar/Datepicker.svelte';
 	import RatingGroup from '$lib/components/rating/RatingGroup.svelte';
 	import Select from '$lib/components/select/Select.svelte';
-	import Combobox from '$lib/components/search/Combobox.svelte';
+	import Search from '$lib/components/search/Search.svelte';
+	import Pagination from '$lib/components/pagination/Pagination.svelte';
+	import AlertDialog from '$lib/components/dialog/AlertDialog.svelte';
+	import Dialog from '$lib/components/dialog/Dialog.svelte';
 
 	let selectedValue = $state<string>('');
-    let keyword = $state<string>("");
-    let searchValue = $state<string>("");
+	let keyword = $state<string>('');
+	let searchValue = $state<string>('');
+	let openAlert = $state<boolean>(false);
 
 	function openToastSuccess() {
 		toast.success('Success!', {
@@ -21,17 +25,29 @@
 		});
 	}
 
+	function rateOnChange(num: number){
+		console.log(num)
+	}
+
 	function selectOnChange(val: string) {
 		selectedValue = val;
 		console.log($state.snapshot(selectedValue));
 	}
 
-    function searchOnChange(val :string){
-        searchValue = val
-        console.log($state.snapshot(searchValue))
-    }
+	function searchOnChange(val: string) {
+		searchValue = val;
+		console.log($state.snapshot(searchValue));
+	}
 
-    const searchLabel = "Search"
+	function alertOnSubmit(e: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement }) {
+		e.preventDefault();
+		openAlert = false;
+	}
+
+	function pageOnChange(num: number){
+		console.log(num)
+	}
+
 	const themes = [
 		{ value: 'light-monochrome', label: 'Light Monochrome' },
 		{ value: 'dark-green', label: 'Dark Green' },
@@ -57,6 +73,22 @@
 	];
 </script>
 
+{#snippet alertTitle()}
+	Confirm your action
+{/snippet}
+
+{#snippet alertDescription()}
+	Are you sure you want to do this?
+{/snippet}
+
+{#snippet dialogTitle()}
+	Title Test
+{/snippet}
+
+{#snippet dialogDescription()}
+	Test description
+{/snippet}
+
 <div>
 	<Button>Button Example</Button>
 	<Button onClick={openToastSuccess}>Click for success toast</Button>
@@ -67,6 +99,7 @@
 		<Link href="/">Home</Link>
 	</span>
 	<Image src={imageSrc} alt="test-image" height={256} width={256} round="full" />
+
 	<Menubar>
 		<Menu separator={true}>
 			<Link href="/">Home</Link>
@@ -75,19 +108,40 @@
 			<Link href="/playground">Playground</Link>
 		</Menu>
 	</Menubar>
+
 	<Datepicker
 		onChange={(date) => console.log(date?.toString())}
 		dows={[0, 1, 2]}
 		label="Pick Your Reservation Date"
 	/>
-	<RatingGroup onChange={(rate) => console.log(rate)} />
-	<Select 
-    options={themes} 
-    value={selectedValue} 
-    onChange={selectOnChange} />
-	<Combobox 
-    keyword={keyword} 
-    label={searchLabel} 
-    items={themes}
-    onValueChange={searchOnChange}/>
+
+	<RatingGroup onChange={rateOnChange} />
+
+	<Select options={themes} value={selectedValue} onChange={selectOnChange} />
+
+	<Search
+		{keyword}
+		label="Search"
+		items={themes}
+		onValueChange={searchOnChange}
+		onKeywordChange={(e) => console.log(e.currentTarget.value)}
+	/>
+
+	<Search
+		{keyword}
+		label="Search without Dropdown"
+		onKeywordChange={(e) => console.log(e.currentTarget.value)}
+	/>
+
+	<Pagination onPageChange={pageOnChange} count={100} perPage={15} />
+
+	<AlertDialog
+		bind:open={openAlert}
+		onSubmit={alertOnSubmit}
+		description={alertDescription}
+		title={alertTitle}
+	>
+		Submit
+	</AlertDialog>
+	<Dialog dialogTitle={dialogTitle} dialogContent={dialogDescription}>Test</Dialog>
 </div>
