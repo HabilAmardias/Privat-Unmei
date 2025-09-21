@@ -5,7 +5,6 @@ type (
 		Name         string `json:"name" binding:"required"`
 		Email        string `json:"email" binding:"required,email"`
 		Password     string `json:"password" binding:"required,containsany=!@#?,min=8"`
-		Bio          string `json:"bio" binding:"required"`
 		CaptchaToken string `json:"captcha_token" binding:"required"`
 	}
 	LoginStudentReq struct {

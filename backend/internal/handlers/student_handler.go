@@ -350,7 +350,6 @@ func (sh *StudentHandlerImpl) Register(ctx *gin.Context) {
 		Name:     req.Name,
 		Email:    req.Email,
 		Password: req.Password,
-		Bio:      req.Bio,
 		Status:   constants.UnverifiedStatus,
 	}
 	if err := sh.ss.Register(ctx, param); err != nil {

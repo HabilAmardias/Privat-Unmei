@@ -1,56 +1,43 @@
 <script lang="ts">
-	import welcome from '$lib/images/svelte-welcome.webp';
-	import welcomeFallback from '$lib/images/svelte-welcome.png';
-	import Link from '$lib/components/button/Link.svelte';
+	import Button from '$lib/components/button/Button.svelte';
+	import Card from '$lib/components/card/Card.svelte';
+	import Input from '$lib/components/form/Input.svelte';
+	import InputSecret from '$lib/components/form/InputSecret.svelte';
+	import { View } from './view.svelte';
 </script>
 
 <svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
+	<title>Login</title>
+	<meta name="description" content="Login - Privat Unmei" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </svelte:head>
 
-<section>
-	<h1>
-		<span class="welcome">
-			<picture>
-				<source srcset={welcome} type="image/webp" />
-				<img src={welcomeFallback} alt="Welcome" />
-			</picture>
-		</span>
-
-		to your new<br />SvelteKit app
-	</h1>
-
-	<Link href="/playground" theme="dark">Playground</Link>
-</section>
-
-<style>
-	section {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 0.6;
-	}
-
-	h1 {
-		width: 100%;
-	}
-
-	.welcome {
-		display: block;
-		position: relative;
-		width: 100%;
-		height: 0;
-		padding: 0 0 calc(100% * 495 / 2048) 0;
-	}
-
-	.welcome img {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		top: 0;
-		display: block;
-	}
-</style>
+<div class="flex h-full w-full items-center justify-center">
+	{#if View.cardState === 'Register'}
+		<Card title={View.cardState}>
+			<form action="?/register" method="post" class="flex flex-col gap-4">
+				<Input type="text" name="name" placeholder="Username" id="name" bind:value={View.name} />
+				<Input type="email" name="email" placeholder="email" id="email" bind:value={View.email} />
+				<InputSecret placeholder="Password" name="password" bind:value={View.password} />
+				<InputSecret
+					placeholder="Repeat Password"
+					name="repeat-password"
+					bind:value={View.repeatPassword}
+				/>
+				<div class="flex justify-end px-2">
+					<Button full={true} type="submit" formAction="?/register">Register</Button>
+				</div>
+			</form>
+		</Card>
+	{:else}
+		<Card title={View.cardState}>
+			<form action="?/login" method="post" class="flex flex-col gap-4">
+				<Input type="email" name="email" placeholder="Email" id="email" bind:value={View.email} />
+				<InputSecret placeholder="Password" name="password" bind:value={View.password} />
+				<div class="flex justify-end">
+					<Button full={true} type="submit" formAction="?/login">Login</Button>
+				</div>
+			</form>
+		</Card>
+	{/if}
+</div>

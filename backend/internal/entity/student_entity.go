@@ -18,7 +18,6 @@ type (
 		Name     string
 		Email    string
 		Password string
-		Bio      string
 		Status   string
 	}
 	StudentLoginParam struct {

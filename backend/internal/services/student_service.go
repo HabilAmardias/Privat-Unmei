@@ -432,7 +432,6 @@ func (us *StudentServiceImpl) Register(ctx context.Context, param entity.Student
 			)
 		}
 
-		user.Bio = param.Bio
 		user.Email = param.Email
 		user.Name = param.Name
 		user.Status = param.Status

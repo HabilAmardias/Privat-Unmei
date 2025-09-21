@@ -1,15 +1,24 @@
 <script lang="ts">
-    import { Button } from "bits-ui";
-	import type { Snippet } from "svelte";
-    export type ButtonProps = {
-        children: Snippet
-        onClick?: () => void
-        formAction? : string
-    }
+	import { Button } from 'bits-ui';
+	import type { Snippet } from 'svelte';
+	export type ButtonProps = {
+		children: Snippet;
+		onClick?: () => void;
+		formAction?: string;
+		full?: boolean;
+		type?: 'submit' | 'button' | 'reset' | null;
+	};
 
-    let {children, onClick, formAction} : ButtonProps = $props()
+	let { children, onClick, formAction, type, full = false }: ButtonProps = $props();
+
+	let buttonClass = $state<string>(
+		'cursor-pointer rounded-md bg-[var(--tertiary-color)] p-2 text-[var(--secondary-color)] hover:text-[var(--primary-color)]'
+	);
+	if (full) {
+		buttonClass += ' w-full';
+	}
 </script>
 
-<Button.Root formaction={formAction} onclick={onClick} class="bg-[var(--tertiary-color)] p-2 text-[var(--secondary-color)] hover:text-[var(--primary-color)] cursor-pointer rounded-md">
-    {@render children()}
+<Button.Root {type} formaction={formAction} onclick={onClick} class={buttonClass}>
+	{@render children()}
 </Button.Root>
