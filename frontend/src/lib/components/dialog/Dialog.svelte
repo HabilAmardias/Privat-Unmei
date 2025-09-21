@@ -13,9 +13,9 @@
 
 <Dialog.Root>
 	<Dialog.Trigger
-		class="hover:text-[var(--primary-color)] cursor-pointer rounded-input text-background shadow-mini hover:bg-dark/95 focus-visible:ring-foreground
-	  focus-visible:ring-offset-background focus-visible:outline-hidden inline-flex h-12 items-center
-	  justify-center whitespace-nowrap rounded-lg bg-[var(--tertiary-color)] px-[21px] text-[15px] font-semibold text-[var(--secondary-color)] transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98]"
+		class="rounded-input text-background shadow-mini hover:bg-dark/95 focus-visible:ring-foreground focus-visible:ring-offset-background focus-visible:outline-hidden
+	  inline-flex h-12 cursor-pointer items-center justify-center
+	  whitespace-nowrap rounded-lg bg-[var(--tertiary-color)] px-[21px] text-[15px] font-semibold text-[var(--secondary-color)] transition-colors hover:text-[var(--primary-color)] focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98]"
 	>
 		{@render children()}
 	</Dialog.Trigger>
@@ -40,15 +40,8 @@
 			<div class="flex flex-col items-start gap-1 pb-11 pt-7">
 				{@render dialogContent()}
 			</div>
-			<div class="flex w-full justify-end">
-				<Dialog.Close
-					class="cursor-pointer h-input rounded-input bg-dark text-background shadow-mini hover:bg-dark/95 focus-visible:ring-dark focus-visible:ring-offset-background focus-visible:outline-hidden inline-flex items-center justify-center px-[50px] text-[15px] font-semibold hover:text-[var(--secondary-color)] focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98]"
-				>
-					Close
-				</Dialog.Close>
-			</div>
 			<Dialog.Close
-				class="cursor-pointer focus-visible:ring-foreground focus-visible:ring-offset-background focus-visible:outline-hidden absolute right-5 top-5 rounded-md hover:text-[var(--secondary-color)] focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98]"
+				class="focus-visible:ring-foreground focus-visible:ring-offset-background focus-visible:outline-hidden absolute right-5 top-5 cursor-pointer rounded-md hover:text-[var(--secondary-color)] focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98]"
 			>
 				<div>
 					<X class="text-foreground size-5" />
