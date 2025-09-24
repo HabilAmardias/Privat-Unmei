@@ -1,7 +1,7 @@
 import type { LoginResponse } from './model';
 
 class AuthController {
-	async register(req: Request): Promise<boolean> {
+	async register(req: Request): Promise<{ success: boolean; message: string }> {
 		const formData = await req.formData();
 		const name = formData.get('name');
 		const email = formData.get('email');
@@ -9,22 +9,25 @@ class AuthController {
 		const repeatPassword = formData.get('repeat-password');
 		const token = formData.get('token');
 		if (!email) {
-			return false;
+			return { success: false, message: 'please insert an email' };
 		}
 		if (!this.#validateEmail(email as string)) {
-			return false;
+			return { success: false, message: 'please insert an valid email' };
 		}
 		if (!password) {
-			return false;
+			return { success: false, message: 'please insert an password' };
 		}
 		if (!this.#validatePassword(password as string)) {
-			return false;
+			return {
+				success: false,
+				message: 'password need to be at least 8 characters and contain any @#!?'
+			};
 		}
 		if (repeatPassword !== password) {
-			return false;
+			return { success: false, message: 'both password input are not same' };
 		}
 		if (!name) {
-			return false;
+			return { success: false, message: 'please insert a name' };
 		}
 		const url = 'http://localhost:8080/api/v1/register';
 		const body = JSON.stringify({
@@ -38,9 +41,13 @@ class AuthController {
 			body: body
 		});
 		if (!res.ok) {
-			return false;
+			const data = await res.json();
+			if ('message' in data) {
+				return { success: false, message: data.message as string };
+			}
+			return { success: false, message: 'invalid input' };
 		}
-		return true;
+		return { success: true, message: 'successfully registered' };
 	}
 	async login(req: Request): Promise<{ data: LoginResponse | undefined; success: boolean }> {
 		const formData = await req.formData();

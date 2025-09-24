@@ -8,9 +8,18 @@
 		withBg?: boolean;
 		full?: boolean;
 		type?: 'submit' | 'button' | 'reset' | null;
+		disabled?: boolean;
 	};
 
-	let { children, onClick, formAction, type, full = false, withBg = true }: ButtonProps = $props();
+	let {
+		children,
+		onClick,
+		formAction,
+		type,
+		full = false,
+		withBg = true,
+		disabled
+	}: ButtonProps = $props();
 
 	let buttonClass = $state<string>(
 		'cursor-pointer rounded-md bg-[var(--tertiary-color)] p-2 text-[var(--secondary-color)] hover:text-[var(--primary-color)]'
@@ -24,6 +33,6 @@
 	}
 </script>
 
-<Button.Root {type} formaction={formAction} onclick={onClick} class={buttonClass}>
+<Button.Root {disabled} {type} formaction={formAction} onclick={onClick} class={buttonClass}>
 	{@render children()}
 </Button.Root>

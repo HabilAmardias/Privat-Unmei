@@ -6,13 +6,44 @@
 	import { View } from './view.svelte';
 	import { PUBLIC_RECAPTCHA_SITE_KEY } from '$env/static/public';
 	import { enhance } from '$app/forms';
+	import type { EnhancementArgs, EnhancementReturn } from './model';
+	import toast from 'svelte-french-toast';
 	import type { PageProps } from './$types';
+
+	let { form }: PageProps = $props();
 
 	function switchForm() {
 		View.switchForm();
 	}
 
-	let { data, form }: PageProps = $props();
+	async function onRegisterSubmit(args: EnhancementArgs) {
+		View.setIsLoading(true);
+		const loadID = toast.loading('Creating account....', {
+			position: 'top-right'
+		});
+		await new Promise((resolve) => {
+			grecaptcha.ready(resolve);
+		});
+		const token = await grecaptcha.execute(PUBLIC_RECAPTCHA_SITE_KEY, { action: 'submit' });
+		args.formData.append('token', token);
+
+		return async ({ result, update }: EnhancementReturn) => {
+			View.setIsLoading(false);
+			toast.dismiss(loadID);
+			if (result.type === 'success') {
+				toast.success('Successfully registered', {
+					position: 'top-right'
+				});
+			}
+			if (result.type === 'failure' || result.type === 'error') {
+				toast.error(form!.message, {
+					position: 'top-right'
+				});
+			}
+			View.switchForm();
+			update();
+		};
+	}
 </script>
 
 <svelte:head>
@@ -30,13 +61,7 @@
 				action="?/register"
 				method="post"
 				class="flex flex-col gap-4"
-				use:enhance={async ({ formData }) => {
-					await new Promise((resolve) => {
-						grecaptcha.ready(resolve);
-					});
-					const token = await grecaptcha.execute(PUBLIC_RECAPTCHA_SITE_KEY, { action: 'submit' });
-					formData.append('token', token);
-				}}
+				use:enhance={onRegisterSubmit}
 			>
 				<Input type="text" name="name" placeholder="Username" id="name" bind:value={View.name} />
 				<Input type="email" name="email" placeholder="Email" id="email" bind:value={View.email} />
@@ -52,7 +77,9 @@
 					name="repeat-password"
 					bind:value={View.repeatPassword}
 				/>
-				<Button full={true} type="submit" formAction="?/register">Register</Button>
+				<Button disabled={View.isLoading} full={true} type="submit" formAction="?/register"
+					>Register</Button
+				>
 			</form>
 			<Button withBg={false} onClick={switchForm}>Already have an account?</Button>
 		</Card>
@@ -67,12 +94,11 @@
 					name="password"
 					bind:value={View.password}
 				/>
-				<Button full={true} type="submit" formAction="?/login">Login</Button>
+				<Button disabled={View.isLoading} full={true} type="submit" formAction="?/login"
+					>Login</Button
+				>
 			</form>
 			<Button withBg={false} onClick={switchForm}>Want to create account?</Button>
 		</Card>
-	{/if}
-	{#if form?.success}
-		<p>{form.message}</p>
 	{/if}
 </div>

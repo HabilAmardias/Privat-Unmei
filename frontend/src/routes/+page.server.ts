@@ -12,9 +12,9 @@ export const actions = {
 		return { success: true, message: 'succesfully login' };
 	},
 	register: async ({ request }) => {
-		const success = await controller.register(request);
+		const { success, message } = await controller.register(request);
 		if (!success) {
-			return fail(400);
+			return fail(400, { message });
 		}
 		return { success: true, message: 'succesfully registered' };
 	}

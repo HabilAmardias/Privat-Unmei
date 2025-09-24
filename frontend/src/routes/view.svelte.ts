@@ -5,6 +5,11 @@ class AuthView {
 	repeatPassword = $state<string>('');
 	name = $state<string>('');
 	error = $state<Error | undefined>();
+	isLoading = $state<boolean>(false);
+
+	setIsLoading(b: boolean) {
+		this.isLoading = b;
+	}
 
 	switchForm() {
 		this.login = !this.login;
