@@ -5,6 +5,7 @@
 		placeholder: string;
 		name: string;
 		value?: string;
+		id: string;
 		onChange?: (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => void;
 	};
 
