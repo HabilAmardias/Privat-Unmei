@@ -35,12 +35,32 @@
 					position: 'top-right'
 				});
 			}
-			if (result.type === 'failure' || result.type === 'error') {
-				toast.error(form!.message, {
+			if (result.type === 'failure') {
+				toast.error(result.data?.message, {
 					position: 'top-right'
 				});
 			}
 			View.switchForm();
+			update();
+		};
+	}
+
+	function onLoginSubmit(args: EnhancementArgs) {
+		View.setIsLoading(true);
+		const loadID = toast.loading('logging in.....', { position: 'top-right' });
+		return async ({ result, update }: EnhancementReturn) => {
+			View.setIsLoading(false);
+			toast.dismiss(loadID);
+			if (result.type === 'redirect') {
+				toast.success('Successfully login', {
+					position: 'top-right'
+				});
+			}
+			if (result.type === 'failure') {
+				toast.error(result.data?.message, {
+					position: 'top-right'
+				});
+			}
 			update();
 		};
 	}
@@ -81,12 +101,14 @@
 					>Register</Button
 				>
 			</form>
-			<Button withBg={false} onClick={switchForm}>Already have an account?</Button>
+			<Button disabled={View.isLoading} withBg={false} textColor="dark" onClick={switchForm}
+				>Already have an account?</Button
+			>
 		</Card>
 	{:else}
 		<Card>
 			<h2 class="mb-3 text-2xl font-bold text-[var(--tertiary-color)]">Login</h2>
-			<form action="?/login" method="post" class="flex flex-col gap-4">
+			<form use:enhance={onLoginSubmit} action="?/login" method="post" class="flex flex-col gap-4">
 				<Input type="email" name="email" placeholder="Email" id="email" bind:value={View.email} />
 				<InputSecret
 					id="password"
@@ -98,7 +120,9 @@
 					>Login</Button
 				>
 			</form>
-			<Button withBg={false} onClick={switchForm}>Want to create account?</Button>
+			<Button disabled={View.isLoading} withBg={false} textColor="dark" onClick={switchForm}
+				>Want to create account?</Button
+			>
 		</Card>
 	{/if}
 </div>

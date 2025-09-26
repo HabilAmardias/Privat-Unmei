@@ -1,7 +1,7 @@
-import type { LoginResponse } from './model';
+import type { CookiesData, LoginResponse, SameSiteType } from './model';
 
 class AuthController {
-	async register(req: Request): Promise<{ success: boolean; message: string }> {
+	async register(req: Request): Promise<{ success: boolean; message: string; status: number }> {
 		const formData = await req.formData();
 		const name = formData.get('name');
 		const email = formData.get('email');
@@ -9,25 +9,26 @@ class AuthController {
 		const repeatPassword = formData.get('repeat-password');
 		const token = formData.get('token');
 		if (!email) {
-			return { success: false, message: 'please insert an email' };
+			return { success: false, message: 'please insert an email', status: 400 };
 		}
 		if (!this.#validateEmail(email as string)) {
-			return { success: false, message: 'please insert an valid email' };
+			return { success: false, message: 'please insert an valid email', status: 400 };
 		}
 		if (!password) {
-			return { success: false, message: 'please insert an password' };
+			return { success: false, message: 'please insert an password', status: 400 };
 		}
 		if (!this.#validatePassword(password as string)) {
 			return {
 				success: false,
-				message: 'password need to be at least 8 characters and contain any @#!?'
+				message: 'password need to be at least 8 characters and contain any @#!?',
+				status: 400
 			};
 		}
 		if (repeatPassword !== password) {
-			return { success: false, message: 'both password input are not same' };
+			return { success: false, message: 'both password input are not same', status: 400 };
 		}
 		if (!name) {
-			return { success: false, message: 'please insert a name' };
+			return { success: false, message: 'please insert a name', status: 400 };
 		}
 		const url = 'http://localhost:8080/api/v1/register';
 		const body = JSON.stringify({
@@ -41,44 +42,99 @@ class AuthController {
 			body: body
 		});
 		if (!res.ok) {
-			const data = await res.json();
-			if ('message' in data) {
-				return { success: false, message: data.message as string };
+			const resData = await res.json();
+			if ('message' in resData.data) {
+				return { success: false, message: resData.data.message as string, status: res.status };
 			}
-			return { success: false, message: 'invalid input' };
+			return { success: false, message: 'invalid input', status: res.status };
 		}
-		return { success: true, message: 'successfully registered' };
+		return { success: true, message: 'successfully registered', status: res.status };
 	}
-	async login(req: Request): Promise<{ data: LoginResponse | undefined; success: boolean }> {
+	async login(req: Request): Promise<{
+		responseBody: LoginResponse | undefined;
+		cookiesData: CookiesData[] | undefined;
+		success: boolean;
+		message: string;
+		status: number;
+	}> {
 		const formData = await req.formData();
 		const email = formData.get('email');
 		const password = formData.get('password');
 		if (!email) {
-			return { data: undefined, success: false };
+			return {
+				responseBody: undefined,
+				cookiesData: undefined,
+				success: false,
+				message: 'please insert an email',
+				status: 400
+			};
 		}
 		if (!this.#validateEmail(email as string)) {
-			return { data: undefined, success: false };
+			return {
+				responseBody: undefined,
+				cookiesData: undefined,
+				success: false,
+				message: 'please insert an valid email',
+				status: 400
+			};
 		}
 		if (!password) {
-			return { data: undefined, success: false };
+			return {
+				responseBody: undefined,
+				cookiesData: undefined,
+				success: false,
+				message: 'please insert an password',
+				status: 400
+			};
 		}
 		if (!this.#validatePassword(password as string)) {
-			return { data: undefined, success: false };
+			return {
+				responseBody: undefined,
+				success: false,
+				cookiesData: undefined,
+				message: 'password need to be at least 8 characters and contain any @#!?',
+				status: 400
+			};
 		}
-		const url = '/api/v1/login';
+		const url = 'http://localhost:8080/api/v1/login';
 		const body = JSON.stringify({
 			email: email,
 			password: password
 		});
 		const res = await fetch(url, {
 			method: 'POST',
-			body: body
+			body: body,
+			credentials: 'include'
 		});
+
 		if (!res.ok) {
-			return { data: undefined, success: false };
+			const resData = await res.json();
+			if ('message' in resData.data) {
+				return {
+					responseBody: undefined,
+					cookiesData: undefined,
+					success: false,
+					message: resData.data.message as string,
+					status: res.status
+				};
+			}
+			return {
+				responseBody: undefined,
+				cookiesData: undefined,
+				success: false,
+				message: 'invalid input',
+				status: res.status
+			};
 		}
-		const data: LoginResponse = await res.json();
-		return { data, success: true };
+		const cookiesData = this.#getCookies(res);
+		const responseBody: LoginResponse = await res.json();
+		return {
+			responseBody,
+			cookiesData,
+			success: true,
+			message: 'successfully login',
+			status: res.status
+		};
 	}
 	#validateEmail(email: string) {
 		const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -92,6 +148,51 @@ class AuthController {
 			password.includes('#') ||
 			password.includes('?');
 		return minLength && hasSpecialChar;
+	}
+	#getCookies(res: Response) {
+		const out: CookiesData[] = [];
+		const setCookies = res.headers.getSetCookie();
+		setCookies.forEach((val) => {
+			const data: CookiesData = {
+				key: '',
+				value: '',
+				path: ''
+			};
+
+			const keyValPairs = val.split(';');
+			keyValPairs.forEach((e) => {
+				const [key, val] = e.split('=');
+				switch (key.toLowerCase().trim()) {
+					case 'refresh_token':
+						data.key = key;
+						data.value = val;
+						break;
+					case 'auth_token':
+						data.key = key;
+						data.value = val;
+						break;
+					case 'domain':
+						data.domain = val;
+						break;
+					case 'max-age':
+						data.maxAge = parseInt(val);
+						break;
+					case 'path':
+						data.path = val;
+						break;
+					case 'samesite':
+						data.sameSite = val.toLowerCase() as SameSiteType;
+						break;
+					case 'httponly':
+						data.httpOnly = true;
+						break;
+					default:
+						break;
+				}
+			});
+			out.push(data);
+		});
+		return out;
 	}
 }
 

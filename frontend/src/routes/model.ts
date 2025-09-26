@@ -1,8 +1,22 @@
 import type { ActionResult } from '@sveltejs/kit';
 
+export type SameSiteType = 'none' | 'lax' | 'strict';
+
 export type LoginResponse = {
-	token: string;
-	status: 'verified' | 'unverified';
+	success: boolean;
+	data: {
+		status: 'verified' | 'unverified';
+	};
+};
+
+export type CookiesData = {
+	key: string;
+	value: string;
+	maxAge?: number;
+	path: string;
+	domain?: string;
+	sameSite?: SameSiteType;
+	httpOnly?: boolean;
 };
 
 export type EnhancementArgs = {

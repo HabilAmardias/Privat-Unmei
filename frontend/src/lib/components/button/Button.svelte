@@ -8,6 +8,8 @@
 		withBg?: boolean;
 		full?: boolean;
 		type?: 'submit' | 'button' | 'reset' | null;
+		withPadding?: boolean;
+		textColor?: 'light' | 'dark';
 		disabled?: boolean;
 	};
 
@@ -18,18 +20,29 @@
 		type,
 		full = false,
 		withBg = true,
+		withPadding = true,
+		textColor = 'light',
 		disabled
 	}: ButtonProps = $props();
 
-	let buttonClass = $state<string>(
-		'cursor-pointer rounded-md bg-[var(--tertiary-color)] p-2 text-[var(--secondary-color)] hover:text-[var(--primary-color)]'
-	);
-	if (!withBg) {
-		buttonClass =
-			'cursor-pointer rounded-md bg-none p-2 text-[var(--tertiary-color)] hover:text-[var(--primary-color)]';
+	let buttonClass = $state<string>('cursor-pointer rounded-md hover:text-[var(--primary-color)]');
+	if (withBg) {
+		buttonClass += ' bg-[var(--tertiary-color)]';
+	} else {
+		buttonClass += ' bg-none';
 	}
+
+	if (textColor === 'light') {
+		buttonClass += ' text-[var(--secondary-color)]';
+	} else {
+		buttonClass += ' text-[var(--tertiary-color)]';
+	}
+
 	if (full) {
 		buttonClass += ' w-full';
+	}
+	if (withPadding) {
+		buttonClass += ` p-2`;
 	}
 </script>
 

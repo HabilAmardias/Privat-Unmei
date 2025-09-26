@@ -113,13 +113,13 @@ func (sh *StudentHandlerImpl) GoogleLoginCallback(ctx *gin.Context) {
 		))
 		return
 	}
-	token, err := sh.ss.GoogleLoginCallback(ctx, code)
+	authToken, _, err := sh.ss.GoogleLoginCallback(ctx, code)
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
 	clientURL := os.Getenv("CLIENT_DOMAIN")
-	ctx.Redirect(http.StatusTemporaryRedirect, clientURL+"/google-callback/"+token)
+	ctx.Redirect(http.StatusTemporaryRedirect, clientURL+"/google-callback/"+authToken)
 }
 
 func (sh *StudentHandlerImpl) UpdateStudentProfile(ctx *gin.Context) {
@@ -305,6 +305,7 @@ func (sh *StudentHandlerImpl) Verify(ctx *gin.Context) {
 }
 
 func (sh *StudentHandlerImpl) Login(ctx *gin.Context) {
+	domain := os.Getenv("COOKIE_DOMAIN")
 	var req dtos.LoginStudentReq
 	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
 		ctx.Error(err)
@@ -314,15 +315,17 @@ func (sh *StudentHandlerImpl) Login(ctx *gin.Context) {
 		Email:    req.Email,
 		Password: req.Password,
 	}
-	token, status, err := sh.ss.Login(ctx, param)
+	authToken, refreshToken, status, err := sh.ss.Login(ctx, param)
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
+	ctx.SetSameSite(http.SameSiteNoneMode)
+	ctx.SetCookie(constants.AUTH_COOKIE_KEY, *authToken, int(constants.AUTH_AGE), "/", domain, false, true)
+	ctx.SetCookie(constants.REFRESH_COOKIE_KEY, *refreshToken, int(constants.REFRESH_AGE), "/", domain, false, true)
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
 		Data: dtos.LoginStudentRes{
-			Token:  *token,
 			Status: *status,
 		},
 	})

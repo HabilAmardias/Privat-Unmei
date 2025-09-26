@@ -9,7 +9,7 @@
 		onChange?: (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => void;
 	};
 
-	let { placeholder, value = $bindable(), name, onChange }: inputSecretProps = $props();
+	let { placeholder, value = $bindable(), name, onChange, id }: inputSecretProps = $props();
 	let open = $state<boolean>(false);
 </script>
 
@@ -19,7 +19,7 @@
 			bind:value
 			onchange={onChange}
 			class="placeholder:text-[var(--secondary-color)]/60 border-none bg-transparent text-[var(--secondary-color)]"
-			id="secret"
+			{id}
 			{name}
 			{placeholder}
 			type={open ? 'text' : 'password'}

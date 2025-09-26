@@ -137,8 +137,8 @@
 </AlertDialog>
 <Dialog {dialogTitle} dialogContent={dialogDescription}>Test</Dialog>
 
-<Card title="Register">
+<Card>
 	<Input placeholder="Email" type="email" name="email" id="email" />
-	<InputSecret placeholder="Password" name="password" bind:value={password} />
+	<InputSecret id="password" placeholder="Password" name="password" bind:value={password} />
 	<Datepicker onChange={(date) => console.log(date?.toString())} dows={[0, 1, 2]} />
 </Card>

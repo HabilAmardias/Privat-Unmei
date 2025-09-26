@@ -58,6 +58,7 @@ func (c *RouteConfig) Setup() {
 		AllowAllOrigins: true,
 		AllowMethods:    []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
 		AllowHeaders:    []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
 	}
 
 	c.App.Use(cors.New(config))

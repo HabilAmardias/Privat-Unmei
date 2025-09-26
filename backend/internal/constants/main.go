@@ -25,6 +25,17 @@ const (
 )
 
 const (
+	AUTH_AGE    = 15 * time.Minute   // 15 minutes
+	REFRESH_AGE = 3 * 24 * time.Hour // 3 days
+	RESET_AGE   = 15 * time.Minute
+)
+
+const (
+	AUTH_COOKIE_KEY    = "auth_token"
+	REFRESH_COOKIE_KEY = "refresh_token"
+)
+
+const (
 	ReservedStatus       = "reserved"
 	PendingPaymentStatus = "pending payment"
 	ScheduledStatus      = "scheduled"
@@ -53,6 +64,7 @@ const (
 	ForVerification = iota + 1 // 1
 	ForReset
 	ForLogin
+	ForRefresh
 )
 
 const (

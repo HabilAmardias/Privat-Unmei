@@ -83,14 +83,14 @@ func (ju *JWTUtil) VerifyJWT(tokenStr string, usedFor int) (*entity.CustomClaim,
 	return claim, nil
 }
 
-func (ju *JWTUtil) GenerateJWT(id string, role int, usedFor int, status string) (string, error) {
+func (ju *JWTUtil) GenerateJWT(id string, role int, usedFor int, status string, age time.Duration) (string, error) {
 	secret := os.Getenv("JWT_SECRET")
 	claim := entity.CustomClaim{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   id,
 			Issuer:    "privat-unmei",
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(3 * 24 * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(age)),
 		},
 		Role:   role,
 		For:    usedFor,

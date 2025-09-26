@@ -1,8 +1,9 @@
 <script lang="ts">
+	import Button from '$lib/components/button/Button.svelte';
 	import Link from '$lib/components/button/Link.svelte';
 	import Menubar from '$lib/components/menubar/Menubar.svelte';
 	import MenuItem from '$lib/components/menubar/MenuItem.svelte';
-	import { House, Info, List, MessageCircleMore, Play, ShoppingCart } from '@lucide/svelte';
+	import { House, Info, List, LogOut, MessageCircleMore, Play, ShoppingCart } from '@lucide/svelte';
 
 	let { children } = $props();
 </script>
@@ -52,10 +53,10 @@
 		</Link>
 	</MenuItem>
 	<MenuItem>
-		<Link href="/playground">
+		<Link href="/logout">
 			<div class="flex flex-col items-center">
-				<Play />
-				Playground
+				<LogOut />
+				Logout
 			</div>
 		</Link>
 	</MenuItem>

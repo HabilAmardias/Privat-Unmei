@@ -204,10 +204,12 @@ func (ms *MentorServiceImpl) ChangePassword(ctx context.Context, param entity.Me
 	})
 }
 
-func (ms *MentorServiceImpl) Login(ctx context.Context, param entity.LoginMentorParam) (string, error) {
+func (ms *MentorServiceImpl) Login(ctx context.Context, param entity.LoginMentorParam) (string, string, error) {
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
-	token := new(string)
+	authToken := new(string)
+	refreshToken := new(string)
+
 	if err := ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := ms.ur.FindByEmail(ctx, param.Email, user); err != nil {
 			var parsedErr *customerrors.CustomError
@@ -232,16 +234,21 @@ func (ms *MentorServiceImpl) Login(ctx context.Context, param entity.LoginMentor
 				customerrors.InvalidAction,
 			)
 		}
-		loginToken, err := ms.ju.GenerateJWT(mentor.ID, constants.MentorRole, constants.ForLogin, user.Status)
+		loginToken, err := ms.ju.GenerateJWT(mentor.ID, constants.MentorRole, constants.ForLogin, user.Status, constants.AUTH_AGE)
 		if err != nil {
 			return err
 		}
-		*token = loginToken
+		rtoken, err := ms.ju.GenerateJWT(mentor.ID, constants.MentorRole, constants.ForRefresh, user.Status, constants.REFRESH_AGE)
+		if err != nil {
+			return err
+		}
+		*authToken = loginToken
+		*refreshToken = rtoken
 		return nil
 	}); err != nil {
-		return "", err
+		return "", "", err
 	}
-	return *token, nil
+	return *authToken, *refreshToken, nil
 }
 
 func (ms *MentorServiceImpl) GetMentorList(ctx context.Context, param entity.ListMentorParam) (*[]entity.ListMentorQuery, *int64, error) {

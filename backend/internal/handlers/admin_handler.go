@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"net/http"
+	"os"
+	"privat-unmei/internal/constants"
 	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/services"
@@ -87,21 +89,24 @@ func (ah *AdminHandlerImpl) GenerateRandomPassword(ctx *gin.Context) {
 }
 
 func (ah *AdminHandlerImpl) Login(ctx *gin.Context) {
+	domain := os.Getenv("COOKIE_DOMAIN")
 	var req dtos.AdminLoginReq
 	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
 		ctx.Error(err)
 		return
 	}
 	param := entity.AdminLoginParam(req)
-	token, status, err := ah.as.Login(ctx, param)
+	authToken, refreshToken, status, err := ah.as.Login(ctx, param)
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
+	ctx.SetSameSite(http.SameSiteNoneMode)
+	ctx.SetCookie(constants.AUTH_COOKIE_KEY, *authToken, int(constants.AUTH_AGE), "/", domain, false, true)
+	ctx.SetCookie(constants.REFRESH_COOKIE_KEY, *refreshToken, int(constants.REFRESH_AGE), "/", domain, false, true)
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
 		Data: dtos.AdminLoginRes{
-			Token:  *token,
 			Status: *status,
 		},
 	})
