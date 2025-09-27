@@ -9,8 +9,11 @@ export const load: PageServerLoad = ({ cookies }) => {
 };
 
 export const actions = {
-	login: async ({ request, cookies }) => {
-		const { responseBody, cookiesData, success, message, status } = await controller.login(request);
+	login: async ({ request, cookies, fetch }) => {
+		const { responseBody, cookiesData, success, message, status } = await controller.login(
+			request,
+			fetch
+		);
 		if (!success || !responseBody) {
 			return fail(status, { message });
 		}
@@ -25,11 +28,11 @@ export const actions = {
 		cookies.set('status', responseBody.data.status, { path: '/', httpOnly: false });
 		redirect(303, '/home');
 	},
-	register: async ({ request }) => {
-		const { success, message, status } = await controller.register(request);
+	register: async ({ request, fetch }) => {
+		const { success, message, status } = await controller.register(request, fetch);
 		if (!success) {
 			return fail(status, { message });
 		}
-		return { success: true, message: 'succesfully registered' };
+		return { success, message: 'succesfully registered' };
 	}
 } satisfies Actions;

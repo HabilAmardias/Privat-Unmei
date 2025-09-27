@@ -1,7 +1,13 @@
-import type { CookiesData, LoginResponse, SameSiteType } from './model';
+import type { Fetch, ServerResponse } from '$lib/types';
+import type { LoginResponse } from './model';
+import type { CookiesData, SameSite } from '$lib/types';
+import { FetchData } from '$lib/utils';
 
 class AuthController {
-	async register(req: Request): Promise<{ success: boolean; message: string; status: number }> {
+	async register(
+		req: Request,
+		fetch: Fetch
+	): Promise<{ success: boolean; message: string; status: number }> {
 		const formData = await req.formData();
 		const name = formData.get('name');
 		const email = formData.get('email');
@@ -37,21 +43,14 @@ class AuthController {
 			password: password,
 			captcha_token: token
 		});
-		const res = await fetch(url, {
-			method: 'POST',
-			body: body
-		});
-		if (!res.ok) {
-			const resData = await res.json();
-			if ('message' in resData.data) {
-				return { success: false, message: resData.data.message as string, status: res.status };
-			}
-			return { success: false, message: 'invalid input', status: res.status };
-		}
-		return { success: true, message: 'successfully registered', status: res.status };
+		const { success, message, status } = await FetchData(fetch, url, 'POST', body);
+		return { success, message, status };
 	}
-	async login(req: Request): Promise<{
-		responseBody: LoginResponse | undefined;
+	async login(
+		req: Request,
+		fetch: Fetch
+	): Promise<{
+		responseBody: ServerResponse<LoginResponse> | undefined;
 		cookiesData: CookiesData[] | undefined;
 		success: boolean;
 		message: string;
@@ -101,39 +100,28 @@ class AuthController {
 			email: email,
 			password: password
 		});
-		const res = await fetch(url, {
-			method: 'POST',
-			body: body,
-			credentials: 'include'
-		});
-
-		if (!res.ok) {
-			const resData = await res.json();
-			if ('message' in resData.data) {
-				return {
-					responseBody: undefined,
-					cookiesData: undefined,
-					success: false,
-					message: resData.data.message as string,
-					status: res.status
-				};
-			}
+		const { success, resBody, res, message, status } = await FetchData<LoginResponse>(
+			fetch,
+			url,
+			'POST',
+			body
+		);
+		if (!success) {
 			return {
-				responseBody: undefined,
+				responseBody: resBody,
 				cookiesData: undefined,
 				success: false,
-				message: 'invalid input',
-				status: res.status
+				message,
+				status
 			};
 		}
-		const cookiesData = this.#getCookies(res);
-		const responseBody: LoginResponse = await res.json();
+		const cookiesData = this.#getCookies(res!);
 		return {
-			responseBody,
+			responseBody: resBody,
 			cookiesData,
 			success: true,
 			message: 'successfully login',
-			status: res.status
+			status: res!.status
 		};
 	}
 	#validateEmail(email: string) {
@@ -181,7 +169,7 @@ class AuthController {
 						data.path = val;
 						break;
 					case 'samesite':
-						data.sameSite = val.toLowerCase() as SameSiteType;
+						data.sameSite = val.toLowerCase() as SameSite;
 						break;
 					case 'httponly':
 						data.httpOnly = true;

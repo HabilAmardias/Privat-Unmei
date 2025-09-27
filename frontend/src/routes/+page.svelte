@@ -6,11 +6,9 @@
 	import { View } from './view.svelte';
 	import { PUBLIC_RECAPTCHA_SITE_KEY } from '$env/static/public';
 	import { enhance } from '$app/forms';
-	import type { EnhancementArgs, EnhancementReturn } from './model';
+	import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
 	import toast from 'svelte-french-toast';
-	import type { PageProps } from './$types';
-
-	let { form }: PageProps = $props();
+	import Link from '$lib/components/button/Link.svelte';
 
 	function switchForm() {
 		View.switchForm();
@@ -52,7 +50,7 @@
 			View.setIsLoading(false);
 			toast.dismiss(loadID);
 			if (result.type === 'redirect') {
-				toast.success('Successfully login', {
+				toast.success('login success', {
 					position: 'top-right'
 				});
 			}
@@ -116,6 +114,7 @@
 					name="password"
 					bind:value={View.password}
 				/>
+				<Link theme="dark" href="/reset">Forgot Password?</Link>
 				<Button disabled={View.isLoading} full={true} type="submit" formAction="?/login"
 					>Login</Button
 				>

@@ -5,5 +5,5 @@ export const load: PageServerLoad = ({ cookies }) => {
 	cookies.delete('auth_token', { path: '/' });
 	cookies.delete('refresh_token', { path: '/' });
 	cookies.delete('status', { path: '/' });
-	redirect(301, '/');
+	redirect(303, '/');
 };

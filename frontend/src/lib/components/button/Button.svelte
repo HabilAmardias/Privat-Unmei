@@ -25,7 +25,9 @@
 		disabled
 	}: ButtonProps = $props();
 
-	let buttonClass = $state<string>('cursor-pointer rounded-md hover:text-[var(--primary-color)]');
+	let buttonClass = $state<string>(
+		'cursor-pointer rounded-md hover:text-[var(--primary-color)] disabled:cursor-not-allowed disabled:opacity-50'
+	);
 	if (withBg) {
 		buttonClass += ' bg-[var(--tertiary-color)]';
 	} else {
