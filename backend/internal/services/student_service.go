@@ -45,6 +45,20 @@ func (us *StudentServiceImpl) GoogleLogin(oauthState string) string {
 	return us.goauth.Config.AuthCodeURL(oauthState)
 }
 
+func (us *StudentServiceImpl) RefreshToken(ctx context.Context, param entity.RefreshTokenParam) (string, error) {
+	user := new(entity.User)
+	if err := us.ur.FindByID(ctx, param.UserID, user); err != nil {
+		return "", err
+	}
+
+	token, err := us.ju.GenerateJWT(param.UserID, param.Role, constants.ForLogin, user.Status, constants.AUTH_AGE)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
 func (us *StudentServiceImpl) GetStudentProfile(ctx context.Context, param entity.StudentProfileParam) (*entity.StudentProfileQuery, error) {
 	user := new(entity.User)
 	student := new(entity.Student)

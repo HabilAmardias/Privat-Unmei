@@ -63,4 +63,8 @@ type (
 		Bio          string
 		ProfileImage string
 	}
+	RefreshTokenParam struct {
+		UserID string
+		Role   int
+	}
 )

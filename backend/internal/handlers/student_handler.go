@@ -25,6 +25,32 @@ func CreateStudentHandler(ss *services.StudentServiceImpl) *StudentHandlerImpl {
 	return &StudentHandlerImpl{ss}
 }
 
+func (sh *StudentHandlerImpl) RefreshToken(ctx *gin.Context) {
+	domain := os.Getenv("COOKIE_DOMAIN")
+	claim, err := getRefreshPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.RefreshTokenParam{
+		UserID: claim.Subject,
+		Role:   claim.Role,
+	}
+	token, err := sh.ss.RefreshToken(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.SetSameSite(http.SameSiteNoneMode)
+	ctx.SetCookie(constants.AUTH_COOKIE_KEY, token, int(constants.AUTH_AGE), "/", domain, false, true)
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.MessageResponse{
+			Message: "Successfully refresh auth",
+		},
+	})
+}
+
 func (sh *StudentHandlerImpl) GetStudentProfile(ctx *gin.Context) {
 	claim, err := getAuthenticationPayload(ctx)
 	if err != nil {
