@@ -6,6 +6,17 @@
 	import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
 	import toast from 'svelte-french-toast';
 	import { View } from './view.svelte';
+	import type { PageProps } from './$types';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+
+	let { data }: PageProps = $props();
+
+	onMount(() => {
+		if (data.returnHome) {
+			goto('/home', { replaceState: true });
+		}
+	});
 
 	function onSendSubmit(args: EnhancementArgs) {
 		View.setIsLoading(true);

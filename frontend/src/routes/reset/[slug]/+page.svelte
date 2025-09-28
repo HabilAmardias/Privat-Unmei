@@ -6,6 +6,17 @@
 	import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
 	import toast from 'svelte-french-toast';
 	import InputSecret from '$lib/components/form/InputSecret.svelte';
+	import { goto } from '$app/navigation';
+	import type { PageProps } from './$types';
+	import { onMount } from 'svelte';
+
+	let { data }: PageProps = $props();
+
+	onMount(() => {
+		if (data.returnHome) {
+			goto('/home', { replaceState: true });
+		}
+	});
 
 	function onChangePasswordSubmit(args: EnhancementArgs) {
 		View.setIsLoading(true);
@@ -13,8 +24,9 @@
 		return async ({ result, update }: EnhancementReturn) => {
 			toast.dismiss(loadID);
 			View.setIsLoading(false);
-			if (result.type === 'redirect') {
+			if (result.type === 'success') {
 				toast.success('successfully reset password', { position: 'top-right' });
+				await goto('/', { replaceState: true });
 			}
 			if (result.type === 'failure') {
 				toast.error(result.data?.message, { position: 'top-right' });
