@@ -1,8 +1,18 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import Button from '$lib/components/button/Button.svelte';
 	import Link from '$lib/components/button/Link.svelte';
 	import Menubar from '$lib/components/menubar/Menubar.svelte';
 	import MenuItem from '$lib/components/menubar/MenuItem.svelte';
+	import { loadingStore } from '$lib/stores/LoadingStore.svelte';
 	import { House, Info, List, LogOut, MessageCircleMore, ShoppingCart } from '@lucide/svelte';
+	import toast from 'svelte-french-toast';
+
+	function onLogout() {
+		const loadID = toast.loading('logging out....', { position: 'top-right' });
+		loadingStore.setLogOutLoadID(loadID);
+		goto('/logout', { replaceState: true });
+	}
 
 	let { children } = $props();
 </script>
@@ -52,11 +62,11 @@
 		</Link>
 	</MenuItem>
 	<MenuItem>
-		<Link href="/logout">
+		<Button onClick={onLogout} withBg={false} textColor="light" withPadding={false}>
 			<div class="flex flex-col items-center">
 				<LogOut />
 				Logout
 			</div>
-		</Link>
+		</Button>
 	</MenuItem>
 </Menubar>

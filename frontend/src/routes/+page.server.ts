@@ -26,7 +26,7 @@ export const actions = {
 			});
 		});
 		cookies.set('status', responseBody.data.status, { path: '/', httpOnly: false });
-		redirect(303, '/home');
+		return { success };
 	},
 	register: async ({ request, fetch }) => {
 		const { success, message, status } = await controller.register(request, fetch);

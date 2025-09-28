@@ -1,13 +1,10 @@
-import type { Fetch, CookiesData, MessageResponse, SameSite } from '$lib/types';
+import type { CookiesData, Fetch, MessageResponse, SameSite } from '$lib/types';
 import { FetchData } from '$lib/utils';
 
-class CookieController {
-	async refresh(fetch: Fetch): Promise<{
-		success: boolean;
-		cookiesData?: CookiesData[];
-		message: string;
-		status: number;
-	}> {
+class HomeController {
+	async refresh(
+		fetch: Fetch
+	): Promise<{ success: boolean; cookiesData?: CookiesData[]; message: string; status: number }> {
 		const url = 'http://localhost:8080/api/v1/refresh';
 		const { success, res, status, message } = await FetchData<MessageResponse>(fetch, url);
 		if (!success) {
@@ -71,5 +68,4 @@ class CookieController {
 		return out;
 	}
 }
-
-export const controller = new CookieController();
+export const controller = new HomeController();

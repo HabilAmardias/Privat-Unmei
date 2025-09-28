@@ -9,10 +9,17 @@
 	import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
 	import toast from 'svelte-french-toast';
 	import Link from '$lib/components/button/Link.svelte';
+	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import { loadingStore } from '$lib/stores/LoadingStore.svelte';
 
-	function switchForm() {
-		View.switchForm();
-	}
+	onMount(() => {
+		if (loadingStore.logOutLoadID) {
+			toast.dismiss(loadingStore.logOutLoadID);
+			loadingStore.removeLogOutLoadID();
+			toast.success('log out success', { position: 'top-right' });
+		}
+	});
 
 	async function onRegisterSubmit(args: EnhancementArgs) {
 		View.setIsLoading(true);
@@ -32,13 +39,13 @@
 				toast.success('Successfully registered', {
 					position: 'top-right'
 				});
+				View.switchForm();
 			}
 			if (result.type === 'failure') {
 				toast.error(result.data?.message, {
 					position: 'top-right'
 				});
 			}
-			View.switchForm();
 			update();
 		};
 	}
@@ -47,14 +54,17 @@
 		View.setIsLoading(true);
 		const loadID = toast.loading('logging in.....', { position: 'top-right' });
 		return async ({ result, update }: EnhancementReturn) => {
-			View.setIsLoading(false);
-			toast.dismiss(loadID);
-			if (result.type === 'redirect') {
+			if (result.type === 'success') {
+				await goto('/home', { replaceState: true });
+				View.setIsLoading(false);
+				toast.dismiss(loadID);
 				toast.success('login success', {
 					position: 'top-right'
 				});
 			}
 			if (result.type === 'failure') {
+				View.setIsLoading(false);
+				toast.dismiss(loadID);
 				toast.error(result.data?.message, {
 					position: 'top-right'
 				});
@@ -119,8 +129,11 @@
 					>Register</Button
 				>
 			</form>
-			<Button disabled={View.isLoading} withBg={false} textColor="dark" onClick={switchForm}
-				>Already have an account?</Button
+			<Button
+				disabled={View.isLoading}
+				withBg={false}
+				textColor="dark"
+				onClick={() => View.switchForm()}>Already have an account?</Button
 			>
 		</Card>
 	{:else}
@@ -149,8 +162,11 @@
 					>Login</Button
 				>
 			</form>
-			<Button disabled={View.isLoading} withBg={false} textColor="dark" onClick={switchForm}
-				>Want to create account?</Button
+			<Button
+				disabled={View.isLoading}
+				withBg={false}
+				textColor="dark"
+				onClick={() => View.switchForm()}>Want to create account?</Button
 			>
 		</Card>
 	{/if}

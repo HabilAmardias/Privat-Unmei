@@ -1,4 +1,4 @@
-import { redirect, type HandleFetch } from '@sveltejs/kit';
+import { type HandleFetch } from '@sveltejs/kit';
 import { controller } from './controller';
 
 const publicRoutes = ['/', '/reset', '/home', '/courses', '/playground'];
@@ -9,9 +9,15 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 
 	if (!publicRoutes.includes(event.url.pathname)) {
 		if (refreshToken && !authToken) {
-			const { success, cookiesData } = await controller.refresh(fetch);
+			const { success, cookiesData, message, status } = await controller.refresh(fetch);
 			if (!success) {
-				redirect(303, '/');
+				const body = JSON.stringify({
+					success,
+					data: {
+						message
+					}
+				});
+				return new Response(body, { status });
 			}
 			cookiesData?.forEach((val) => {
 				event.cookies.set(val.key, val.value, {
@@ -23,7 +29,13 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 			});
 		}
 		if (!refreshToken && !authToken) {
-			redirect(303, '/');
+			const body = JSON.stringify({
+				success: false,
+				data: {
+					message: 'unauthorized'
+				}
+			});
+			return new Response(body, { status: 401 });
 		}
 	}
 	return fetch(request);
