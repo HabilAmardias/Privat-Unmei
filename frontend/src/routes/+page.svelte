@@ -81,21 +81,41 @@
 				class="flex flex-col gap-4"
 				use:enhance={onRegisterSubmit}
 			>
-				<Input type="text" name="name" placeholder="Username" id="name" bind:value={View.name} />
-				<Input type="email" name="email" placeholder="Email" id="email" bind:value={View.email} />
+				<Input
+					err={View.nameError}
+					onBlur={() => View.nameOnBlur()}
+					type="text"
+					name="name"
+					placeholder="Username"
+					id="name"
+					bind:value={View.name}
+				/>
+				<Input
+					err={View.emailError}
+					onBlur={() => View.emailOnBlur()}
+					type="email"
+					name="email"
+					placeholder="Email"
+					id="email"
+					bind:value={View.email}
+				/>
 				<InputSecret
+					err={View.passwordError}
+					onBlur={() => View.passwordOnBlur()}
 					id="password"
 					placeholder="Password"
 					name="password"
 					bind:value={View.password}
 				/>
 				<InputSecret
+					err={View.repeatPasswordError}
+					onBlur={() => View.repeatPasswordOnBlur()}
 					id="repeat-password"
 					placeholder="Repeat Password"
 					name="repeat-password"
 					bind:value={View.repeatPassword}
 				/>
-				<Button disabled={View.isLoading} full={true} type="submit" formAction="?/register"
+				<Button disabled={View.registerDisabled} full={true} type="submit" formAction="?/register"
 					>Register</Button
 				>
 			</form>
@@ -107,15 +127,25 @@
 		<Card>
 			<h2 class="mb-3 text-2xl font-bold text-[var(--tertiary-color)]">Login</h2>
 			<form use:enhance={onLoginSubmit} action="?/login" method="post" class="flex flex-col gap-4">
-				<Input type="email" name="email" placeholder="Email" id="email" bind:value={View.email} />
+				<Input
+					err={View.emailError}
+					onBlur={() => View.emailOnBlur()}
+					type="email"
+					name="email"
+					placeholder="Email"
+					id="email"
+					bind:value={View.email}
+				/>
 				<InputSecret
+					err={View.passwordError}
+					onBlur={() => View.passwordOnBlur()}
 					id="password"
 					placeholder="Password"
 					name="password"
 					bind:value={View.password}
 				/>
 				<Link theme="dark" href="/reset">Forgot Password?</Link>
-				<Button disabled={View.isLoading} full={true} type="submit" formAction="?/login"
+				<Button disabled={View.loginDisabled} full={true} type="submit" formAction="?/login"
 					>Login</Button
 				>
 			</form>

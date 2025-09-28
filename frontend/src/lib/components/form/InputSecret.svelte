@@ -6,18 +6,25 @@
 		name: string;
 		value?: string;
 		id: string;
-		onChange?: (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => void;
+		onBlur?: (e: FocusEvent & { currentTarget: EventTarget & HTMLInputElement }) => void;
+		err?: Error;
 	};
 
-	let { placeholder, value = $bindable(), name, onChange, id }: inputSecretProps = $props();
+	let { placeholder, value = $bindable(), name, onBlur, id, err }: inputSecretProps = $props();
 	let open = $state<boolean>(false);
 </script>
 
-<div class="rounded-md bg-[var(--tertiary-color)]">
-	<label class="flex w-fit items-center justify-center gap-1" for="secret">
+<div class="flex flex-col rounded-md">
+	{#if err}
+		<p class="text-sm text-[red]">{err.message}</p>
+	{/if}
+	<label
+		class="flex w-fit items-center justify-center gap-1 rounded-md bg-[var(--tertiary-color)]"
+		for="secret"
+	>
 		<input
 			bind:value
-			onchange={onChange}
+			onblur={onBlur}
 			class="placeholder:text-[var(--secondary-color)]/60 border-none bg-transparent text-[var(--secondary-color)]"
 			{id}
 			{name}

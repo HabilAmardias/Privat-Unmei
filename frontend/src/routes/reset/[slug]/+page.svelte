@@ -34,18 +34,22 @@
 			class="flex flex-col gap-4"
 		>
 			<InputSecret
+				err={View.passwordError}
+				onBlur={() => View.passwordOnBlur()}
 				id="password"
 				placeholder="New Password"
 				bind:value={View.password}
 				name="password"
 			/>
 			<InputSecret
+				err={View.repeatPasswordError}
+				onBlur={() => View.repeatPasswordOnBlur()}
 				id="password"
 				placeholder="Repeat New Password"
 				bind:value={View.repeatPassword}
 				name="repeat-password"
 			/>
-			<Button disabled={View.isLoading} type="submit" full={true}>Submit</Button>
+			<Button disabled={View.resetDisabled} type="submit" full={true}>Submit</Button>
 		</form>
 	</Card>
 </div>

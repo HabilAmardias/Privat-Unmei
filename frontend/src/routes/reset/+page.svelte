@@ -28,8 +28,16 @@
 	<Card>
 		<h2 class="mb-3 text-2xl font-bold text-[var(--tertiary-color)]">Reset Password</h2>
 		<form use:enhance={onSendSubmit} action="?/send" method="post" class="flex flex-col gap-4">
-			<Input bind:value={View.email} type="email" name="email" placeholder="Email" id="email" />
-			<Button disabled={View.isLoading} type="submit" full={true}>Submit</Button>
+			<Input
+				err={View.emailError}
+				onBlur={() => View.emailOnBlur()}
+				bind:value={View.email}
+				type="email"
+				name="email"
+				placeholder="Email"
+				id="email"
+			/>
+			<Button disabled={View.sendDisabled} type="submit" full={true}>Submit</Button>
 		</form>
 	</Card>
 </div>
