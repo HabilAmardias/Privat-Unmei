@@ -4,6 +4,11 @@ import type { CookiesData, SameSite } from '$lib/types';
 import { FetchData } from '$lib/utils';
 
 class AuthController {
+	async googleLogin(fetch: Fetch) {
+		const url = 'http://localhost:8080/api/v1/auth/google';
+		const { success, status, message, res } = await FetchData(fetch, url, 'GET');
+		return { success, status, message, res };
+	}
 	async register(
 		req: Request,
 		fetch: Fetch
@@ -50,10 +55,10 @@ class AuthController {
 		req: Request,
 		fetch: Fetch
 	): Promise<{
-		responseBody: ServerResponse<LoginResponse> | undefined;
-		cookiesData: CookiesData[] | undefined;
+		cookiesData?: CookiesData[];
 		success: boolean;
 		message: string;
+		userStatus?: 'verified' | 'unverified';
 		status: number;
 	}> {
 		const formData = await req.formData();
@@ -61,8 +66,6 @@ class AuthController {
 		const password = formData.get('password');
 		if (!email) {
 			return {
-				responseBody: undefined,
-				cookiesData: undefined,
 				success: false,
 				message: 'please insert an email',
 				status: 400
@@ -70,8 +73,6 @@ class AuthController {
 		}
 		if (!this.#validateEmail(email as string)) {
 			return {
-				responseBody: undefined,
-				cookiesData: undefined,
 				success: false,
 				message: 'please insert an valid email',
 				status: 400
@@ -79,8 +80,6 @@ class AuthController {
 		}
 		if (!password) {
 			return {
-				responseBody: undefined,
-				cookiesData: undefined,
 				success: false,
 				message: 'please insert an password',
 				status: 400
@@ -88,9 +87,7 @@ class AuthController {
 		}
 		if (!this.#validatePassword(password as string)) {
 			return {
-				responseBody: undefined,
 				success: false,
-				cookiesData: undefined,
 				message: 'password need to be at least 8 characters and contain any @#!?',
 				status: 400
 			};
@@ -100,28 +97,22 @@ class AuthController {
 			email: email,
 			password: password
 		});
-		const { success, resBody, res, message, status } = await FetchData<LoginResponse>(
-			fetch,
-			url,
-			'POST',
-			body
-		);
+		const { success, res, message, status } = await FetchData(fetch, url, 'POST', body);
 		if (!success) {
 			return {
-				responseBody: resBody,
-				cookiesData: undefined,
 				success: false,
 				message,
 				status
 			};
 		}
+		const resBody: ServerResponse<LoginResponse> = await res?.json();
 		const cookiesData = this.#getCookies(res!);
 		return {
-			responseBody: resBody,
 			cookiesData,
 			success: true,
 			message: 'successfully login',
-			status: res!.status
+			status: res!.status,
+			userStatus: resBody.data.status
 		};
 	}
 	#validateEmail(email: string) {
@@ -156,6 +147,10 @@ class AuthController {
 						data.value = val;
 						break;
 					case 'auth_token':
+						data.key = key;
+						data.value = val;
+						break;
+					case 'oauthstate':
 						data.key = key;
 						data.value = val;
 						break;

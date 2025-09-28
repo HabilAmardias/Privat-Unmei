@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
-	"log"
 	"net/http"
 	"os"
 	"privat-unmei/internal/constants"
@@ -108,7 +107,6 @@ func (sh *StudentHandlerImpl) GoogleLogin(ctx *gin.Context) {
 
 	url := sh.ss.GoogleLogin(state)
 
-	log.Println("Redirecting to: ", url)
 	ctx.Redirect(http.StatusTemporaryRedirect, url)
 }
 
@@ -125,7 +123,7 @@ func (sh *StudentHandlerImpl) GoogleLoginCallback(ctx *gin.Context) {
 	if ctx.Query("state") != state {
 		ctx.Error(customerrors.NewError(
 			"invalid credential",
-			err,
+			errors.New("mismatch state parameters"),
 			customerrors.InvalidAction,
 		))
 		return
@@ -346,7 +344,6 @@ func (sh *StudentHandlerImpl) Login(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	ctx.SetSameSite(http.SameSiteNoneMode)
 	ctx.SetCookie(constants.AUTH_COOKIE_KEY, *authToken, int(constants.AUTH_AGE), "/", domain, false, true)
 	ctx.SetCookie(constants.REFRESH_COOKIE_KEY, *refreshToken, int(constants.REFRESH_AGE), "/", domain, false, true)
 	ctx.JSON(http.StatusOK, dtos.Response{

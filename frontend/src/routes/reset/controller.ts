@@ -1,4 +1,4 @@
-import type { Fetch, MessageResponse } from '$lib/types';
+import type { Fetch } from '$lib/types';
 import { FetchData } from '$lib/utils';
 
 class ResetController {
@@ -35,7 +35,7 @@ class ResetController {
 		const body = JSON.stringify({
 			new_password: password
 		});
-		const { success, message, status } = await FetchData<MessageResponse>(fetch, url, 'POST', body);
+		const { success, message, status } = await FetchData(fetch, url, 'POST', body);
 		return { success, message, status };
 	}
 	#validateEmail(email: string) {

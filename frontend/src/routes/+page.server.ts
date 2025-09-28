@@ -10,11 +10,11 @@ export const load: PageServerLoad = ({ cookies }) => {
 
 export const actions = {
 	login: async ({ request, cookies, fetch }) => {
-		const { responseBody, cookiesData, success, message, status } = await controller.login(
+		const { cookiesData, success, message, status, userStatus } = await controller.login(
 			request,
 			fetch
 		);
-		if (!success || !responseBody) {
+		if (!success) {
 			return fail(status, { message });
 		}
 		cookiesData?.forEach((c) => {
@@ -25,8 +25,7 @@ export const actions = {
 				maxAge: c.maxAge
 			});
 		});
-		cookies.set('status', responseBody.data.status, { path: '/', httpOnly: false });
-		return { success };
+		return { success, userStatus };
 	},
 	register: async ({ request, fetch }) => {
 		const { success, message, status } = await controller.register(request, fetch);
@@ -34,5 +33,14 @@ export const actions = {
 			return fail(status, { message });
 		}
 		return { success, message: 'succesfully registered' };
+	},
+	googlelogin: async ({ fetch }) => {
+		const { success, message, status, res } = await controller.googleLogin(fetch);
+		if (!success) {
+			return fail(status, { message });
+		}
+		if (res?.redirected) {
+			redirect(303, res.url);
+		}
 	}
 } satisfies Actions;

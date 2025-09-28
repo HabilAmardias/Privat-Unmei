@@ -1,11 +1,11 @@
-import type { Fetch, FetchReturn, HTTPMethod, ServerResponse } from '$lib/types';
+import type { Fetch, FetchReturn, HTTPMethod } from '$lib/types';
 
-export async function FetchData<T>(
+export async function FetchData(
 	fetch: Fetch,
 	url: string | URL,
 	method?: HTTPMethod,
 	body?: BodyInit
-): Promise<FetchReturn<T>> {
+): Promise<FetchReturn> {
 	const res = await fetch(url, {
 		method,
 		body,
@@ -19,6 +19,5 @@ export async function FetchData<T>(
 		return { success: false, message: 'invalid input', status: res.status };
 	}
 
-	const resBody: ServerResponse<T> = await res.json();
-	return { success: true, resBody, message: 'success', status: res.status, res };
+	return { success: true, message: 'success', status: res.status, res };
 }

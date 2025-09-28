@@ -51,26 +51,29 @@
 	}
 
 	function onLoginSubmit(args: EnhancementArgs) {
-		View.setIsLoading(true);
-		const loadID = toast.loading('logging in.....', { position: 'top-right' });
-		return async ({ result, update }: EnhancementReturn) => {
-			if (result.type === 'success') {
-				await goto('/home', { replaceState: true });
-				View.setIsLoading(false);
-				toast.dismiss(loadID);
-				toast.success('login success', {
-					position: 'top-right'
-				});
-			}
-			if (result.type === 'failure') {
-				View.setIsLoading(false);
-				toast.dismiss(loadID);
-				toast.error(result.data?.message, {
-					position: 'top-right'
-				});
-			}
-			update();
-		};
+		if (args.action.search === '?/login') {
+			View.setIsLoading(true);
+			const loadID = toast.loading('logging in.....', { position: 'top-right' });
+			return async ({ result, update }: EnhancementReturn) => {
+				if (result.type === 'success') {
+					localStorage.setItem('status', result.data?.userStatus);
+					await goto('/home', { replaceState: true });
+					View.setIsLoading(false);
+					toast.dismiss(loadID);
+					toast.success('login success', {
+						position: 'top-right'
+					});
+				}
+				if (result.type === 'failure') {
+					View.setIsLoading(false);
+					toast.dismiss(loadID);
+					toast.error(result.data?.message, {
+						position: 'top-right'
+					});
+				}
+				update();
+			};
+		}
 	}
 </script>
 
@@ -160,6 +163,9 @@
 				<Link theme="dark" href="/reset">Forgot Password?</Link>
 				<Button disabled={View.loginDisabled} full={true} type="submit" formAction="?/login"
 					>Login</Button
+				>
+				<Button formAction="?/googlelogin" type="submit" full={true} disabled={View.isLoading}
+					>Login With Google</Button
 				>
 			</form>
 			<Button

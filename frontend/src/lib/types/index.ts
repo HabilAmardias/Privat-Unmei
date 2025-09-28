@@ -15,9 +15,8 @@ export type ServerResponse<T> = {
 	data: T;
 };
 
-export type FetchReturn<T> = {
+export type FetchReturn = {
 	success: boolean;
-	resBody?: ServerResponse<T>;
 	message: string;
 	status: number;
 	res?: Response;
