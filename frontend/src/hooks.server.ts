@@ -24,7 +24,8 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 					path: val.path,
 					domain: val.domain,
 					httpOnly: val.httpOnly,
-					maxAge: val.maxAge
+					maxAge: val.maxAge,
+					sameSite: val.sameSite
 				});
 			});
 		}

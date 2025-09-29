@@ -1,4 +1,4 @@
-import type { CookiesData, Fetch, MessageResponse, SameSite } from '$lib/types';
+import type { CookiesData, Fetch, SameSite } from '$lib/types';
 import { FetchData } from '$lib/utils';
 
 class HomeController {
@@ -6,7 +6,7 @@ class HomeController {
 		fetch: Fetch
 	): Promise<{ success: boolean; cookiesData?: CookiesData[]; message: string; status: number }> {
 		const url = 'http://localhost:8080/api/v1/refresh';
-		const { success, res, status, message } = await FetchData<MessageResponse>(fetch, url);
+		const { success, res, status, message } = await FetchData(fetch, url);
 		if (!success) {
 			return {
 				success,

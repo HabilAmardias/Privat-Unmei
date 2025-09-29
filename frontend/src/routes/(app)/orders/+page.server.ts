@@ -23,7 +23,8 @@ export const actions = {
 				path: val.path,
 				domain: val.domain,
 				httpOnly: val.httpOnly,
-				maxAge: val.maxAge
+				maxAge: val.maxAge,
+				sameSite: val.sameSite
 			});
 		});
 		return { success: true, message };

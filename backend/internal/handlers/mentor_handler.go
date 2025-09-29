@@ -180,7 +180,6 @@ func (mh *MentorHandlerImpl) Login(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	ctx.SetSameSite(http.SameSiteNoneMode)
 	ctx.SetCookie(constants.AUTH_COOKIE_KEY, authToken, int(constants.AUTH_AGE), "/", domain, false, true)
 	ctx.SetCookie(constants.REFRESH_COOKIE_KEY, refreshToken, int(constants.REFRESH_AGE), "/", domain, false, true)
 	ctx.JSON(http.StatusOK, dtos.Response{

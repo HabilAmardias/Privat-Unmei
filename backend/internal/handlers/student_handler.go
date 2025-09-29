@@ -40,7 +40,6 @@ func (sh *StudentHandlerImpl) RefreshToken(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	ctx.SetSameSite(http.SameSiteNoneMode)
 	ctx.SetCookie(constants.AUTH_COOKIE_KEY, token, int(constants.AUTH_AGE), "/", domain, false, true)
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
