@@ -34,13 +34,17 @@ export const actions = {
 		}
 		return { success, message: 'succesfully registered' };
 	},
-	googlelogin: async ({ fetch }) => {
-		const { success, message, status, res } = await controller.googleLogin(fetch);
+	googlelogin: async ({ fetch, cookies }) => {
+		const { success, message, status, res, cookiesData } = await controller.googleLogin(fetch);
 		if (!success) {
 			return fail(status, { message });
 		}
-		if (res?.redirected) {
-			redirect(303, res.url);
+		const redirectUrl = res?.headers.get('Location');
+		if (redirectUrl) {
+			cookiesData.forEach((val) => {
+				cookies.set(val.key, val.value, { path: val.path });
+			});
+			redirect(303, redirectUrl);
 		}
 	}
 } satisfies Actions;

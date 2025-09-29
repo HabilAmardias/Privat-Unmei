@@ -101,7 +101,7 @@ func (sh *StudentHandlerImpl) GoogleLogin(ctx *gin.Context) {
 	expTime := time.Now().Add(30 * time.Minute)
 	b := make([]byte, 16)
 	rand.Read(b)
-	state := base64.URLEncoding.EncodeToString(b)
+	state := base64.RawURLEncoding.EncodeToString(b)
 	cookie := http.Cookie{Name: "oauthstate", Value: state, Expires: expTime}
 	http.SetCookie(ctx.Writer, &cookie)
 
@@ -111,6 +111,8 @@ func (sh *StudentHandlerImpl) GoogleLogin(ctx *gin.Context) {
 }
 
 func (sh *StudentHandlerImpl) GoogleLoginCallback(ctx *gin.Context) {
+	domain := os.Getenv("COOKIE_DOMAIN")
+	clientURL := os.Getenv("CLIENT_DOMAIN")
 	state, err := ctx.Cookie("oauthstate")
 	if err != nil {
 		ctx.Error(customerrors.NewError(
@@ -137,13 +139,15 @@ func (sh *StudentHandlerImpl) GoogleLoginCallback(ctx *gin.Context) {
 		))
 		return
 	}
-	authToken, _, err := sh.ss.GoogleLoginCallback(ctx, code)
+	authToken, refreshToken, userStatus, err := sh.ss.GoogleLoginCallback(ctx, code)
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
-	clientURL := os.Getenv("CLIENT_DOMAIN")
-	ctx.Redirect(http.StatusTemporaryRedirect, clientURL+"/google-callback/"+authToken)
+	ctx.SetCookie(constants.AUTH_COOKIE_KEY, authToken, int(constants.AUTH_AGE), "/", domain, false, true)
+	ctx.SetCookie(constants.REFRESH_COOKIE_KEY, refreshToken, int(constants.REFRESH_AGE), "/", domain, false, true)
+	ctx.SetCookie("status", userStatus, int(constants.AUTH_AGE), "/", domain, false, true)
+	ctx.Redirect(http.StatusTemporaryRedirect, clientURL+"/google-callback")
 }
 
 func (sh *StudentHandlerImpl) UpdateStudentProfile(ctx *gin.Context) {

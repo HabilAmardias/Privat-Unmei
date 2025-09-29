@@ -9,9 +9,10 @@ export async function FetchData(
 	const res = await fetch(url, {
 		method,
 		body,
-		credentials: 'include'
+		credentials: 'include',
+		redirect: 'manual'
 	});
-	if (!res.ok) {
+	if (!res.ok && res.status !== 307) {
 		const resBody = await res.json();
 		if ('message' in resBody.data) {
 			return { success: false, message: resBody.data?.message as string, status: res.status };

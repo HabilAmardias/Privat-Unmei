@@ -3,22 +3,31 @@
 	import { X } from '@lucide/svelte';
 	import type { Snippet } from 'svelte';
 	type dialogProps = {
-		children: Snippet;
+		children?: Snippet;
 		dialogTitle: Snippet;
 		dialogContent: Snippet;
 		dialogDescription?: Snippet;
+		open?: boolean;
 	};
-	let { children, dialogContent, dialogDescription, dialogTitle }: dialogProps = $props();
+	let {
+		children,
+		dialogContent,
+		dialogDescription,
+		dialogTitle,
+		open = $bindable()
+	}: dialogProps = $props();
 </script>
 
-<Dialog.Root>
-	<Dialog.Trigger
-		class="rounded-input text-background shadow-mini hover:bg-dark/95 focus-visible:ring-foreground focus-visible:ring-offset-background focus-visible:outline-hidden
+<Dialog.Root bind:open>
+	{#if children}
+		<Dialog.Trigger
+			class="rounded-input text-background shadow-mini hover:bg-dark/95 focus-visible:ring-foreground focus-visible:ring-offset-background focus-visible:outline-hidden
 	  inline-flex h-12 cursor-pointer items-center justify-center
 	  whitespace-nowrap rounded-lg bg-[var(--tertiary-color)] px-[21px] text-[15px] font-semibold text-[var(--secondary-color)] transition-colors hover:text-[var(--primary-color)] focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98]"
-	>
-		{@render children()}
-	</Dialog.Trigger>
+		>
+			{@render children()}
+		</Dialog.Trigger>
+	{/if}
 	<Dialog.Portal>
 		<Dialog.Overlay
 			class="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/80"
@@ -37,7 +46,7 @@
 					{@render dialogDescription()}
 				</Dialog.Description>
 			{/if}
-			<div class="flex flex-col items-start gap-1 pb-11 pt-7">
+			<div class="flex flex-col items-center gap-4 pb-11 pt-7">
 				{@render dialogContent()}
 			</div>
 			<Dialog.Close

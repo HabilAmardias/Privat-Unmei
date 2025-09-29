@@ -105,10 +105,10 @@ func (us *StudentServiceImpl) ChangePassword(ctx context.Context, param entity.S
 	})
 }
 
-func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code string) (string, string, error) {
+func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code string) (string, string, string, error) {
 	oauthToken, err := us.goauth.Config.Exchange(context.Background(), code)
 	if err != nil {
-		return "", "", customerrors.NewError(
+		return "", "", "", customerrors.NewError(
 			"failed to login",
 			err,
 			customerrors.CommonErr,
@@ -116,7 +116,7 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 	}
 	response, err := http.Get(us.goauth.UrlAPI + oauthToken.AccessToken)
 	if err != nil {
-		return "", "", customerrors.NewError(
+		return "", "", "", customerrors.NewError(
 			"failed to login",
 			err,
 			customerrors.CommonErr,
@@ -126,7 +126,7 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 
 	contents, err := io.ReadAll(response.Body)
 	if err != nil {
-		return "", "", customerrors.NewError(
+		return "", "", "", customerrors.NewError(
 			"failed to login",
 			err,
 			customerrors.CommonErr,
@@ -135,7 +135,7 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 
 	var userInfo map[string]interface{}
 	if err := json.Unmarshal(contents, &userInfo); err != nil {
-		return "", "", customerrors.NewError(
+		return "", "", "", customerrors.NewError(
 			"failed to login",
 			err,
 			customerrors.CommonErr,
@@ -143,7 +143,7 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 	}
 	email, ok := userInfo["email"].(string)
 	if !ok {
-		return "", "", customerrors.NewError(
+		return "", "", "", customerrors.NewError(
 			"no email found",
 			errors.New("email not found in user info"),
 			customerrors.ItemNotExist,
@@ -157,7 +157,7 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 		if parsedErr.ErrCode == customerrors.ItemNotExist {
 			pass, err := generateRandomPassword()
 			if err != nil {
-				return "", "", customerrors.NewError(
+				return "", "", "", customerrors.NewError(
 					"error when creating account",
 					err,
 					customerrors.CommonErr,
@@ -165,7 +165,7 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 			}
 			hashed, err := us.bu.HashPassword(pass)
 			if err != nil {
-				return "", "", err
+				return "", "", "", err
 			}
 			newUser := &entity.User{
 				Email:        email,
@@ -175,38 +175,38 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 				ProfileImage: constants.DefaultAvatar,
 			}
 			if err := us.ur.AddNewUser(ctx, newUser); err != nil {
-				return "", "", err
+				return "", "", "", err
 			}
 			newStudent := &entity.Student{
 				ID: newUser.ID,
 			}
 			if err := us.sr.AddNewStudent(ctx, newStudent); err != nil {
-				return "", "", err
+				return "", "", "", err
 			}
 			authToken, err := us.ju.GenerateJWT(newUser.ID, constants.StudentRole, constants.ForLogin, constants.VerifiedStatus, constants.AUTH_AGE)
 			if err != nil {
-				return "", "", err
+				return "", "", "", err
 			}
 			refreshToken, err := us.ju.GenerateJWT(newStudent.ID, constants.StudentRole, constants.ForRefresh, constants.VerifiedStatus, constants.REFRESH_AGE)
 			if err != nil {
-				return "", "", err
+				return "", "", "", err
 			}
-			return authToken, refreshToken, nil
+			return authToken, refreshToken, newUser.Status, nil
 		}
-		return "", "", err
+		return "", "", "", err
 	}
 	if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
-		return "", "", err
+		return "", "", "", err
 	}
 	authToken, err := us.ju.GenerateJWT(student.ID, constants.StudentRole, constants.ForLogin, constants.VerifiedStatus, constants.AUTH_AGE)
 	if err != nil {
-		return "", "", err
+		return "", "", "", err
 	}
 	refreshToken, err := us.ju.GenerateJWT(student.ID, constants.StudentRole, constants.ForRefresh, constants.VerifiedStatus, constants.REFRESH_AGE)
 	if err != nil {
-		return "", "", err
+		return "", "", "", err
 	}
-	return authToken, refreshToken, nil
+	return authToken, refreshToken, user.Status, nil
 }
 
 func (us *StudentServiceImpl) UpdateStudentProfile(ctx context.Context, param entity.UpdateStudentParam) error {

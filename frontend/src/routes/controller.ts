@@ -7,7 +7,8 @@ class AuthController {
 	async googleLogin(fetch: Fetch) {
 		const url = 'http://localhost:8080/api/v1/auth/google';
 		const { success, status, message, res } = await FetchData(fetch, url, 'GET');
-		return { success, status, message, res };
+		const cookiesData = this.#getCookies(res!);
+		return { success, status, message, res, cookiesData };
 	}
 	async register(
 		req: Request,
