@@ -3,7 +3,7 @@ import { controller } from './controller';
 
 export const actions = {
 	refresh: async ({ cookies, fetch }) => {
-		if (!cookies.get('auth_token')) {
+		if (!cookies.get('refresh_token')) {
 			return fail(401, { message: 'unauthorized' });
 		}
 		const { success, cookiesData, message, status } = await controller.refresh(fetch);

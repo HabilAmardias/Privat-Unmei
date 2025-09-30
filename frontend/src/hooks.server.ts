@@ -1,13 +1,11 @@
 import { type HandleFetch } from '@sveltejs/kit';
 import { controller } from './controller';
 
-const publicRoutes = ['/', '/reset', '/home', '/courses', '/playground'];
-
 export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 	const authToken = event.cookies.get('auth_token');
 	const refreshToken = event.cookies.get('refresh_token');
 
-	if (!publicRoutes.includes(event.url.pathname)) {
+	if (!event.route.id?.includes('/(public)')) {
 		if (refreshToken && !authToken) {
 			const { success, cookiesData, message, status } = await controller.refresh(fetch);
 			if (!success) {

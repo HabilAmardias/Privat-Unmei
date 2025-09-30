@@ -29,6 +29,7 @@
 		window.addEventListener('resize', isDesktop);
 		return () => {
 			window.removeEventListener('resize', isDesktop);
+			View.removeGoogleScript();
 		};
 	});
 
@@ -92,7 +93,10 @@
 	<title>Login</title>
 	<meta name="description" content="Login - Privat Unmei" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<script src="https://www.google.com/recaptcha/api.js?render={PUBLIC_RECAPTCHA_SITE_KEY}"></script>
+	<script
+		bind:this={View.googleScript}
+		src="https://www.google.com/recaptcha/api.js?render={PUBLIC_RECAPTCHA_SITE_KEY}"
+	></script>
 </svelte:head>
 
 <div class="flex h-full w-full items-center justify-center md:justify-between">

@@ -1,5 +1,5 @@
 import { redirect } from '@sveltejs/kit';
-import type { PageServerLoad } from '../../$types';
+import type { PageServerLoad } from './$types';
 import { type Actions, fail } from '@sveltejs/kit';
 import { controller } from './controller';
 

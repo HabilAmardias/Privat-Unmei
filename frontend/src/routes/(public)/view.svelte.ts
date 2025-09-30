@@ -9,6 +9,7 @@ class AuthView {
 	name = $state<string>('');
 	nameError = $state<Error | undefined>();
 	isLoading = $state<boolean>(false);
+	googleScript = $state<HTMLScriptElement>()
 	isDesktop = $state<boolean>();
 
 	loginDisabled = $derived.by<boolean>(() => {
@@ -34,6 +35,13 @@ class AuthView {
 		}
 		return false;
 	});
+
+	removeGoogleScript(){
+		if(this.googleScript){
+			this.googleScript.remove()
+			this.googleScript = undefined
+		}
+	}
 
 	passwordOnBlur() {
 		this.passwordError = undefined;
