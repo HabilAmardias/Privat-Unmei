@@ -18,7 +18,6 @@ type (
 		Name     string
 		Email    string
 		Password string
-		Bio      string
 		Status   string
 	}
 	StudentLoginParam struct {
@@ -63,5 +62,9 @@ type (
 		Name         string
 		Bio          string
 		ProfileImage string
+	}
+	RefreshTokenParam struct {
+		UserID string
+		Role   int
 	}
 )

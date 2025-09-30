@@ -110,11 +110,12 @@ func (as *AdminServiceImpl) VerifyAdmin(ctx context.Context, param entity.AdminV
 	return nil
 }
 
-func (as *AdminServiceImpl) Login(ctx context.Context, param entity.AdminLoginParam) (*string, *string, error) {
+func (as *AdminServiceImpl) Login(ctx context.Context, param entity.AdminLoginParam) (*string, *string, *string, error) {
 	user := new(entity.User)
 	admin := new(entity.Admin)
 	status := new(string)
-	token := new(string)
+	authToken := new(string)
+	refreshToken := new(string)
 
 	if err := as.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := as.ur.FindByEmail(ctx, param.Email, user); err != nil {
@@ -140,17 +141,23 @@ func (as *AdminServiceImpl) Login(ctx context.Context, param entity.AdminLoginPa
 				customerrors.InvalidAction,
 			)
 		}
-		loginToken, err := as.ju.GenerateJWT(admin.ID, constants.AdminRole, constants.ForLogin, user.Status)
+		atoken, err := as.ju.GenerateJWT(admin.ID, constants.AdminRole, constants.ForLogin, user.Status, constants.AUTH_AGE)
 		if err != nil {
 			return err
 		}
 
-		*token = loginToken
+		rtoken, err := as.ju.GenerateJWT(admin.ID, constants.AdminRole, constants.ForRefresh, user.Status, constants.REFRESH_AGE)
+		if err != nil {
+			return err
+		}
+
+		*authToken = atoken
+		*refreshToken = rtoken
 		*status = user.Status
 
 		return nil
 	}); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
-	return token, status, nil
+	return authToken, refreshToken, status, nil
 }

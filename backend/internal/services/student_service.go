@@ -45,6 +45,20 @@ func (us *StudentServiceImpl) GoogleLogin(oauthState string) string {
 	return us.goauth.Config.AuthCodeURL(oauthState)
 }
 
+func (us *StudentServiceImpl) RefreshToken(ctx context.Context, param entity.RefreshTokenParam) (string, error) {
+	user := new(entity.User)
+	if err := us.ur.FindByID(ctx, param.UserID, user); err != nil {
+		return "", err
+	}
+
+	token, err := us.ju.GenerateJWT(param.UserID, param.Role, constants.ForLogin, user.Status, constants.AUTH_AGE)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
 func (us *StudentServiceImpl) GetStudentProfile(ctx context.Context, param entity.StudentProfileParam) (*entity.StudentProfileQuery, error) {
 	user := new(entity.User)
 	student := new(entity.Student)
@@ -91,10 +105,10 @@ func (us *StudentServiceImpl) ChangePassword(ctx context.Context, param entity.S
 	})
 }
 
-func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code string) (string, error) {
+func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code string) (string, string, string, error) {
 	oauthToken, err := us.goauth.Config.Exchange(context.Background(), code)
 	if err != nil {
-		return "", customerrors.NewError(
+		return "", "", "", customerrors.NewError(
 			"failed to login",
 			err,
 			customerrors.CommonErr,
@@ -102,7 +116,7 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 	}
 	response, err := http.Get(us.goauth.UrlAPI + oauthToken.AccessToken)
 	if err != nil {
-		return "", customerrors.NewError(
+		return "", "", "", customerrors.NewError(
 			"failed to login",
 			err,
 			customerrors.CommonErr,
@@ -112,7 +126,7 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 
 	contents, err := io.ReadAll(response.Body)
 	if err != nil {
-		return "", customerrors.NewError(
+		return "", "", "", customerrors.NewError(
 			"failed to login",
 			err,
 			customerrors.CommonErr,
@@ -121,7 +135,7 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 
 	var userInfo map[string]interface{}
 	if err := json.Unmarshal(contents, &userInfo); err != nil {
-		return "", customerrors.NewError(
+		return "", "", "", customerrors.NewError(
 			"failed to login",
 			err,
 			customerrors.CommonErr,
@@ -129,7 +143,7 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 	}
 	email, ok := userInfo["email"].(string)
 	if !ok {
-		return "", customerrors.NewError(
+		return "", "", "", customerrors.NewError(
 			"no email found",
 			errors.New("email not found in user info"),
 			customerrors.ItemNotExist,
@@ -143,7 +157,7 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 		if parsedErr.ErrCode == customerrors.ItemNotExist {
 			pass, err := generateRandomPassword()
 			if err != nil {
-				return "", customerrors.NewError(
+				return "", "", "", customerrors.NewError(
 					"error when creating account",
 					err,
 					customerrors.CommonErr,
@@ -151,7 +165,7 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 			}
 			hashed, err := us.bu.HashPassword(pass)
 			if err != nil {
-				return "", err
+				return "", "", "", err
 			}
 			newUser := &entity.User{
 				Email:        email,
@@ -161,27 +175,38 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 				ProfileImage: constants.DefaultAvatar,
 			}
 			if err := us.ur.AddNewUser(ctx, newUser); err != nil {
-				return "", err
+				return "", "", "", err
 			}
 			newStudent := &entity.Student{
 				ID: newUser.ID,
 			}
 			if err := us.sr.AddNewStudent(ctx, newStudent); err != nil {
-				return "", err
+				return "", "", "", err
 			}
-			token, err := us.ju.GenerateJWT(newUser.ID, constants.StudentRole, constants.ForLogin, constants.VerifiedStatus)
+			authToken, err := us.ju.GenerateJWT(newUser.ID, constants.StudentRole, constants.ForLogin, constants.VerifiedStatus, constants.AUTH_AGE)
 			if err != nil {
-				return "", err
+				return "", "", "", err
 			}
-			return token, nil
+			refreshToken, err := us.ju.GenerateJWT(newStudent.ID, constants.StudentRole, constants.ForRefresh, constants.VerifiedStatus, constants.REFRESH_AGE)
+			if err != nil {
+				return "", "", "", err
+			}
+			return authToken, refreshToken, newUser.Status, nil
 		}
-		return "", err
+		return "", "", "", err
 	}
 	if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
-		return "", err
+		return "", "", "", err
 	}
-	return us.ju.GenerateJWT(student.ID, constants.StudentRole, constants.ForLogin, constants.VerifiedStatus)
-
+	authToken, err := us.ju.GenerateJWT(student.ID, constants.StudentRole, constants.ForLogin, constants.VerifiedStatus, constants.AUTH_AGE)
+	if err != nil {
+		return "", "", "", err
+	}
+	refreshToken, err := us.ju.GenerateJWT(student.ID, constants.StudentRole, constants.ForRefresh, constants.VerifiedStatus, constants.REFRESH_AGE)
+	if err != nil {
+		return "", "", "", err
+	}
+	return authToken, refreshToken, user.Status, nil
 }
 
 func (us *StudentServiceImpl) UpdateStudentProfile(ctx context.Context, param entity.UpdateStudentParam) error {
@@ -256,7 +281,7 @@ func (us *StudentServiceImpl) SendVerificationEmail(ctx context.Context, id stri
 				customerrors.InvalidAction,
 			)
 		}
-		jwt, err := us.ju.GenerateJWT(student.ID, constants.StudentRole, constants.ForVerification, user.Status)
+		jwt, err := us.ju.GenerateJWT(student.ID, constants.StudentRole, constants.ForVerification, user.Status, constants.AUTH_AGE)
 		if err != nil {
 			return err
 		}
@@ -322,7 +347,7 @@ func (us *StudentServiceImpl) SendResetTokenEmail(ctx context.Context, email str
 		if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
 			return err
 		}
-		resetToken, err := us.ju.GenerateJWT(student.ID, constants.StudentRole, constants.ForReset, user.Status)
+		resetToken, err := us.ju.GenerateJWT(student.ID, constants.StudentRole, constants.ForReset, user.Status, constants.RESET_AGE)
 		if err != nil {
 			return err
 		}
@@ -371,10 +396,11 @@ func (us *StudentServiceImpl) Verify(ctx context.Context, param entity.VerifyStu
 	})
 }
 
-func (us *StudentServiceImpl) Login(ctx context.Context, param entity.StudentLoginParam) (*string, *string, error) {
+func (us *StudentServiceImpl) Login(ctx context.Context, param entity.StudentLoginParam) (*string, *string, *string, error) {
 	user := new(entity.User)
 	student := new(entity.Student)
-	token := new(string)
+	authToken := new(string)
+	refreshToken := new(string)
 	status := new(string)
 
 	if err := us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
@@ -397,19 +423,24 @@ func (us *StudentServiceImpl) Login(ctx context.Context, param entity.StudentLog
 		if match := us.bu.ComparePassword(param.Password, user.Password); !match {
 			return customerrors.NewError("invalid email or password", errors.New("password does not match"), customerrors.InvalidAction)
 		}
-		jwt, err := us.ju.GenerateJWT(student.ID, constants.StudentRole, constants.ForLogin, user.Status)
+		atoken, err := us.ju.GenerateJWT(student.ID, constants.StudentRole, constants.ForLogin, user.Status, constants.AUTH_AGE)
 		if err != nil {
 			return err
 		}
-		*token = jwt
+		rtoken, err := us.ju.GenerateJWT(student.ID, constants.StudentRole, constants.ForRefresh, user.Status, constants.REFRESH_AGE)
+		if err != nil {
+			return err
+		}
+		*authToken = atoken
+		*refreshToken = rtoken
 		*status = user.Status
 
 		return nil
 
 	}); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
-	return token, status, nil
+	return authToken, refreshToken, status, nil
 }
 
 func (us *StudentServiceImpl) Register(ctx context.Context, param entity.StudentRegisterParam) error {
@@ -432,7 +463,6 @@ func (us *StudentServiceImpl) Register(ctx context.Context, param entity.Student
 			)
 		}
 
-		user.Bio = param.Bio
 		user.Email = param.Email
 		user.Name = param.Name
 		user.Status = param.Status
@@ -446,7 +476,7 @@ func (us *StudentServiceImpl) Register(ctx context.Context, param entity.Student
 		if err := us.ur.AddNewUser(ctx, user); err != nil {
 			return err
 		}
-		token, err := us.ju.GenerateJWT(user.ID, constants.StudentRole, constants.ForVerification, user.Status)
+		token, err := us.ju.GenerateJWT(user.ID, constants.StudentRole, constants.ForVerification, user.Status, constants.AUTH_AGE)
 		if err != nil {
 			return err
 		}

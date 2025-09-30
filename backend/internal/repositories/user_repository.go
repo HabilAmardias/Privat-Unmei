@@ -110,16 +110,15 @@ func (ur *UserRepositoryImpl) AddNewUser(ctx context.Context, user *entity.User)
 		driver = tx
 	}
 	query := `
-	INSERT INTO users (name, email, password_hash, bio, profile_image, status)
+	INSERT INTO users (name, email, password_hash, profile_image, status)
 	VALUES
-	($1, $2, $3, $4, $5, $6)
+	($1, $2, $3, $4, $5)
 	RETURNING id;
 	`
 	row := driver.QueryRow(query,
 		user.Name,
 		user.Email,
 		user.Password,
-		user.Bio,
 		user.ProfileImage,
 		user.Status)
 

@@ -11,11 +11,15 @@
 	import Pagination from '$lib/components/pagination/Pagination.svelte';
 	import AlertDialog from '$lib/components/dialog/AlertDialog.svelte';
 	import Dialog from '$lib/components/dialog/Dialog.svelte';
+	import InputSecret from '$lib/components/form/InputSecret.svelte';
+	import Card from '$lib/components/card/Card.svelte';
+	import Input from '$lib/components/form/Input.svelte';
 
 	let selectedValue = $state<string>('');
 	let keyword = $state<string>('');
 	let searchValue = $state<string>('');
 	let openAlert = $state<boolean>(false);
+	let password = $state<string>('');
 
 	function openToastSuccess() {
 		toast.success('Success!', {
@@ -103,12 +107,6 @@
 </span>
 <Image src={imageSrc} alt="test-image" height={256} width={256} round="full" />
 
-<Datepicker
-	onChange={(date) => console.log(date?.toString())}
-	dows={[0, 1, 2]}
-	label="Pick Your Reservation Date"
-/>
-
 <RatingGroup onChange={rateOnChange} />
 
 <Select options={themes} value={selectedValue} onChange={selectOnChange} />
@@ -138,3 +136,9 @@
 	Submit
 </AlertDialog>
 <Dialog {dialogTitle} dialogContent={dialogDescription}>Test</Dialog>
+
+<Card>
+	<Input placeholder="Email" type="email" name="email" id="email" />
+	<InputSecret id="password" placeholder="Password" name="password" bind:value={password} />
+	<Datepicker onChange={(date) => console.log(date?.toString())} dows={[0, 1, 2]} />
+</Card>

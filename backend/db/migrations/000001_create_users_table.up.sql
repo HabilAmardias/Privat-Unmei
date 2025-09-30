@@ -5,7 +5,7 @@ CREATE TABLE users (
     name TEXT NOT NULL,
     email TEXT NOT NULL,
     password_hash TEXT NOT NULL,
-    bio TEXT NOT NULL,
+    bio TEXT NOT NULL DEFAULT 'Add bio',
     profile_image TEXT NOT NULL,
     status VARCHAR NOT NULL CHECK(status IN ('unverified', 'verified')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,

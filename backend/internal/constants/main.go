@@ -7,21 +7,33 @@ import (
 )
 
 const (
-	FileSizeThreshold    = 1_000_000 // 1MB
-	PNGType              = "image/png"
-	JPGType              = "image/jpeg"
-	PDFType              = "application/pdf"
-	UnverifiedStatus     = "unverified"
-	VerifiedStatus       = "verified"
-	CTX_AUTH_PAYLOAD_KEY = "auth_payload"
-	CTX_AUTH_TOKEN_KEY   = "auth_token"
-	DefaultAvatar        = "https://res.cloudinary.com/dk8rlicon/image/upload/v1753881263/default-avatar-icon-of-social-media-user-vector_j8obqd.jpg"
-	AvatarFolder         = "Avatars/"
-	ResumeFolder         = "Resumes/"
-	MaxCourseCategories  = 5
-	ExpiredInterval      = 15 * time.Minute // 15 minute for development and testing
-	NoRating             = 0
-	MaxLimit             = 25
+	FileSizeThreshold       = 1_000_000 // 1MB
+	PNGType                 = "image/png"
+	JPGType                 = "image/jpeg"
+	PDFType                 = "application/pdf"
+	UnverifiedStatus        = "unverified"
+	VerifiedStatus          = "verified"
+	CTX_REFRESH_PAYLOAD_KEY = "refresh_payload"
+	CTX_AUTH_PAYLOAD_KEY    = "auth_payload"
+	CTX_AUTH_TOKEN_KEY      = "auth_token"
+	DefaultAvatar           = "https://res.cloudinary.com/dk8rlicon/image/upload/v1753881263/default-avatar-icon-of-social-media-user-vector_j8obqd.jpg"
+	AvatarFolder            = "Avatars/"
+	ResumeFolder            = "Resumes/"
+	MaxCourseCategories     = 5
+	ExpiredInterval         = 15 * time.Minute // 15 minute for development and testing
+	NoRating                = 0
+	MaxLimit                = 25
+)
+
+const (
+	AUTH_AGE    = 15 * time.Minute   // 15 minutes
+	REFRESH_AGE = 3 * 24 * time.Hour // 3 days
+	RESET_AGE   = 15 * time.Minute
+)
+
+const (
+	AUTH_COOKIE_KEY    = "auth_token"
+	REFRESH_COOKIE_KEY = "refresh_token"
 )
 
 const (
@@ -53,6 +65,7 @@ const (
 	ForVerification = iota + 1 // 1
 	ForReset
 	ForLogin
+	ForRefresh
 )
 
 const (

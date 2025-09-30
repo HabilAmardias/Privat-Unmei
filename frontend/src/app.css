@@ -3,18 +3,13 @@
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 
-
-:root{
-    --dark-color: #0F1035;
-    --secondary-color: #DCF2F1;
-    --primary-color: #7FC7D9;
-    --tertiary-color: #365486;
+:root {
+	--dark-color: #0f1035;
+	--secondary-color: #dcf2f1;
+	--primary-color: #7fc7d9;
+	--tertiary-color: #365486;
 }
 
-p{
-    color: var(--dark-color);
-}
-
-body{
-    background-color: var(--secondary-color);
+body {
+	background-color: var(--secondary-color);
 }

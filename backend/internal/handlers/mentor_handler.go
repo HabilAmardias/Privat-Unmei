@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"os"
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/dtos"
@@ -164,6 +165,7 @@ func (mh *MentorHandlerImpl) ChangePassword(ctx *gin.Context) {
 }
 
 func (mh *MentorHandlerImpl) Login(ctx *gin.Context) {
+	domain := os.Getenv("COOKIE_DOMAIN")
 	var req dtos.LoginMentorReq
 	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
 		ctx.Error(err)
@@ -173,15 +175,17 @@ func (mh *MentorHandlerImpl) Login(ctx *gin.Context) {
 		Email:    req.Email,
 		Password: req.Password,
 	}
-	token, err := mh.ms.Login(ctx, param)
+	authToken, refreshToken, err := mh.ms.Login(ctx, param)
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
+	ctx.SetCookie(constants.AUTH_COOKIE_KEY, authToken, int(constants.AUTH_AGE), "/", domain, false, true)
+	ctx.SetCookie(constants.REFRESH_COOKIE_KEY, refreshToken, int(constants.REFRESH_AGE), "/", domain, false, true)
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
-		Data: dtos.LoginMentorRes{
-			Token: token,
+		Data: dtos.MessageResponse{
+			Message: "Successfully logged in",
 		},
 	})
 }

@@ -55,9 +55,10 @@ func (c *RouteConfig) Setup() {
 	prometheus.MustRegister(httpRequestDuration, httpRequestsTotal)
 
 	config := cors.Config{
-		AllowAllOrigins: true,
-		AllowMethods:    []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
-		AllowHeaders:    []string{"Content-Type", "Authorization"},
+		AllowAllOrigins:  true,
+		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
 	}
 
 	c.App.Use(cors.New(config))
@@ -94,6 +95,7 @@ func (c *RouteConfig) SetupPublicRoute() {
 	v1.GET("/courses/:id", c.CourseHandler.CourseDetail)
 	v1.GET("/mentors/:id", c.MentorHandler.GetMentorProfileForStudent)
 	v1.GET("/courses/:id/reviews", c.CourseRatingHandler.GetCourseReview)
+	v1.GET("/refresh", middlewares.RefreshAuthMiddleware(c.TokenUtil), c.StudentHandler.RefreshToken)
 }
 
 func (c *RouteConfig) SetupPrivateRoute() {

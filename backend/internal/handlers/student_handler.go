@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
-	"log"
 	"net/http"
 	"os"
 	"privat-unmei/internal/constants"
@@ -23,6 +22,31 @@ type StudentHandlerImpl struct {
 
 func CreateStudentHandler(ss *services.StudentServiceImpl) *StudentHandlerImpl {
 	return &StudentHandlerImpl{ss}
+}
+
+func (sh *StudentHandlerImpl) RefreshToken(ctx *gin.Context) {
+	domain := os.Getenv("COOKIE_DOMAIN")
+	claim, err := getRefreshPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.RefreshTokenParam{
+		UserID: claim.Subject,
+		Role:   claim.Role,
+	}
+	token, err := sh.ss.RefreshToken(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.SetCookie(constants.AUTH_COOKIE_KEY, token, int(constants.AUTH_AGE), "/", domain, false, true)
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.MessageResponse{
+			Message: "Successfully refresh auth",
+		},
+	})
 }
 
 func (sh *StudentHandlerImpl) GetStudentProfile(ctx *gin.Context) {
@@ -76,17 +100,18 @@ func (sh *StudentHandlerImpl) GoogleLogin(ctx *gin.Context) {
 	expTime := time.Now().Add(30 * time.Minute)
 	b := make([]byte, 16)
 	rand.Read(b)
-	state := base64.URLEncoding.EncodeToString(b)
+	state := base64.RawURLEncoding.EncodeToString(b)
 	cookie := http.Cookie{Name: "oauthstate", Value: state, Expires: expTime}
 	http.SetCookie(ctx.Writer, &cookie)
 
 	url := sh.ss.GoogleLogin(state)
 
-	log.Println("Redirecting to: ", url)
 	ctx.Redirect(http.StatusTemporaryRedirect, url)
 }
 
 func (sh *StudentHandlerImpl) GoogleLoginCallback(ctx *gin.Context) {
+	domain := os.Getenv("COOKIE_DOMAIN")
+	clientURL := os.Getenv("CLIENT_DOMAIN")
 	state, err := ctx.Cookie("oauthstate")
 	if err != nil {
 		ctx.Error(customerrors.NewError(
@@ -99,7 +124,7 @@ func (sh *StudentHandlerImpl) GoogleLoginCallback(ctx *gin.Context) {
 	if ctx.Query("state") != state {
 		ctx.Error(customerrors.NewError(
 			"invalid credential",
-			err,
+			errors.New("mismatch state parameters"),
 			customerrors.InvalidAction,
 		))
 		return
@@ -113,13 +138,15 @@ func (sh *StudentHandlerImpl) GoogleLoginCallback(ctx *gin.Context) {
 		))
 		return
 	}
-	token, err := sh.ss.GoogleLoginCallback(ctx, code)
+	authToken, refreshToken, userStatus, err := sh.ss.GoogleLoginCallback(ctx, code)
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
-	clientURL := os.Getenv("CLIENT_DOMAIN")
-	ctx.Redirect(http.StatusTemporaryRedirect, clientURL+"/google-callback/"+token)
+	ctx.SetCookie(constants.AUTH_COOKIE_KEY, authToken, int(constants.AUTH_AGE), "/", domain, false, true)
+	ctx.SetCookie(constants.REFRESH_COOKIE_KEY, refreshToken, int(constants.REFRESH_AGE), "/", domain, false, true)
+	ctx.SetCookie("status", userStatus, int(constants.AUTH_AGE), "/", domain, false, true)
+	ctx.Redirect(http.StatusTemporaryRedirect, clientURL+"/google-callback")
 }
 
 func (sh *StudentHandlerImpl) UpdateStudentProfile(ctx *gin.Context) {
@@ -305,6 +332,7 @@ func (sh *StudentHandlerImpl) Verify(ctx *gin.Context) {
 }
 
 func (sh *StudentHandlerImpl) Login(ctx *gin.Context) {
+	domain := os.Getenv("COOKIE_DOMAIN")
 	var req dtos.LoginStudentReq
 	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
 		ctx.Error(err)
@@ -314,15 +342,16 @@ func (sh *StudentHandlerImpl) Login(ctx *gin.Context) {
 		Email:    req.Email,
 		Password: req.Password,
 	}
-	token, status, err := sh.ss.Login(ctx, param)
+	authToken, refreshToken, status, err := sh.ss.Login(ctx, param)
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
+	ctx.SetCookie(constants.AUTH_COOKIE_KEY, *authToken, int(constants.AUTH_AGE), "/", domain, false, true)
+	ctx.SetCookie(constants.REFRESH_COOKIE_KEY, *refreshToken, int(constants.REFRESH_AGE), "/", domain, false, true)
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
 		Data: dtos.LoginStudentRes{
-			Token:  *token,
 			Status: *status,
 		},
 	})
@@ -350,7 +379,6 @@ func (sh *StudentHandlerImpl) Register(ctx *gin.Context) {
 		Name:     req.Name,
 		Email:    req.Email,
 		Password: req.Password,
-		Bio:      req.Bio,
 		Status:   constants.UnverifiedStatus,
 	}
 	if err := sh.ss.Register(ctx, param); err != nil {
