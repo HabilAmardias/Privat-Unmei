@@ -26,7 +26,7 @@
 	}: ButtonProps = $props();
 
 	let buttonClass = $state<string>(
-		'cursor-pointer rounded-md hover:text-[var(--primary-color)] disabled:cursor-not-allowed disabled:opacity-50'
+		'flex gap-2 items-center justify-center cursor-pointer rounded-md hover:text-[var(--primary-color)] disabled:cursor-not-allowed disabled:opacity-50'
 	);
 	if (withBg) {
 		buttonClass += ' bg-[var(--tertiary-color)]';
@@ -42,6 +42,8 @@
 
 	if (full) {
 		buttonClass += ' w-full';
+	} else {
+		buttonClass += ' w-fit';
 	}
 	if (withPadding) {
 		buttonClass += ` p-2`;

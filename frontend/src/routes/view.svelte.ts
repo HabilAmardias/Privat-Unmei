@@ -9,12 +9,15 @@ class AuthView {
 	name = $state<string>('');
 	nameError = $state<Error | undefined>();
 	isLoading = $state<boolean>(false);
+	isDesktop = $state<boolean>();
+
 	loginDisabled = $derived.by<boolean>(() => {
 		if (!this.email || !this.password || this.emailError || this.passwordError || this.isLoading) {
 			return true;
 		}
 		return false;
 	});
+
 	registerDisabled = $derived.by<boolean>(() => {
 		if (
 			!this.name ||
@@ -31,6 +34,7 @@ class AuthView {
 		}
 		return false;
 	});
+
 	passwordOnBlur() {
 		this.passwordError = undefined;
 		if (!this.#validatePassword(this.password)) {
@@ -74,6 +78,10 @@ class AuthView {
 
 	switchForm() {
 		this.login = !this.login;
+	}
+
+	setIsDesktop(b: boolean){
+		this.isDesktop = b
 	}
 }
 

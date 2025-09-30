@@ -12,13 +12,24 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { loadingStore } from '$lib/stores/LoadingStore.svelte';
+	import Google from '$lib/components/icons/Google.svelte';
+	import Image from '$lib/components/image/Image.svelte';
+	import LandingIcons from '$lib/images/website-maintenance.png';
 
 	onMount(() => {
+		View.setIsDesktop(window.innerWidth >= 768);
+		function isDesktop() {
+			View.setIsDesktop(window.innerWidth >= 768);
+		}
 		if (loadingStore.logOutLoadID) {
 			toast.dismiss(loadingStore.logOutLoadID);
 			loadingStore.removeLogOutLoadID();
 			toast.success('log out success', { position: 'top-right' });
 		}
+		window.addEventListener('resize', isDesktop);
+		return () => {
+			window.removeEventListener('resize', isDesktop);
+		};
 	});
 
 	async function onRegisterSubmit(args: EnhancementArgs) {
@@ -84,7 +95,10 @@
 	<script src="https://www.google.com/recaptcha/api.js?render={PUBLIC_RECAPTCHA_SITE_KEY}"></script>
 </svelte:head>
 
-<div class="flex h-full w-full items-center justify-center">
+<div class="flex h-full w-full items-center justify-center md:justify-between">
+	{#if View.isDesktop}
+		<Image src={LandingIcons} width={500} height={500} />
+	{/if}
 	{#if !View.login}
 		<Card>
 			<h2 class="mb-3 text-2xl font-bold text-[var(--tertiary-color)]">Register</h2>
@@ -136,6 +150,7 @@
 				disabled={View.isLoading}
 				withBg={false}
 				textColor="dark"
+				full={true}
 				onClick={() => View.switchForm()}>Already have an account?</Button
 			>
 		</Card>
@@ -165,12 +180,13 @@
 					>Login</Button
 				>
 				<Button formAction="?/googlelogin" type="submit" full={true} disabled={View.isLoading}
-					>Login With Google</Button
+					>Login With <Google width={24} height={24} /></Button
 				>
 			</form>
 			<Button
 				disabled={View.isLoading}
 				withBg={false}
+				full={true}
 				textColor="dark"
 				onClick={() => View.switchForm()}>Want to create account?</Button
 			>
