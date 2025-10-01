@@ -5,7 +5,7 @@
 	import Menubar from '$lib/components/menubar/Menubar.svelte';
 	import MenuItem from '$lib/components/menubar/MenuItem.svelte';
 	import { loadingStore } from '$lib/stores/LoadingStore.svelte';
-	import { House, Info, List, LogOut, MessageCircleMore, ShoppingCart } from '@lucide/svelte';
+	import { House, Info, List, LogOut, MessageCircleMore, ShoppingCart, User } from '@lucide/svelte';
 	import toast from 'svelte-french-toast';
 
 	function onLogout() {
@@ -58,6 +58,14 @@
 			<div class="flex flex-col items-center">
 				<Info />
 				About
+			</div>
+		</Link>
+	</MenuItem>
+	<MenuItem>
+		<Link href="/profile">
+			<div class="flex flex-col items-center">
+				<User />
+				Profile
 			</div>
 		</Link>
 	</MenuItem>

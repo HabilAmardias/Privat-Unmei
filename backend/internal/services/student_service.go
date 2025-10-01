@@ -72,6 +72,7 @@ func (us *StudentServiceImpl) GetStudentProfile(ctx context.Context, param entit
 	profile.Name = user.Name
 	profile.Bio = user.Bio
 	profile.ProfileImage = user.ProfileImage
+	profile.Email = user.Email
 
 	return profile, nil
 }
@@ -169,11 +170,12 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 			}
 			newUser := &entity.User{
 				Email:        email,
-				Name:         strings.TrimSuffix(email, "@"),
+				Name:         strings.Split(email, "@")[0],
 				Status:       constants.VerifiedStatus,
 				Password:     hashed,
 				ProfileImage: constants.DefaultAvatar,
 			}
+			log.Println(newUser.Name)
 			if err := us.ur.AddNewUser(ctx, newUser); err != nil {
 				return "", "", "", err
 			}

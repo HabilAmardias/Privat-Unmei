@@ -1,6 +1,6 @@
 <script lang="ts">
 	type inputProps = {
-		placeholder: string;
+		placeholder?: string;
 		name: string;
 		value?: string;
 		id: string;
