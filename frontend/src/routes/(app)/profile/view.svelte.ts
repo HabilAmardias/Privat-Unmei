@@ -3,6 +3,9 @@ class profileView {
     isEdit = $state<boolean>(false)
     name = $state<string>("")
     bio = $state<string>("")
+    profileImage = $state<FileList>()
+    status = $state<string>("")
+    
     size = $derived.by<number>(()=>{
         if (this.isDesktop){
             return 200

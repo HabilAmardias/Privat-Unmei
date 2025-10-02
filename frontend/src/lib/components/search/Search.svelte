@@ -7,8 +7,16 @@
 		onValueChange?: (val: string) => void;
 		label: string;
 		items?: { value: string; label: string }[];
+		value?: string;
 	};
-	let { keyword = '', onKeywordChange, items, onValueChange, label }: searchProps = $props();
+	let {
+		keyword = '',
+		onKeywordChange,
+		items,
+		onValueChange,
+		label,
+		value = $bindable()
+	}: searchProps = $props();
 </script>
 
 <Combobox.Root
@@ -16,6 +24,7 @@
 	onOpenChangeComplete={(o) => {
 		if (!o) keyword = '';
 	}}
+	bind:value
 	{onValueChange}
 >
 	<div class="relative w-fit rounded-lg bg-[var(--tertiary-color)]">

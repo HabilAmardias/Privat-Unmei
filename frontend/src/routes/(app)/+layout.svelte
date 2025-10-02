@@ -38,14 +38,6 @@
 		</Link>
 	</MenuItem>
 	<MenuItem>
-		<Link href="/orders">
-			<div class="flex flex-col items-center">
-				<ShoppingCart />
-				Orders
-			</div>
-		</Link>
-	</MenuItem>
-	<MenuItem>
 		<Link href="/chats">
 			<div class="flex flex-col items-center">
 				<MessageCircleMore />
