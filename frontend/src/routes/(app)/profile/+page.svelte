@@ -10,7 +10,7 @@
 	import FileInput from '$lib/components/form/FileInput.svelte';
 	import Select from '$lib/components/select/Select.svelte';
 	import { statusOptions } from './model';
-	import Search from '$lib/components/search/Search.svelte';
+	import Pagination from '$lib/components/pagination/Pagination.svelte';
 
 	let { data }: PageProps = $props();
 	onMount(() => {
@@ -29,7 +29,7 @@
 </script>
 
 {#if View.isEdit}
-	<form action="?/updateProfile" class="flex h-full flex-col justify-center gap-4 p-8">
+	<form action="?/updateProfile" class="flex h-full flex-col justify-center gap-4 p-4">
 		<div class="flex items-center gap-4">
 			<FileInput bind:files={View.profileImage} id="profile_image" name="profile_image">
 				<div class="group relative inline-block overflow-hidden rounded-full">
@@ -62,7 +62,7 @@
 		</div>
 	</form>
 {:else}
-	<div class="flex h-full flex-col gap-4 p-8">
+	<div class="flex h-full flex-col gap-4 p-4">
 		<div class="flex items-center gap-4">
 			<CldImage
 				src={data.resBody.data.profile_image}
@@ -87,15 +87,24 @@
 			</div>
 		</div>
 		<div class="flex flex-col gap-2">
-			<p>Bio:</p>
+			<b class="text-xl text-[var(--tertiary-color)]">Bio:</b>
 			<p class="text-justify">{data.resBody.data.bio}</p>
 		</div>
-		<div>
+		<div class="flex flex-col gap-4">
 			<h3 class="text-xl font-bold text-[var(--tertiary-color)]">Orders</h3>
-			<form class="flex items-center gap-4" action="?/myOrders">
-				<Input width={300} placeholder="Enter a Keyword" id="search" name="search" type="text" />
-				<Select defaultLable="Select status" options={statusOptions} bind:value={View.status} />
-				<Button type="submit" formAction="?/myOrders">Search</Button>
+			<form class="grid grid-cols-3 gap-4" action="?/myOrders" method="POST">
+				<Input width="full" placeholder="Search" id="search" name="search" type="text" />
+				<Select defaultLable="Status" options={statusOptions} bind:value={View.status} />
+				<Button type="submit" full formAction="?/myOrders">Search</Button>
+			</form>
+
+			<form
+				bind:this={View.paginationForm}
+				action="?/myOrders"
+				method="POST"
+				class="flex items-center justify-center"
+			>
+				<Pagination count={View.totalRow} perPage={View.limit} />
 			</form>
 		</div>
 	</div>

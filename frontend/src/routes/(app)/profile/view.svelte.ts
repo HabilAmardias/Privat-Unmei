@@ -5,6 +5,9 @@ class profileView {
     bio = $state<string>("")
     profileImage = $state<FileList>()
     status = $state<string>("")
+    totalRow = $state<number>(100)
+    limit = $state<number>(15)
+    paginationForm = $state<HTMLFormElement | undefined>()
     
     size = $derived.by<number>(()=>{
         if (this.isDesktop){

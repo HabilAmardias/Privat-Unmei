@@ -6,6 +6,7 @@
 	import MenuItem from '$lib/components/menubar/MenuItem.svelte';
 	import { loadingStore } from '$lib/stores/LoadingStore.svelte';
 	import { House, Info, List, LogOut, MessageCircleMore, ShoppingCart, User } from '@lucide/svelte';
+	import { ScrollArea } from 'bits-ui';
 	import toast from 'svelte-french-toast';
 
 	function onLogout() {
@@ -18,7 +19,11 @@
 </script>
 
 <main class="flex-1 pb-24 md:pb-0 md:pt-24">
-	{@render children()}
+	<ScrollArea.Root>
+		<ScrollArea.Viewport>
+			{@render children()}
+		</ScrollArea.Viewport>
+	</ScrollArea.Root>
 </main>
 <Menubar>
 	<MenuItem>

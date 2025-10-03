@@ -18,7 +18,7 @@
 
 <Select.Root bind:value type="single" onValueChange={onChange} items={options} allowDeselect={true}>
 	<Select.Trigger
-		class="h-input rounded-9px border-border-input bg-background data-placeholder:text-foreground-alt/50 inline-flex w-fit touch-none select-none items-center rounded-lg border border-[var(--tertiary-color)] bg-[var(--tertiary-color)] p-3 px-[11px] text-sm text-[var(--secondary-color)] transition-colors"
+		class="h-input rounded-9px border-border-input bg-background data-placeholder:text-foreground-alt/50 inline-flex w-full touch-none select-none items-center rounded-lg border border-[var(--tertiary-color)] bg-[var(--tertiary-color)] p-2 px-[11px] text-sm text-[var(--secondary-color)] transition-colors"
 	>
 		{selectedLabel}
 		<ChevronsUpDown
@@ -36,7 +36,7 @@
 			<Select.Viewport class="p-1">
 				{#each options as opt, i (i + opt.value)}
 					<Select.Item
-						class="rounded-button data-highlighted:bg-muted outline-hidden data-disabled:opacity-50 data-disabled:text-[var(--secondary-color)] data-disabled:cursor-not-allowed flex h-10 w-full cursor-pointer select-none items-center py-3 pl-5 pr-1.5 text-sm capitalize text-[var(--secondary-color)] hover:text-[var(--primary-color)]"
+						class="rounded-button data-highlighted:bg-muted outline-hidden data-disabled:opacity-50 data-disabled:text-[var(--secondary-color)] data-disabled:cursor-not-allowed flex h-10 w-full cursor-pointer select-none items-center px-1 py-3 text-sm capitalize text-[var(--secondary-color)] hover:text-[var(--primary-color)]"
 						value={opt.value}
 						label={opt.label}
 					>
