@@ -4,19 +4,39 @@
 	import type { PageProps } from './$types';
 	import { View } from './view.svelte';
 	import Button from '$lib/components/button/Button.svelte';
-	import { Pencil, Scroll } from '@lucide/svelte';
+	import { Pencil } from '@lucide/svelte';
 	import Textarea from '$lib/components/form/Textarea.svelte';
 	import Input from '$lib/components/form/Input.svelte';
 	import FileInput from '$lib/components/form/FileInput.svelte';
 	import Select from '$lib/components/select/Select.svelte';
 	import { statusOptions } from './model';
 	import Pagination from '$lib/components/pagination/Pagination.svelte';
-	import type { EnhancementArgs, EnhancementReturn, UserStatus } from '$lib/types';
+	import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
 	import { enhance } from '$app/forms';
 	import toast from 'svelte-french-toast';
 	import { ScrollArea } from 'bits-ui';
+	import Loading from '$lib/components/loader/Loading.svelte';
 
 	let { data }: PageProps = $props();
+
+	onMount(() => {
+		View.setBio(data.profile.bio);
+		View.setName(data.profile.name);
+		View.setIsDesktop(window.innerWidth >= 768);
+		if (data.orders) {
+			View.setOrders(data.orders.entries);
+			View.setTotalRow(data.orders.page_info.total_row);
+			View.setLastID(data.orders.page_info.last_id);
+		}
+		function isDesktop() {
+			View.setIsDesktop(window.innerWidth >= 768);
+		}
+		window.addEventListener('resize', isDesktop);
+
+		return () => {
+			window.removeEventListener('resize', isDesktop);
+		};
+	});
 
 	function onVerifySubmit(args: EnhancementArgs) {
 		View.setVerifyIsLoading(true);
@@ -34,33 +54,50 @@
 		};
 	}
 
-	onMount(() => {
-		View.setBio(data.profile.bio);
-		View.setName(data.profile.name);
-		View.setIsDesktop(window.innerWidth >= 768);
-		const userStatus = localStorage.getItem('status');
-		if (userStatus) {
-			View.setUserStatus(userStatus as UserStatus);
-		}
-		if (data.orders) {
-			View.setOrders(data.orders.entries);
-			View.setTotalRow(data.orders.page_info.total_row);
-		}
-		function isDesktop() {
-			View.setIsDesktop(window.innerWidth >= 768);
-		}
-		window.addEventListener('resize', isDesktop);
-
-		return () => {
-			window.removeEventListener('resize', isDesktop);
+	function onUpdateOrders(args: EnhancementArgs) {
+		View.setOrdersIsLoading(true);
+		args.formData.append('last_id', `${View.lastID}`);
+		return async ({ result, update }: EnhancementReturn) => {
+			View.setOrdersIsLoading(false);
+			if (result.type === 'success') {
+				View.setOrders(result.data?.orders);
+				View.setTotalRow(result.data?.totalRow);
+			}
+			if (result.type === 'failure') {
+				toast.error(result.data?.message, { position: 'top-right' });
+			}
+			update({ reset: false });
 		};
-	});
+	}
+
+	function onUpdateProfile(args: EnhancementArgs) {
+		View.setProfileIsLoading(true);
+		const loadID = toast.loading('updating...', { position: 'top-right' });
+		return async ({ result, update }: EnhancementReturn) => {
+			View.setProfileIsLoading(false);
+			toast.dismiss(loadID);
+			if (result.type === 'success') {
+				toast.success('update profile success', { position: 'top-right' });
+			}
+			if (result.type === 'failure') {
+				toast.error(result.data?.message, { position: 'top-right' });
+			}
+			View.setIsEdit();
+			update({ reset: false });
+		};
+	}
 </script>
 
 {#if View.isEdit}
-	<form action="?/updateProfile" class="flex h-full flex-col justify-center gap-4 p-4">
+	<form
+		use:enhance={onUpdateProfile}
+		action="?/updateProfile"
+		method="POST"
+		enctype="multipart/form-data"
+		class="flex h-full flex-col justify-center gap-4 p-4"
+	>
 		<div class="flex items-center gap-4">
-			<FileInput bind:files={View.profileImage} id="profile_image" name="profile_image">
+			<FileInput bind:files={View.profileImage} id="profile_image" name="file">
 				<div class="group relative inline-block overflow-hidden rounded-full">
 					<CldImage
 						src={data.profile.profile_image}
@@ -86,8 +123,10 @@
 			<Textarea id="bio" name="bio" bind:value={View.bio}>Bio:</Textarea>
 		</div>
 		<div class="flex gap-1">
-			<Button onClick={() => View.setIsEdit()}>Cancel</Button>
-			<Button formAction="?/updateProfile" type="submit">Submit</Button>
+			<Button type="button" onClick={() => View.setIsEdit()}>Cancel</Button>
+			<Button disabled={View.profileIsLoading} formAction="?/updateProfile" type="submit"
+				>Submit</Button
+			>
 		</div>
 	</form>
 {:else}
@@ -113,7 +152,7 @@
 					</Button>
 				</div>
 				<p class="text-md">{data.profile.email}</p>
-				{#if View.userStatus !== 'verified'}
+				{#if data.userStatus !== 'verified'}
 					<form use:enhance={onVerifySubmit} method="POST" action="?/sendVerification">
 						<Button disabled={View.verifyIsLoading} type="submit" formAction="?/sendVerification"
 							>Send Verification Link</Button
@@ -126,10 +165,15 @@
 			<b class="text-xl text-[var(--tertiary-color)]">Bio:</b>
 			<p class="text-justify">{data.profile.bio}</p>
 		</div>
-		{#if View.userStatus === 'verified'}
+		{#if data.userStatus === 'verified'}
 			<div class="flex flex-1 flex-col gap-4">
 				<h3 class="text-xl font-bold text-[var(--tertiary-color)]">Orders</h3>
-				<form class="grid grid-cols-3 gap-4" action="?/myOrders" method="POST">
+				<form
+					use:enhance={onUpdateOrders}
+					class="grid grid-cols-3 gap-4"
+					action="?/myOrders"
+					method="POST"
+				>
 					<Input width="full" placeholder="Search" id="search" name="search" type="text" />
 					<Select
 						defaultLable="Status"
@@ -137,10 +181,14 @@
 						options={statusOptions}
 						bind:value={View.status}
 					/>
-					<Button type="submit" full formAction="?/myOrders">Search</Button>
+					<Button disabled={View.ordersIsLoading} type="submit" full formAction="?/myOrders"
+						>Search</Button
+					>
 				</form>
 				<div class="flex flex-1">
-					{#if !View.orders || View.orders.length === 0}
+					{#if View.ordersIsLoading}
+						<Loading />
+					{:else if !View.orders || View.orders.length === 0}
 						<p>No orders found</p>
 					{:else}
 						<ScrollArea.Root class="h-full">
@@ -164,6 +212,7 @@
 					action="?/myOrders"
 					method="POST"
 					class="flex items-center justify-center"
+					use:enhance={onUpdateOrders}
 				>
 					<Pagination
 						onPageChange={(num) => {

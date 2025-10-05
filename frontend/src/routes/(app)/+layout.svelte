@@ -5,7 +5,7 @@
 	import Menubar from '$lib/components/menubar/Menubar.svelte';
 	import MenuItem from '$lib/components/menubar/MenuItem.svelte';
 	import { loadingStore } from '$lib/stores/LoadingStore.svelte';
-	import { House, Info, List, LogOut, MessageCircleMore, ShoppingCart, User } from '@lucide/svelte';
+	import { House, Info, List, LogOut, MessageCircleMore, User } from '@lucide/svelte';
 	import { ScrollArea } from 'bits-ui';
 	import toast from 'svelte-french-toast';
 

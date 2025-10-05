@@ -3,6 +3,12 @@ import { FetchData } from "$lib/utils";
 import type { StudentOrders, StudentProfile } from "./model";
 
 class profileController {
+    async updateProfile(fetch: Fetch, req: Request){
+        const url = 'http://localhost:8080/api/v1/students/me'
+        const body = await req.formData()
+        const {success, message, status} = await FetchData(fetch, url, 'PATCH', body)
+        return {success, message, status}
+    }
     async sendVerificationLink(fetch : Fetch){
         const url = 'http://localhost:8080/api/v1/verify/send'
         const {success, message, status} = await FetchData(fetch, url)

@@ -46,7 +46,7 @@ export const handle: Handle = async({event, resolve}) =>{
 	const refreshToken = event.cookies.get('refresh_token');
 	if (!event.route.id?.includes('/(public)')) {
 		if (!IsTokenExpired(refreshToken) && IsTokenExpired(authToken)) {
-			const { success, cookiesData, message, status } = await controller.refresh(fetch);
+			const { success, cookiesData, message, status } = await controller.refresh(event.fetch);
 			if (!success) {
 				const body = JSON.stringify({
 					success,

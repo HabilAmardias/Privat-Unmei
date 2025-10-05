@@ -151,6 +151,10 @@ class AuthController {
 						data.key = key;
 						data.value = val;
 						break;
+					case 'status':
+						data.key = key;
+						data.value = val;
+						break;
 					case 'oauthstate':
 						data.key = key;
 						data.value = val;

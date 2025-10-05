@@ -1,8 +1,9 @@
-import type { UserStatus } from "$lib/types"
 import type { StudentOrders } from "./model"
 
 class profileView {
     verifyIsLoading = $state<boolean>(false)
+    ordersIsLoading = $state<boolean>(false)
+    profileIsLoading = $state<boolean>(false)
     isDesktop = $state<boolean>()
     isEdit = $state<boolean>(false)
     name = $state<string>("")
@@ -10,7 +11,6 @@ class profileView {
     profileImage = $state<FileList>()
     status = $state<string>("")
     totalRow = $state<number>(1) // temporary
-    userStatus = $state<UserStatus>()
     limit = $state<number>(15)
     lastID = $state<number>(15)
     pageNumber = $state<number>(1)
@@ -34,16 +34,19 @@ class profileView {
             this.lastID = lastOrder.id
         }
         this.pageNumber = num
-        this.paginationForm?.submit()
+        this.paginationForm?.requestSubmit()
     }
     setTotalRow(row: number){
         this.totalRow = row
     }
+    setOrdersIsLoading(b: boolean){
+        this.ordersIsLoading = b
+    }
     setVerifyIsLoading(b: boolean){
         this.verifyIsLoading = b
     }
-    setUserStatus(newStatus: UserStatus){
-        this.userStatus = newStatus
+    setProfileIsLoading(b: boolean){
+        this.profileIsLoading = b
     }
     setBio(newBio: string){
         this.bio = newBio
@@ -59,6 +62,9 @@ class profileView {
     }
     setOrders(newOrders: StudentOrders[]){
         this.orders = newOrders
+    }
+    setLastID(newID: number){
+        this.lastID = newID
     }
 }
 

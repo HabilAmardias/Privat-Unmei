@@ -68,7 +68,6 @@
 			const loadID = toast.loading('logging in.....', { position: 'top-right' });
 			return async ({ result, update }: EnhancementReturn) => {
 				if (result.type === 'success') {
-					localStorage.setItem('status', result.data?.userStatus);
 					await goto('/home', { replaceState: true });
 					View.setIsLoading(false);
 					toast.dismiss(loadID);
