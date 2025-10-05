@@ -19,8 +19,8 @@
 </script>
 
 <main class="flex-1 pb-24 md:pb-0 md:pt-24">
-	<ScrollArea.Root>
-		<ScrollArea.Viewport>
+	<ScrollArea.Root class="h-full">
+		<ScrollArea.Viewport class="h-full">
 			{@render children()}
 		</ScrollArea.Viewport>
 	</ScrollArea.Root>

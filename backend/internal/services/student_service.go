@@ -293,7 +293,7 @@ func (us *StudentServiceImpl) SendVerificationEmail(ctx context.Context, id stri
 		emailParam := entity.SendEmailParams{
 			Receiver:  user.Email,
 			Subject:   "Verify your account",
-			EmailBody: constants.VerificationEmailBody(*student.VerifyToken),
+			EmailBody: constants.VerificationEmailBody(jwt),
 		}
 		if err := us.gu.SendEmail(emailParam); err != nil {
 			return err
@@ -382,6 +382,10 @@ func (us *StudentServiceImpl) Verify(ctx context.Context, param entity.VerifyStu
 			return err
 		}
 		if student.VerifyToken == nil || param.Token != *student.VerifyToken {
+			if student.VerifyToken != nil {
+				log.Println("stored token: ", *student.VerifyToken)
+			}
+			log.Println("sent token: ", param.Token)
 			return customerrors.NewError(
 				"invalid credential",
 				errors.New("invalid verify token"),

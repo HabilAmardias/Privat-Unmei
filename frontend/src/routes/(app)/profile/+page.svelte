@@ -4,19 +4,48 @@
 	import type { PageProps } from './$types';
 	import { View } from './view.svelte';
 	import Button from '$lib/components/button/Button.svelte';
-	import { Pencil } from '@lucide/svelte';
+	import { Pencil, Scroll } from '@lucide/svelte';
 	import Textarea from '$lib/components/form/Textarea.svelte';
 	import Input from '$lib/components/form/Input.svelte';
 	import FileInput from '$lib/components/form/FileInput.svelte';
 	import Select from '$lib/components/select/Select.svelte';
 	import { statusOptions } from './model';
 	import Pagination from '$lib/components/pagination/Pagination.svelte';
+	import type { EnhancementArgs, EnhancementReturn, UserStatus } from '$lib/types';
+	import { enhance } from '$app/forms';
+	import toast from 'svelte-french-toast';
+	import { ScrollArea } from 'bits-ui';
 
 	let { data }: PageProps = $props();
+
+	function onVerifySubmit(args: EnhancementArgs) {
+		View.setVerifyIsLoading(true);
+		const loadID = toast.loading('sending....', { position: 'top-right' });
+		return async ({ result, update }: EnhancementReturn) => {
+			View.setVerifyIsLoading(false);
+			toast.dismiss(loadID);
+			if (result.type === 'success') {
+				toast.success(result.data?.message, { position: 'top-right' });
+			}
+			if (result.type === 'failure') {
+				toast.error(result.data?.message, { position: 'top-right' });
+			}
+			update();
+		};
+	}
+
 	onMount(() => {
-		View.setBio(data.resBody.data.bio);
-		View.setName(data.resBody.data.name);
+		View.setBio(data.profile.bio);
+		View.setName(data.profile.name);
 		View.setIsDesktop(window.innerWidth >= 768);
+		const userStatus = localStorage.getItem('status');
+		if (userStatus) {
+			View.setUserStatus(userStatus as UserStatus);
+		}
+		if (data.orders) {
+			View.setOrders(data.orders.entries);
+			View.setTotalRow(data.orders.page_info.total_row);
+		}
 		function isDesktop() {
 			View.setIsDesktop(window.innerWidth >= 768);
 		}
@@ -34,7 +63,7 @@
 			<FileInput bind:files={View.profileImage} id="profile_image" name="profile_image">
 				<div class="group relative inline-block overflow-hidden rounded-full">
 					<CldImage
-						src={data.resBody.data.profile_image}
+						src={data.profile.profile_image}
 						width={View.size}
 						height={View.size}
 						className="rounded-full shadow-2xl border-gray-400 brightness-60 md:brightness-100 md:border-none md:shadow-none md:hover:shadow-2xl md:group-hover:border-gray-400 md:transition-all md:duration-300 md:group-hover:brightness-60"
@@ -50,7 +79,7 @@
 			</FileInput>
 			<div class="flex flex-col gap-1">
 				<Input id="name" name="name" type="text" bind:value={View.name} />
-				<p class="text-md">{data.resBody.data.email}</p>
+				<p class="text-md">{data.profile.email}</p>
 			</div>
 		</div>
 		<div class="flex flex-col gap-2">
@@ -65,14 +94,14 @@
 	<div class="flex h-full flex-col gap-4 p-4">
 		<div class="flex items-center gap-4">
 			<CldImage
-				src={data.resBody.data.profile_image}
+				src={data.profile.profile_image}
 				width={View.size}
 				height={View.size}
 				className="rounded-full"
 			/>
 			<div class="flex flex-col gap-1">
 				<div class="flex gap-1">
-					<b class="text-xl text-[var(--tertiary-color)]">{data.resBody.data.name}</b>
+					<b class="text-xl text-[var(--tertiary-color)]">{data.profile.name}</b>
 					<Button
 						onClick={() => View.setIsEdit()}
 						type="button"
@@ -83,29 +112,69 @@
 						<Pencil width={24} height={24} />
 					</Button>
 				</div>
-				<p class="text-md">{data.resBody.data.email}</p>
+				<p class="text-md">{data.profile.email}</p>
+				{#if View.userStatus !== 'verified'}
+					<form use:enhance={onVerifySubmit} method="POST" action="?/sendVerification">
+						<Button disabled={View.verifyIsLoading} type="submit" formAction="?/sendVerification"
+							>Send Verification Link</Button
+						>
+					</form>
+				{/if}
 			</div>
 		</div>
 		<div class="flex flex-col gap-2">
 			<b class="text-xl text-[var(--tertiary-color)]">Bio:</b>
-			<p class="text-justify">{data.resBody.data.bio}</p>
+			<p class="text-justify">{data.profile.bio}</p>
 		</div>
-		<div class="flex flex-col gap-4">
-			<h3 class="text-xl font-bold text-[var(--tertiary-color)]">Orders</h3>
-			<form class="grid grid-cols-3 gap-4" action="?/myOrders" method="POST">
-				<Input width="full" placeholder="Search" id="search" name="search" type="text" />
-				<Select defaultLable="Status" options={statusOptions} bind:value={View.status} />
-				<Button type="submit" full formAction="?/myOrders">Search</Button>
-			</form>
+		{#if View.userStatus === 'verified'}
+			<div class="flex flex-1 flex-col gap-4">
+				<h3 class="text-xl font-bold text-[var(--tertiary-color)]">Orders</h3>
+				<form class="grid grid-cols-3 gap-4" action="?/myOrders" method="POST">
+					<Input width="full" placeholder="Search" id="search" name="search" type="text" />
+					<Select
+						defaultLable="Status"
+						name="status"
+						options={statusOptions}
+						bind:value={View.status}
+					/>
+					<Button type="submit" full formAction="?/myOrders">Search</Button>
+				</form>
+				<div class="flex flex-1">
+					{#if !View.orders || View.orders.length === 0}
+						<p>No orders found</p>
+					{:else}
+						<ScrollArea.Root class="h-full">
+							<ScrollArea.Viewport class="h-full">
+								{#each View.orders as order (order.id)}
+									<div>
+										<p>{order.course_name}</p>
+										<p>{order.mentor_name}</p>
+										<p>{order.mentor_email}</p>
+										<p>{order.total_price}</p>
+										<p>{order.status}</p>
+									</div>
+								{/each}
+							</ScrollArea.Viewport>
+						</ScrollArea.Root>
+					{/if}
+				</div>
 
-			<form
-				bind:this={View.paginationForm}
-				action="?/myOrders"
-				method="POST"
-				class="flex items-center justify-center"
-			>
-				<Pagination count={View.totalRow} perPage={View.limit} />
-			</form>
-		</div>
+				<form
+					bind:this={View.paginationForm}
+					action="?/myOrders"
+					method="POST"
+					class="flex items-center justify-center"
+				>
+					<Pagination
+						onPageChange={(num) => {
+							View.onPageChange(num);
+						}}
+						pageNumber={View.pageNumber}
+						count={View.totalRow}
+						perPage={View.limit}
+					/>
+				</form>
+			</div>
+		{/if}
 	</div>
 {/if}

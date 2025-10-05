@@ -7,16 +7,24 @@
 		options: { value: string; label: string }[];
 		onChange?: (val: string) => void;
 		defaultLable: string;
+		name: string;
 	};
 
-	let { value = $bindable(), options, onChange, defaultLable }: selectProps = $props();
+	let { value = $bindable(), options, onChange, defaultLable, name }: selectProps = $props();
 
 	const selectedLabel = $derived(
 		value ? options.find((opt) => opt.value === value)?.label : defaultLable
 	);
 </script>
 
-<Select.Root bind:value type="single" onValueChange={onChange} items={options} allowDeselect={true}>
+<Select.Root
+	bind:value
+	type="single"
+	{name}
+	onValueChange={onChange}
+	items={options}
+	allowDeselect={true}
+>
 	<Select.Trigger
 		class="h-input rounded-9px border-border-input bg-background data-placeholder:text-foreground-alt/50 inline-flex w-full touch-none select-none items-center rounded-lg border border-[var(--tertiary-color)] bg-[var(--tertiary-color)] p-2 px-[11px] text-sm text-[var(--secondary-color)] transition-colors"
 	>

@@ -1,12 +1,13 @@
 import { type Handle, type HandleFetch } from '@sveltejs/kit';
 import { controller } from './controller';
+import { IsTokenExpired } from '$lib/utils/helper';
 
 export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 	const authToken = event.cookies.get('auth_token');
 	const refreshToken = event.cookies.get('refresh_token');
 
 	if (!event.route.id?.includes('/(public)')) {
-		if (refreshToken && !authToken) {
+		if (!IsTokenExpired(refreshToken) && IsTokenExpired(authToken)) {
 			const { success, cookiesData, message, status } = await controller.refresh(fetch);
 			if (!success) {
 				const body = JSON.stringify({
@@ -27,7 +28,7 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 				});
 			});
 		}
-		if (!refreshToken && !authToken) {
+		if (IsTokenExpired(refreshToken) && IsTokenExpired(authToken)) {
 			const body = JSON.stringify({
 				success: false,
 				data: {
@@ -44,7 +45,7 @@ export const handle: Handle = async({event, resolve}) =>{
 	const authToken = event.cookies.get('auth_token');
 	const refreshToken = event.cookies.get('refresh_token');
 	if (!event.route.id?.includes('/(public)')) {
-		if (refreshToken && !authToken) {
+		if (!IsTokenExpired(refreshToken) && IsTokenExpired(authToken)) {
 			const { success, cookiesData, message, status } = await controller.refresh(fetch);
 			if (!success) {
 				const body = JSON.stringify({
@@ -65,7 +66,7 @@ export const handle: Handle = async({event, resolve}) =>{
 				});
 			});
 		}
-		if (!refreshToken && !authToken) {
+		if (IsTokenExpired(refreshToken) && IsTokenExpired(authToken)) {
 			const body = JSON.stringify({
 				success: false,
 				data: {

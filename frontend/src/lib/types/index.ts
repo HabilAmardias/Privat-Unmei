@@ -6,6 +6,8 @@ export type Fetch = (input: string | URL, init?: RequestInit) => Promise<Respons
 
 export type SameSite = 'none' | 'lax' | 'strict';
 
+export type UserStatus = 'verified' | 'unverified'
+
 export type MessageResponse = {
 	message: string;
 };
@@ -78,4 +80,11 @@ export type PaginatedResponse<T> = {
 		filter_by?: FilterInfo[]
 		sort_by?: SortInfo[]
 	}
+}
+
+export interface AuthClaim {
+	sub: string
+	iss: string
+	iat: number
+	exp: number
 }
