@@ -39,6 +39,15 @@
 		};
 	});
 
+	function onCancel() {
+		View.setProfileImage(undefined);
+		View.setBio(data.profile.bio);
+		View.setName(data.profile.name);
+		View.setNameError(undefined);
+		View.setBioError(undefined);
+		View.setIsEdit();
+	}
+
 	function onVerifySubmit(args: EnhancementArgs) {
 		View.setVerifyIsLoading(true);
 		const loadID = toast.loading('sending....', { position: 'top-right' });
@@ -63,6 +72,7 @@
 			if (result.type === 'success') {
 				View.setOrders(result.data?.orders);
 				View.setTotalRow(result.data?.totalRow);
+				toast.success(result.data?.message, { position: 'top-right' });
 			}
 			if (result.type === 'failure') {
 				toast.error(result.data?.message, { position: 'top-right' });
@@ -72,9 +82,11 @@
 	}
 
 	function onUpdateProfile(args: EnhancementArgs) {
-		View.setProfileIsLoading(true);
 		const loadID = toast.loading('updating...', { position: 'top-right' });
 		return async ({ result, update }: EnhancementReturn) => {
+			onCancel();
+			View.setProfileIsLoading(true);
+			await update({ reset: false });
 			View.setProfileIsLoading(false);
 			toast.dismiss(loadID);
 			if (result.type === 'success') {
@@ -83,8 +95,6 @@
 			if (result.type === 'failure') {
 				toast.error(result.data?.message, { position: 'top-right' });
 			}
-			View.setIsEdit();
-			update({ reset: false });
 		};
 	}
 </script>
@@ -98,7 +108,7 @@
 		class="flex h-full flex-col justify-center gap-4 p-4"
 	>
 		<div class="flex items-center gap-4">
-			<FileInput bind:files={View.profileImage} id="profile_image" name="file">
+			<FileInput accept="image/png" bind:files={View.profileImage} id="profile_image" name="file">
 				<div class="group relative inline-block overflow-hidden rounded-full">
 					{#if View.profileImage}
 						<Image
@@ -106,6 +116,7 @@
 							width={View.size}
 							height={View.size}
 							round="full"
+							additionalClass="shadow-2xl border-gray-400 brightness-60 md:brightness-100 md:border-none md:shadow-none md:hover:shadow-2xl md:group-hover:border-gray-400 md:transition-all md:duration-300 md:group-hover:brightness-60"
 						/>
 					{:else}
 						<CldImage
@@ -125,55 +136,76 @@
 				</div>
 			</FileInput>
 			<div class="flex flex-col gap-1">
-				<Input id="name" name="name" type="text" bind:value={View.name} />
+				<Input
+					err={View.nameError}
+					onBlur={() => View.nameOnBlur()}
+					id="name"
+					name="name"
+					type="text"
+					bind:value={View.name}
+				/>
 				<p class="text-md">{data.profile.email}</p>
 			</div>
 		</div>
 		<div class="flex flex-col gap-2">
-			<Textarea id="bio" name="bio" bind:value={View.bio}>Bio:</Textarea>
+			<Textarea
+				err={View.bioError}
+				onBlur={() => View.bioOnBlur()}
+				id="bio"
+				name="bio"
+				bind:value={View.bio}>Bio:</Textarea
+			>
 		</div>
 		<div class="flex gap-1">
-			<Button type="button" onClick={() => View.setIsEdit()}>Cancel</Button>
-			<Button disabled={View.profileIsLoading} formAction="?/updateProfile" type="submit"
+			<Button type="button" onClick={onCancel}>Cancel</Button>
+			<Button disabled={View.updateProfileDisable} formAction="?/updateProfile" type="submit"
 				>Submit</Button
 			>
 		</div>
 	</form>
 {:else}
 	<div class="flex h-full flex-col gap-4 p-4">
-		<div class="flex items-center gap-4">
-			<CldImage
-				src={data.profile.profile_image}
-				width={View.size}
-				height={View.size}
-				className="rounded-full"
-			/>
-			<div class="flex flex-col gap-1">
-				<div class="flex gap-1">
-					<b class="text-xl text-[var(--tertiary-color)]">{data.profile.name}</b>
-					<Button
-						onClick={() => View.setIsEdit()}
-						type="button"
-						withPadding={false}
-						withBg={false}
-						textColor="dark"
-					>
-						<Pencil width={24} height={24} />
-					</Button>
+		<div class="flex flex-col gap-4">
+			{#if View.profileIsLoading}
+				<Loading />
+			{:else}
+				<div class="flex items-center gap-4">
+					<CldImage
+						src={data.profile.profile_image}
+						width={View.size}
+						height={View.size}
+						className="rounded-full"
+					/>
+					<div class="flex flex-col gap-1">
+						<div class="flex gap-1">
+							<b class="text-xl text-[var(--tertiary-color)]">{data.profile.name}</b>
+							<Button
+								onClick={() => View.setIsEdit()}
+								type="button"
+								withPadding={false}
+								withBg={false}
+								textColor="dark"
+							>
+								<Pencil width={24} height={24} />
+							</Button>
+						</div>
+						<p class="text-md">{data.profile.email}</p>
+						{#if data.userStatus !== 'verified'}
+							<form use:enhance={onVerifySubmit} method="POST" action="?/sendVerification">
+								<Button
+									disabled={View.verifyIsLoading}
+									type="submit"
+									formAction="?/sendVerification">Send Verification Link</Button
+								>
+							</form>
+						{/if}
+					</div>
 				</div>
-				<p class="text-md">{data.profile.email}</p>
-				{#if data.userStatus !== 'verified'}
-					<form use:enhance={onVerifySubmit} method="POST" action="?/sendVerification">
-						<Button disabled={View.verifyIsLoading} type="submit" formAction="?/sendVerification"
-							>Send Verification Link</Button
-						>
-					</form>
-				{/if}
-			</div>
-		</div>
-		<div class="flex flex-col gap-2">
-			<b class="text-xl text-[var(--tertiary-color)]">Bio:</b>
-			<p class="text-justify">{data.profile.bio}</p>
+				<div class="flex flex-col gap-2">
+					<b class="text-xl text-[var(--tertiary-color)]">Bio:</b>
+					<p class="text-justify">{data.profile.bio}</p>
+				</div>
+			{/if}
 		</div>
 		{#if data.userStatus === 'verified'}
 			<div class="flex flex-1 flex-col gap-4">
@@ -199,7 +231,7 @@
 					{#if View.ordersIsLoading}
 						<Loading />
 					{:else if !View.orders || View.orders.length === 0}
-						<p>No orders found</p>
+						<b class="mx-auto self-center text-[var(--tertiary-color)]">No orders found</b>
 					{:else}
 						<ScrollArea.Root class="h-full">
 							<ScrollArea.Viewport class="h-full">

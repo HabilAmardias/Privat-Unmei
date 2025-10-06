@@ -8,14 +8,16 @@ class profileController {
     async updateProfile(fetch: Fetch, req: Request){
         const url = 'http://localhost:8080/api/v1/students/me'
         const body = await req.formData()
-        const profileImage = body.get('file') as File
-        const name = body.get('name') as string
-        const bio = body.get('bio') as string
-        if (profileImage.type !== 'image/png'){
-            return {success: false, message: 'wrong image format', status: 400}
-        }
-        if (profileImage.size > FILE_IMAGE_THRESHOLD){
-            return {success: false, message: 'file size is too large', status: 400}
+        const profileImage = body.get('file') as File | null
+        const name = body.get('name') as string | null
+        const bio = body.get('bio') as string | null
+        if (profileImage && profileImage.size > 0){
+            if (profileImage.type !== 'image/png'){
+                return {success: false, message: 'wrong image format', status: 400}
+            }
+            if (profileImage.size > FILE_IMAGE_THRESHOLD){
+                return {success: false, message: 'file size is too large', status: 400}
+            }
         }
         if (name && !IsAlphaOnly(name)){
             return {success: false, message: 'name must contain alphabet only', status: 400}

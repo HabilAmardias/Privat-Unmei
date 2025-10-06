@@ -1,3 +1,5 @@
+import { MAX_BIO_LENGTH } from "$lib/utils/constants"
+import { IsAlphaOnly } from "$lib/utils/helper"
 import type { StudentOrders } from "./model"
 
 class profileView {
@@ -15,8 +17,16 @@ class profileView {
     lastID = $state<number>(15)
     pageNumber = $state<number>(1)
     paginationForm = $state<HTMLFormElement | undefined>()
-    
+    nameError = $state<Error | undefined>()
+    bioError = $state<Error | undefined>()
     orders = $state<StudentOrders[]>()
+
+    updateProfileDisable = $derived.by<boolean>(()=>{
+        if (this.nameError || this.profileIsLoading || this.bioError){
+            return true
+        }
+        return false
+    })
     
     size = $derived.by<number>(()=>{
         if (this.isDesktop){
@@ -57,6 +67,26 @@ class profileView {
     setIsDesktop(b: boolean){
         this.isDesktop = b
     }
+    nameOnBlur(){
+        if (this.name && !IsAlphaOnly(this.name)){
+            this.nameError = new Error('name must only contain alphabets')
+        } else {
+            this.nameError = undefined
+        }
+    }
+    bioOnBlur(){
+        if (this.bio.length > MAX_BIO_LENGTH){
+            this.bioError = new Error(`bio must not more than ${MAX_BIO_LENGTH} characters`)
+        } else {
+            this.bioError = undefined
+        }
+    }
+    setBioError(e: Error | undefined){
+        this.bioError = e
+    }
+    setNameError(e: Error | undefined){
+        this.nameError = e
+    }
     setIsEdit(){
         this.isEdit = !this.isEdit
     }
@@ -65,6 +95,9 @@ class profileView {
     }
     setLastID(newID: number){
         this.lastID = newID
+    }
+    setProfileImage(f: FileList | undefined){
+        this.profileImage = f
     }
 }
 

@@ -31,7 +31,7 @@ export const actions = {
         if (!success){
             return fail(status, {message})
         }
-        return {orders: resBody.entries, lastID: resBody.page_info.last_id, limit: resBody.page_info.limit, totalRow: resBody.page_info.total_row}
+        return {orders: resBody.entries, lastID: resBody.page_info.last_id, limit: resBody.page_info.limit, totalRow: resBody.page_info.total_row, message}
     }
 
 } satisfies Actions

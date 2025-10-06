@@ -6,11 +6,12 @@
 		name: string;
 		id: string;
 		children: Snippet;
+		accept?: string;
 	};
-	let { files = $bindable(), name, id, children }: fileInputProps = $props();
+	let { files = $bindable(), name, id, children, accept }: fileInputProps = $props();
 </script>
 
 <label for={id} class="cursor-pointer">
 	{@render children()}
-	<input class="hidden" type="file" bind:files {name} {id} />
+	<input {accept} class="hidden" type="file" bind:files {name} {id} />
 </label>
