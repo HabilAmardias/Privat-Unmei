@@ -1,0 +1,2 @@
+export const FILE_IMAGE_THRESHOLD = 1000 * 1000
+export const MAX_BIO_LENGTH = 250

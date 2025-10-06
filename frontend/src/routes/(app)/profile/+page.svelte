@@ -16,6 +16,7 @@
 	import toast from 'svelte-french-toast';
 	import { ScrollArea } from 'bits-ui';
 	import Loading from '$lib/components/loader/Loading.svelte';
+	import Image from '$lib/components/image/Image.svelte';
 
 	let { data }: PageProps = $props();
 
@@ -99,12 +100,21 @@
 		<div class="flex items-center gap-4">
 			<FileInput bind:files={View.profileImage} id="profile_image" name="file">
 				<div class="group relative inline-block overflow-hidden rounded-full">
-					<CldImage
-						src={data.profile.profile_image}
-						width={View.size}
-						height={View.size}
-						className="rounded-full shadow-2xl border-gray-400 brightness-60 md:brightness-100 md:border-none md:shadow-none md:hover:shadow-2xl md:group-hover:border-gray-400 md:transition-all md:duration-300 md:group-hover:brightness-60"
-					/>
+					{#if View.profileImage}
+						<Image
+							src={URL.createObjectURL(View.profileImage[0])}
+							width={View.size}
+							height={View.size}
+							round="full"
+						/>
+					{:else}
+						<CldImage
+							src={data.profile.profile_image}
+							width={View.size}
+							height={View.size}
+							className="rounded-full shadow-2xl border-gray-400 brightness-60 md:brightness-100 md:border-none md:shadow-none md:hover:shadow-2xl md:group-hover:border-gray-400 md:transition-all md:duration-300 md:group-hover:brightness-60"
+						/>
+					{/if}
 					<div
 						class="absolute inset-0 flex items-center justify-center bg-opacity-0 transition-all duration-300 group-hover:bg-opacity-30"
 					>

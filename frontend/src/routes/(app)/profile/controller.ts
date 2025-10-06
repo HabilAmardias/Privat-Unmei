@@ -1,11 +1,28 @@
 import type { Fetch, SeekPaginatedResponse, ServerResponse } from "$lib/types";
 import { FetchData } from "$lib/utils";
+import { FILE_IMAGE_THRESHOLD, MAX_BIO_LENGTH } from "$lib/utils/constants";
+import { IsAlphaOnly } from "$lib/utils/helper";
 import type { StudentOrders, StudentProfile } from "./model";
 
 class profileController {
     async updateProfile(fetch: Fetch, req: Request){
         const url = 'http://localhost:8080/api/v1/students/me'
         const body = await req.formData()
+        const profileImage = body.get('file') as File
+        const name = body.get('name') as string
+        const bio = body.get('bio') as string
+        if (profileImage.type !== 'image/png'){
+            return {success: false, message: 'wrong image format', status: 400}
+        }
+        if (profileImage.size > FILE_IMAGE_THRESHOLD){
+            return {success: false, message: 'file size is too large', status: 400}
+        }
+        if (name && !IsAlphaOnly(name)){
+            return {success: false, message: 'name must contain alphabet only', status: 400}
+        }
+        if (bio && bio.length > MAX_BIO_LENGTH){
+            return {success: false, message: `bio length must be shorter than ${MAX_BIO_LENGTH} characters`, status: 400}
+        }
         const {success, message, status} = await FetchData(fetch, url, 'PATCH', body)
         return {success, message, status}
     }

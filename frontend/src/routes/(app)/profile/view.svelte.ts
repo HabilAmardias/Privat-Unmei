@@ -20,7 +20,7 @@ class profileView {
     
     size = $derived.by<number>(()=>{
         if (this.isDesktop){
-            return 200
+            return 150
         }
         return 100
     })
