@@ -1,7 +1,17 @@
-import type { CookiesData, Fetch, SameSite } from '$lib/types';
+import type { CookiesData, Fetch, SameSite, ServerResponse } from '$lib/types';
 import { FetchData } from '$lib/utils';
+import type { MostBoughtCourse } from './model';
 
 class HomeController {
+	async getMostBoughtCourses(fetch: Fetch){
+		const url = 'http://localhost:8080/api/v1/courses/most-bought'
+		const {success, res, status, message} = await FetchData(fetch, url, 'GET')
+		if (!success){
+			return {success, status, message}
+		}
+		const resBody : ServerResponse<MostBoughtCourse[]> = await res?.json()
+		return {success, resBody, status, message}
+	}
 	async refresh(
 		fetch: Fetch
 	): Promise<{ success: boolean; cookiesData?: CookiesData[]; message: string; status: number }> {

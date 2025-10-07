@@ -1,24 +1,18 @@
 <script lang="ts">
-	import Button from '$lib/components/button/Button.svelte';
-	import toast from 'svelte-french-toast';
-	import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
-	import { enhance } from '$app/forms';
+	import type { PageProps } from './$types';
 
-	async function onRefreshSubmit(args: EnhancementArgs) {
-		const loadID = toast.loading('loading....', { position: 'top-right' });
-		return async ({ result, update }: EnhancementReturn) => {
-			toast.dismiss(loadID);
-			if (result.type === 'success') {
-				toast.success(result.data?.message, { position: 'top-right' });
-			}
-			if (result.type === 'failure') {
-				toast.error(result.data?.message, { position: 'top-right' });
-			}
-			update();
-		};
-	}
+	let { data }: PageProps = $props();
 </script>
 
-<form use:enhance={onRefreshSubmit} action="?/refresh" method="POST">
-	<Button type="submit">Refresh</Button>
-</form>
+{#if data.resBody.data.length > 0}
+	{#each data.resBody.data as course (course.id)}
+		<div>
+			<p>{course.title}</p>
+			<p>{course.price}</p>
+			<p>{course.mentor_name}</p>
+			<p>{course.session_duration_minutes}</p>
+		</div>
+	{/each}
+{:else}
+	<div>No courses found</div>
+{/if}

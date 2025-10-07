@@ -1,5 +1,14 @@
-import { fail, type Actions } from '@sveltejs/kit';
+import { error, fail, type Actions } from '@sveltejs/kit';
 import { controller } from './controller';
+import type { PageServerLoad } from './$types';
+
+export const load : PageServerLoad = async ({fetch}) =>{
+	const [mostBought] = await Promise.all([controller.getMostBoughtCourses(fetch)])
+	if (!mostBought.success){
+		error(mostBought.status, {message: mostBought.message})
+	}
+	return mostBought
+}
 
 export const actions = {
 	refresh: async ({ cookies, fetch }) => {
