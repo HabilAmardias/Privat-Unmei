@@ -168,6 +168,9 @@ func (sh *StudentHandlerImpl) UpdateStudentProfile(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
+	if file != nil {
+		defer file.Close()
+	}
 	param := entity.UpdateStudentParam{
 		ID:           claim.Subject,
 		Name:         req.Name,
@@ -177,9 +180,6 @@ func (sh *StudentHandlerImpl) UpdateStudentProfile(ctx *gin.Context) {
 	if err := sh.ss.UpdateStudentProfile(ctx, param); err != nil {
 		ctx.Error(err)
 		return
-	}
-	if file != nil {
-		file.Close()
 	}
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,

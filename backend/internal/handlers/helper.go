@@ -147,17 +147,25 @@ func ValidateFile(headerFile *multipart.FileHeader, fileSizeThresh int64, fileTy
 			customerrors.CommonErr,
 		)
 	}
-	defer file.Close()
 	buff := make([]byte, 512)
 	if _, err := file.Read(buff); err != nil {
+		file.Close()
 		return nil, customerrors.NewError(
 			"failed to upload file",
 			err,
 			customerrors.CommonErr,
 		)
 	}
-	file.Seek(0, io.SeekStart)
+	if _, err := file.Seek(0, io.SeekStart); err != nil {
+		file.Close()
+		return nil, customerrors.NewError(
+			"invalid file",
+			err,
+			customerrors.InvalidAction,
+		)
+	}
 	if fileExt := http.DetectContentType(buff); fileExt != fileType {
+		file.Close()
 		return nil, customerrors.NewError(
 			"invalid file format",
 			errors.New("invalid file format"),

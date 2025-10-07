@@ -84,9 +84,14 @@
 	function onUpdateProfile(args: EnhancementArgs) {
 		const loadID = toast.loading('updating...', { position: 'top-right' });
 		return async ({ result, update }: EnhancementReturn) => {
-			onCancel();
+			View.setIsEdit();
 			View.setProfileIsLoading(true);
 			await update({ reset: false });
+			View.setProfileImage(undefined);
+			View.setBio(data.profile.bio);
+			View.setName(data.profile.name);
+			View.setNameError(undefined);
+			View.setBioError(undefined);
 			View.setProfileIsLoading(false);
 			toast.dismiss(loadID);
 			if (result.type === 'success') {
