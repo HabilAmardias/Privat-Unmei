@@ -13,8 +13,8 @@
 	import { onMount } from 'svelte';
 	import { loadingStore } from '$lib/stores/LoadingStore.svelte';
 	import Google from '$lib/components/icons/Google.svelte';
-	import Image from '$lib/components/image/Image.svelte';
-	import LandingIcons from '$lib/images/website-maintenance.png';
+	import CldImage from '$lib/components/image/CldImage.svelte';
+	import { LandingLogo } from '$lib/utils/constants';
 
 	onMount(() => {
 		View.setIsDesktop(window.innerWidth >= 768);
@@ -100,7 +100,7 @@
 
 <div class="flex h-full w-full items-center justify-center md:justify-between">
 	{#if View.isDesktop}
-		<Image src={LandingIcons} width={500} height={500} />
+		<CldImage src={LandingLogo} width={500} height={500} />
 	{/if}
 	{#if !View.login}
 		<Card>

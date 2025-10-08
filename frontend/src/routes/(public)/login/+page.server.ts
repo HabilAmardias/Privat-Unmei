@@ -4,7 +4,7 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ cookies }) => {
 	if (cookies.get('auth_token')) {
-		redirect(303, '/home');
+		redirect(303, '/courses');
 	}
 };
 

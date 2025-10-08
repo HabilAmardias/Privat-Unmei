@@ -5,7 +5,7 @@ import { controller } from './controller';
 
 export const load: PageServerLoad = ({ cookies }) => {
 	if (!cookies.get('auth_token')) {
-		redirect(303, '/');
+		redirect(303, '/login');
 	}
 };
 
