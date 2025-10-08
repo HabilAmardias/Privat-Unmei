@@ -14,7 +14,7 @@
 
 	onMount(() => {
 		if (data.returnHome) {
-			goto('/home', { replaceState: true });
+			goto('/', { replaceState: true });
 		}
 	});
 
@@ -26,7 +26,7 @@
 			View.setIsLoading(false);
 			if (result.type === 'success') {
 				toast.success('successfully reset password', { position: 'top-right' });
-				await goto('/', { replaceState: true });
+				await goto('/login', { replaceState: true });
 			}
 			if (result.type === 'failure') {
 				toast.error(result.data?.message, { position: 'top-right' });

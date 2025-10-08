@@ -1,4 +1,4 @@
-export type MostBoughtCourse = {
+export type CourseList = {
     id: string
     title: string
     domicile: string

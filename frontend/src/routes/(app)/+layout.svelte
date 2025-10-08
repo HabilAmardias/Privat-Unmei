@@ -27,7 +27,7 @@
 </main>
 <Menubar>
 	<MenuItem>
-		<Link href="/home">
+		<Link href="/">
 			<div class="flex flex-col items-center justify-center">
 				<House />
 				Home
@@ -47,14 +47,6 @@
 			<div class="flex flex-col items-center">
 				<MessageCircleMore />
 				Chats
-			</div>
-		</Link>
-	</MenuItem>
-	<MenuItem>
-		<Link href="/about">
-			<div class="flex flex-col items-center">
-				<Info />
-				About
 			</div>
 		</Link>
 	</MenuItem>

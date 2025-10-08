@@ -14,7 +14,7 @@
 
 	onMount(() => {
 		if (data.returnHome) {
-			goto('/home', { replaceState: true });
+			goto('/', { replaceState: true });
 		}
 	});
 

@@ -97,13 +97,11 @@ func (sh *StudentHandlerImpl) ChangePassword(ctx *gin.Context) {
 }
 
 func (sh *StudentHandlerImpl) GoogleLogin(ctx *gin.Context) {
-	expTime := time.Now().Add(30 * time.Minute)
+	domain := os.Getenv("COOKIE_DOMAIN")
 	b := make([]byte, 16)
 	rand.Read(b)
 	state := base64.RawURLEncoding.EncodeToString(b)
-	cookie := http.Cookie{Name: "oauthstate", Value: state, Expires: expTime}
-	http.SetCookie(ctx.Writer, &cookie)
-
+	ctx.SetCookie("oauthstate", state, int(30*time.Minute), "/", domain, true, false)
 	url := sh.ss.GoogleLogin(state)
 
 	ctx.Redirect(http.StatusTemporaryRedirect, url)

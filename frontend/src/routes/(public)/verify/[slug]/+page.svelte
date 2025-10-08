@@ -12,14 +12,14 @@
 		if (data.success) {
 			View.setOpenDialog(true);
 		} else {
-			goto('/', { replaceState: true });
+			goto('/login', { replaceState: true });
 		}
 		return () => {
 			View.setOpenDialog(false);
 		};
 	});
 	function navigateToLogin() {
-		goto('/', { replaceState: true });
+		goto('/login', { replaceState: true });
 	}
 </script>
 

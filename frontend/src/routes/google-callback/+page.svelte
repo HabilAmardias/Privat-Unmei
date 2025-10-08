@@ -5,9 +5,9 @@
 	let { data }: PageProps = $props();
 	onMount(async () => {
 		if (data.success) {
-			await goto('/home', { replaceState: true });
-		} else {
 			await goto('/', { replaceState: true });
+		} else {
+			await goto('/login', { replaceState: true });
 		}
 	});
 </script>
