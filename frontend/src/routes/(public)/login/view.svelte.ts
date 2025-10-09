@@ -44,27 +44,31 @@ class AuthView {
 	}
 
 	passwordOnBlur() {
-		this.passwordError = undefined;
 		if (!this.#validatePassword(this.password)) {
 			this.passwordError = new Error('min 8 characters with !@#?');
+		} else {
+			this.passwordError = undefined;
 		}
 	}
 	emailOnBlur() {
-		this.emailError = undefined;
 		if (!this.#validateEmail(this.email)) {
 			this.emailError = new Error('please insert an valid email');
+		} else {
+			this.emailError = undefined;
 		}
 	}
 	repeatPasswordOnBlur() {
-		this.repeatPasswordError = undefined;
 		if (this.repeatPassword !== this.password) {
 			this.repeatPasswordError = new Error('password does not match');
+		} else {
+			this.repeatPasswordError = undefined;
 		}
 	}
 	nameOnBlur() {
-		this.nameError = undefined;
 		if (!this.name) {
 			this.nameError = new Error('please insert a name');
+		} else {
+			this.nameError = undefined;
 		}
 	}
 	#validateEmail(email: string) {

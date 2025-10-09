@@ -20,14 +20,14 @@
 		<Accordion.Item class="group border-b border-[var(--tertiary-color)] px-2">
 			<Accordion.Header>
 				<Accordion.Trigger
-					class="flex w-full items-center justify-between py-8 font-bold text-[var(--tertiary-color)]"
+					class="flex w-full cursor-pointer items-center justify-between py-8 font-bold text-[var(--tertiary-color)] transition-all [&[data-state=open]_svg]:rotate-180"
 				>
 					{item.header}
-					<ChevronDown />
+					<ChevronDown class="transition-transform duration-200" />
 				</Accordion.Trigger>
 			</Accordion.Header>
-			<Accordion.Content>
-				<div>
+			<Accordion.Content class="accordion-content overflow-hidden">
+				<div class="pb-4">
 					{item.content}
 				</div>
 			</Accordion.Content>
@@ -36,4 +36,29 @@
 </Accordion.Root>
 
 <style>
+	@keyframes accordion-down {
+		from {
+			height: 0;
+		}
+		to {
+			height: var(--bits-accordion-content-height);
+		}
+	}
+
+	@keyframes accordion-up {
+		from {
+			height: var(--bits-accordion-content-height);
+		}
+		to {
+			height: 0;
+		}
+	}
+
+	:global(.accordion-content[data-state='open']) {
+		animation: accordion-down 0.2s ease-out;
+	}
+
+	:global(.accordion-content[data-state='closed']) {
+		animation: accordion-up 0.2s ease-out;
+	}
 </style>

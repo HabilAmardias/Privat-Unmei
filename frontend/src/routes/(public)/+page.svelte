@@ -7,6 +7,7 @@
 	import { View } from './view.svelte';
 	import Accordion from '$lib/components/accordion/Accordion.svelte';
 	import { faqItems } from './model';
+	import AnimatedContainer from '$lib/components/container/AnimatedContainer.svelte';
 
 	onMount(() => {
 		View.isDesktop = window.innerWidth >= 768;
@@ -20,60 +21,72 @@
 	});
 </script>
 
-<div class="flex h-full flex-col gap-8 p-4">
-	<div class="flex flex-col gap-4 py-4">
-		<CldImage
-			width={View.imageWidth}
-			height={View.imageHeight}
-			src={PrivatUnmeiLogo}
-			className="mx-auto"
-		/>
-		<p class="text-center">
-			Lorem ipsum dolor, sit amet consectetur adipisicing elit. Amet odio nesciunt sequi voluptatum
-			rerum quae. Est ex voluptatem nobis odit, quis eos obcaecati cum consectetur aspernatur sit
-			nisi impedit at!
-		</p>
+<div class="flex h-full flex-col gap-16 p-4">
+	<AnimatedContainer>
+		<div class="flex flex-col gap-4 py-4">
+			<CldImage
+				width={View.imageWidth}
+				height={View.imageHeight}
+				src={PrivatUnmeiLogo}
+				className="mx-auto"
+			/>
+			<p class="text-center">
+				Lorem ipsum dolor, sit amet consectetur adipisicing elit. Amet odio nesciunt sequi
+				voluptatum rerum quae. Est ex voluptatem nobis odit, quis eos obcaecati cum consectetur
+				aspernatur sit nisi impedit at!
+			</p>
 
-		<div class="mx-auto flex justify-center rounded-2xl bg-[var(--tertiary-color)] p-4">
-			<Link href="/courses" theme="light">Start Exploring</Link>
+			<div class="mx-auto flex justify-center rounded-2xl bg-[var(--tertiary-color)] p-4">
+				<Link href="/courses" theme="light">Start Exploring</Link>
+			</div>
 		</div>
-	</div>
+	</AnimatedContainer>
 	<div class="flex flex-col gap-4">
-		<h3 class="text-center text-2xl font-medium text-[var(--tertiary-color)]">Lorem ipsum</h3>
+		<AnimatedContainer>
+			<h3 class="text-center text-2xl font-medium text-[var(--tertiary-color)]">Lorem ipsum</h3>
+		</AnimatedContainer>
 		<div class="flex flex-col gap-8 md:flex-row">
-			<div class="flex flex-col gap-4">
-				<Book />
-				<h4 class="text-xl text-[var(--tertiary-color)]">lorem ipsum</h4>
-				<p class="text-justify">
-					Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolores deleniti, obcaecati
-					maxime cupiditate, facere iure et nam, quidem itaque magni in rerum cumque earum provident
-					mollitia animi ducimus expedita possimus.
-				</p>
-			</div>
-			<div class="flex flex-col gap-4">
-				<Pencil />
-				<h4 class="text-xl text-[var(--tertiary-color)]">lorem ipsum</h4>
-				<p class="text-justify">
-					Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolores deleniti, obcaecati
-					maxime cupiditate, facere iure et nam, quidem itaque magni in rerum cumque earum provident
-					mollitia animi ducimus expedita possimus.
-				</p>
-			</div>
-			<div class="flex flex-col gap-4">
-				<CalendarFold />
-				<h4 class="text-xl text-[var(--tertiary-color)]">lorem ipsum</h4>
-				<p class="text-justify">
-					Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolores deleniti, obcaecati
-					maxime cupiditate, facere iure et nam, quidem itaque magni in rerum cumque earum provident
-					mollitia animi ducimus expedita possimus.
-				</p>
-			</div>
+			<AnimatedContainer>
+				<div class="flex flex-col gap-4">
+					<Book />
+					<h4 class="text-xl text-[var(--tertiary-color)]">lorem ipsum</h4>
+					<p class="text-justify">
+						Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolores deleniti, obcaecati
+						maxime cupiditate, facere iure et nam, quidem itaque magni in rerum cumque earum
+						provident mollitia animi ducimus expedita possimus.
+					</p>
+				</div>
+			</AnimatedContainer>
+			<AnimatedContainer>
+				<div class="flex flex-col gap-4">
+					<Pencil />
+					<h4 class="text-xl text-[var(--tertiary-color)]">lorem ipsum</h4>
+					<p class="text-justify">
+						Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolores deleniti, obcaecati
+						maxime cupiditate, facere iure et nam, quidem itaque magni in rerum cumque earum
+						provident mollitia animi ducimus expedita possimus.
+					</p>
+				</div>
+			</AnimatedContainer>
+			<AnimatedContainer>
+				<div class="flex flex-col gap-4">
+					<CalendarFold />
+					<h4 class="text-xl text-[var(--tertiary-color)]">lorem ipsum</h4>
+					<p class="text-justify">
+						Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolores deleniti, obcaecati
+						maxime cupiditate, facere iure et nam, quidem itaque magni in rerum cumque earum
+						provident mollitia animi ducimus expedita possimus.
+					</p>
+				</div>
+			</AnimatedContainer>
 		</div>
 	</div>
-	<div class="flex flex-col gap-4">
-		<h3 class="text-center text-2xl font-medium text-[var(--tertiary-color)]">
-			Frequently Asked Question (FAQ)
-		</h3>
-		<Accordion type="multiple" items={faqItems} />
-	</div>
+	<AnimatedContainer>
+		<div class="flex flex-col gap-4">
+			<h3 class="text-center text-2xl font-medium text-[var(--tertiary-color)]">
+				Frequently Asked Question (FAQ)
+			</h3>
+			<Accordion type="multiple" items={faqItems} />
+		</div>
+	</AnimatedContainer>
 </div>

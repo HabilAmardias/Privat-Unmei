@@ -195,15 +195,6 @@
 							</Button>
 						</div>
 						<p class="text-md">{data.profile.email}</p>
-						{#if data.userStatus !== 'verified'}
-							<form use:enhance={onVerifySubmit} method="POST" action="?/sendVerification">
-								<Button
-									disabled={View.verifyIsLoading}
-									type="submit"
-									formAction="?/sendVerification">Send Verification Link</Button
-								>
-							</form>
-						{/if}
 					</div>
 				</div>
 				<div class="flex flex-col gap-2">
@@ -271,6 +262,17 @@
 					/>
 				</form>
 			</div>
+		{:else}
+			<form
+				use:enhance={onVerifySubmit}
+				method="POST"
+				action="?/sendVerification"
+				class="flex w-full flex-1 items-center justify-center"
+			>
+				<Button disabled={View.verifyIsLoading} type="submit" formAction="?/sendVerification"
+					>Send Verification Link</Button
+				>
+			</form>
 		{/if}
 	</div>
 {/if}
