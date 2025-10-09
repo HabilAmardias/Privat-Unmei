@@ -68,7 +68,7 @@
 			const loadID = toast.loading('logging in.....', { position: 'top-right' });
 			return async ({ result, update }: EnhancementReturn) => {
 				if (result.type === 'success') {
-					await goto('/', { replaceState: true });
+					await goto('/courses', { replaceState: true });
 					View.setIsLoading(false);
 					toast.dismiss(loadID);
 					toast.success('login success', {

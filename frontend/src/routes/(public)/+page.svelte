@@ -5,6 +5,8 @@
 	import { Book, CalendarFold, Pencil } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { View } from './view.svelte';
+	import Accordion from '$lib/components/accordion/Accordion.svelte';
+	import { faqItems } from './model';
 
 	onMount(() => {
 		View.isDesktop = window.innerWidth >= 768;
@@ -67,5 +69,11 @@
 				</p>
 			</div>
 		</div>
+	</div>
+	<div class="flex flex-col gap-4">
+		<h3 class="text-center text-2xl font-medium text-[var(--tertiary-color)]">
+			Frequently Asked Question (FAQ)
+		</h3>
+		<Accordion type="multiple" items={faqItems} />
 	</div>
 </div>
