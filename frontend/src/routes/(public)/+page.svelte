@@ -24,12 +24,14 @@
 <div class="flex h-full flex-col gap-16 p-8">
 	<AnimatedContainer>
 		<div class="flex flex-col gap-4 py-4">
-			<CldImage
-				width={View.imageWidth}
-				height={View.imageHeight}
-				src={PrivatUnmeiLogo}
-				className="mx-auto"
-			/>
+			<div class="mx-auto">
+				<CldImage
+					width={View.imageWidth}
+					height={View.imageHeight}
+					src={PrivatUnmeiLogo}
+					className="mx-auto"
+				/>
+			</div>
 			<p class="text-center">
 				Lorem ipsum dolor, sit amet consectetur adipisicing elit. Amet odio nesciunt sequi
 				voluptatum rerum quae. Est ex voluptatem nobis odit, quis eos obcaecati cum consectetur

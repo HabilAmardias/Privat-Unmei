@@ -120,8 +120,7 @@
 							src={URL.createObjectURL(View.profileImage[0])}
 							width={View.size}
 							height={View.size}
-							round="full"
-							additionalClass="shadow-2xl border-gray-400 brightness-60 md:brightness-100 md:border-none md:shadow-none md:hover:shadow-2xl md:group-hover:border-gray-400 md:transition-all md:duration-300 md:group-hover:brightness-60"
+							className="rounded-full shadow-2xl border-gray-400 brightness-60 md:brightness-100 md:border-none md:shadow-none md:hover:shadow-2xl md:group-hover:border-gray-400 md:transition-all md:duration-300 md:group-hover:brightness-60"
 						/>
 					{:else}
 						<CldImage

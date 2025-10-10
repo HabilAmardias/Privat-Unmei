@@ -12,7 +12,18 @@
 	let isLoading = $state<boolean>(true);
 </script>
 
-<CldImage {src} {alt} {width} {height} class={className} onload={() => (isLoading = false)} />
-{#if isLoading}
-	<div class={`${className} animate-pulse bg-gray-300 w-[${width}px] h-[${height}px]`}></div>
-{/if}
+<div class="relative overflow-hidden" style={`width: ${width}px; height: ${height}px`}>
+	{#if isLoading}
+		<div class="absolute inset-0 animate-pulse bg-gray-300"></div>
+	{/if}
+	<CldImage
+		{src}
+		{alt}
+		{width}
+		{height}
+		class={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-500`}
+		onload={() => {
+			isLoading = false;
+		}}
+	/>
+</div>

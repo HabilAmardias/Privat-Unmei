@@ -99,9 +99,9 @@
 </svelte:head>
 
 <div class="flex h-screen w-full items-center justify-center md:justify-between">
-	{#if View.isDesktop}
+	<div class="hidden md:block">
 		<CldImage src={LandingLogo} width={500} height={500} />
-	{/if}
+	</div>
 	{#if !View.login}
 		<Card>
 			<h2 class="mb-3 text-2xl font-bold text-[var(--tertiary-color)]">Register</h2>
