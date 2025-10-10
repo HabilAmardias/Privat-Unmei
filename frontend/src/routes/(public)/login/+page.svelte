@@ -98,7 +98,7 @@
 	></script>
 </svelte:head>
 
-<div class="flex h-full w-full items-center justify-center md:justify-between">
+<div class="flex h-screen w-full items-center justify-center md:justify-between">
 	{#if View.isDesktop}
 		<CldImage src={LandingLogo} width={500} height={500} />
 	{/if}

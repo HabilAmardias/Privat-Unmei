@@ -5,7 +5,7 @@
 	let { data }: PageProps = $props();
 	onMount(async () => {
 		if (data.success) {
-			await goto('/', { replaceState: true });
+			await goto('/courses', { replaceState: true });
 		} else {
 			await goto('/login', { replaceState: true });
 		}

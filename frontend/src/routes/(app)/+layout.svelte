@@ -5,9 +5,10 @@
 	import Menubar from '$lib/components/menubar/Menubar.svelte';
 	import MenuItem from '$lib/components/menubar/MenuItem.svelte';
 	import { loadingStore } from '$lib/stores/LoadingStore.svelte';
-	import { House, Info, List, LogOut, MessageCircleMore, User } from '@lucide/svelte';
+	import { House, List, LogIn, LogOut, MessageCircleMore, User } from '@lucide/svelte';
 	import { ScrollArea } from 'bits-ui';
 	import toast from 'svelte-french-toast';
+	import type { LayoutProps } from './$types';
 
 	function onLogout() {
 		const loadID = toast.loading('logging out....', { position: 'top-right' });
@@ -15,10 +16,10 @@
 		goto('/logout', { replaceState: true });
 	}
 
-	let { children } = $props();
+	let { data, children }: LayoutProps = $props();
 </script>
 
-<main class="flex-1 pb-24 md:pb-0 md:pt-24">
+<main class="h-screen pb-24 md:pb-0 md:pt-24">
 	<ScrollArea.Root class="h-full">
 		<ScrollArea.Viewport class="h-full">
 			{@render children()}
@@ -42,28 +43,39 @@
 			</div>
 		</Link>
 	</MenuItem>
-	<MenuItem>
-		<Link href="/chats">
-			<div class="flex flex-col items-center">
-				<MessageCircleMore />
-				Chats
-			</div>
-		</Link>
-	</MenuItem>
-	<MenuItem>
-		<Link href="/profile">
-			<div class="flex flex-col items-center">
-				<User />
-				Profile
-			</div>
-		</Link>
-	</MenuItem>
-	<MenuItem>
-		<Button onClick={onLogout} withBg={false} textColor="light" withPadding={false}>
-			<div class="flex flex-col items-center">
-				<LogOut />
-				Logout
-			</div>
-		</Button>
-	</MenuItem>
+	{#if data.isLoggedIn}
+		<MenuItem>
+			<Link href="/chats">
+				<div class="flex flex-col items-center">
+					<MessageCircleMore />
+					Chats
+				</div>
+			</Link>
+		</MenuItem>
+		<MenuItem>
+			<Link href="/profile">
+				<div class="flex flex-col items-center">
+					<User />
+					Profile
+				</div>
+			</Link>
+		</MenuItem>
+		<MenuItem>
+			<Button onClick={onLogout} withBg={false} textColor="light" withPadding={false}>
+				<div class="flex flex-col items-center">
+					<LogOut />
+					Logout
+				</div>
+			</Button>
+		</MenuItem>
+	{:else}
+		<MenuItem>
+			<Link href="/login">
+				<div class="flex flex-col items-center">
+					<LogIn />
+					Login
+				</div>
+			</Link>
+		</MenuItem>
+	{/if}
 </Menubar>

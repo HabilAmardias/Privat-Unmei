@@ -6,6 +6,9 @@ class HomeView {
     imageHeight = $derived.by<number>(()=>{
         return this.isDesktop ? 80 : 50
     })
+    iconsSize = $derived.by<number>(()=>{
+        return this.isDesktop ? 40 : 32
+    })
 }
 
 export const View = new HomeView()

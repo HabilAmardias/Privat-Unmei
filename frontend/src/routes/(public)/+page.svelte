@@ -21,7 +21,7 @@
 	});
 </script>
 
-<div class="flex h-full flex-col gap-16 p-4">
+<div class="flex h-full flex-col gap-16 p-8">
 	<AnimatedContainer>
 		<div class="flex flex-col gap-4 py-4">
 			<CldImage
@@ -48,7 +48,7 @@
 		<div class="flex flex-col gap-8 md:flex-row">
 			<AnimatedContainer>
 				<div class="flex flex-col gap-4">
-					<Book />
+					<Book size={View.iconsSize} class="text-[var(--tertiary-color)]" />
 					<h4 class="text-xl text-[var(--tertiary-color)]">lorem ipsum</h4>
 					<p class="text-justify">
 						Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolores deleniti, obcaecati
@@ -59,7 +59,7 @@
 			</AnimatedContainer>
 			<AnimatedContainer>
 				<div class="flex flex-col gap-4">
-					<Pencil />
+					<Pencil size={View.iconsSize} class="text-[var(--tertiary-color)]" />
 					<h4 class="text-xl text-[var(--tertiary-color)]">lorem ipsum</h4>
 					<p class="text-justify">
 						Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolores deleniti, obcaecati
@@ -70,7 +70,7 @@
 			</AnimatedContainer>
 			<AnimatedContainer>
 				<div class="flex flex-col gap-4">
-					<CalendarFold />
+					<CalendarFold size={View.iconsSize} class="text-[var(--tertiary-color)]" />
 					<h4 class="text-xl text-[var(--tertiary-color)]">lorem ipsum</h4>
 					<p class="text-justify">
 						Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolores deleniti, obcaecati
