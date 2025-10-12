@@ -1,8 +1,6 @@
-class VerifyView {
+export class VerifyView {
 	openDialog = $state<boolean>(false);
 	setOpenDialog(b: boolean) {
 		this.openDialog = b;
 	}
 }
-
-export const View = new VerifyView();

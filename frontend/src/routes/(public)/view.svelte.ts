@@ -1,5 +1,5 @@
-class HomeView {
-    isDesktop = $state<boolean>()
+export class HomeView {
+    isDesktop = $state<boolean>(false)
     imageWidth = $derived.by<number>(()=>{
         return this.isDesktop ? 250 : 160
     })
@@ -9,6 +9,7 @@ class HomeView {
     iconsSize = $derived.by<number>(()=>{
         return this.isDesktop ? 40 : 32
     })
+    setIsDesktop(b: boolean){
+        this.isDesktop = b
+    }
 }
-
-export const View = new HomeView()

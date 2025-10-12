@@ -1,4 +1,4 @@
-class ResetView {
+export class ResetView {
 	email = $state<string>('');
 	emailError = $state<Error | undefined>();
 	password = $state<string>('');
@@ -54,5 +54,3 @@ class ResetView {
 		this.isLoading = b;
 	}
 }
-
-export const View = new ResetView();

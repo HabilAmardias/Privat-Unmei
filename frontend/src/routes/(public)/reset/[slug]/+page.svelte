@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { View } from '../view.svelte';
+	import { ResetView } from '../view.svelte';
 	import Card from '$lib/components/card/Card.svelte';
 	import Button from '$lib/components/button/Button.svelte';
 	import { enhance } from '$app/forms';
@@ -10,6 +10,7 @@
 	import type { PageProps } from './$types';
 	import { onMount } from 'svelte';
 
+	const View = new ResetView();
 	let { data }: PageProps = $props();
 
 	onMount(() => {

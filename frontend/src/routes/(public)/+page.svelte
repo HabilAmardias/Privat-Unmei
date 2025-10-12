@@ -4,15 +4,17 @@
 	import { PrivatUnmeiLogo } from '$lib/utils/constants';
 	import { Book, CalendarFold, Pencil } from '@lucide/svelte';
 	import { onMount } from 'svelte';
-	import { View } from './view.svelte';
+	import { HomeView } from './view.svelte';
 	import Accordion from '$lib/components/accordion/Accordion.svelte';
 	import { faqItems } from './model';
 	import AnimatedContainer from '$lib/components/container/AnimatedContainer.svelte';
 
+	const View = new HomeView();
+
 	onMount(() => {
-		View.isDesktop = window.innerWidth >= 768;
+		View.setIsDesktop(window.innerWidth >= 768);
 		function SetIsDesktop() {
-			View.isDesktop = window.innerWidth >= 768;
+			View.setIsDesktop(window.innerWidth >= 768);
 		}
 		window.addEventListener('resize', SetIsDesktop);
 		return () => {

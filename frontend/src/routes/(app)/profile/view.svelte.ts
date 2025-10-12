@@ -2,11 +2,11 @@ import { MAX_BIO_LENGTH } from "$lib/utils/constants"
 import { IsAlphaOnly } from "$lib/utils/helper"
 import type { StudentOrders } from "./model"
 
-class profileView {
+export class profileView {
     verifyIsLoading = $state<boolean>(false)
     ordersIsLoading = $state<boolean>(false)
     profileIsLoading = $state<boolean>(false)
-    isDesktop = $state<boolean>()
+    isDesktop = $state<boolean>(false)
     isEdit = $state<boolean>(false)
     name = $state<string>("")
     bio = $state<string>("")
@@ -100,5 +100,3 @@ class profileView {
         this.profileImage = f
     }
 }
-
-export const View = new profileView()

@@ -5,17 +5,31 @@
 	import Menubar from '$lib/components/menubar/Menubar.svelte';
 	import MenuItem from '$lib/components/menubar/MenuItem.svelte';
 	import { loadingStore } from '$lib/stores/LoadingStore.svelte';
-	import { House, List, LogIn, LogOut, MessageCircleMore, User } from '@lucide/svelte';
+	import { List, LogIn, LogOut, MessageCircleMore, User } from '@lucide/svelte';
 	import { ScrollArea } from 'bits-ui';
 	import toast from 'svelte-french-toast';
 	import type { LayoutProps } from './$types';
+	import CldImage from '$lib/components/image/CldImage.svelte';
+	import { onMount } from 'svelte';
+	import { AppLayoutView } from './view.svelte';
 
 	function onLogout() {
 		const loadID = toast.loading('logging out....', { position: 'top-right' });
 		loadingStore.setLogOutLoadID(loadID);
 		goto('/logout', { replaceState: true });
 	}
+	const View = new AppLayoutView();
 
+	onMount(() => {
+		View.setIsDesktop(window.innerWidth >= 768);
+		function setIsDesktop() {
+			View.setIsDesktop(window.innerWidth >= 768);
+		}
+		window.addEventListener('resize', setIsDesktop);
+		return () => {
+			window.removeEventListener('resize', setIsDesktop);
+		};
+	});
 	let { data, children }: LayoutProps = $props();
 </script>
 
@@ -29,9 +43,8 @@
 <Menubar>
 	<MenuItem>
 		<Link href="/">
-			<div class="flex flex-col items-center justify-center">
-				<House />
-				Home
+			<div class="flex h-full items-center">
+				<CldImage src={View.logoSrc} width={View.logoWidth} height={View.logoHeight} />
 			</div>
 		</Link>
 	</MenuItem>

@@ -2,10 +2,12 @@
 	import { onMount } from 'svelte';
 	import type { PageProps } from './$types';
 	import { goto } from '$app/navigation';
-	import { View } from './view.svelte';
+	import { VerifyView } from './view.svelte';
 	import Dialog from '$lib/components/dialog/Dialog.svelte';
 	import { CircleCheck } from '@lucide/svelte';
 	import Button from '$lib/components/button/Button.svelte';
+
+	const View = new VerifyView();
 
 	let { data }: PageProps = $props();
 	onMount(() => {

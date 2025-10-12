@@ -3,7 +3,7 @@
 	import Card from '$lib/components/card/Card.svelte';
 	import Input from '$lib/components/form/Input.svelte';
 	import InputSecret from '$lib/components/form/InputSecret.svelte';
-	import { View } from './view.svelte';
+	import { AuthView } from './view.svelte';
 	import { PUBLIC_RECAPTCHA_SITE_KEY } from '$env/static/public';
 	import { enhance } from '$app/forms';
 	import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
@@ -14,7 +14,9 @@
 	import { loadingStore } from '$lib/stores/LoadingStore.svelte';
 	import Google from '$lib/components/icons/Google.svelte';
 	import CldImage from '$lib/components/image/CldImage.svelte';
-	import { LandingLogo } from '$lib/utils/constants';
+	import { PrivatUnmeiLogo } from '$lib/utils/constants';
+
+	const View = new AuthView();
 
 	onMount(() => {
 		View.setIsDesktop(window.innerWidth >= 768);
@@ -98,9 +100,12 @@
 	></script>
 </svelte:head>
 
-<div class="flex h-screen w-full items-center justify-center md:justify-between">
-	<div class="hidden md:block">
-		<CldImage src={LandingLogo} width={500} height={500} />
+<div class="flex h-screen w-full flex-col items-center justify-center gap-4 md:flex-row md:gap-0">
+	<div class="hidden md:flex md:flex-1">
+		<CldImage src={PrivatUnmeiLogo} width={400} height={125} />
+	</div>
+	<div class="block md:hidden">
+		<CldImage src={PrivatUnmeiLogo} width={200} height={60} />
 	</div>
 	{#if !View.login}
 		<Card>

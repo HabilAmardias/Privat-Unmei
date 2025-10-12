@@ -1,4 +1,4 @@
-class AuthView {
+export class AuthView {
 	login = $state<boolean>(true);
 	email = $state<string>('');
 	emailError = $state<Error | undefined>();
@@ -10,7 +10,7 @@ class AuthView {
 	nameError = $state<Error | undefined>();
 	isLoading = $state<boolean>(false);
 	googleScript = $state<HTMLScriptElement>()
-	isDesktop = $state<boolean>();
+	isDesktop = $state<boolean>(false);
 
 	loginDisabled = $derived.by<boolean>(() => {
 		if (!this.email || !this.password || this.emailError || this.passwordError || this.isLoading) {
@@ -96,5 +96,3 @@ class AuthView {
 		this.isDesktop = b
 	}
 }
-
-export const View = new AuthView();

@@ -2,7 +2,7 @@
 	import CldImage from '$lib/components/image/CldImage.svelte';
 	import { onMount } from 'svelte';
 	import type { PageProps } from './$types';
-	import { View } from './view.svelte';
+	import { profileView } from './view.svelte';
 	import Button from '$lib/components/button/Button.svelte';
 	import { Pencil } from '@lucide/svelte';
 	import Textarea from '$lib/components/form/Textarea.svelte';
@@ -19,11 +19,12 @@
 	import Image from '$lib/components/image/Image.svelte';
 
 	let { data }: PageProps = $props();
+	const View = new profileView();
 
 	onMount(() => {
+		View.setIsDesktop(window.innerWidth >= 768);
 		View.setBio(data.profile.bio);
 		View.setName(data.profile.name);
-		View.setIsDesktop(window.innerWidth >= 768);
 		if (data.orders) {
 			View.setOrders(data.orders.entries);
 			View.setTotalRow(data.orders.page_info.total_row);
