@@ -72,6 +72,7 @@ func (us *StudentServiceImpl) GetStudentProfile(ctx context.Context, param entit
 	profile.Name = user.Name
 	profile.Bio = user.Bio
 	profile.ProfileImage = user.ProfileImage
+	profile.Email = user.Email
 
 	return profile, nil
 }
@@ -169,11 +170,12 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 			}
 			newUser := &entity.User{
 				Email:        email,
-				Name:         strings.TrimSuffix(email, "@"),
+				Name:         strings.Split(email, "@")[0],
 				Status:       constants.VerifiedStatus,
 				Password:     hashed,
 				ProfileImage: constants.DefaultAvatar,
 			}
+			log.Println(newUser.Name)
 			if err := us.ur.AddNewUser(ctx, newUser); err != nil {
 				return "", "", "", err
 			}
@@ -291,7 +293,7 @@ func (us *StudentServiceImpl) SendVerificationEmail(ctx context.Context, id stri
 		emailParam := entity.SendEmailParams{
 			Receiver:  user.Email,
 			Subject:   "Verify your account",
-			EmailBody: constants.VerificationEmailBody(*student.VerifyToken),
+			EmailBody: constants.VerificationEmailBody(jwt),
 		}
 		if err := us.gu.SendEmail(emailParam); err != nil {
 			return err
@@ -380,6 +382,10 @@ func (us *StudentServiceImpl) Verify(ctx context.Context, param entity.VerifyStu
 			return err
 		}
 		if student.VerifyToken == nil || param.Token != *student.VerifyToken {
+			if student.VerifyToken != nil {
+				log.Println("stored token: ", *student.VerifyToken)
+			}
+			log.Println("sent token: ", param.Token)
 			return customerrors.NewError(
 				"invalid credential",
 				errors.New("invalid verify token"),

@@ -6,6 +6,8 @@ export type Fetch = (input: string | URL, init?: RequestInit) => Promise<Respons
 
 export type SameSite = 'none' | 'lax' | 'strict';
 
+export type UserStatus = 'verified' | 'unverified'
+
 export type MessageResponse = {
 	message: string;
 };
@@ -47,3 +49,42 @@ export type EnhancementReturn = {
 	result: ActionResult;
 	update: (opts?: updateOps) => Promise<void>;
 };
+
+type FilterInfo = {
+	name: string
+	value: any
+}
+
+type SortInfo = {
+	name: string
+	asc: boolean
+}
+
+export type SeekPaginatedResponse<T> = {
+	entries: T[]
+	page_info: {
+		last_id: number
+		filter_by?: FilterInfo[]
+		sort_by?: SortInfo[]
+		total_row: number
+		limit: number
+	}
+}
+
+export type PaginatedResponse<T> = {
+	entries: T[]
+	page_info : {
+		page: number
+		limit: number
+		total_row: number
+		filter_by?: FilterInfo[]
+		sort_by?: SortInfo[]
+	}
+}
+
+export interface AuthClaim {
+	sub: string
+	iss: string
+	iat: number
+	exp: number
+}

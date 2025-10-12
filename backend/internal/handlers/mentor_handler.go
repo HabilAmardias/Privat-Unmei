@@ -338,10 +338,16 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
+	if resumeFile != nil {
+		defer resumeFile.Close()
+	}
 	profileImageFile, err := ValidateFile(profileHeader, constants.FileSizeThreshold, constants.PNGType)
 	if err != nil {
 		ctx.Error(err)
 		return
+	}
+	if profileImageFile != nil {
+		defer profileImageFile.Close()
 	}
 	if req.Degree != nil {
 		if err := ValidateDegree(*req.Degree); err != nil {
@@ -467,6 +473,9 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 	if err != nil {
 		ctx.Error(err)
 		return
+	}
+	if file != nil {
+		defer file.Close()
 	}
 	claim, err := getAuthenticationPayload(ctx)
 	if err != nil {

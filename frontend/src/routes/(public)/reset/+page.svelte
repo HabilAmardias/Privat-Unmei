@@ -5,16 +5,17 @@
 	import Input from '$lib/components/form/Input.svelte';
 	import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
 	import toast from 'svelte-french-toast';
-	import { View } from './view.svelte';
+	import { ResetView } from './view.svelte';
 	import type { PageProps } from './$types';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 
+	const View = new ResetView();
 	let { data }: PageProps = $props();
 
 	onMount(() => {
 		if (data.returnHome) {
-			goto('/home', { replaceState: true });
+			goto('/', { replaceState: true });
 		}
 	});
 

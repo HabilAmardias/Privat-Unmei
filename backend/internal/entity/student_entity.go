@@ -60,6 +60,7 @@ type (
 	}
 	StudentProfileQuery struct {
 		Name         string
+		Email        string
 		Bio          string
 		ProfileImage string
 	}

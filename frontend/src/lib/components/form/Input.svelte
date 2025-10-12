@@ -1,18 +1,34 @@
 <script lang="ts">
 	type inputProps = {
-		placeholder: string;
+		placeholder?: string;
 		name: string;
 		value?: string;
 		id: string;
 		type: 'text' | 'email';
 		onBlur?: (e: FocusEvent & { currentTarget: EventTarget & HTMLInputElement }) => void;
 		err?: Error;
+		width?: 'full' | number;
 	};
 
-	let { placeholder, value = $bindable(), name, onBlur, type, id, err }: inputProps = $props();
+	let {
+		placeholder,
+		value = $bindable(),
+		name,
+		onBlur,
+		type,
+		id,
+		err,
+		width = 'full'
+	}: inputProps = $props();
+	let containerClass = $state<string>('flex flex-col rounded-md');
+	if (width === 'full') {
+		containerClass += ` w-full`;
+	} else {
+		containerClass += ` w-[${width}px]`;
+	}
 </script>
 
-<div class="flex w-full flex-col rounded-md">
+<div class={containerClass}>
 	{#if err}
 		<p class="my-0 text-sm text-[red]">{err.message}</p>
 	{/if}

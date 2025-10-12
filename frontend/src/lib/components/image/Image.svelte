@@ -4,21 +4,18 @@
 		width?: number;
 		src: string;
 		alt?: string;
-		round?: 'sm' | 'full' | 'lg';
+		className?: string;
 	};
-	let { height = 32, width = 32, src, alt, round }: imageProps = $props();
-	let containerStyle = `height: ${height}px; width: ${width}px;`;
-	let containerClass = $state<string>('');
-	if (round) {
-		containerClass = `rounded-${round} overflow-hidden`;
-	}
+	let { height = 32, width = 32, src, alt, className }: imageProps = $props();
 	let isLoading = $state<boolean>(true);
 </script>
 
-<div class={containerClass} style={containerStyle}>
+<div class="relative overflow-hidden" style={`width: ${width}px; height: ${height}px`}>
+	{#if isLoading}
+		<div class="absolute inset-0 animate-pulse bg-gray-300"></div>
+	{/if}
 	<img
-		style:display={isLoading ? 'none' : 'inline'}
-		class="h-full w-full object-cover"
+		class={`${className} h-full w-full ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-500`}
 		{src}
 		{alt}
 		{height}
@@ -27,7 +24,4 @@
 			isLoading = false;
 		}}
 	/>
-	{#if isLoading}
-		<div class="h-full w-full animate-pulse object-cover"></div>
-	{/if}
 </div>

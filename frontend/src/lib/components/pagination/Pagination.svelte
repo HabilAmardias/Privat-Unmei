@@ -4,34 +4,49 @@
 
 	type paginationProps = {
 		count: number;
+		pageNumber: number;
 		perPage: number;
 		onPageChange?: (num: number) => void;
+		offset?: boolean;
 	};
 
-	let { count, perPage, onPageChange }: paginationProps = $props();
+	let { count, perPage, onPageChange, offset = false, pageNumber }: paginationProps = $props();
 </script>
 
 <Pagination.Root {onPageChange} {count} {perPage}>
 	{#snippet children({ pages })}
-		<div class="my-8 flex items-center">
+		<div class="my-4 flex items-center">
 			<Pagination.PrevButton
-				class="hover:text-[var(--secondary-color)] hover:bg-[var(--tertiary-color)] hover:bg-dark-10 disabled:text-muted-foreground mr-[25px] inline-flex size-10 cursor-pointer items-center justify-center rounded-[9px] bg-transparent active:scale-[0.98] disabled:cursor-not-allowed hover:disabled:bg-transparent hover:disabled:text-[var(--dark-color)]"
+				class="hover:bg-dark-10 disabled:text-muted-foreground mr-[25px] inline-flex size-10 cursor-pointer items-center justify-center rounded-[9px] bg-transparent hover:bg-[var(--tertiary-color)] hover:text-[var(--secondary-color)] active:scale-[0.98] disabled:cursor-not-allowed hover:disabled:bg-transparent hover:disabled:text-[var(--dark-color)]"
 			>
 				<ChevronLeft class="size-6" />
 			</Pagination.PrevButton>
 			<div class="flex items-center gap-2.5">
-				{#each pages as page (page.key)}
-					{#if page.type === 'ellipsis'}
-						<div class="cursor-not-allowed text-foreground-alt select-none text-[15px] font-medium">...</div>
-					{:else}
-						<Pagination.Page
-							{page}
-							class="cursor-pointer hover:bg-dark-10 data-selected:bg-[var(--tertiary-color)] data-selected:text-[var(--secondary-color)] data-selected:text-background inline-flex size-10 select-none items-center justify-center rounded-[9px] bg-transparent text-[15px] font-medium active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 hover:disabled:bg-transparent"
-						>
-							{page.value}
-						</Pagination.Page>
-					{/if}
-				{/each}
+				{#if offset}
+					{#each pages as page (page.key)}
+						{#if page.type === 'ellipsis'}
+							<div
+								class="text-foreground-alt cursor-not-allowed select-none text-[15px] font-medium"
+							>
+								...
+							</div>
+						{:else}
+							<Pagination.Page
+								{page}
+								class="hover:bg-dark-10 data-selected:bg-[var(--tertiary-color)] data-selected:text-[var(--secondary-color)] data-selected:text-background inline-flex size-10 cursor-pointer select-none items-center justify-center rounded-[9px] bg-transparent text-[15px] font-medium active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 hover:disabled:bg-transparent"
+							>
+								{page.value}
+							</Pagination.Page>
+						{/if}
+					{/each}
+				{:else}
+					<Pagination.Page
+						page={{ type: 'page', value: pageNumber }}
+						class="hover:bg-dark-10 data-selected:bg-[var(--tertiary-color)] data-selected:text-[var(--secondary-color)] data-selected:text-background inline-flex size-10 cursor-pointer select-none items-center justify-center rounded-[9px] bg-transparent text-[15px] font-medium active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 hover:disabled:bg-transparent"
+					>
+						{pageNumber}
+					</Pagination.Page>
+				{/if}
 			</div>
 			<Pagination.NextButton
 				class="disabled:text-muted-foreground ml-[29px] inline-flex size-10 cursor-pointer items-center justify-center rounded-[9px] bg-transparent hover:bg-[var(--tertiary-color)] hover:text-[var(--secondary-color)] active:scale-[0.98] disabled:cursor-not-allowed disabled:text-[var(--dark-color)] hover:disabled:bg-transparent"

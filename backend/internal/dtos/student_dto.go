@@ -38,6 +38,7 @@ type (
 	}
 	StudentProfileRes struct {
 		Name         string `json:"name"`
+		Email        string `json:"email"`
 		Bio          string `json:"bio"`
 		ProfileImage string `json:"profile_image"`
 	}

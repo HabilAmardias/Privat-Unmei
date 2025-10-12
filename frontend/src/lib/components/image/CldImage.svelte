@@ -1,23 +1,29 @@
 <script lang="ts">
-    import { CldImage } from 'svelte-cloudinary';
-    type cldImageProps = {
-        src: string
-        alt?: string
-        width?: number
-        height?: number
-        round? :"sm" | "lg" | "full"
-    }
-    let {src, alt, width = 32, height = 32, round} : cldImageProps = $props()
-    let className = $state<string>("")
-    if (round){
-        className = `rounded-${round}`
-    }
+	import { CldImage } from 'svelte-cloudinary';
+	type cldImageProps = {
+		src: string;
+		alt?: string;
+		width?: number;
+		height?: number;
+		className?: string;
+	};
+	let { src, alt, width = 32, height = 32, className }: cldImageProps = $props();
+
+	let isLoading = $state<boolean>(true);
 </script>
 
-<CldImage
-    src={src}
-    alt={alt}
-    width={width}
-    height={height}
-    class={className}
-/>
+<div class="relative overflow-hidden" style={`width: ${width}px; height: ${height}px`}>
+	{#if isLoading}
+		<div class="absolute inset-0 animate-pulse bg-gray-300"></div>
+	{/if}
+	<CldImage
+		{src}
+		{alt}
+		{width}
+		{height}
+		class={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-500`}
+		onload={() => {
+			isLoading = false;
+		}}
+	/>
+</div>
