@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Button from '$lib/components/button/Button.svelte';
-	import Card from '$lib/components/card/Card.svelte';
 	import Input from '$lib/components/form/Input.svelte';
 	import InputSecret from '$lib/components/form/InputSecret.svelte';
 	import { ManagerAuthView } from './view.svelte';
@@ -12,6 +11,8 @@
 	import { loadingStore } from '$lib/stores/LoadingStore.svelte';
 	import CldImage from '$lib/components/image/CldImage.svelte';
 	import { PrivatUnmeiLogo } from '$lib/utils/constants';
+	import { adminLogin, mentorLogin } from './constants';
+	import NavigationButton from '$lib/components/button/NavigationButton.svelte';
 
 	const View = new ManagerAuthView();
 
@@ -78,8 +79,8 @@
 </script>
 
 <svelte:head>
-	<title>Manger Login - Privat Unmei</title>
-	<meta name="description" content="Login - Privat Unmei" />
+	<title>Manager Login - Privat Unmei</title>
+	<meta name="description" content="Manager Login - Privat Unmei" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </svelte:head>
 
@@ -90,15 +91,28 @@
 	<div class="block md:hidden">
 		<CldImage src={PrivatUnmeiLogo} width={200} height={60} />
 	</div>
-	{#if !View.loginAdmin}
-		<Card>
-			<h2 class="mb-3 text-2xl font-bold text-[var(--tertiary-color)]">Login</h2>
+
+	<div class="flex flex-col">
+		<NavigationButton
+			menus={[
+				{
+					header: 'Admin',
+					onClick: () => View.switchForm(adminLogin)
+				},
+				{
+					header: 'Mentor',
+					onClick: () => View.switchForm(mentorLogin)
+				}
+			]}
+		/>
+		{#if View.loginMenu === mentorLogin}
 			<form
 				use:enhance={onMentorLoginSubmit}
 				action="?/loginMentor"
 				method="post"
-				class="flex flex-col gap-4"
+				class="border-1 flex flex-col gap-4 rounded-bl-lg rounded-br-lg rounded-tr-lg border-[var(--tertiary-color)] p-4"
 			>
+				<h2 class="mb-3 text-2xl text-[var(--tertiary-color)]">Mentor Login</h2>
 				<Input
 					err={View.emailError}
 					onBlur={() => View.emailOnBlur()}
@@ -120,23 +134,14 @@
 					>Login</Button
 				>
 			</form>
-			<Button
-				disabled={View.isLoading}
-				withBg={false}
-				full={true}
-				textColor="dark"
-				onClick={() => View.switchForm()}>Admin Login</Button
-			>
-		</Card>
-	{:else}
-		<Card>
-			<h2 class="mb-3 text-2xl font-bold text-[var(--tertiary-color)]">Login</h2>
+		{:else}
 			<form
 				use:enhance={onAdminLoginSubmit}
 				action="?/loginAdmin"
 				method="post"
-				class="flex flex-col gap-4"
+				class="border-1 flex flex-col gap-4 rounded-bl-lg rounded-br-lg rounded-tr-lg border-[var(--tertiary-color)] p-4"
 			>
+				<h2 class="mb-3 text-2xl text-[var(--tertiary-color)]">Admin Login</h2>
 				<Input
 					err={View.emailError}
 					onBlur={() => View.emailOnBlur()}
@@ -158,13 +163,6 @@
 					>Login</Button
 				>
 			</form>
-			<Button
-				disabled={View.isLoading}
-				withBg={false}
-				full={true}
-				textColor="dark"
-				onClick={() => View.switchForm()}>Mentor Login</Button
-			>
-		</Card>
-	{/if}
+		{/if}
+	</div>
 </div>

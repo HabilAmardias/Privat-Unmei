@@ -1,5 +1,7 @@
+import type { ManagerLoginType } from "./model";
+
 export class ManagerAuthView {
-	loginAdmin = $state<boolean>(false);
+	loginMenu = $state<ManagerLoginType>('admin');
 	email = $state<string>('');
 	emailError = $state<Error | undefined>();
 	password = $state<string>('');
@@ -45,8 +47,8 @@ export class ManagerAuthView {
 		this.isLoading = b;
 	}
 
-	switchForm() {
-		this.loginAdmin = !this.loginAdmin;
+	switchForm(newState : ManagerLoginType) {
+		this.loginMenu = newState;
 	}
 
 	setIsDesktop(b: boolean){
