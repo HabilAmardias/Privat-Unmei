@@ -91,7 +91,7 @@
 </script>
 
 <svelte:head>
-	<title>Login</title>
+	<title>Login - Privat Unmei</title>
 	<meta name="description" content="Login - Privat Unmei" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<script

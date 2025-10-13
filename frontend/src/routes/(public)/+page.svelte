@@ -23,6 +23,12 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Home - Privat Unmei</title>
+	<meta name="description" content="Home - Privat Unmei" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</svelte:head>
+
 <div class="flex h-full flex-col gap-16 p-8">
 	<AnimatedContainer>
 		<div class="flex flex-col gap-4 py-4">

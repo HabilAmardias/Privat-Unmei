@@ -36,6 +36,12 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Reset Password - Privat Unmei</title>
+	<meta name="description" content="Reset Password - Privat Unmei" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</svelte:head>
+
 <div class="flex h-full w-full items-center justify-center">
 	<Card>
 		<h2 class="mb-3 text-2xl font-bold text-[var(--tertiary-color)]">Reset Password</h2>
