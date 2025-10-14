@@ -22,13 +22,16 @@
 
 	onMount(() => {
 		if (data.authToken) {
-			if (data.role === adminRole) {
-				goto('/manager/admin', { replaceState: true });
-				return;
-			}
-			if (data.role === mentorRole) {
-				goto('/manager/mentor', { replaceState: true });
-				return;
+			switch (data.role) {
+				case adminRole:
+					goto('/manager/admin', { replaceState: true });
+					break;
+				case mentorRole:
+					goto('/manager/mentor', { replaceState: true });
+					break;
+				default:
+					goto('/courses', { replaceState: true });
+					break;
 			}
 		}
 		View.setIsDesktop(window.innerWidth >= 768);
