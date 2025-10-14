@@ -11,12 +11,25 @@
 	import { loadingStore } from '$lib/stores/LoadingStore.svelte';
 	import CldImage from '$lib/components/image/CldImage.svelte';
 	import { PrivatUnmeiLogo } from '$lib/utils/constants';
-	import { adminLogin, mentorLogin } from './constants';
+	import { adminLogin, adminRole, mentorLogin, mentorRole } from './constants';
 	import NavigationButton from '$lib/components/button/NavigationButton.svelte';
+	import type { PageProps } from './$types';
 
 	const View = new ManagerAuthView();
 
+	let { data }: PageProps = $props();
+
 	onMount(() => {
+		if (data.authToken) {
+			if (data.role === adminRole) {
+				goto('/manager/admin', { replaceState: true });
+				return;
+			}
+			if (data.role === mentorRole) {
+				goto('/manager/mentor', { replaceState: true });
+				return;
+			}
+		}
 		View.setIsDesktop(window.innerWidth >= 768);
 		function isDesktop() {
 			View.setIsDesktop(window.innerWidth >= 768);
@@ -37,7 +50,7 @@
 		const loadID = toast.loading('logging in.....', { position: 'top-right' });
 		return async ({ result, update }: EnhancementReturn) => {
 			if (result.type === 'success') {
-				await goto('/admin/profile', { replaceState: true });
+				await goto('/manager/admin', { replaceState: true });
 				View.setIsLoading(false);
 				toast.dismiss(loadID);
 				toast.success('login success', {
@@ -59,7 +72,7 @@
 		const loadID = toast.loading('logging in.....', { position: 'top-right' });
 		return async ({ result, update }: EnhancementReturn) => {
 			if (result.type === 'success') {
-				await goto('/mentor/profile', { replaceState: true });
+				await goto('/manager/mentor', { replaceState: true });
 				View.setIsLoading(false);
 				toast.dismiss(loadID);
 				toast.success('login success', {
@@ -84,7 +97,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </svelte:head>
 
-<div class="flex h-screen w-full flex-col items-center justify-center gap-4 md:flex-row md:gap-0">
+<div class="flex h-screen w-full flex-col items-center justify-center gap-8 md:flex-row md:gap-0">
 	<div class="hidden md:flex md:flex-1">
 		<CldImage src={PrivatUnmeiLogo} width={400} height={125} />
 	</div>

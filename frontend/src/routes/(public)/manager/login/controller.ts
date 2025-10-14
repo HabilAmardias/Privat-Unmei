@@ -168,9 +168,9 @@ class ManagerAuthController {
                         data.key = key;
                         data.value = val;
                         break;
-                    case 'oauthstate':
-                        data.key = key;
-                        data.value = val;
+                    case 'role':
+                        data.key = key
+                        data.value = val
                         break;
                     case 'domain':
                         data.domain = val;

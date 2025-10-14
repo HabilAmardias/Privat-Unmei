@@ -1,6 +1,13 @@
 import type { Actions } from "@sveltejs/kit";
 import { fail } from "@sveltejs/kit";
 import { controller } from "./controller";
+import type { PageServerLoad } from "./$types";
+
+export const load : PageServerLoad = async ({cookies}) =>{
+    const authToken = cookies.get('auth_token')
+    const role = cookies.get('role')
+    return {authToken, role}
+}
 
 export const actions = {
     loginMentor: async ({ request, cookies, fetch }) => {
