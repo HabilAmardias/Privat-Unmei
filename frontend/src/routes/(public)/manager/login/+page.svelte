@@ -11,7 +11,8 @@
 	import { loadingStore } from '$lib/stores/LoadingStore.svelte';
 	import CldImage from '$lib/components/image/CldImage.svelte';
 	import { PrivatUnmeiLogo } from '$lib/utils/constants';
-	import { adminLogin, adminRole, mentorLogin, mentorRole } from './constants';
+	import { adminLogin, mentorLogin } from './constants';
+	import { adminRole, mentorRole } from '$lib/utils/constants';
 	import NavigationButton from '$lib/components/button/NavigationButton.svelte';
 	import type { PageProps } from './$types';
 

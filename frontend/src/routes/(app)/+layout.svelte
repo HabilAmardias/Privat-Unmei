@@ -42,7 +42,7 @@
 </main>
 <Menubar>
 	<MenuItem>
-		<Link href="/">
+		<Link href="/courses">
 			<div class="flex h-full items-center">
 				<CldImage src={View.logoSrc} width={View.logoWidth} height={View.logoHeight} />
 			</div>
