@@ -46,8 +46,13 @@
 				aspernatur sit nisi impedit at!
 			</p>
 
-			<div class="mx-auto flex justify-center rounded-2xl bg-[var(--tertiary-color)] p-4">
-				<Link href="/courses" theme="light">Start Exploring</Link>
+			<div class="flex justify-center gap-4">
+				<div class="flex justify-center rounded-2xl bg-[var(--tertiary-color)] p-4">
+					<Link href="/courses" theme="light">Start Exploring</Link>
+				</div>
+				<div class="flex justify-center rounded-2xl bg-[var(--tertiary-color)] p-4">
+					<Link href="/login" theme="light">Sign In</Link>
+				</div>
 			</div>
 		</div>
 	</AnimatedContainer>
