@@ -8,10 +8,10 @@ export const load : PageServerLoad = async ({fetch}) =>{
         controller.getCourses(fetch)
     ])
     if (!mostBought.success){
-        error(mostBought.status, {message: mostBought.message})
+        throw error(mostBought.status, {message: mostBought.message})
     }
     if (!courses.success){
-        error(courses.status, {message: courses.message})
+        throw error(courses.status, {message: courses.message})
     }
     return {mostBought: mostBought.resBody, courses: courses.resBody}
 }

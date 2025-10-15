@@ -6,7 +6,7 @@ export const load: PageServerLoad = async ({ cookies }) => {
     const refreshToken = cookies.get('refresh_token')
     const status = cookies.get('status')
 	if (!authToken || !refreshToken || !status) {
-		error(401, { message: 'Google login failed' });
+		throw error(401, { message: 'Google login failed' });
 	}
 	cookies.delete('oauthstate', { path: '/' });
 	return { success: true , status};

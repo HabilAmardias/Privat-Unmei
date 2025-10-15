@@ -105,6 +105,12 @@
 	}
 </script>
 
+<svelte:head>
+	<title>My Profile - Privat Unmei</title>
+	<meta name="description" content="My Profile - Privat Unmei" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</svelte:head>
+
 {#if View.isEdit}
 	<form
 		use:enhance={onUpdateProfile}

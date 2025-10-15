@@ -23,6 +23,12 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Home - Privat Unmei</title>
+	<meta name="description" content="Home - Privat Unmei" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</svelte:head>
+
 <div class="flex h-full flex-col gap-16 p-8">
 	<AnimatedContainer>
 		<div class="flex flex-col gap-4 py-4">
@@ -40,8 +46,13 @@
 				aspernatur sit nisi impedit at!
 			</p>
 
-			<div class="mx-auto flex justify-center rounded-2xl bg-[var(--tertiary-color)] p-4">
-				<Link href="/courses" theme="light">Start Exploring</Link>
+			<div class="flex justify-center gap-4">
+				<div class="flex justify-center rounded-2xl bg-[var(--tertiary-color)] p-4">
+					<Link href="/courses" theme="light">Start Exploring</Link>
+				</div>
+				<div class="flex justify-center rounded-2xl bg-[var(--tertiary-color)] p-4">
+					<Link href="/login" theme="light">Sign In</Link>
+				</div>
 			</div>
 		</div>
 	</AnimatedContainer>

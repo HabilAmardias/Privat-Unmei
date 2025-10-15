@@ -182,6 +182,7 @@ func (mh *MentorHandlerImpl) Login(ctx *gin.Context) {
 	}
 	ctx.SetCookie(constants.AUTH_COOKIE_KEY, authToken, int(constants.AUTH_AGE), "/", domain, false, true)
 	ctx.SetCookie(constants.REFRESH_COOKIE_KEY, refreshToken, int(constants.REFRESH_AGE), "/", domain, false, true)
+	ctx.SetCookie("role", strconv.Itoa(constants.MentorRole), int(constants.REFRESH_AGE), "/", domain, false, true)
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
 		Data: dtos.MessageResponse{

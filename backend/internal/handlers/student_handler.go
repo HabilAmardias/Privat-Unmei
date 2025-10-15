@@ -143,7 +143,7 @@ func (sh *StudentHandlerImpl) GoogleLoginCallback(ctx *gin.Context) {
 	}
 	ctx.SetCookie(constants.AUTH_COOKIE_KEY, authToken, int(constants.AUTH_AGE), "/", domain, false, true)
 	ctx.SetCookie(constants.REFRESH_COOKIE_KEY, refreshToken, int(constants.REFRESH_AGE), "/", domain, false, true)
-	ctx.SetCookie("status", userStatus, int(constants.AUTH_AGE), "/", domain, false, true)
+	ctx.SetCookie("status", userStatus, int(constants.REFRESH_AGE), "/", domain, false, true)
 	ctx.Redirect(http.StatusTemporaryRedirect, clientURL+"/google-callback")
 }
 
