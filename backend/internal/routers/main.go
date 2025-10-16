@@ -410,6 +410,13 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		c.RBACCacheRepository,
 		c.Logger,
 	), c.AdminHandler.ChangePassword)
+	v1.GET("/admins/me", middlewares.AuthorizationMiddleware(
+		constants.ReadOwnPermission,
+		constants.AdminResource,
+		c.RBACRepository,
+		c.RBACCacheRepository,
+		c.Logger,
+	), c.AdminHandler.AdminProfile)
 }
 
 func (c *RouteConfig) SetupWebsocketRoute() {

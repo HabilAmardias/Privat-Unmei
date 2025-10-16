@@ -20,6 +20,27 @@ func CreateAdminHandler(as *services.AdminServiceImpl) *AdminHandlerImpl {
 	return &AdminHandlerImpl{as}
 }
 
+func (ah *AdminHandlerImpl) AdminProfile(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.AdminProfileParam{
+		AdminID: claim.Subject,
+	}
+	profile, err := ah.as.AdminProfile(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	res := dtos.AdminProfileRes(*profile)
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data:    res,
+	})
+}
+
 func (ah *AdminHandlerImpl) ChangePassword(ctx *gin.Context) {
 	claim, err := getAuthenticationPayload(ctx)
 	if err != nil {

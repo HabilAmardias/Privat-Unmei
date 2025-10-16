@@ -36,6 +36,25 @@ func CreateAdminService(
 	return &AdminServiceImpl{ur, ar, sr, mr, tmr, cu, bu, ju, gu}
 }
 
+func (as *AdminServiceImpl) AdminProfile(ctx context.Context, param entity.AdminProfileParam) (*entity.AdminProfileQuery, error) {
+	user := new(entity.User)
+	admin := new(entity.Admin)
+	query := new(entity.AdminProfileQuery)
+	if err := as.ur.FindByID(ctx, param.AdminID, user); err != nil {
+		return nil, err
+	}
+	if err := as.ar.FindByID(ctx, param.AdminID, admin); err != nil {
+		return nil, err
+	}
+	query.Name = user.Name
+	query.Email = user.Email
+	query.Bio = user.Bio
+	query.ProfileImage = user.ProfileImage
+	query.Status = user.Status
+
+	return query, nil
+}
+
 func (as *AdminServiceImpl) UpdatePassword(ctx context.Context, param entity.AdminUpdatePasswordParam) error {
 	user := new(entity.User)
 	admin := new(entity.Admin)
