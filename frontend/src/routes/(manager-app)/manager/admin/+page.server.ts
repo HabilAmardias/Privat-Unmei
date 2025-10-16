@@ -1,4 +1,4 @@
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { controller } from './controller';
 import type { ServerResponse } from '$lib/types';
@@ -11,5 +11,8 @@ export const load : PageServerLoad = async ({fetch}) => {
     }
     
     const resBody : ServerResponse<adminProfile> = await res?.json()
-    return {profile: resBody.data, isVerified: resBody.data.status === 'verified'}
+    if (resBody.data.status !== 'verified'){
+        throw redirect(303, '/manager/admin/verify')
+    }
+    return {profile: resBody.data}
 }

@@ -7,10 +7,12 @@
 	const { children, data }: LayoutProps = $props();
 
 	onMount(() => {
-		if (data.role !== mentorRole && data.role !== adminRole) {
+		if (data.role !== mentorRole) {
 			goto('/courses', { replaceState: true });
 		}
 	});
 </script>
 
-{@render children()}
+<main class="h-screen">
+	{@render children()}
+</main>
