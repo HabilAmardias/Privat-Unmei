@@ -1,4 +1,4 @@
-import { error, redirect } from '@sveltejs/kit';
+import { error, fail, redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { controller } from './controller';
 import type { ServerResponse } from '$lib/types';
@@ -16,3 +16,13 @@ export const load : PageServerLoad = async ({fetch}) => {
     }
     return {profile: resBody.data}
 }
+
+export const actions = {
+    changePassword : async ({fetch, request}) => {
+        const {success, message, status} = await controller.changePassword(fetch, request)
+        if (!success){
+            return fail(status, {message})
+        }
+        return {success}
+    }
+} satisfies Actions
