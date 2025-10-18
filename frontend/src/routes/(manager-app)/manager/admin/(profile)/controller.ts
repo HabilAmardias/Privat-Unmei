@@ -1,5 +1,6 @@
-import type { Fetch } from "$lib/types";
+import type { Fetch, ServerResponse } from "$lib/types";
 import { FetchData } from "$lib/utils";
+import type { adminProfile } from "./model";
 
 class AdminPageController {
     async getProfile(fetch: Fetch){
@@ -8,7 +9,8 @@ class AdminPageController {
         if (!success){
             return {success, message, status}
         }
-        return {success, message, status, res}
+        const resBody : ServerResponse<adminProfile> = await res?.json()
+        return {success, message, status, resBody}
     }
     async changePassword(fetch: Fetch, req: Request){
         const url = 'http://localhost:8080/api/v1/admins/me/change-password'

@@ -255,15 +255,12 @@ func (ms *MentorServiceImpl) GetMentorList(ctx context.Context, param entity.Lis
 	mentors := new([]entity.ListMentorQuery)
 	totalRow := new(int64)
 	user := new(entity.User)
+	admin := new(entity.Admin)
 	if err := ms.ur.FindByID(ctx, param.UserID, user); err != nil {
 		return nil, nil, err
 	}
-	if user.Status == constants.UnverifiedStatus {
-		return nil, nil, customerrors.NewError(
-			"unauthorized",
-			errors.New("user is not verified yet"),
-			customerrors.Unauthenticate,
-		)
+	if err := ms.ar.FindByID(ctx, param.UserID, admin); err != nil {
+		return nil, nil, err
 	}
 	if err := ms.mr.GetMentorList(ctx, mentors, totalRow, param); err != nil {
 		return nil, nil, err

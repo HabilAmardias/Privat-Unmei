@@ -9,6 +9,7 @@
 	import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
 	import { onMount } from 'svelte';
 	import { CreateToast, DismissToast } from '$lib/utils/helper';
+	import { goto } from '$app/navigation';
 
 	let { data }: PageProps = $props();
 	const View = new adminProfileView();
@@ -30,6 +31,10 @@
 		};
 	}
 	onMount(() => {
+		if (!data.isVerified) {
+			goto('/manager/admin/verify', { replaceState: true });
+			return;
+		}
 		View.setIsDesktop(window.innerWidth >= 768);
 		function setIsDesktop() {
 			View.setIsDesktop(window.innerWidth >= 768);

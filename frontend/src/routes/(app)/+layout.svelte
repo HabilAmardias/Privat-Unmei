@@ -48,14 +48,6 @@
 			</div>
 		</Link>
 	</MenuItem>
-	<MenuItem>
-		<Link href="/courses">
-			<div class="flex flex-col items-center">
-				<List />
-				Courses
-			</div>
-		</Link>
-	</MenuItem>
 	{#if data.isLoggedIn}
 		<MenuItem>
 			<Link href="/chats">
