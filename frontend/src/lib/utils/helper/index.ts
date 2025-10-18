@@ -1,4 +1,5 @@
-import type { AuthClaim } from "$lib/types";
+import type { AuthClaim, ToastType } from "$lib/types";
+import toast, { type ToastOptions } from "svelte-french-toast";
 
 function DecodeJWT(token: string){
     const claim : AuthClaim = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
@@ -17,4 +18,25 @@ export function IsTokenExpired(token: string | undefined){
 export function IsAlphaOnly(str: string){
     const reg = /^[a-zA-Z]+$/
     return reg.test(str)
+}
+
+export function CreateToast(toastType : ToastType, message: string) : string {
+    let loadID : string
+    const Opts : ToastOptions = {position: 'top-right'}
+    switch (toastType) {
+        case 'error':
+            loadID = toast.error(message, Opts)
+            break
+        case 'success':
+            loadID = toast.success(message, Opts)
+            break
+        case 'loading':
+            loadID = toast.loading(message, Opts)
+            break
+    }
+    return loadID
+}
+
+export function DismissToast(toastID : string){
+    toast.dismiss(toastID)
 }

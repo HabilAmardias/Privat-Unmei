@@ -7,14 +7,14 @@
 	import { loadingStore } from '$lib/stores/LoadingStore.svelte';
 	import { List, LogIn, LogOut, MessageCircleMore, User } from '@lucide/svelte';
 	import { ScrollArea } from 'bits-ui';
-	import toast from 'svelte-french-toast';
 	import type { LayoutProps } from './$types';
 	import CldImage from '$lib/components/image/CldImage.svelte';
 	import { onMount } from 'svelte';
 	import { AppLayoutView } from './view.svelte';
+	import { CreateToast } from '$lib/utils/helper';
 
 	function onLogout() {
-		const loadID = toast.loading('logging out....', { position: 'top-right' });
+		const loadID = CreateToast('loading', 'logging out....');
 		loadingStore.setLogOutLoadID(loadID);
 		goto('/logout', { replaceState: true });
 	}

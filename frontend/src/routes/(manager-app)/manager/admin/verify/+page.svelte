@@ -5,12 +5,12 @@
 	import Card from '$lib/components/card/Card.svelte';
 	import { enhance } from '$app/forms';
 	import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
-	import toast from 'svelte-french-toast';
 	import Input from '$lib/components/form/Input.svelte';
 	import Button from '$lib/components/button/Button.svelte';
 	import { loadingStore } from '$lib/stores/LoadingStore.svelte';
 	import { VerifyAdminView } from './view.svelte';
 	import InputSecret from '$lib/components/form/InputSecret.svelte';
+	import { CreateToast, DismissToast } from '$lib/utils/helper';
 
 	let { data }: PageProps = $props();
 	const View = new VerifyAdminView();
@@ -23,7 +23,7 @@
 
 	function onVerifySubmit(args: EnhancementArgs) {
 		View.setIsLoading(true);
-		const loadID = toast.loading('loading....', { position: 'top-right' });
+		const loadID = CreateToast('loading', 'loading....');
 		return async ({ result, update }: EnhancementReturn) => {
 			View.setIsLoading(false);
 			if (result.type === 'success') {
@@ -31,8 +31,8 @@
 				await goto('/manager/login', { replaceState: true });
 			}
 			if (result.type === 'failure') {
-				toast.dismiss(loadID);
-				toast.error(result.data?.message, { position: 'top-right' });
+				DismissToast(loadID);
+				CreateToast('error', result.data?.message);
 			}
 			update();
 		};

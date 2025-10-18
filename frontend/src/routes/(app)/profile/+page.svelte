@@ -13,10 +13,10 @@
 	import Pagination from '$lib/components/pagination/Pagination.svelte';
 	import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
 	import { enhance } from '$app/forms';
-	import toast from 'svelte-french-toast';
 	import { ScrollArea } from 'bits-ui';
 	import Loading from '$lib/components/loader/Loading.svelte';
 	import Image from '$lib/components/image/Image.svelte';
+	import { CreateToast, DismissToast } from '$lib/utils/helper';
 
 	let { data }: PageProps = $props();
 	const View = new profileView();
@@ -51,15 +51,15 @@
 
 	function onVerifySubmit(args: EnhancementArgs) {
 		View.setVerifyIsLoading(true);
-		const loadID = toast.loading('sending....', { position: 'top-right' });
+		const loadID = CreateToast('loading', 'sending....');
 		return async ({ result, update }: EnhancementReturn) => {
 			View.setVerifyIsLoading(false);
-			toast.dismiss(loadID);
+			DismissToast(loadID);
 			if (result.type === 'success') {
-				toast.success(result.data?.message, { position: 'top-right' });
+				CreateToast('success', result.data?.message);
 			}
 			if (result.type === 'failure') {
-				toast.error(result.data?.message, { position: 'top-right' });
+				CreateToast('error', result.data?.message);
 			}
 			update();
 		};
@@ -73,17 +73,17 @@
 			if (result.type === 'success') {
 				View.setOrders(result.data?.orders);
 				View.setTotalRow(result.data?.totalRow);
-				toast.success(result.data?.message, { position: 'top-right' });
+				CreateToast('success', result.data?.message);
 			}
 			if (result.type === 'failure') {
-				toast.error(result.data?.message, { position: 'top-right' });
+				CreateToast('error', result.data?.message);
 			}
 			update({ reset: false });
 		};
 	}
 
 	function onUpdateProfile(args: EnhancementArgs) {
-		const loadID = toast.loading('updating...', { position: 'top-right' });
+		const loadID = CreateToast('loading', 'updating....');
 		return async ({ result, update }: EnhancementReturn) => {
 			View.setIsEdit();
 			View.setProfileIsLoading(true);
@@ -94,12 +94,12 @@
 			View.setNameError(undefined);
 			View.setBioError(undefined);
 			View.setProfileIsLoading(false);
-			toast.dismiss(loadID);
+			DismissToast(loadID);
 			if (result.type === 'success') {
-				toast.success('update profile success', { position: 'top-right' });
+				CreateToast('success', 'update profile success');
 			}
 			if (result.type === 'failure') {
-				toast.error(result.data?.message, { position: 'top-right' });
+				CreateToast('error', result.data?.message);
 			}
 		};
 	}

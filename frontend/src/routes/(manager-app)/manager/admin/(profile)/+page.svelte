@@ -6,25 +6,25 @@
 	import Button from '$lib/components/button/Button.svelte';
 	import { enhance } from '$app/forms';
 	import InputSecret from '$lib/components/form/InputSecret.svelte';
-	import toast from 'svelte-french-toast';
 	import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
 	import { onMount } from 'svelte';
+	import { CreateToast, DismissToast } from '$lib/utils/helper';
 
 	let { data }: PageProps = $props();
 	const View = new adminProfileView();
 
 	function onChangePasswordSubmit(args: EnhancementArgs) {
 		View.setIsLoading(true);
-		const loadID = toast.loading('loading....', { position: 'top-right' });
+		const loadID = CreateToast('loading', 'loading....');
 		return async ({ result, update }: EnhancementReturn) => {
-			toast.dismiss(loadID);
+			DismissToast(loadID);
 			View.setIsLoading(false);
 			if (result.type === 'success') {
-				toast.success('successfully change password', { position: 'top-right' });
+				CreateToast('success', 'successfully change password');
 				View.switchForm();
 			}
 			if (result.type === 'failure') {
-				toast.error(result.data?.message, { position: 'top-right' });
+				CreateToast('error', result.data?.message);
 			}
 			update();
 		};

@@ -9,22 +9,21 @@
 	import Button from '$lib/components/button/Button.svelte';
 	import Menubar from '$lib/components/menubar/Menubar.svelte';
 	import MenuItem from '$lib/components/menubar/MenuItem.svelte';
-	import toast from 'svelte-french-toast';
 	import { loadingStore } from '$lib/stores/LoadingStore.svelte';
+	import { adminLayoutView } from './view.svelte';
+	import { CreateToast } from '$lib/utils/helper';
 
 	const { children, data }: LayoutProps = $props();
+	const View = new adminLayoutView();
 
 	onMount(() => {
 		if (data.role !== adminRole) {
 			goto('/courses', { replaceState: true });
 		}
 	});
-	let menuOpen = $state<boolean>(false);
-	function handleMenu() {
-		menuOpen = !menuOpen;
-	}
+
 	function onLogout() {
-		const loadID = toast.loading('logging out....', { position: 'top-right' });
+		const loadID = CreateToast('loading', 'logging out....');
 		loadingStore.setLogOutLoadID(loadID);
 		goto('/manager/logout', { replaceState: true });
 	}
@@ -35,36 +34,40 @@
 		class="
             hidden h-dvh flex-col items-center gap-4 bg-[var(--tertiary-color)] p-4 transition-all
             duration-300 ease-in-out md:flex
-            {menuOpen ? 'w-[15%]' : 'w-20'} 
+            {View.menuOpen ? 'w-[15%]' : 'w-20'} 
             "
 	>
 		<div class="mb-16 w-full justify-self-start">
-			<Button onClick={handleMenu} full>
-				<Menu class="duration-300 ease-in-out {menuOpen ? 'rotate-90' : ''}" />
+			<Button onClick={() => View.handleMenu()} full>
+				<Menu class="duration-300 ease-in-out {View.menuOpen ? 'rotate-90' : ''}" />
 			</Button>
 		</div>
 		<Link href="/manager/admin">
 			<div class="flex flex-col items-center gap-1">
 				<House />
-				<p class="duration-300 ease-in-out {menuOpen ? 'opacity-100' : 'opacity-0'}">Home</p>
+				<p class="duration-300 ease-in-out {View.menuOpen ? 'opacity-100' : 'opacity-0'}">Home</p>
 			</div>
 		</Link>
 		<Link href="/manager/admin/mentors">
 			<div class="flex flex-col items-center gap-1">
 				<User />
-				<p class="duration-300 ease-in-out {menuOpen ? 'opacity-100' : 'opacity-0'}">Mentors</p>
+				<p class="duration-300 ease-in-out {View.menuOpen ? 'opacity-100' : 'opacity-0'}">
+					Mentors
+				</p>
 			</div>
 		</Link>
 		<Link href="/manager/admin/maintenance">
 			<div class="flex flex-col items-center gap-1">
 				<Percent />
-				<p class="duration-300 ease-in-out {menuOpen ? 'opacity-100' : 'opacity-0'}">Maintenance</p>
+				<p class="duration-300 ease-in-out {View.menuOpen ? 'opacity-100' : 'opacity-0'}">
+					Maintenance
+				</p>
 			</div>
 		</Link>
 		<Button onClick={onLogout} withBg={false} textColor="light" withPadding={false}>
 			<div class="flex flex-col items-center gap-1">
 				<LogOut />
-				<p class="duration-300 ease-in-out {menuOpen ? 'opacity-100' : 'opacity-0'}">Logout</p>
+				<p class="duration-300 ease-in-out {View.menuOpen ? 'opacity-100' : 'opacity-0'}">Logout</p>
 			</div>
 		</Button>
 	</nav>
