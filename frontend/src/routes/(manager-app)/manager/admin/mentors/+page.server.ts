@@ -14,7 +14,6 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		throw error(adminProfile.status, { message: adminProfile.message });
 	}
 	return {
-		success: true,
 		mentorsList: mentorsList.resBody.data,
 		isVerified: adminProfile.resBody.data.status === 'verified'
 	};
