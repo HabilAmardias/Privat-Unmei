@@ -29,7 +29,7 @@
 	}
 </script>
 
-<main class="flex h-dvh">
+<div class="flex flex-row">
 	<nav
 		class="
             hidden h-dvh flex-col items-center gap-4 bg-[var(--tertiary-color)] p-4 transition-all
@@ -71,45 +71,47 @@
 			</div>
 		</Button>
 	</nav>
-	<ScrollArea.Root class="flex-1">
-		<ScrollArea.Viewport class="h-full">
-			{@render children()}
-		</ScrollArea.Viewport>
-	</ScrollArea.Root>
-	<div class="block md:hidden">
-		<Menubar>
-			<MenuItem>
-				<Link href="/manager/admin">
-					<div class="flex flex-col items-center gap-1">
-						<House />
-						<p>Home</p>
-					</div>
-				</Link>
-			</MenuItem>
-			<MenuItem>
-				<Link href="/manager/admin/mentors">
-					<div class="flex flex-col items-center gap-1">
-						<User />
-						<p>Mentors</p>
-					</div>
-				</Link>
-			</MenuItem>
-			<MenuItem>
-				<Link href="/manager/admin/maintenance">
-					<div class="flex flex-col items-center gap-1">
-						<Percent />
-						<p>Maintenance</p>
-					</div>
-				</Link>
-			</MenuItem>
-			<MenuItem>
-				<Button onClick={onLogout} withBg={false} textColor="light" withPadding={false}>
-					<div class="flex flex-col items-center gap-1">
-						<LogOut />
-						<p>Logout</p>
-					</div>
-				</Button>
-			</MenuItem>
-		</Menubar>
-	</div>
-</main>
+	<main class="flex h-dvh pb-24 md:flex-1 md:pb-0">
+		<ScrollArea.Root class="flex-1">
+			<ScrollArea.Viewport class="h-full">
+				{@render children()}
+			</ScrollArea.Viewport>
+		</ScrollArea.Root>
+	</main>
+</div>
+<div class="block md:hidden">
+	<Menubar>
+		<MenuItem>
+			<Link href="/manager/admin">
+				<div class="flex flex-col items-center gap-1">
+					<House />
+					<p>Home</p>
+				</div>
+			</Link>
+		</MenuItem>
+		<MenuItem>
+			<Link href="/manager/admin/mentors">
+				<div class="flex flex-col items-center gap-1">
+					<User />
+					<p>Mentors</p>
+				</div>
+			</Link>
+		</MenuItem>
+		<MenuItem>
+			<Link href="/manager/admin/maintenance">
+				<div class="flex flex-col items-center gap-1">
+					<Percent />
+					<p>Maintenance</p>
+				</div>
+			</Link>
+		</MenuItem>
+		<MenuItem>
+			<Button onClick={onLogout} withBg={false} textColor="light" withPadding={false}>
+				<div class="flex flex-col items-center gap-1">
+					<LogOut />
+					<p>Logout</p>
+				</div>
+			</Button>
+		</MenuItem>
+	</Menubar>
+</div>

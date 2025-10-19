@@ -20,14 +20,19 @@ class MentorManagerController {
 			const formData = await req.formData();
 			const search = formData.get('search');
 			const sortYearOfExperience = formData.get('sort_year_of_experience');
+			const page = formData.get('page');
 			if (search) {
 				queries.push(`search=${search}`);
 			}
 			if (sortYearOfExperience) {
 				queries.push(`sort_year_of_experience=${sortYearOfExperience}`);
 			}
+			if (page) {
+				queries.push(`page=${page}`);
+			}
 			url += queries.join('&');
 		}
+		console.log(url);
 		const { success, message, res, status } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
