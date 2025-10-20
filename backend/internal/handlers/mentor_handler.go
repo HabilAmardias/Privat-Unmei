@@ -489,7 +489,6 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 		Email:             req.Email,
 		Password:          req.Password,
 		ResumeFile:        file,
-		Bio:               req.Bio,
 		YearsOfExperience: req.YearsOfExperience,
 		MentorPayments:    []entity.MentorPaymentInfo{},
 		Degree:            req.Degree,

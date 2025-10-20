@@ -29,7 +29,6 @@ type (
 	AddNewMentorReq struct {
 		Name              string   `form:"name" binding:"required"`
 		Email             string   `form:"email" binding:"required,email"`
-		Bio               string   `form:"bio" binding:"required"`
 		Password          string   `form:"password" binding:"required,containsany=!@#?,min=8"`
 		MentorPayments    []string `form:"mentor_payment_info" binding:"dive"`
 		YearsOfExperience int      `form:"years_of_experience" binding:"required,gte=0"`

@@ -49,7 +49,6 @@ type (
 		AdminID           string
 		Name              string
 		Email             string
-		Bio               string
 		Password          string
 		ResumeFile        multipart.File
 		MentorPayments    []MentorPaymentInfo

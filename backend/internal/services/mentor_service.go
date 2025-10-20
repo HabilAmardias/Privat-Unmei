@@ -477,7 +477,6 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 
 		user.Email = param.Email
 		user.Name = param.Name
-		user.Bio = param.Bio
 		user.ProfileImage = constants.DefaultAvatar
 
 		hashedPass, err := ms.bu.HashPassword(param.Password)
