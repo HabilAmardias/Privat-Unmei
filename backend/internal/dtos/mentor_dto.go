@@ -17,9 +17,8 @@ type (
 		EndTime   TimeOnly `json:"end_time"`
 	}
 	MentorPaymentInfoReq struct {
-		PaymentMethodID   int    `json:"payment_method_id" binding:"required"`
-		PaymentMethodName string `json:"payment_method_name" binding:"required"`
-		AccountNumber     string `json:"account_number" binding:"required,numeric"`
+		PaymentMethodID int    `json:"payment_method_id" binding:"required"`
+		AccountNumber   string `json:"account_number" binding:"required,numeric"`
 	}
 	MentorPaymentInfoRes struct {
 		PaymentMethodID   int    `json:"payment_method_id"`
