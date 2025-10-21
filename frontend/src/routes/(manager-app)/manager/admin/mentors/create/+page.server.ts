@@ -1,4 +1,4 @@
-import { error } from '@sveltejs/kit';
+import { error, fail, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { controller } from './controller';
 
@@ -9,3 +9,16 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	}
 	return { paymentMethods: resBody.data.entries };
 };
+
+export const actions = {
+	getPaymentMethods: async ({ fetch, request }) => {
+		const { success, status, message, resBody } = await controller.getPaymentMethods(
+			fetch,
+			request
+		);
+		if (!success) {
+			throw fail(status, { message });
+		}
+		return { paymentMethods: resBody.data.entries };
+	}
+} satisfies Actions;

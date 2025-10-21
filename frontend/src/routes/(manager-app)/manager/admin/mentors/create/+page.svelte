@@ -6,6 +6,8 @@
 	import { degreeOpts } from './constants';
 	import { CreateMentorView } from './view.svelte';
 	import type { PageProps } from './$types';
+	import Search from '$lib/components/search/Search.svelte';
+	import { enhance } from '$app/forms';
 	const View = new CreateMentorView();
 
 	const { data }: PageProps = $props();
@@ -17,6 +19,12 @@
 
 <div class="flex h-full flex-col gap-4 p-4">
 	<h3 class="text-xl font-bold text-[var(--tertiary-color)]">Create New Mentor</h3>
+	<form
+		bind:this={View.paymentMethodForm}
+		use:enhance={View.onGetPaymentMethods}
+		action="?/getPaymentMethods"
+		method="POST"
+	></form>
 	<form action="?/createMentor" method="POST">
 		<Input type="text" placeholder="Input mentor name" name="name" id="name" />
 		<Input type="email" placeholder="Input mentor email" name="email" id="email" />
@@ -24,21 +32,21 @@
 			<p>test password</p>
 			<Button formAction="?/generatePassword">Generate Password</Button>
 		</div>
-		<div class="flex items-center gap-4">
-			<Select
-				options={View.paymentMethods}
-				defaultLable="Choose Payment Method"
-				name="payment methods"
+		<div class="flex flex-col gap-4">
+			<Search
 				bind:value={View.selectedPaymentMethod}
+				items={View.paymentMethods}
+				label="Payment Method"
+				onKeywordChange={View.onKeyWordChange}
 			/>
 			<Input
 				type="text"
 				name="account_number"
 				id="account_number"
-				placeholder="Input Payment Account Number"
+				placeholder="Account Number"
 				bind:value={View.accountNumber}
 			/>
-			<Button type="button" onClick={View.addMentorPaymentMethod}>Add Payment Method</Button>
+			<Button type="button" onClick={View.addMentorPaymentMethod}>Add</Button>
 		</div>
 		<Select
 			options={degreeOpts}

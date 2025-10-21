@@ -364,7 +364,7 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 		Name:              req.Name,
 		Bio:               req.Bio,
 		YearsOfExperience: req.YearsOfExperience,
-		MentorPayments:    []entity.MentorPaymentInfo{},
+		MentorPayments:    []entity.AddMentorPaymentInfo{},
 		Degree:            req.Degree,
 		Major:             req.Major,
 		Campus:            req.Campus,
@@ -385,7 +385,7 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 				ctx.Error(err)
 				return
 			}
-			param.MentorPayments = append(param.MentorPayments, entity.MentorPaymentInfo(payment))
+			param.MentorPayments = append(param.MentorPayments, entity.AddMentorPaymentInfo(payment))
 		}
 	}
 	if len(req.MentorSchedules) > 0 {
@@ -490,7 +490,7 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 		Password:          req.Password,
 		ResumeFile:        file,
 		YearsOfExperience: req.YearsOfExperience,
-		MentorPayments:    []entity.MentorPaymentInfo{},
+		MentorPayments:    []entity.AddMentorPaymentInfo{},
 		Degree:            req.Degree,
 		Major:             req.Major,
 		Campus:            req.Campus,
@@ -510,7 +510,7 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 			ctx.Error(err)
 			return
 		}
-		param.MentorPayments = append(param.MentorPayments, entity.MentorPaymentInfo(payment))
+		param.MentorPayments = append(param.MentorPayments, entity.AddMentorPaymentInfo(payment))
 	}
 	dowsMap := make(map[int]bool)
 	for _, sched := range req.MentorSchedules {

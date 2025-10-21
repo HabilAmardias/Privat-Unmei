@@ -40,6 +40,10 @@ type (
 		UpdatedAt time.Time
 		DeletedAt *time.Time
 	}
+	AddMentorPaymentInfo struct {
+		PaymentMethodID int
+		AccountNumber   string
+	}
 	MentorPaymentInfo struct {
 		PaymentMethodID   int
 		PaymentMethodName string
@@ -51,7 +55,7 @@ type (
 		Email             string
 		Password          string
 		ResumeFile        multipart.File
-		MentorPayments    []MentorPaymentInfo
+		MentorPayments    []AddMentorPaymentInfo
 		YearsOfExperience int
 		Degree            string
 		Major             string
@@ -68,7 +72,7 @@ type (
 		Degree            *string
 		Major             *string
 		Campus            *string
-		MentorPayments    []MentorPaymentInfo
+		MentorPayments    []AddMentorPaymentInfo
 		MentorSchedules   []MentorSchedule
 	}
 	UpdateMentorQuery struct {

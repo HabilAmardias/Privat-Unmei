@@ -96,21 +96,21 @@ func (pr *PaymentRepositoryImpl) GetAllPaymentMethod(
 		id,
 		name
 	FROM payment_methods
-	WHERE deleted_at IS NULL AND id < $1 AND
+	WHERE deleted_at IS NULL AND id < $1
 	`
 	countQuery := `
 	SELECT count(*)
 	FROM payment_methods
-	WHERE deleted_at IS NULL AND id < $1 AND
+	WHERE deleted_at IS NULL AND id < $1
 	`
 	if search != nil {
 		args = append(args, "%"+*search+"%")
 		countArgs = append(countArgs, "%"+*search+"%")
 		query += fmt.Sprintf(`
-		name ILIKE $%d
+		AND name ILIKE $%d
 		`, len(args))
 		countQuery += fmt.Sprintf(`
-		name ILIKE $%d
+		AND name ILIKE $%d
 		`, len(countArgs))
 	}
 	query += `ORDER BY id DESC`
@@ -292,7 +292,7 @@ func (pr *PaymentRepositoryImpl) UnassignPaymentMethodFromMentor(ctx context.Con
 	return nil
 }
 
-func (pr *PaymentRepositoryImpl) AssignPaymentMethodToMentor(ctx context.Context, mentorID string, paymentInfo []entity.MentorPaymentInfo) error {
+func (pr *PaymentRepositoryImpl) AssignPaymentMethodToMentor(ctx context.Context, mentorID string, paymentInfo []entity.AddMentorPaymentInfo) error {
 	var driver RepoDriver
 	driver = pr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {

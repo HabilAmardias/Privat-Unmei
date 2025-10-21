@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Combobox } from 'bits-ui';
-	import { ChevronsUp, ChevronsDown, Search } from '@lucide/svelte';
+	import { ChevronsUp, ChevronsDown } from '@lucide/svelte';
 	type searchProps = {
 		keyword?: string;
 		onKeywordChange?: (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => void;
@@ -28,12 +28,9 @@
 	{onValueChange}
 >
 	<div class="relative w-fit rounded-lg bg-[var(--tertiary-color)]">
-		<Search
-			class="absolute start-3 top-1/2 size-6 -translate-y-1/2 text-[var(--secondary-color)]"
-		/>
 		<Combobox.Input
 			oninput={onKeywordChange}
-			class="h-input border-border-input bg-background focus:ring-foreground focus:ring-offset-background focus:outline-hidden inline-flex w-[296px] touch-none truncate rounded-lg border bg-[var(--tertiary-color)] p-3 px-11 text-base text-[var(--secondary-color)] transition-colors placeholder:text-[var(--secondary-color)] focus:ring-2 focus:ring-offset-2 sm:text-sm"
+			class="h-input border-border-input bg-background focus:ring-foreground focus:ring-offset-background focus:outline-hidden inline-flex w-fit touch-none truncate rounded-lg border bg-[var(--tertiary-color)] p-3 text-base text-[var(--secondary-color)] transition-colors placeholder:text-[var(--secondary-color)] focus:ring-2 focus:ring-offset-2 sm:text-sm md:w-[296px] md:px-11"
 			placeholder={label}
 			aria-label={label}
 		/>
@@ -41,7 +38,7 @@
 	{#if items}
 		<Combobox.Portal>
 			<Combobox.Content
-				class="focus-override border-muted bg-background shadow-popover data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 outline-hidden z-50 h-96 max-h-[var(--bits-combobox-content-available-height)] w-[var(--bits-combobox-anchor-width)] min-w-[var(--bits-combobox-anchor-width)] select-none rounded-xl border bg-[var(--tertiary-color)] px-1 py-3 text-[var(--secondary-color)] data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1"
+				class="focus-override border-muted bg-background shadow-popover data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 outline-hidden z-50 h-fit max-h-[var(--bits-combobox-content-available-height)] w-[var(--bits-combobox-anchor-width)] min-w-[var(--bits-combobox-anchor-width)] select-none rounded-xl border bg-[var(--tertiary-color)] px-1 py-3 text-[var(--secondary-color)] data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1"
 				sideOffset={10}
 			>
 				<Combobox.ScrollUpButton class="flex w-full items-center justify-center py-1">
