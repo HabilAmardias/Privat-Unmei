@@ -1,6 +1,5 @@
 import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
 import { CreateToast, debounce } from '$lib/utils/helper';
-import { PaymentMethodOptionsLimit } from './constants';
 import type { mentorPaymentMethods, paymentMethod, paymentMethodOpts } from './model';
 
 export class CreateMentorView {
@@ -11,7 +10,12 @@ export class CreateMentorView {
 	accountNumber = $state<string>('');
 	paymentMethodForm = $state<HTMLFormElement>();
 	searchValue = $state<string>('');
+	generatedPassword = $state<string>();
+	generatePasswordForm = $state<HTMLFormElement>();
 
+	generatePassword = () => {
+		this.generatePasswordForm?.requestSubmit();
+	};
 	setPaymentMethods(newPayments: paymentMethod[]) {
 		const opts: paymentMethodOpts[] = [];
 		newPayments.forEach((val) => {
@@ -30,13 +34,22 @@ export class CreateMentorView {
 	};
 	onGetPaymentMethods = (args: EnhancementArgs) => {
 		args.formData.append('search', this.searchValue);
-		args.formData.append('limit', PaymentMethodOptionsLimit);
 		return async ({ result }: EnhancementReturn) => {
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);
 			}
 			if (result.type === 'success') {
 				this.setPaymentMethods(result.data?.paymentMethods);
+			}
+		};
+	};
+	onGetPassword = () => {
+		return async ({ result }: EnhancementReturn) => {
+			if (result.type === 'failure') {
+				CreateToast('error', result.data?.message);
+			}
+			if (result.type === 'success') {
+				this.generatedPassword = result.data?.password;
 			}
 		};
 	};

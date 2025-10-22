@@ -12,3 +12,7 @@ export type mentorPaymentMethods = {
 	payment_method_id: number;
 	account_number: string;
 };
+
+export type generatedPassword = {
+	password: string;
+};

@@ -3,11 +3,20 @@ import type { PageServerLoad } from './$types';
 import { controller } from './controller';
 
 export const load: PageServerLoad = async ({ fetch }) => {
-	const { success, status, message, resBody } = await controller.getPaymentMethods(fetch);
-	if (!success) {
-		throw error(status, { message });
+	const [paymentMethodsRes, generatePasswordRes] = await Promise.all([
+		controller.getPaymentMethods(fetch),
+		controller.getRandomizedPassword(fetch)
+	]);
+	if (!paymentMethodsRes.success) {
+		throw error(paymentMethodsRes.status, { message: paymentMethodsRes.message });
 	}
-	return { paymentMethods: resBody.data.entries };
+	if (!generatePasswordRes.success) {
+		throw error(generatePasswordRes.status, { message: generatePasswordRes.message });
+	}
+	return {
+		paymentMethods: paymentMethodsRes.resBody.data.entries,
+		generatedPassword: generatePasswordRes.resBody.data.password
+	};
 };
 
 export const actions = {
@@ -20,5 +29,12 @@ export const actions = {
 			throw fail(status, { message });
 		}
 		return { paymentMethods: resBody.data.entries };
+	},
+	generatePassword: async ({ fetch }) => {
+		const { success, status, message, resBody } = await controller.getRandomizedPassword(fetch);
+		if (!success) {
+			return fail(status, { message });
+		}
+		return { password: resBody.data.password };
 	}
 } satisfies Actions;

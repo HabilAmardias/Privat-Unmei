@@ -20,5 +20,3 @@ export const degreeOpts = [
 		label: 'Professor'
 	}
 ];
-
-export const PaymentMethodOptionsLimit = '5';

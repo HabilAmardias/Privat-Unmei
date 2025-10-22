@@ -17,22 +17,33 @@
 	});
 </script>
 
-<div class="flex h-full flex-col gap-4 p-4">
-	<h3 class="text-xl font-bold text-[var(--tertiary-color)]">Create New Mentor</h3>
+<div class="flex h-full flex-col p-4">
+	<h3 class="mb-4 text-xl font-bold text-[var(--tertiary-color)]">Create New Mentor</h3>
 	<form
 		bind:this={View.paymentMethodForm}
 		use:enhance={View.onGetPaymentMethods}
 		action="?/getPaymentMethods"
 		method="POST"
 	></form>
-	<form action="?/createMentor" method="POST">
-		<Input type="text" placeholder="Input mentor name" name="name" id="name" />
-		<Input type="email" placeholder="Input mentor email" name="email" id="email" />
-		<div class="flex items-center gap-4">
-			<p>test password</p>
-			<Button formAction="?/generatePassword">Generate Password</Button>
+	<form
+		action="?/generatePassword"
+		method="POST"
+		bind:this={View.generatePasswordForm}
+		use:enhance={View.onGetPassword}
+	></form>
+	<form action="?/createMentor" method="POST" class="flex flex-col gap-4">
+		<div class="flex gap-4">
+			<Input type="text" placeholder="Input mentor name" name="name" id="name" />
+			<Input type="email" placeholder="Input mentor email" name="email" id="email" />
 		</div>
-		<div class="flex flex-col gap-4">
+		<div class="flex items-center justify-between">
+			<div class="flex gap-3">
+				<p>Password:</p>
+				<p>{View.generatedPassword ? View.generatedPassword : data.generatedPassword}</p>
+			</div>
+			<Button type="button" onClick={View.generatePassword}>Generate</Button>
+		</div>
+		<div class="flex gap-4">
 			<Search
 				bind:value={View.selectedPaymentMethod}
 				items={View.paymentMethods}
@@ -46,14 +57,16 @@
 				placeholder="Account Number"
 				bind:value={View.accountNumber}
 			/>
-			<Button type="button" onClick={View.addMentorPaymentMethod}>Add</Button>
 		</div>
-		<Select
-			options={degreeOpts}
-			defaultLable="Choose mentor degree"
-			name="degree"
-			bind:value={View.degree}
-		/>
-		<Input type="text" name="major" id="major" placeholder="Insert mentor major" />
+		<Button type="button" onClick={View.addMentorPaymentMethod}>Add</Button>
+		<div class="flex gap-4">
+			<Select
+				options={degreeOpts}
+				defaultLable="Mentor degree"
+				name="degree"
+				bind:value={View.degree}
+			/>
+			<Input type="text" name="major" id="major" placeholder="Insert mentor major" />
+		</div>
 	</form>
 </div>
