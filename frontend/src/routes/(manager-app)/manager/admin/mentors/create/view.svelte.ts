@@ -12,6 +12,12 @@ export class CreateMentorView {
 	searchValue = $state<string>('');
 	generatedPassword = $state<string>();
 	generatePasswordForm = $state<HTMLFormElement>();
+	disableAddPaymentMethod = $derived.by<boolean>(() => {
+		if (!this.selectedPaymentMethod || !this.accountNumber) {
+			return true;
+		}
+		return false;
+	});
 
 	generatePassword = () => {
 		this.generatePasswordForm?.requestSubmit();
@@ -53,11 +59,17 @@ export class CreateMentorView {
 			}
 		};
 	};
+
 	#paymentMethodSubmit = debounce(() => {
 		this.paymentMethodForm?.requestSubmit();
 	}, 500);
+
 	onKeyWordChange = (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
 		this.searchValue = e.currentTarget.value;
 		this.#paymentMethodSubmit();
 	};
+
+	setGeneratedPassword(p: string) {
+		this.generatedPassword = p;
+	}
 }

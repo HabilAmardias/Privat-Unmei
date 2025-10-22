@@ -4,10 +4,13 @@
 		name: string;
 		value?: string;
 		id: string;
-		type: 'text' | 'email';
+		type: 'text' | 'email' | 'number' | 'time';
 		onBlur?: (e: FocusEvent & { currentTarget: EventTarget & HTMLInputElement }) => void;
 		err?: Error;
 		width?: 'full' | number;
+		min?: number;
+		max?: number;
+		step?: number;
 	};
 
 	let {
@@ -18,7 +21,10 @@
 		type,
 		id,
 		err,
-		width = 'full'
+		width = 'full',
+		min,
+		max,
+		step
 	}: inputProps = $props();
 	let containerClass = $state<string>('flex flex-col rounded-md');
 	if (width === 'full') {
@@ -41,6 +47,9 @@
 			{name}
 			{placeholder}
 			{type}
+			{min}
+			{max}
+			{step}
 		/>
 	</label>
 </div>

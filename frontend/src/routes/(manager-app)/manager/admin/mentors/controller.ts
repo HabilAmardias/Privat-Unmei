@@ -32,7 +32,6 @@ class MentorManagerController {
 			}
 			url += queries.join('&');
 		}
-		console.log(url);
 		const { success, message, res, status } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };

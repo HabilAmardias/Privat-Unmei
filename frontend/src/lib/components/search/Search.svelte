@@ -30,7 +30,7 @@
 	<div class="relative w-fit rounded-lg bg-[var(--tertiary-color)]">
 		<Combobox.Input
 			oninput={onKeywordChange}
-			class="h-input border-border-input bg-background focus:ring-foreground focus:ring-offset-background focus:outline-hidden inline-flex w-fit touch-none truncate rounded-lg border bg-[var(--tertiary-color)] p-3 text-base text-[var(--secondary-color)] transition-colors placeholder:text-[var(--secondary-color)] focus:ring-2 focus:ring-offset-2 sm:text-sm md:w-[296px]"
+			class="h-input border-border-input bg-background focus:ring-foreground focus:ring-offset-background focus:outline-hidden inline-flex w-fit touch-none truncate rounded-lg border bg-[var(--tertiary-color)] text-base text-[var(--secondary-color)] transition-colors placeholder:text-[var(--secondary-color)] focus:ring-2 focus:ring-offset-2 sm:text-sm md:w-[296px]"
 			placeholder={label}
 			aria-label={label}
 		/>
