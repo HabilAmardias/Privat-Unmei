@@ -32,6 +32,14 @@ export function stringToTimeOnly(s: string): TimeOnly {
 	};
 }
 
+export function TimeOnlyToString(t: TimeOnly): string {
+	let res: string = '';
+	res += t.hour < 10 ? `0${t.hour}:` : `${t.hour}:`;
+	res += t.minute < 10 ? `0${t.minute}:` : `${t.minute}:`;
+	res += t.second < 10 ? `0${t.second}` : `${t.second}`;
+	return res;
+}
+
 export type MentorSchedule = {
 	day_of_week: number;
 	start_time: TimeOnly;

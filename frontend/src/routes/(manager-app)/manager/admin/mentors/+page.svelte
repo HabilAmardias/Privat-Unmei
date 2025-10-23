@@ -7,7 +7,7 @@
 	import Button from '$lib/components/button/Button.svelte';
 	import { enhance } from '$app/forms';
 	import Loading from '$lib/components/loader/Loading.svelte';
-	import { ScrollArea } from 'bits-ui';
+	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import Pagination from '$lib/components/pagination/Pagination.svelte';
 	import { ArrowDownUp, UserPlus } from '@lucide/svelte';
 	import Link from '$lib/components/button/Link.svelte';
@@ -86,26 +86,24 @@
 		{:else if !View.mentors || View.mentors.length === 0}
 			<b class="mx-auto self-center text-[var(--tertiary-color)]">No mentors found</b>
 		{:else}
-			<ScrollArea.Root class="h-full">
-				<ScrollArea.Viewport class="h-full">
-					{#each View.mentors as mentor (mentor.id)}
-						<div>
-							<p>{mentor.email}</p>
-							<p>{mentor.name}</p>
-							<p>{mentor.years_of_experience}</p>
-							<form use:enhance={View.onDeleteMentor} method="POST" action="?/deleteMentor">
-								<Button
-									onClick={() => {
-										View.setMentorToDelete(mentor.id);
-									}}
-									type="submit"
-									formAction="?/deleteMentor">Delete</Button
-								>
-							</form>
-						</div>
-					{/each}
-				</ScrollArea.Viewport>
-			</ScrollArea.Root>
+			<ScrollArea orientation="vertical" class="h-full" viewportClasses="max-h-full">
+				{#each View.mentors as mentor (mentor.id)}
+					<div>
+						<p>{mentor.email}</p>
+						<p>{mentor.name}</p>
+						<p>{mentor.years_of_experience}</p>
+						<form use:enhance={View.onDeleteMentor} method="POST" action="?/deleteMentor">
+							<Button
+								onClick={() => {
+									View.setMentorToDelete(mentor.id);
+								}}
+								type="submit"
+								formAction="?/deleteMentor">Delete</Button
+							>
+						</form>
+					</div>
+				{/each}
+			</ScrollArea>
 		{/if}
 	</div>
 	<form

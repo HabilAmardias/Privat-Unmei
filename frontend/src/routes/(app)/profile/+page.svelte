@@ -13,7 +13,7 @@
 	import Pagination from '$lib/components/pagination/Pagination.svelte';
 	import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
 	import { enhance } from '$app/forms';
-	import { ScrollArea } from 'bits-ui';
+	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import Loading from '$lib/components/loader/Loading.svelte';
 	import Image from '$lib/components/image/Image.svelte';
 	import { CreateToast, DismissToast } from '$lib/utils/helper';
@@ -235,19 +235,17 @@
 					{:else if !View.orders || View.orders.length === 0}
 						<b class="mx-auto self-center text-[var(--tertiary-color)]">No orders found</b>
 					{:else}
-						<ScrollArea.Root class="h-full">
-							<ScrollArea.Viewport class="h-full">
-								{#each View.orders as order (order.id)}
-									<div>
-										<p>{order.course_name}</p>
-										<p>{order.mentor_name}</p>
-										<p>{order.mentor_email}</p>
-										<p>{order.total_price}</p>
-										<p>{order.status}</p>
-									</div>
-								{/each}
-							</ScrollArea.Viewport>
-						</ScrollArea.Root>
+						<ScrollArea class="h-full" orientation="horizontal" viewportClasses="max-h-full">
+							{#each View.orders as order (order.id)}
+								<div>
+									<p>{order.course_name}</p>
+									<p>{order.mentor_name}</p>
+									<p>{order.mentor_email}</p>
+									<p>{order.total_price}</p>
+									<p>{order.status}</p>
+								</div>
+							{/each}
+						</ScrollArea>
 					{/if}
 				</div>
 

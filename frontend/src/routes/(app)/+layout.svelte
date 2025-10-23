@@ -6,8 +6,8 @@
 	import MenuItem from '$lib/components/menubar/MenuItem.svelte';
 	import { loadingStore } from '$lib/stores/LoadingStore.svelte';
 	import { List, LogIn, LogOut, MessageCircleMore, User } from '@lucide/svelte';
-	import { ScrollArea } from 'bits-ui';
 	import type { LayoutProps } from './$types';
+	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import CldImage from '$lib/components/image/CldImage.svelte';
 	import { onMount } from 'svelte';
 	import { AppLayoutView } from './view.svelte';
@@ -34,11 +34,9 @@
 </script>
 
 <main class="h-screen pb-24 md:pb-0 md:pt-24">
-	<ScrollArea.Root class="h-full">
-		<ScrollArea.Viewport class="h-full">
-			{@render children()}
-		</ScrollArea.Viewport>
-	</ScrollArea.Root>
+	<ScrollArea orientation="vertical" viewportClasses="max-h-full">
+		{@render children()}
+	</ScrollArea>
 </main>
 <Menubar>
 	<MenuItem>

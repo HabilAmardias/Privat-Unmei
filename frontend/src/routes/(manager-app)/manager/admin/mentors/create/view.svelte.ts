@@ -1,10 +1,11 @@
 import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
 import { CreateToast, debounce, DismissToast } from '$lib/utils/helper';
-import type {
-	mentorPaymentMethods,
-	MentorSchedule,
-	paymentMethod,
-	paymentMethodOpts
+import {
+	stringToTimeOnly,
+	type mentorPaymentMethods,
+	type MentorSchedule,
+	type paymentMethod,
+	type paymentMethodOpts
 } from './model';
 
 export class CreateMentorView {
@@ -16,6 +17,7 @@ export class CreateMentorView {
 	paymentMethodForm = $state<HTMLFormElement>();
 	searchValue = $state<string>('');
 	generatedPassword = $state<string>('');
+	resumeFile = $state<FileList>();
 	generatePasswordForm = $state<HTMLFormElement>();
 	disableAddPaymentMethod = $derived.by<boolean>(() => {
 		if (!this.selectedPaymentMethod || !this.accountNumber) {
@@ -54,7 +56,14 @@ export class CreateMentorView {
 		});
 	};
 	addMentorSchedule = () => {
-		this.mentorSchedules.push();
+		this.mentorSchedules.push({
+			day_of_week: parseInt(this.selectedDayOfWeek),
+			start_time: stringToTimeOnly(this.selectedStartTime),
+			end_time: stringToTimeOnly(this.selectedEndTime)
+		});
+	};
+	removeMentorSchedule = (i: number) => {
+		this.mentorSchedules = this.mentorSchedules.filter((v, idx) => idx !== i);
 	};
 	onGetPaymentMethods = (args: EnhancementArgs) => {
 		args.formData.append('search', this.searchValue);

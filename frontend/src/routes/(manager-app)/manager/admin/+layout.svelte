@@ -4,7 +4,7 @@
 	import { adminRole } from '$lib/utils/constants';
 	import { goto } from '$app/navigation';
 	import Link from '$lib/components/button/Link.svelte';
-	import { ScrollArea } from 'bits-ui';
+	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import { House, LogOut, Menu, Percent, User } from '@lucide/svelte';
 	import Button from '$lib/components/button/Button.svelte';
 	import Menubar from '$lib/components/menubar/Menubar.svelte';
@@ -72,11 +72,9 @@
 		</Button>
 	</nav>
 	<main class="flex h-dvh pb-24 md:flex-1 md:pb-0">
-		<ScrollArea.Root class="flex-1">
-			<ScrollArea.Viewport class="h-full">
-				{@render children()}
-			</ScrollArea.Viewport>
-		</ScrollArea.Root>
+		<ScrollArea class="h-full" orientation="vertical" viewportClasses="max-h-full">
+			{@render children()}
+		</ScrollArea>
 	</main>
 </div>
 <div class="block md:hidden">
