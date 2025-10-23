@@ -36,5 +36,12 @@ export const actions = {
 			return fail(status, { message });
 		}
 		return { password: resBody.data.password };
+	},
+	createMentor: async ({ fetch, request }) => {
+		const { success, status, message } = await controller.CreateNewMentor(fetch, request);
+		if (!success) {
+			return fail(status, { message });
+		}
+		return { message };
 	}
 } satisfies Actions;

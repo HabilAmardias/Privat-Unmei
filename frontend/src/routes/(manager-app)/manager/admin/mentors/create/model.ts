@@ -31,3 +31,9 @@ export function stringToTimeOnly(s: string): TimeOnly {
 		second: second ? parseInt(second) : 0
 	};
 }
+
+export type MentorSchedule = {
+	day_of_week: number;
+	start_time: TimeOnly;
+	end_time: TimeOnly;
+};

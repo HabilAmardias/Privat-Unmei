@@ -8,6 +8,8 @@
 	import type { PageProps } from './$types';
 	import Search from '$lib/components/search/Search.svelte';
 	import { enhance } from '$app/forms';
+	import FileInput from '$lib/components/form/FileInput.svelte';
+	import { CloudUpload } from '@lucide/svelte';
 	const View = new CreateMentorView();
 
 	const { data }: PageProps = $props();
@@ -18,7 +20,7 @@
 	});
 </script>
 
-<div class="flex h-full flex-col p-4">
+<div class="flex flex-col p-4">
 	<h3 class="mb-4 text-xl font-bold text-[var(--tertiary-color)]">Create New Mentor</h3>
 	<form
 		bind:this={View.paymentMethodForm}
@@ -32,8 +34,14 @@
 		bind:this={View.generatePasswordForm}
 		use:enhance={View.onGetPassword}
 	></form>
-	<form action="?/createMentor" method="POST" class="flex flex-col gap-4">
+	<form
+		use:enhance={View.onCreateMentor}
+		action="?/createMentor"
+		method="POST"
+		class="flex flex-col gap-4"
+	>
 		<Input type="text" placeholder="Input mentor name" name="name" id="name" />
+		<Input type="email" placeholder="Input mentor email" name="email" id="email" />
 		<Input
 			type="number"
 			placeholder="Years of Experience"
@@ -42,7 +50,6 @@
 			min={0}
 			max={100}
 		/>
-		<Input type="email" placeholder="Input mentor email" name="email" id="email" />
 		<div class="flex items-center gap-4">
 			<div
 				class="flex flex-1 gap-1 rounded-lg bg-[var(--tertiary-color)] px-4 py-2 text-[var(--secondary-color)]"
@@ -62,22 +69,30 @@
 			/>
 			<Input type="text" name="major" id="major" placeholder="Insert mentor major" />
 		</div>
+		<FileInput accept="application/pdf" name="file" id="file">
+			<div
+				class="border-1 flex w-full flex-col items-center justify-center rounded-lg border-dashed border-[var(--tertiary-color)] p-3 font-bold text-[var(--tertiary-color)] hover:text-[var(--primary-color)]"
+			>
+				<CloudUpload />
+				Upload Resume
+			</div>
+		</FileInput>
 		<div class="flex flex-col gap-4">
 			<div class="flex gap-4">
 				<Select
 					options={dayofWeeks}
 					defaultLable="Weekday"
 					name="day_of_week"
-					bind:value={View.degree}
+					bind:value={View.selectedDayOfWeek}
 				/>
-				<Input step={1} type="time" name="start" id="start" />
-				<Input step={1} type="time" name="end" id="end" />
+				<Input bind:value={View.selectedStartTime} step={1} type="time" name="start" id="start" />
+				<Input bind:value={View.selectedEndTime} step={1} type="time" name="end" id="end" />
 			</div>
 			<Button
-				disabled={View.disableAddPaymentMethod}
+				disabled={View.disableAddMentorSchedule}
 				full
 				type="button"
-				onClick={View.addMentorPaymentMethod}>Add Mentor Schedule</Button
+				onClick={View.addMentorSchedule}>Add Mentor Schedule</Button
 			>
 		</div>
 		<div class="flex flex-col gap-4">

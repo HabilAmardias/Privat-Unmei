@@ -3,6 +3,12 @@ import { FetchData } from '$lib/utils';
 import type { generatedPassword, paymentMethod } from './model';
 
 class CreateMentorController {
+	async CreateNewMentor(fetch: Fetch, req: Request) {
+		const url = 'http://localhost:8080/api/v1/mentors';
+		const formData = await req.formData();
+		const { success, message, status } = await FetchData(fetch, url, 'POST', formData);
+		return { success, message, status };
+	}
 	async getPaymentMethods(fetch: Fetch, req?: Request) {
 		let url = 'http://localhost:8080/api/v1/payment-methods?limit=5';
 		if (req) {
