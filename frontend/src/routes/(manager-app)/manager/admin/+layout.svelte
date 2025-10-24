@@ -29,7 +29,7 @@
 	}
 </script>
 
-<div class="flex flex-row">
+<div class="flex h-dvh flex-row">
 	<nav
 		class="
             hidden h-dvh flex-col items-center gap-4 bg-[var(--tertiary-color)] p-4 transition-all
@@ -71,8 +71,8 @@
 			</div>
 		</Button>
 	</nav>
-	<main class="flex h-dvh pb-24 md:flex-1 md:pb-0">
-		<ScrollArea class="h-full" orientation="vertical" viewportClasses="max-h-full">
+	<main class="flex flex-1 pb-24 md:pb-0">
+		<ScrollArea class="flex-1" orientation="vertical" viewportClasses="h-full max-h-full">
 			{@render children()}
 		</ScrollArea>
 	</main>

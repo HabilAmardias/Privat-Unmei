@@ -10,7 +10,6 @@
 	import { enhance } from '$app/forms';
 	import FileInput from '$lib/components/form/FileInput.svelte';
 	import { CloudUpload, X } from '@lucide/svelte';
-	import { TimeOnlyToString } from './model';
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	const View = new CreateMentorView();
 
@@ -52,7 +51,16 @@
 			<Input type="email" placeholder="Input mentor email" name="email" id="email" />
 		</div>
 		<div class="flex items-center gap-4">
-			<p class="font-bold text-[var(--tertiary-color)]">YoE:</p>
+			<p class="font-bold text-[var(--tertiary-color)]">Password:</p>
+			<div
+				class="flex flex-1 gap-1 rounded-lg bg-[var(--tertiary-color)] px-4 py-2 text-[var(--secondary-color)]"
+			>
+				<p>{View.generatedPassword}</p>
+			</div>
+			<Button type="button" onClick={View.generatePassword}>Generate</Button>
+		</div>
+		<div class="flex items-center gap-4">
+			<p class="font-bold text-[var(--tertiary-color)]">Experience:</p>
 			<Input
 				type="number"
 				placeholder="Years of Experience"
@@ -63,21 +71,13 @@
 			/>
 		</div>
 
-		<div class="flex items-center gap-4">
-			<p class="font-bold text-[var(--tertiary-color)]">Password:</p>
-			<div
-				class="flex flex-1 gap-1 rounded-lg bg-[var(--tertiary-color)] px-4 py-2 text-[var(--secondary-color)]"
-			>
-				<p>{View.generatedPassword}</p>
-			</div>
-			<Button type="button" onClick={View.generatePassword}>Generate</Button>
-		</div>
 		<p class="font-bold text-[var(--tertiary-color)]">Education:</p>
 		<Input type="text" name="campus" id="campus" placeholder="Campus" />
 		<div class="flex gap-4">
 			<Select options={degreeOpts} defaultLable="Degree" name="degree" bind:value={View.degree} />
 			<Input type="text" name="major" id="major" placeholder="Major" />
 		</div>
+		<p class="font-bold text-[var(--tertiary-color)]">Resume:</p>
 		<FileInput bind:files={View.resumeFile} accept="application/pdf" name="file" id="file">
 			<div
 				class="border-1 flex w-full flex-col items-center justify-center rounded-lg border-dashed border-[var(--tertiary-color)] p-3 font-bold text-[var(--tertiary-color)] hover:text-[var(--primary-color)]"
@@ -86,8 +86,9 @@
 				{View.resumeFile ? View.resumeFile[0].name : 'Upload Resume'}
 			</div>
 		</FileInput>
-		<div class=" grid grid-cols-2 gap-4">
-			<div class="flex flex-col gap-4">
+		<p class="font-bold text-[var(--tertiary-color)]">Schedules:</p>
+		<div class="grid grid-cols-2 place-items-center gap-4">
+			<div class="flex w-full flex-col gap-4">
 				<div class="flex gap-4">
 					<Select
 						options={dayofWeeks}
@@ -105,11 +106,13 @@
 					onClick={View.addMentorSchedule}>Add Mentor Schedule</Button
 				>
 			</div>
-			<ScrollArea orientation="vertical" viewportClasses="max-h-[100px]">
+			<ScrollArea class="w-full" orientation="vertical" viewportClasses="max-h-[100px]">
 				<ul>
 					{#each View.mentorSchedules as sch, i}
-						<div class="flex gap-4">
-							<p>{`${TimeOnlyToString(sch.start_time)}-${TimeOnlyToString(sch.end_time)}`}</p>
+						<li class="flex justify-between">
+							<p class="text-[var(--tertiary-color)]">
+								{`${sch.day_of_week_label}, ${View.TimeOnlyToString(sch.start_time)}-${View.TimeOnlyToString(sch.end_time)}`}
+							</p>
 							<Button
 								type="button"
 								withBg={false}
@@ -121,13 +124,14 @@
 							>
 								<X />
 							</Button>
-						</div>
+						</li>
 					{/each}
 				</ul>
 			</ScrollArea>
 		</div>
-		<div class="grid grid-cols-2 gap-4">
-			<div class="flex flex-col gap-4">
+		<p class="font-bold text-[var(--tertiary-color)]">Payment Methods:</p>
+		<div class="grid grid-cols-2 place-items-center gap-4">
+			<div class="flex w-full flex-col gap-4">
 				<div class="flex gap-4">
 					<Search
 						bind:value={View.selectedPaymentMethod}
@@ -150,6 +154,28 @@
 					onClick={View.addMentorPaymentMethod}>Add Payment Method</Button
 				>
 			</div>
+			<ScrollArea class="w-full" orientation="vertical" viewportClasses="max-h-[100px]">
+				<ul>
+					{#each View.mentorPaymentMethods as pym, i}
+						<div class="flex gap-4">
+							<p class="text-[var(--tertiary-color)]">
+								{`${pym.payment_method_name} - ${pym.account_number}`}
+							</p>
+							<Button
+								type="button"
+								withBg={false}
+								withPadding={false}
+								textColor="dark"
+								onClick={() => {
+									View.removeMentorPaymentMethod(i);
+								}}
+							>
+								<X />
+							</Button>
+						</div>
+					{/each}
+				</ul>
+			</ScrollArea>
 		</div>
 		<div class="flex gap-4">
 			<Button type="button">Cancel</Button>

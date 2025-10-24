@@ -1,30 +1,45 @@
 import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
 import { CreateToast, debounce, DismissToast } from '$lib/utils/helper';
+import { dayofWeeks } from './constants';
 import {
-	stringToTimeOnly,
 	type mentorPaymentMethods,
 	type MentorSchedule,
 	type paymentMethod,
-	type paymentMethodOpts
+	type paymentMethodOpts,
+	type TimeOnly
 } from './model';
 
 export class CreateMentorView {
 	degree = $state<string>('');
+	resumeFile = $state<FileList>();
+
+	generatePasswordForm = $state<HTMLFormElement>();
+	generatedPassword = $state<string>('');
+
 	paymentMethods = $state<paymentMethodOpts[]>([]);
 	selectedPaymentMethod = $state<string>('');
 	mentorPaymentMethods = $state<mentorPaymentMethods[]>([]);
 	accountNumber = $state<string>('');
 	paymentMethodForm = $state<HTMLFormElement>();
 	searchValue = $state<string>('');
-	generatedPassword = $state<string>('');
-	resumeFile = $state<FileList>();
-	generatePasswordForm = $state<HTMLFormElement>();
 	disableAddPaymentMethod = $derived.by<boolean>(() => {
 		if (!this.selectedPaymentMethod || !this.accountNumber) {
 			return true;
 		}
 		return false;
 	});
+	selectedPaymentLabel = $derived.by<string | undefined>(() => {
+		if (this.selectedPaymentMethod) {
+			const filtered = this.paymentMethods.filter(
+				(val) => val.value === this.selectedPaymentMethod
+			);
+			return filtered[0].label;
+		}
+	});
+	#paymentMethodSubmit = debounce(() => {
+		this.paymentMethodForm?.requestSubmit();
+	}, 500);
+
 	mentorSchedules = $state<MentorSchedule[]>([]);
 	selectedDayOfWeek = $state<string>('');
 	selectedStartTime = $state<string>('');
@@ -34,6 +49,12 @@ export class CreateMentorView {
 			return true;
 		}
 		return false;
+	});
+	selectedDayOfWeekLabel = $derived.by<string | undefined>(() => {
+		if (this.selectedDayOfWeek) {
+			const filtered = dayofWeeks.filter((val) => val.value === this.selectedDayOfWeek);
+			return filtered[0].label;
+		}
 	});
 
 	generatePassword = () => {
@@ -52,14 +73,19 @@ export class CreateMentorView {
 	addMentorPaymentMethod = () => {
 		this.mentorPaymentMethods.push({
 			payment_method_id: parseInt(this.selectedPaymentMethod),
+			payment_method_name: this.selectedPaymentLabel!,
 			account_number: this.accountNumber
 		});
+	};
+	removeMentorPaymentMethod = (i: number) => {
+		this.mentorPaymentMethods = this.mentorPaymentMethods.filter((v, idx) => idx !== i);
 	};
 	addMentorSchedule = () => {
 		this.mentorSchedules.push({
 			day_of_week: parseInt(this.selectedDayOfWeek),
-			start_time: stringToTimeOnly(this.selectedStartTime),
-			end_time: stringToTimeOnly(this.selectedEndTime)
+			start_time: this.#stringToTimeOnly(this.selectedStartTime),
+			end_time: this.#stringToTimeOnly(this.selectedEndTime),
+			day_of_week_label: this.selectedDayOfWeekLabel!
 		});
 	};
 	removeMentorSchedule = (i: number) => {
@@ -86,10 +112,6 @@ export class CreateMentorView {
 			}
 		};
 	};
-
-	#paymentMethodSubmit = debounce(() => {
-		this.paymentMethodForm?.requestSubmit();
-	}, 500);
 
 	onKeyWordChange = (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
 		this.searchValue = e.currentTarget.value;
@@ -118,4 +140,19 @@ export class CreateMentorView {
 			}
 		};
 	};
+	#stringToTimeOnly(s: string): TimeOnly {
+		const [hour, minute, second] = s.split(':');
+		return {
+			hour: parseInt(hour),
+			minute: parseInt(minute),
+			second: second ? parseInt(second) : 0
+		};
+	}
+	TimeOnlyToString(t: TimeOnly): string {
+		let res: string = '';
+		res += t.hour < 10 ? `0${t.hour}:` : `${t.hour}:`;
+		res += t.minute < 10 ? `0${t.minute}:` : `${t.minute}:`;
+		res += t.second < 10 ? `0${t.second}` : `${t.second}`;
+		return res;
+	}
 }

@@ -5,7 +5,7 @@
 	import { Toaster } from 'svelte-french-toast';
 </script>
 
-<div class="mx-auto flex max-w-[1200px] flex-col">
+<div class="mx-auto flex max-h-dvh max-w-[1200px] flex-col">
 	{@render children()}
 	<Toaster />
 </div>
