@@ -1,6 +1,7 @@
 import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
 import type { mentorList } from './model';
 import { CreateToast } from '$lib/utils/helper';
+import { debounce } from '$lib/utils/helper';
 
 export class MentorManagerView {
 	mentors = $state<mentorList[]>([]);
@@ -12,7 +13,15 @@ export class MentorManagerView {
 	mentorToDelete = $state<string>();
 	sortByYears = $state<boolean | null>(null);
 	search = $state<string>('');
+	searchForm = $state<HTMLFormElement | null>(null);
+	#SearchSubmit = debounce(() => {
+		this.searchForm?.requestSubmit();
+	}, 500);
 
+	onSearchInput = (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
+		this.search = e.currentTarget.value;
+		this.#SearchSubmit();
+	};
 	setMentors(newList: mentorList[]) {
 		this.mentors = newList;
 	}
@@ -34,10 +43,16 @@ export class MentorManagerView {
 		this.page = num;
 	}
 	onSort() {
-		if (this.sortByYears === null) {
-			this.sortByYears = true;
-		} else {
-			this.sortByYears = !this.sortByYears;
+		switch (this.sortByYears) {
+			case null:
+				this.sortByYears = true;
+				break;
+			case true:
+				this.sortByYears = false;
+				break;
+			case false:
+				this.sortByYears = null;
+				break;
 		}
 	}
 	resetFilterForm() {
@@ -52,7 +67,7 @@ export class MentorManagerView {
 		if (this.mentorToDelete) {
 			args.formData.append('id', this.mentorToDelete);
 		}
-		return async ({ result, update }: EnhancementReturn) => {
+		return async ({ result }: EnhancementReturn) => {
 			this.setMentorsIsLoading(false);
 			if (result.type === 'success') {
 				if (this.mentorToDelete) {
@@ -64,7 +79,6 @@ export class MentorManagerView {
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);
 			}
-			update({ invalidateAll: false });
 		};
 	};
 	onUpdateMentors = (args: EnhancementArgs) => {
@@ -73,7 +87,7 @@ export class MentorManagerView {
 			args.formData.append('sort_year_of_experience', `${this.sortByYears}`);
 		}
 		args.formData.append('page', `${this.page}`);
-		return async ({ result, update }: EnhancementReturn) => {
+		return async ({ result }: EnhancementReturn) => {
 			this.setMentorsIsLoading(false);
 			if (result.type === 'success') {
 				this.setMentors(result.data?.mentorsList.entries);
@@ -82,13 +96,10 @@ export class MentorManagerView {
 					result.data?.mentorsList.page_info.limit,
 					result.data?.mentorsList.page_info.total_row
 				);
-				CreateToast('success', 'success retrieve mentors');
 			}
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);
 			}
-
-			update({ invalidateAll: false });
 		};
 	};
 }

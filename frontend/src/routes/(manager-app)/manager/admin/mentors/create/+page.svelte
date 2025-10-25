@@ -44,11 +44,24 @@
 	>
 		<div class="flex items-center gap-4">
 			<p class="font-bold text-[var(--tertiary-color)]">Name:</p>
-			<Input type="text" placeholder="Input mentor name" name="name" id="name" />
+			<Input
+				bind:value={View.name}
+				type="text"
+				placeholder="Input mentor name"
+				name="name"
+				id="name"
+			/>
 		</div>
 		<div class="flex items-center gap-4">
 			<p class="font-bold text-[var(--tertiary-color)]">Email:</p>
-			<Input type="email" placeholder="Input mentor email" name="email" id="email" />
+			<Input
+				err={View.emailErr}
+				bind:value={View.email}
+				type="email"
+				placeholder="Input mentor email"
+				name="email"
+				id="email"
+			/>
 		</div>
 		<div class="flex items-center gap-4">
 			<p class="font-bold text-[var(--tertiary-color)]">Password:</p>
@@ -66,18 +79,23 @@
 				placeholder="Years of Experience"
 				name="years_of_experience"
 				id="years_of_experience"
+				bind:value={View.yearsOfExperience}
 				min={0}
-				max={100}
+				max={40}
+				err={View.yoeErr}
 			/>
 		</div>
 
 		<p class="font-bold text-[var(--tertiary-color)]">Education:</p>
-		<Input type="text" name="campus" id="campus" placeholder="Campus" />
+		<Input bind:value={View.campus} type="text" name="campus" id="campus" placeholder="Campus" />
 		<div class="flex gap-4">
 			<Select options={degreeOpts} defaultLable="Degree" name="degree" bind:value={View.degree} />
-			<Input type="text" name="major" id="major" placeholder="Major" />
+			<Input bind:value={View.major} type="text" name="major" id="major" placeholder="Major" />
 		</div>
 		<p class="font-bold text-[var(--tertiary-color)]">Resume:</p>
+		{#if View.resumeErr}
+			<p class="text-red-500">{View.resumeErr.message}</p>
+		{/if}
 		<FileInput bind:files={View.resumeFile} accept="application/pdf" name="file" id="file">
 			<div
 				class="border-1 flex w-full flex-col items-center justify-center rounded-lg border-dashed border-[var(--tertiary-color)] p-3 font-bold text-[var(--tertiary-color)] hover:text-[var(--primary-color)]"
@@ -99,6 +117,9 @@
 					<Input bind:value={View.selectedStartTime} step={1} type="time" name="start" id="start" />
 					<Input bind:value={View.selectedEndTime} step={1} type="time" name="end" id="end" />
 				</div>
+				{#if View.selectMentorScheduleErr}
+					<p class="text-red-500">{View.selectMentorScheduleErr.message}</p>
+				{/if}
 				<Button
 					disabled={View.disableAddMentorSchedule}
 					full
@@ -137,7 +158,8 @@
 						bind:value={View.selectedPaymentMethod}
 						items={View.paymentMethods}
 						label="Payment Method"
-						onKeywordChange={View.onKeyWordChange}
+						keyword={View.searchValue}
+						onKeywordChange={View.onSearchPaymentMethodChange}
 					/>
 					<Input
 						type="text"
@@ -147,6 +169,9 @@
 						bind:value={View.accountNumber}
 					/>
 				</div>
+				{#if View.selectPaymentMethodErr}
+					<p class="text-red-500">{View.selectPaymentMethodErr.message}</p>
+				{/if}
 				<Button
 					disabled={View.disableAddPaymentMethod}
 					full
@@ -157,7 +182,7 @@
 			<ScrollArea class="w-full" orientation="vertical" viewportClasses="max-h-[100px]">
 				<ul>
 					{#each View.mentorPaymentMethods as pym, i}
-						<div class="flex gap-4">
+						<li class="flex justify-between">
 							<p class="text-[var(--tertiary-color)]">
 								{`${pym.payment_method_name} - ${pym.account_number}`}
 							</p>
@@ -172,14 +197,14 @@
 							>
 								<X />
 							</Button>
-						</div>
+						</li>
 					{/each}
 				</ul>
 			</ScrollArea>
 		</div>
 		<div class="flex gap-4">
 			<Button type="button">Cancel</Button>
-			<Button type="submit">Create</Button>
+			<Button disabled={View.disableCreateMentor} type="submit">Create</Button>
 		</div>
 	</form>
 </div>

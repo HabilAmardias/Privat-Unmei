@@ -2,9 +2,10 @@
 	type inputProps = {
 		placeholder?: string;
 		name: string;
-		value?: string;
+		value?: string | number;
 		id: string;
 		type: 'text' | 'email' | 'number' | 'time';
+		onInput?: (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => void;
 		onBlur?: (e: FocusEvent & { currentTarget: EventTarget & HTMLInputElement }) => void;
 		err?: Error;
 		width?: 'full' | number;
@@ -18,6 +19,7 @@
 		value = $bindable(),
 		name,
 		onBlur,
+		onInput,
 		type,
 		id,
 		err,
@@ -42,6 +44,7 @@
 		<input
 			bind:value
 			onblur={onBlur}
+			oninput={onInput}
 			class="placeholder:text-[var(--secondary-color)]/60 w-full border-none bg-transparent text-[var(--secondary-color)]"
 			{id}
 			{name}

@@ -30,7 +30,7 @@ type (
 		Email             string   `form:"email" binding:"required,email"`
 		Password          string   `form:"password" binding:"required,containsany=!@#?,min=8"`
 		MentorPayments    []string `form:"mentor_payment_info" binding:"dive"`
-		YearsOfExperience int      `form:"years_of_experience" binding:"required,gte=0"`
+		YearsOfExperience *int     `form:"years_of_experience" binding:"omitempty,gte=0"`
 		Degree            string   `form:"degree" binding:"required"`
 		Major             string   `form:"major" binding:"required"`
 		Campus            string   `form:"campus" binding:"required"`

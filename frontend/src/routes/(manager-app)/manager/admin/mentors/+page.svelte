@@ -9,7 +9,7 @@
 	import Loading from '$lib/components/loader/Loading.svelte';
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import Pagination from '$lib/components/pagination/Pagination.svelte';
-	import { ArrowDownUp, UserPlus } from '@lucide/svelte';
+	import { ArrowDown, ArrowUp, UserPlus } from '@lucide/svelte';
 	import Link from '$lib/components/button/Link.svelte';
 
 	let { data }: PageProps = $props();
@@ -55,12 +55,13 @@
 	</div>
 	<form
 		use:enhance={View.onUpdateMentors}
-		class="grid grid-cols-4 gap-4"
+		bind:this={View.searchForm}
+		class="grid grid-cols-2 gap-4"
 		action="?/getMentors"
 		method="POST"
 	>
 		<Input
-			bind:value={View.search}
+			onInput={View.onSearchInput}
 			width="full"
 			placeholder="Search"
 			id="search"
@@ -70,15 +71,13 @@
 		<Button onClick={() => View.onSort()} full type="submit">
 			<div class="flex w-full justify-between px-1">
 				<p>Sort</p>
-				<ArrowDownUp />
+				{#if View.sortByYears === true}
+					<ArrowUp />
+				{:else if View.sortByYears === false}
+					<ArrowDown />
+				{/if}
 			</div>
 		</Button>
-		<Button onClick={() => View.resetFilterForm()} full type="submit">
-			<div class="w-full">Reset</div>
-		</Button>
-		<Button disabled={View.mentorsIsLoading} type="submit" full formAction="?/getMentors"
-			>Search</Button
-		>
 	</form>
 	<div class="flex flex-1">
 		{#if View.mentorsIsLoading}
@@ -86,23 +85,44 @@
 		{:else if !View.mentors || View.mentors.length === 0}
 			<b class="mx-auto self-center text-[var(--tertiary-color)]">No mentors found</b>
 		{:else}
-			<ScrollArea orientation="vertical" class="h-full" viewportClasses="max-h-full">
-				{#each View.mentors as mentor (mentor.id)}
-					<div>
-						<p>{mentor.email}</p>
-						<p>{mentor.name}</p>
-						<p>{mentor.years_of_experience}</p>
-						<form use:enhance={View.onDeleteMentor} method="POST" action="?/deleteMentor">
-							<Button
-								onClick={() => {
-									View.setMentorToDelete(mentor.id);
-								}}
-								type="submit"
-								formAction="?/deleteMentor">Delete</Button
-							>
-						</form>
-					</div>
-				{/each}
+			<ScrollArea orientation="vertical" class="flex-1" viewportClasses="h-full w-full max-h-full">
+				<table class="w-full">
+					<thead>
+						<tr>
+							<th class="text-[var(--tertiary-color)]">Email</th>
+							<th class="text-[var(--tertiary-color)]">Name</th>
+							<th class="text-[var(--tertiary-color)]">YoE</th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each View.mentors as mentor (mentor.id)}
+							<tr>
+								<td class="overflow-x-auto text-center">{mentor.email}</td>
+								<td class="overflow-x-auto text-center">{mentor.name}</td>
+								<td class="overflow-x-auto text-center">{mentor.years_of_experience}</td>
+								<td class="text-center">
+									<Link theme="dark" href={`/manager/admin/mentors/${mentor.id}`}>Detail</Link>
+								</td>
+								<td>
+									<form
+										class="flex justify-center"
+										use:enhance={View.onDeleteMentor}
+										method="POST"
+										action="?/deleteMentor"
+									>
+										<Button
+											onClick={() => {
+												View.setMentorToDelete(mentor.id);
+											}}
+											type="submit"
+											formAction="?/deleteMentor">Delete</Button
+										>
+									</form>
+								</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
 			</ScrollArea>
 		{/if}
 	</div>

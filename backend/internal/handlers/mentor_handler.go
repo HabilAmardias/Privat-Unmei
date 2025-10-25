@@ -439,6 +439,14 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
+	if req.YearsOfExperience == nil {
+		ctx.Error(customerrors.NewError(
+			"years of experience should not empty",
+			errors.New("years of experience should not empty"),
+			customerrors.InvalidAction,
+		))
+		return
+	}
 	if err := ValidateDegree(req.Degree); err != nil {
 		ctx.Error(err)
 		return
@@ -489,7 +497,7 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 		Email:             req.Email,
 		Password:          req.Password,
 		ResumeFile:        file,
-		YearsOfExperience: req.YearsOfExperience,
+		YearsOfExperience: *req.YearsOfExperience,
 		MentorPayments:    []entity.AddMentorPaymentInfo{},
 		Degree:            req.Degree,
 		Major:             req.Major,
