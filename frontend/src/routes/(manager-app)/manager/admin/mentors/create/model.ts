@@ -24,6 +24,14 @@ export type TimeOnly = {
 	second: number;
 };
 
+export type adminProfile = {
+	name: string;
+	email: string;
+	bio: string;
+	profile_image: string;
+	status: 'verified' | 'unverified';
+};
+
 export type MentorSchedule = {
 	day_of_week: number;
 	day_of_week_label: string;

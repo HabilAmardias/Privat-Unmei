@@ -3,10 +3,14 @@ import type { PageServerLoad } from './$types';
 import { controller } from './controller';
 
 export const load: PageServerLoad = async ({ fetch }) => {
-	const [paymentMethodsRes, generatePasswordRes] = await Promise.all([
+	const [paymentMethodsRes, generatePasswordRes, adminProfileRes] = await Promise.all([
 		controller.getPaymentMethods(fetch),
-		controller.getRandomizedPassword(fetch)
+		controller.getRandomizedPassword(fetch),
+		controller.getAdminProfile(fetch)
 	]);
+	if (!adminProfileRes.success) {
+		throw error(adminProfileRes.status, { message: adminProfileRes.message });
+	}
 	if (!paymentMethodsRes.success) {
 		throw error(paymentMethodsRes.status, { message: paymentMethodsRes.message });
 	}
@@ -15,7 +19,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	}
 	return {
 		paymentMethods: paymentMethodsRes.resBody.data.entries,
-		generatedPassword: generatePasswordRes.resBody.data.password
+		generatedPassword: generatePasswordRes.resBody.data.password,
+		isVerified: adminProfileRes.resBody.data.status === 'verified'
 	};
 };
 

@@ -1,6 +1,6 @@
 import type { Fetch, SeekPaginatedResponse, ServerResponse } from '$lib/types';
 import { FetchData } from '$lib/utils';
-import type { generatedPassword, paymentMethod } from './model';
+import type { generatedPassword, paymentMethod, adminProfile } from './model';
 
 class CreateMentorController {
 	async CreateNewMentor(fetch: Fetch, req: Request) {
@@ -32,6 +32,15 @@ class CreateMentorController {
 			return { success, message, status };
 		}
 		const resBody: ServerResponse<generatedPassword> = await res?.json();
+		return { success, message, status, resBody };
+	}
+	async getAdminProfile(fetch: Fetch) {
+		const url = 'http://localhost:8080/api/v1/admins/me';
+		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
+		if (!success) {
+			return { success, message, status };
+		}
+		const resBody: ServerResponse<adminProfile> = await res?.json();
 		return { success, message, status, resBody };
 	}
 }

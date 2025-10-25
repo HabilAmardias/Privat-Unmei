@@ -94,6 +94,44 @@ func (mh *MentorHandlerImpl) GetMentorProfileForStudent(ctx *gin.Context) {
 	})
 }
 
+func (mh *MentorHandlerImpl) GetProfileForAdmin(ctx *gin.Context) {
+	id := ctx.Param("id")
+	param := entity.GetProfileMentorParam{
+		MentorID: id,
+	}
+	res, err := mh.ms.GetProfileForMentor(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	profile := dtos.GetProfileMentorRes{
+		ResumeFile:           res.ResumeFile,
+		ProfileImage:         res.ProfileImage,
+		Name:                 res.Name,
+		Bio:                  res.Bio,
+		YearsOfExperience:    res.YearsOfExperience,
+		MentorPayments:       []dtos.MentorPaymentInfoRes{},
+		Degree:               res.Degree,
+		Major:                res.Major,
+		Campus:               res.Campus,
+		MentorAvailabilities: []dtos.MentorAvailabilityRes{},
+	}
+	for _, sched := range res.MentorAvailabilities {
+		profile.MentorAvailabilities = append(profile.MentorAvailabilities, dtos.MentorAvailabilityRes{
+			DayOfWeek: sched.DayOfWeek,
+			StartTime: dtos.TimeOnly(sched.StartTime),
+			EndTime:   dtos.TimeOnly(sched.EndTime),
+		})
+	}
+	for _, info := range res.MentorPayments {
+		profile.MentorPayments = append(profile.MentorPayments, dtos.MentorPaymentInfoRes(info))
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data:    profile,
+	})
+}
+
 func (mh *MentorHandlerImpl) GetProfileForMentor(ctx *gin.Context) {
 	claims, err := getAuthenticationPayload(ctx)
 	if err != nil {

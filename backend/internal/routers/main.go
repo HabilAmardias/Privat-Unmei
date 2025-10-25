@@ -144,6 +144,13 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		c.RBACCacheRepository,
 		c.Logger,
 	), c.MentorHandler.GetMentorList)
+	v1.GET("/admin/mentors/:id", middlewares.AuthorizationMiddleware(
+		constants.ReadAllPermission,
+		constants.MentorResource,
+		c.RBACRepository,
+		c.RBACCacheRepository,
+		c.Logger,
+	), c.MentorHandler.GetProfileForAdmin)
 	v1.POST("/mentors", middlewares.AuthorizationMiddleware(
 		constants.CreatePermission,
 		constants.MentorResource,

@@ -1,0 +1,26 @@
+import type { Fetch, ServerResponse } from '$lib/types';
+import { FetchData } from '$lib/utils';
+import type { MentorProfile, adminProfile } from './model';
+
+class MentorProfileController {
+	getMentorProfile = async (fetch: Fetch, id: string) => {
+		const url = `http://localhost:8080/api/v1/admin/mentors/${id}`;
+		const { success, res, status, message } = await FetchData(fetch, url, 'GET');
+		if (!success) {
+			return { success, status, message };
+		}
+		const resBody: ServerResponse<MentorProfile> = await res?.json();
+		return { success, status, message, resBody };
+	};
+	async getAdminProfile(fetch: Fetch) {
+		const url = 'http://localhost:8080/api/v1/admins/me';
+		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
+		if (!success) {
+			return { success, message, status };
+		}
+		const resBody: ServerResponse<adminProfile> = await res?.json();
+		return { success, message, status, resBody };
+	}
+}
+
+export const controller = new MentorProfileController();
