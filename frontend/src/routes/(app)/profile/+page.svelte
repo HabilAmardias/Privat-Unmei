@@ -52,7 +52,7 @@
 	function onVerifySubmit(args: EnhancementArgs) {
 		View.setVerifyIsLoading(true);
 		const loadID = CreateToast('loading', 'sending....');
-		return async ({ result, update }: EnhancementReturn) => {
+		return async ({ result }: EnhancementReturn) => {
 			View.setVerifyIsLoading(false);
 			DismissToast(loadID);
 			if (result.type === 'success') {
@@ -61,14 +61,13 @@
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);
 			}
-			update();
 		};
 	}
 
 	function onUpdateOrders(args: EnhancementArgs) {
 		View.setOrdersIsLoading(true);
 		args.formData.append('last_id', `${View.lastID}`);
-		return async ({ result, update }: EnhancementReturn) => {
+		return async ({ result }: EnhancementReturn) => {
 			View.setOrdersIsLoading(false);
 			if (result.type === 'success') {
 				View.setOrders(result.data?.orders);
@@ -78,7 +77,6 @@
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);
 			}
-			update({ reset: false });
 		};
 	}
 
@@ -235,7 +233,7 @@
 					{:else if !View.orders || View.orders.length === 0}
 						<b class="mx-auto self-center text-[var(--tertiary-color)]">No orders found</b>
 					{:else}
-						<ScrollArea class="h-full" orientation="horizontal" viewportClasses="max-h-full">
+						<ScrollArea class="flex-1" orientation="horizontal" viewportClasses="max-h-full">
 							{#each View.orders as order (order.id)}
 								<div>
 									<p>{order.course_name}</p>

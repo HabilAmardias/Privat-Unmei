@@ -34,7 +34,7 @@
 </script>
 
 <main class="h-screen pb-24 md:pb-0 md:pt-24">
-	<ScrollArea orientation="vertical" viewportClasses="max-h-full">
+	<ScrollArea class="h-full" orientation="vertical" viewportClasses="h-full max-h-full">
 		{@render children()}
 	</ScrollArea>
 </main>

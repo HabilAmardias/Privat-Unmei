@@ -22,7 +22,7 @@
 	function onChangePasswordSubmit(args: EnhancementArgs) {
 		View.setIsLoading(true);
 		const loadID = CreateToast('loading', 'loading....');
-		return async ({ result, update }: EnhancementReturn) => {
+		return async ({ result }: EnhancementReturn) => {
 			DismissToast(loadID);
 			View.setIsLoading(false);
 			if (result.type === 'success') {
@@ -32,7 +32,6 @@
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);
 			}
-			update();
 		};
 	}
 </script>

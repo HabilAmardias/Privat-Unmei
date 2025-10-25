@@ -1,6 +1,6 @@
 export class adminLayoutView {
-    menuOpen = $state<boolean>(false);
-    handleMenu() {
+	menuOpen = $state<boolean>(false);
+	handleMenu() {
 		this.menuOpen = !this.menuOpen;
 	}
 }

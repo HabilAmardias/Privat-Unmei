@@ -24,7 +24,7 @@
 	function onVerifySubmit(args: EnhancementArgs) {
 		View.setIsLoading(true);
 		const loadID = CreateToast('loading', 'loading....');
-		return async ({ result, update }: EnhancementReturn) => {
+		return async ({ result }: EnhancementReturn) => {
 			View.setIsLoading(false);
 			if (result.type === 'success') {
 				loadingStore.setLogOutLoadID(loadID);
@@ -34,7 +34,6 @@
 				DismissToast(loadID);
 				CreateToast('error', result.data?.message);
 			}
-			update();
 		};
 	}
 </script>

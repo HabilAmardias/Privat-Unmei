@@ -52,7 +52,7 @@
 	function onAdminLoginSubmit(args: EnhancementArgs) {
 		View.setIsLoading(true);
 		const loadID = CreateToast('loading', 'logging in....');
-		return async ({ result, update }: EnhancementReturn) => {
+		return async ({ result }: EnhancementReturn) => {
 			if (result.type === 'success') {
 				await goto('/manager/admin', { replaceState: true });
 				View.setIsLoading(false);
@@ -64,13 +64,12 @@
 				DismissToast(loadID);
 				CreateToast('error', result.data?.message);
 			}
-			update();
 		};
 	}
 	function onMentorLoginSubmit(args: EnhancementArgs) {
 		View.setIsLoading(true);
 		const loadID = CreateToast('loading', 'logging in....');
-		return async ({ result, update }: EnhancementReturn) => {
+		return async ({ result }: EnhancementReturn) => {
 			if (result.type === 'success') {
 				await goto('/manager/mentor', { replaceState: true });
 				View.setIsLoading(false);
@@ -82,7 +81,6 @@
 				DismissToast(loadID);
 				CreateToast('error', result.data?.message);
 			}
-			update();
 		};
 	}
 </script>
