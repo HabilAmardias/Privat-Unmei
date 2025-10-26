@@ -20,6 +20,31 @@ func CreateCourseRequestRepository(db *db.CustomDB) *CourseRequestRepositoryImpl
 	return &CourseRequestRepositoryImpl{db}
 }
 
+func (cr *CourseRequestRepositoryImpl) DeleteAllMentorOrders(ctx context.Context, id string) error {
+	var driver RepoDriver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE course_requests
+	SET deleted_at = NOW(), updated_at = NOW()
+	WHERE course_id IN (
+		SELECT id
+		FROM courses
+		WHERE mentor_id = $1 AND deleted_at IS NULL
+	) AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, id)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to delete course requests",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (cr *CourseRequestRepositoryImpl) FindOngoingOrderByMentorID(ctx context.Context, mentorID string, count *int64) error {
 	var driver RepoDriver = cr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {

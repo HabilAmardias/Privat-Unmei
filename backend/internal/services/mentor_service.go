@@ -229,11 +229,9 @@ func (ms *MentorServiceImpl) DeleteMentor(ctx context.Context, param entity.Dele
 			return err
 		}
 		if *maxTransactionCount > 0 {
-			return customerrors.NewError(
-				"there are course that has been bought",
-				errors.New("max transaction count is more than zero"),
-				customerrors.InvalidAction,
-			)
+			if err := ms.crr.DeleteAllMentorOrders(ctx, mentor.ID); err != nil {
+				return err
+			}
 		}
 		if err := ms.cr.FindByMentorID(ctx, param.ID, courseIDs); err != nil {
 			return err
