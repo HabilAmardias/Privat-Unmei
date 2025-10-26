@@ -93,6 +93,7 @@ func (c *RouteConfig) SetupPublicRoute() {
 	v1.GET("/auth/google/callback", c.StudentHandler.GoogleLoginCallback)
 	v1.GET("/courses", c.CourseHandler.ListCourse)
 	v1.GET("/courses/:id", c.CourseHandler.CourseDetail)
+	v1.GET("/mentors", c.MentorHandler.GetMentorList)
 	v1.GET("/mentors/:id", c.MentorHandler.GetMentorProfileForStudent)
 	v1.GET("/courses/:id/reviews", c.CourseRatingHandler.GetCourseReview)
 	v1.GET("/refresh", middlewares.RefreshAuthMiddleware(c.TokenUtil), c.StudentHandler.RefreshToken)
@@ -137,13 +138,6 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		c.RBACCacheRepository,
 		c.Logger,
 	), c.StudentHandler.GetStudentList)
-	v1.GET("/mentors", middlewares.AuthorizationMiddleware(
-		constants.ReadAllPermission,
-		constants.MentorResource,
-		c.RBACRepository,
-		c.RBACCacheRepository,
-		c.Logger,
-	), c.MentorHandler.GetMentorList)
 	v1.GET("/admin/mentors/:id", middlewares.AuthorizationMiddleware(
 		constants.ReadAllPermission,
 		constants.MentorResource,

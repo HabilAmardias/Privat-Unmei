@@ -235,11 +235,6 @@ func (mh *MentorHandlerImpl) GetMentorList(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
-	if err != nil {
-		ctx.Error(err)
-		return
-	}
 	param := entity.ListMentorParam{
 		PaginatedParam: entity.PaginatedParam{
 			Limit: req.Limit,
@@ -247,7 +242,6 @@ func (mh *MentorHandlerImpl) GetMentorList(ctx *gin.Context) {
 		},
 		Search:               req.Search,
 		SortYearOfExperience: req.SortYearOfExperience,
-		UserID:               claim.Subject,
 	}
 	if param.Limit <= 0 || param.Limit > constants.MaxLimit {
 		param.Limit = constants.DefaultLimit

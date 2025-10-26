@@ -254,14 +254,6 @@ func (ms *MentorServiceImpl) Login(ctx context.Context, param entity.LoginMentor
 func (ms *MentorServiceImpl) GetMentorList(ctx context.Context, param entity.ListMentorParam) (*[]entity.ListMentorQuery, *int64, error) {
 	mentors := new([]entity.ListMentorQuery)
 	totalRow := new(int64)
-	user := new(entity.User)
-	admin := new(entity.Admin)
-	if err := ms.ur.FindByID(ctx, param.UserID, user); err != nil {
-		return nil, nil, err
-	}
-	if err := ms.ar.FindByID(ctx, param.UserID, admin); err != nil {
-		return nil, nil, err
-	}
 	if err := ms.mr.GetMentorList(ctx, mentors, totalRow, param); err != nil {
 		return nil, nil, err
 	}
