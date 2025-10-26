@@ -11,11 +11,6 @@ type (
 		StartTime TimeOnly `json:"start_time" binding:"required"`
 		EndTime   TimeOnly `json:"end_time" binding:"required"`
 	}
-	MentorAvailabilityRes struct {
-		DayOfWeek int      `json:"day_of_week"`
-		StartTime TimeOnly `json:"start_time"`
-		EndTime   TimeOnly `json:"end_time"`
-	}
 	MentorPaymentInfoReq struct {
 		PaymentMethodID int    `json:"payment_method_id" binding:"required"`
 		AccountNumber   string `json:"account_number" binding:"required,numeric"`
@@ -93,5 +88,10 @@ type (
 	}
 	GetDOWAvailabilityRes struct {
 		DayOfWeeks []int `json:"day_of_weeks"`
+	}
+	GetMentorAvailabilityRes struct {
+		DayOfWeek int    `json:"day_of_week"`
+		StartTime string `json:"start_time"`
+		EndTime   string `json:"end_time"`
 	}
 )

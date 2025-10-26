@@ -6,6 +6,8 @@
 	import { MentorDetailView } from './view.svelte';
 	import DownloadLink from '$lib/components/button/DownloadLink.svelte';
 	import AlertDialog from '$lib/components/dialog/AlertDialog.svelte';
+	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
+	import { dowMap } from './constants';
 
 	const View = new MentorDetailView();
 	let { data }: PageProps = $props();
@@ -39,9 +41,9 @@
 				<p class="font-bold text-[var(--tertiary-color)]">{data.profile.name}</p>
 				<p>{data.profile.email}</p>
 				<DownloadLink
-					download="resume"
+					download="resume.pdf"
 					className="cursor-pointer text-[var(--tertiary-color)] hover:text-[var(--primary-color)]"
-					href={data.profile.resume_file}>Download Resume</DownloadLink
+					href={data.profile.resume}>Download Resume</DownloadLink
 				>
 			</div>
 			<AlertDialog
@@ -74,5 +76,27 @@
 	<div class="flex flex-col">
 		<p class="font-bold text-[var(--tertiary-color)]">Bio:</p>
 		<p>{data.profile.bio}</p>
+	</div>
+	<div class="flex flex-col gap-2 md:grid md:grid-cols-2">
+		<div class="flex flex-col gap-4">
+			<p class="font-bold text-[var(--tertiary-color)]">Schedules:</p>
+			<ScrollArea class="h-[100px]" orientation="vertical" viewportClasses="max-h-[100px]">
+				{#each data.schedules as sch, i (i)}
+					<div class="rounded-lg bg-[var(--tertiary-color)] p-4 text-[var(--secondary-color)]">
+						<p>{dowMap.get(sch.day_of_week)}, {sch.start_time} - {sch.end_time}</p>
+					</div>
+				{/each}
+			</ScrollArea>
+		</div>
+		<div class="flex flex-col gap-4">
+			<p class="font-bold text-[var(--tertiary-color)]">Payments:</p>
+			<ScrollArea class="h-[100px]" orientation="vertical" viewportClasses="max-h-[100px]">
+				{#each data.payments as py, i (i)}
+					<div class="rounded-lg bg-[var(--tertiary-color)] p-4 text-[var(--secondary-color)]">
+						<p>{py.payment_method_name} - {py.account_number}</p>
+					</div>
+				{/each}
+			</ScrollArea>
+		</div>
 	</div>
 </div>

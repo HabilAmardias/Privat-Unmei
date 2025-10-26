@@ -36,8 +36,9 @@ type (
 		Search *string
 	}
 	GetPaymentMethodQuery struct {
-		ID   int
-		Name string
+		ID            int
+		Name          string
+		AccountNumber string
 	}
 	GetMentorPaymentMethodParam struct {
 		UserID   string

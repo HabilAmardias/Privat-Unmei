@@ -45,7 +45,8 @@ func (pr *PaymentRepositoryImpl) GetMentorPaymentMethod(
 	query := `
 	SELECT
 		mp.payment_method_id,
-		pm.name
+		pm.name,
+		mp.account_number
 	FROM mentor_payments mp
 	JOIN payment_methods pm ON mp.payment_method_id = pm.id
 	WHERE mp.mentor_id = $1 AND mp.deleted_at IS NULL AND pm.deleted_at IS NULL
@@ -64,6 +65,7 @@ func (pr *PaymentRepositoryImpl) GetMentorPaymentMethod(
 		if err := rows.Scan(
 			&item.ID,
 			&item.Name,
+			&item.AccountNumber,
 		); err != nil {
 			return customerrors.NewError(
 				"failed to get mentor payment method",

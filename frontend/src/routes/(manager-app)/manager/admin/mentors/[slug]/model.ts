@@ -3,10 +3,11 @@ export type TimeOnly = {
 	minute: number;
 	second: number;
 };
+
 export type MentorScheduleInfo = {
 	day_of_week: number;
-	start_time: TimeOnly;
-	end_time: TimeOnly;
+	start_time: string;
+	end_time: string;
 };
 
 export type MentorPaymentInfo = {
@@ -25,7 +26,7 @@ export type adminProfile = {
 
 export type MentorProfile = {
 	id: string;
-	resume_file: string;
+	resume: string;
 	profile_image: string;
 	name: string;
 	bio: string;

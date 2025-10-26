@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"errors"
-	"fmt"
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
@@ -48,6 +47,22 @@ func CreateMentorService(
 	lg logger.CustomLogger,
 ) *MentorServiceImpl {
 	return &MentorServiceImpl{tmr, ur, mr, tr, ccr, car, crr, cr, pr, ar, bu, ju, cu, gu, lg}
+}
+
+func (ms *MentorServiceImpl) GetMentorAvailability(ctx context.Context, param entity.GetMentorAvailabilityParam) (*[]entity.MentorAvailability, error) {
+	scheds := new([]entity.MentorAvailability)
+	user := new(entity.User)
+	mentor := new(entity.Mentor)
+	if err := ms.ur.FindByID(ctx, param.MentorID, user); err != nil {
+		return nil, err
+	}
+	if err := ms.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
+		return nil, err
+	}
+	if err := ms.car.GetAvailabilityByMentorID(ctx, param.MentorID, scheds); err != nil {
+		return nil, err
+	}
+	return scheds, nil
 }
 
 func (ms *MentorServiceImpl) GetDOWAvailability(ctx context.Context, param entity.GetDOWAvailabilityParam) (*[]int, error) {
@@ -102,7 +117,6 @@ func (ms *MentorServiceImpl) GetMentorProfile(ctx context.Context, param entity.
 	res.ProfileImage = user.ProfileImage
 	res.Resume = mentor.Resume
 	res.YearsOfExperience = mentor.YearsOfExperience
-
 	return res, nil
 }
 
@@ -423,9 +437,7 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 		mentor.Degree = param.Degree
 		mentor.Major = param.Major
 		mentor.YearsOfExperience = param.YearsOfExperience
-
-		newFilename := fmt.Sprintf("%s.pdf", mentor.ID)
-		uploadRes, err := ms.cu.UploadFile(ctx, param.ResumeFile, newFilename, constants.ResumeFolder)
+		uploadRes, err := ms.cu.UploadFile(ctx, param.ResumeFile, mentor.ID, constants.ResumeFolder)
 		if err != nil {
 			return err
 		}

@@ -144,6 +144,9 @@ type (
 		CourseID int
 		UserID   string
 	}
+	GetMentorAvailabilityParam struct {
+		MentorID string
+	}
 )
 
 func (to *TimeOnly) ToString() string {

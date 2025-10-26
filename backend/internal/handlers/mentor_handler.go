@@ -24,6 +24,58 @@ func CreateMentorHandler(ms *services.MentorServiceImpl) *MentorHandlerImpl {
 	return &MentorHandlerImpl{ms}
 }
 
+func (mh *MentorHandlerImpl) GetMyAvailability(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.GetMentorAvailabilityParam{
+		MentorID: claim.Subject,
+	}
+	scheds, err := mh.ms.GetMentorAvailability(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	res := []dtos.GetMentorAvailabilityRes{}
+	for _, sch := range *scheds {
+		res = append(res, dtos.GetMentorAvailabilityRes{
+			DayOfWeek: sch.DayOfWeek,
+			StartTime: sch.StartTime.ToString(),
+			EndTime:   sch.EndTime.ToString(),
+		})
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data:    res,
+	})
+}
+
+func (mh *MentorHandlerImpl) GetMentorAvailability(ctx *gin.Context) {
+	id := ctx.Param("id")
+	param := entity.GetMentorAvailabilityParam{
+		MentorID: id,
+	}
+	scheds, err := mh.ms.GetMentorAvailability(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	res := []dtos.GetMentorAvailabilityRes{}
+	for _, sch := range *scheds {
+		res = append(res, dtos.GetMentorAvailabilityRes{
+			DayOfWeek: sch.DayOfWeek,
+			StartTime: sch.StartTime.ToString(),
+			EndTime:   sch.EndTime.ToString(),
+		})
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data:    res,
+	})
+}
+
 func (mh *MentorHandlerImpl) GetDOWAvailability(ctx *gin.Context) {
 	courseID, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
