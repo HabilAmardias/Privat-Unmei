@@ -1,4 +1,4 @@
-import { error } from '@sveltejs/kit';
+import { error, fail, redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { controller } from './controller';
 
@@ -18,3 +18,13 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 		profile: mentorProfile.resBody.data
 	};
 };
+
+export const actions = {
+	deleteMentor: async ({ fetch, params }) => {
+		const { success, message, status } = await controller.deleteMentor(fetch, params.slug);
+		if (!success) {
+			return fail(status, { message });
+		}
+		throw redirect(303, '/manager/admin/mentors');
+	}
+} satisfies Actions;

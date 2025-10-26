@@ -24,6 +24,7 @@ export type adminProfile = {
 };
 
 export type MentorProfile = {
+	id: string;
 	resume_file: string;
 	profile_image: string;
 	name: string;
@@ -32,6 +33,5 @@ export type MentorProfile = {
 	degree: string;
 	major: string;
 	campus: string;
-	mentor_availability: MentorScheduleInfo[];
-	mentor_payment_info: MentorPaymentInfo[];
+	email: string;
 };

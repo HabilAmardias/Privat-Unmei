@@ -82,91 +82,27 @@ func (ms *MentorServiceImpl) GetDOWAvailability(ctx context.Context, param entit
 	return dows, nil
 }
 
-func (ms *MentorServiceImpl) GetMentorProfileForStudent(ctx context.Context, param entity.GetMentorProfileForStudentParam) (*entity.GetMentorProfileForStudentQuery, error) {
+func (ms *MentorServiceImpl) GetMentorProfile(ctx context.Context, param entity.MentorProfileParam) (*entity.MentorProfileQuery, error) {
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
-	mentorAvailability := new([]entity.MentorAvailability)
-	res := new(entity.GetMentorProfileForStudentQuery)
-	if err := ms.ur.FindByID(ctx, param.MentorID, user); err != nil {
+	res := new(entity.MentorProfileQuery)
+	if err := ms.ur.FindByID(ctx, param.ID, user); err != nil {
 		return nil, err
 	}
-	if err := ms.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
+	if err := ms.mr.FindByID(ctx, param.ID, mentor, false); err != nil {
 		return nil, err
 	}
-	if err := ms.car.GetAvailabilityByMentorID(ctx, param.MentorID, mentorAvailability); err != nil {
-		return nil, err
-	}
-
-	res.MentorAvailabilities = []entity.MentorSchedule{}
-	res.MentorAverageRating = constants.NoRating
-	if mentor.RatingCount > constants.NoRating {
-		res.MentorAverageRating = mentor.TotalRating / float64(mentor.RatingCount)
-	}
-	res.MentorBio = user.Bio
-	res.MentorCampus = mentor.Campus
-	res.MentorDegree = mentor.Degree
-	res.MentorEmail = user.Email
-	res.MentorID = mentor.ID
-	res.MentorMajor = mentor.Major
-	res.MentorName = user.Name
-	res.MentorProfileImage = user.ProfileImage
-	res.MentorResume = mentor.Resume
-	res.MentorYearsOfExperience = mentor.YearsOfExperience
-
-	for _, sc := range *mentorAvailability {
-		res.MentorAvailabilities = append(res.MentorAvailabilities, entity.MentorSchedule{
-			DayOfWeek: sc.DayOfWeek,
-			StartTime: sc.StartTime,
-			EndTime:   sc.EndTime,
-		})
-	}
-
-	return res, nil
-}
-
-func (ms *MentorServiceImpl) GetProfileForMentor(ctx context.Context, param entity.GetProfileMentorParam) (*entity.GetProfileMentorQuery, error) {
-	user := new(entity.User)
-	mentor := new(entity.Mentor)
-	mentorAvailability := new([]entity.MentorAvailability)
-	res := new(entity.GetProfileMentorQuery)
-	paymentInfo := new([]entity.MentorPaymentInfo)
-
-	if err := ms.ur.FindByID(ctx, param.MentorID, user); err != nil {
-		return nil, err
-	}
-	if err := ms.mr.FindByID(ctx, user.ID, mentor, false); err != nil {
-		return nil, err
-	}
-	if err := ms.car.GetAvailabilityByMentorID(ctx, mentor.ID, mentorAvailability); err != nil {
-		return nil, err
-	}
-	if err := ms.pr.MentorPaymentInfo(ctx, param.MentorID, paymentInfo); err != nil {
-		return nil, err
-	}
-	if len(*mentorAvailability) <= 0 {
-		return nil, customerrors.NewError(
-			"mentor data does not exist",
-			errors.New("mentor availability does not exist"),
-			customerrors.ItemNotExist,
-		)
-	}
-	res.ResumeFile = mentor.Resume
-	res.ProfileImage = user.ProfileImage
+	res.ID = user.ID
+	res.Name = user.Name
+	res.Email = user.Email
 	res.Bio = user.Bio
 	res.Campus = mentor.Campus
 	res.Degree = mentor.Degree
-	res.MentorPayments = *paymentInfo
 	res.Major = mentor.Major
-	res.Name = user.Name
+	res.ProfileImage = user.ProfileImage
+	res.Resume = mentor.Resume
 	res.YearsOfExperience = mentor.YearsOfExperience
-	res.MentorAvailabilities = []entity.MentorSchedule{}
-	for _, sched := range *mentorAvailability {
-		res.MentorAvailabilities = append(res.MentorAvailabilities, entity.MentorSchedule{
-			DayOfWeek: sched.DayOfWeek,
-			StartTime: sched.StartTime,
-			EndTime:   sched.EndTime,
-		})
-	}
+
 	return res, nil
 }
 

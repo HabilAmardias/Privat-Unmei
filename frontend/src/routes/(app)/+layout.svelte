@@ -5,7 +5,7 @@
 	import Menubar from '$lib/components/menubar/Menubar.svelte';
 	import MenuItem from '$lib/components/menubar/MenuItem.svelte';
 	import { loadingStore } from '$lib/stores/LoadingStore.svelte';
-	import { List, LogIn, LogOut, MessageCircleMore, User } from '@lucide/svelte';
+	import { CircleUserRound, LogIn, LogOut, MessageCircleMore, Users } from '@lucide/svelte';
 	import type { LayoutProps } from './$types';
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import CldImage from '$lib/components/image/CldImage.svelte';
@@ -46,6 +46,14 @@
 			</div>
 		</Link>
 	</MenuItem>
+	<MenuItem>
+		<Link href="/mentors">
+			<div class="flex flex-col items-center">
+				<Users />
+				Mentors
+			</div>
+		</Link>
+	</MenuItem>
 	{#if data.isLoggedIn}
 		<MenuItem>
 			<Link href="/chats">
@@ -58,7 +66,7 @@
 		<MenuItem>
 			<Link href="/profile">
 				<div class="flex flex-col items-center">
-					<User />
+					<CircleUserRound />
 					Profile
 				</div>
 			</Link>

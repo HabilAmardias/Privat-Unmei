@@ -13,6 +13,7 @@ export class MentorManagerView {
 	mentorToDelete = $state<string>();
 	sortByYears = $state<boolean | null>(null);
 	search = $state<string>('');
+	alertOpen = $state<boolean>(false);
 	searchForm = $state<HTMLFormElement | null>(null);
 	#SearchSubmit = debounce(() => {
 		this.searchForm?.requestSubmit();

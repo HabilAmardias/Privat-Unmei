@@ -94,7 +94,7 @@ func (c *RouteConfig) SetupPublicRoute() {
 	v1.GET("/courses", c.CourseHandler.ListCourse)
 	v1.GET("/courses/:id", c.CourseHandler.CourseDetail)
 	v1.GET("/mentors", c.MentorHandler.GetMentorList)
-	v1.GET("/mentors/:id", c.MentorHandler.GetMentorProfileForStudent)
+	v1.GET("/mentors/:id", c.MentorHandler.GetMentorProfile)
 	v1.GET("/courses/:id/reviews", c.CourseRatingHandler.GetCourseReview)
 	v1.GET("/refresh", middlewares.RefreshAuthMiddleware(c.TokenUtil), c.StudentHandler.RefreshToken)
 }
@@ -138,13 +138,6 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		c.RBACCacheRepository,
 		c.Logger,
 	), c.StudentHandler.GetStudentList)
-	v1.GET("/admin/mentors/:id", middlewares.AuthorizationMiddleware(
-		constants.ReadAllPermission,
-		constants.MentorResource,
-		c.RBACRepository,
-		c.RBACCacheRepository,
-		c.Logger,
-	), c.MentorHandler.GetProfileForAdmin)
 	v1.POST("/mentors", middlewares.AuthorizationMiddleware(
 		constants.CreatePermission,
 		constants.MentorResource,
@@ -277,7 +270,7 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		c.RBACRepository,
 		c.RBACCacheRepository,
 		c.Logger,
-	), c.MentorHandler.GetProfileForMentor)
+	), c.MentorHandler.GetMyProfile)
 	v1.GET("/mentors/me/course-requests", middlewares.AuthorizationMiddleware(
 		constants.ReadOwnPermission,
 		constants.CourseRequestResource,

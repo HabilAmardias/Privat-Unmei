@@ -49,6 +49,21 @@ type (
 		PaymentMethodName string
 		AccountNumber     string
 	}
+	MentorProfileParam struct {
+		ID string
+	}
+	MentorProfileQuery struct {
+		ID                string
+		Name              string
+		Email             string
+		Bio               string
+		ProfileImage      string
+		Resume            string
+		YearsOfExperience int
+		Degree            string
+		Major             string
+		Campus            string
+	}
 	AddNewMentorParam struct {
 		AdminID           string
 		Name              string
@@ -107,9 +122,6 @@ type (
 		ID          string
 		NewPassword string
 	}
-	GetProfileMentorParam struct {
-		MentorID string
-	}
 	GetProfileMentorQuery struct {
 		ResumeFile           string
 		ProfileImage         string
@@ -121,23 +133,6 @@ type (
 		Campus               string
 		MentorAvailabilities []MentorSchedule
 		MentorPayments       []MentorPaymentInfo
-	}
-	GetMentorProfileForStudentParam struct {
-		MentorID string
-	}
-	GetMentorProfileForStudentQuery struct {
-		MentorID                string
-		MentorName              string
-		MentorEmail             string
-		MentorBio               string
-		MentorProfileImage      string
-		MentorAverageRating     float64
-		MentorResume            string
-		MentorYearsOfExperience int
-		MentorDegree            string
-		MentorMajor             string
-		MentorCampus            string
-		MentorAvailabilities    []MentorSchedule
 	}
 	AvailabilityResult struct {
 		TotalRequested   int

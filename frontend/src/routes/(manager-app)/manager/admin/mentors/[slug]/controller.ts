@@ -4,7 +4,7 @@ import type { MentorProfile, adminProfile } from './model';
 
 class MentorProfileController {
 	getMentorProfile = async (fetch: Fetch, id: string) => {
-		const url = `http://localhost:8080/api/v1/admin/mentors/${id}`;
+		const url = `http://localhost:8080/api/v1/mentors/${id}`;
 		const { success, res, status, message } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, status, message };
@@ -20,6 +20,14 @@ class MentorProfileController {
 		}
 		const resBody: ServerResponse<adminProfile> = await res?.json();
 		return { success, message, status, resBody };
+	}
+	async deleteMentor(fetch: Fetch, id?: string) {
+		if (!id) {
+			return { success: false, message: 'no mentor selected', status: 400 };
+		}
+		const url = `http://localhost:8080/api/v1/mentors/${id}`;
+		const { success, message, status } = await FetchData(fetch, url, 'DELETE');
+		return { success, message, status };
 	}
 }
 

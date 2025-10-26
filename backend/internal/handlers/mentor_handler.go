@@ -57,118 +57,38 @@ func (mh *MentorHandlerImpl) GetDOWAvailability(ctx *gin.Context) {
 	})
 }
 
-func (mh *MentorHandlerImpl) GetMentorProfileForStudent(ctx *gin.Context) {
+func (mh *MentorHandlerImpl) GetMyProfile(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.MentorProfileParam{
+		ID: claim.Subject,
+	}
+	detail, err := mh.ms.GetMentorProfile(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	profile := dtos.MentorProfileRes(*detail)
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data:    profile,
+	})
+}
+
+func (mh *MentorHandlerImpl) GetMentorProfile(ctx *gin.Context) {
 	mentorID := ctx.Param("id")
-	param := entity.GetMentorProfileForStudentParam{
-		MentorID: mentorID,
+	param := entity.MentorProfileParam{
+		ID: mentorID,
 	}
-	detail, err := mh.ms.GetMentorProfileForStudent(ctx, param)
+	detail, err := mh.ms.GetMentorProfile(ctx, param)
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
-	profile := dtos.GetMentorProfileForStudentRes{
-		MentorID:                detail.MentorID,
-		MentorName:              detail.MentorName,
-		MentorEmail:             detail.MentorEmail,
-		MentorBio:               detail.MentorBio,
-		MentorProfileImage:      detail.MentorProfileImage,
-		MentorResume:            detail.MentorResume,
-		MentorAverageRating:     detail.MentorAverageRating,
-		MentorYearsOfExperience: detail.MentorYearsOfExperience,
-		MentorDegree:            detail.MentorDegree,
-		MentorMajor:             detail.MentorMajor,
-		MentorCampus:            detail.MentorCampus,
-		MentorAvailabilities:    []dtos.MentorAvailabilityRes{},
-	}
-	for _, sc := range detail.MentorAvailabilities {
-		profile.MentorAvailabilities = append(profile.MentorAvailabilities, dtos.MentorAvailabilityRes{
-			DayOfWeek: sc.DayOfWeek,
-			StartTime: dtos.TimeOnly(sc.StartTime),
-			EndTime:   dtos.TimeOnly(sc.EndTime),
-		})
-	}
-	ctx.JSON(http.StatusOK, dtos.Response{
-		Success: true,
-		Data:    profile,
-	})
-}
-
-func (mh *MentorHandlerImpl) GetProfileForAdmin(ctx *gin.Context) {
-	id := ctx.Param("id")
-	param := entity.GetProfileMentorParam{
-		MentorID: id,
-	}
-	res, err := mh.ms.GetProfileForMentor(ctx, param)
-	if err != nil {
-		ctx.Error(err)
-		return
-	}
-	profile := dtos.GetProfileMentorRes{
-		ResumeFile:           res.ResumeFile,
-		ProfileImage:         res.ProfileImage,
-		Name:                 res.Name,
-		Bio:                  res.Bio,
-		YearsOfExperience:    res.YearsOfExperience,
-		MentorPayments:       []dtos.MentorPaymentInfoRes{},
-		Degree:               res.Degree,
-		Major:                res.Major,
-		Campus:               res.Campus,
-		MentorAvailabilities: []dtos.MentorAvailabilityRes{},
-	}
-	for _, sched := range res.MentorAvailabilities {
-		profile.MentorAvailabilities = append(profile.MentorAvailabilities, dtos.MentorAvailabilityRes{
-			DayOfWeek: sched.DayOfWeek,
-			StartTime: dtos.TimeOnly(sched.StartTime),
-			EndTime:   dtos.TimeOnly(sched.EndTime),
-		})
-	}
-	for _, info := range res.MentorPayments {
-		profile.MentorPayments = append(profile.MentorPayments, dtos.MentorPaymentInfoRes(info))
-	}
-	ctx.JSON(http.StatusOK, dtos.Response{
-		Success: true,
-		Data:    profile,
-	})
-}
-
-func (mh *MentorHandlerImpl) GetProfileForMentor(ctx *gin.Context) {
-	claims, err := getAuthenticationPayload(ctx)
-	if err != nil {
-		ctx.Error(err)
-		return
-	}
-	param := entity.GetProfileMentorParam{
-		MentorID: claims.Subject,
-	}
-	res, err := mh.ms.GetProfileForMentor(ctx, param)
-	if err != nil {
-		ctx.Error(err)
-		return
-	}
-
-	profile := dtos.GetProfileMentorRes{
-		ResumeFile:           res.ResumeFile,
-		ProfileImage:         res.ProfileImage,
-		Name:                 res.Name,
-		Bio:                  res.Bio,
-		YearsOfExperience:    res.YearsOfExperience,
-		MentorPayments:       []dtos.MentorPaymentInfoRes{},
-		Degree:               res.Degree,
-		Major:                res.Major,
-		Campus:               res.Campus,
-		MentorAvailabilities: []dtos.MentorAvailabilityRes{},
-	}
-	for _, sched := range res.MentorAvailabilities {
-		profile.MentorAvailabilities = append(profile.MentorAvailabilities, dtos.MentorAvailabilityRes{
-			DayOfWeek: sched.DayOfWeek,
-			StartTime: dtos.TimeOnly(sched.StartTime),
-			EndTime:   dtos.TimeOnly(sched.EndTime),
-		})
-	}
-	for _, info := range res.MentorPayments {
-		profile.MentorPayments = append(profile.MentorPayments, dtos.MentorPaymentInfoRes(info))
-	}
+	profile := dtos.MentorProfileRes(*detail)
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
 		Data:    profile,

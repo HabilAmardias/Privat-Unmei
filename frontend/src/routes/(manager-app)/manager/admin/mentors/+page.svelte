@@ -11,6 +11,7 @@
 	import Pagination from '$lib/components/pagination/Pagination.svelte';
 	import { ArrowDown, ArrowUp, UserPlus } from '@lucide/svelte';
 	import Link from '$lib/components/button/Link.svelte';
+	import AlertDialog from '$lib/components/dialog/AlertDialog.svelte';
 
 	let { data }: PageProps = $props();
 	const View = new MentorManagerView();
@@ -36,6 +37,14 @@
 		};
 	});
 </script>
+
+{#snippet dialogTitle()}
+	Delete Mentor Confirmation
+{/snippet}
+
+{#snippet dialogDescription()}
+	Irreversible action, are you sure want to proceed?
+{/snippet}
 
 <svelte:head>
 	<title>Mentors - Privat Unmei</title>
@@ -104,20 +113,16 @@
 									<Link theme="dark" href={`/manager/admin/mentors/${mentor.id}`}>Detail</Link>
 								</td>
 								<td>
-									<form
-										class="flex justify-center"
-										use:enhance={View.onDeleteMentor}
-										method="POST"
+									<AlertDialog
 										action="?/deleteMentor"
+										bind:open={View.alertOpen}
+										enhancement={View.onDeleteMentor}
+										title={dialogTitle}
+										onClick={() => {
+											View.setMentorToDelete(mentor.id);
+										}}
+										description={dialogDescription}>Delete</AlertDialog
 									>
-										<Button
-											onClick={() => {
-												View.setMentorToDelete(mentor.id);
-											}}
-											type="submit"
-											formAction="?/deleteMentor">Delete</Button
-										>
-									</form>
 								</td>
 							</tr>
 						{/each}

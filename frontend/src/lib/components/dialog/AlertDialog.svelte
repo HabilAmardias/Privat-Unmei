@@ -1,23 +1,37 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
+	import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
 	import { AlertDialog } from 'bits-ui';
 	import type { Snippet } from 'svelte';
 	type alertDialogProp = {
-		open: boolean;
+		open?: boolean;
 		action?: string;
-        children: Snippet
-        description: Snippet
-        title: Snippet
-		onSubmit?: (e: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement }) => void;
+		onClick?: (e: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) => void;
+		enhancement?: (
+			args: EnhancementArgs
+		) => ({ result, update }: EnhancementReturn) => Promise<void>;
+		children: Snippet;
+		description: Snippet;
+		title: Snippet;
 	};
-	let { open = $bindable(), action, onSubmit, children, description, title }: alertDialogProp = $props();
+	let {
+		open = $bindable(),
+		action,
+		children,
+		description,
+		title,
+		onClick,
+		enhancement
+	}: alertDialogProp = $props();
 </script>
 
 <AlertDialog.Root bind:open>
 	<AlertDialog.Trigger
 		class="rounded-input bg-dark text-background shadow-mini
-    hover:bg-dark/95 inline-flex h-12 cursor-pointer select-none items-center
-    justify-center whitespace-nowrap rounded-lg bg-[var(--tertiary-color)]
-	p-2 px-[21px] text-[15px] font-semibold text-[var(--secondary-color)] transition-all hover:text-[var(--primary-color)] active:scale-[0.98]"
+    hover:bg-dark/95 inline-flex h-fit cursor-pointer select-none
+    items-center justify-center whitespace-nowrap rounded-lg
+	bg-[var(--tertiary-color)] p-2 font-semibold text-[var(--secondary-color)] transition-all hover:text-[var(--primary-color)]"
+		onclick={onClick}
 	>
 		{@render children()}
 	</AlertDialog.Trigger>
@@ -37,7 +51,7 @@
 				</AlertDialog.Description>
 			</div>
 			<form
-				onsubmit={onSubmit}
+				use:enhance={enhancement}
 				method="POST"
 				{action}
 				class="flex w-full items-center justify-center gap-2"
@@ -49,7 +63,8 @@
 					Cancel
 				</AlertDialog.Cancel>
 				<AlertDialog.Action
-					type={onSubmit ? 'submit' : 'button'}
+					type="submit"
+					formaction={action}
 					class="h-input rounded-input bg-dark text-background shadow-mini hover:bg-dark/95 focus-visible:ring-dark focus-visible:ring-offset-background focus-visible:outline-hidden inline-flex w-full cursor-pointer items-center justify-center bg-[var(--tertiary-color)] py-2 text-[15px] font-semibold text-[var(--secondary-color)] transition-all hover:text-[var(--primary-color)] focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98]"
 				>
 					Continue

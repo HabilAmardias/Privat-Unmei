@@ -79,31 +79,17 @@ type (
 	MentorChangePasswordReq struct {
 		NewPassword string `json:"password" binding:"required,containsany=!@#?,min=8"`
 	}
-	GetProfileMentorRes struct {
-		ResumeFile           string                  `json:"resume_file"`
-		ProfileImage         string                  `json:"profile_image"`
-		Name                 string                  `json:"name"`
-		Bio                  string                  `json:"bio"`
-		YearsOfExperience    int                     `json:"years_of_experience"`
-		Degree               string                  `json:"degree"`
-		Major                string                  `json:"major"`
-		Campus               string                  `json:"campus"`
-		MentorAvailabilities []MentorAvailabilityRes `json:"mentor_availability"`
-		MentorPayments       []MentorPaymentInfoRes  `json:"mentor_payment_info"`
-	}
-	GetMentorProfileForStudentRes struct {
-		MentorID                string                  `json:"id"`
-		MentorName              string                  `json:"name"`
-		MentorEmail             string                  `json:"email"`
-		MentorBio               string                  `json:"bio"`
-		MentorProfileImage      string                  `json:"profile_image"`
-		MentorAverageRating     float64                 `json:"rating"`
-		MentorResume            string                  `json:"resume"`
-		MentorYearsOfExperience int                     `json:"years_of_experience"`
-		MentorDegree            string                  `json:"degree"`
-		MentorMajor             string                  `json:"major"`
-		MentorCampus            string                  `json:"campus"`
-		MentorAvailabilities    []MentorAvailabilityRes `json:"mentor_availability"`
+	MentorProfileRes struct {
+		ID                string `json:"id"`
+		Name              string `json:"name"`
+		Email             string `json:"email"`
+		Bio               string `json:"bio"`
+		ProfileImage      string `json:"profile_image"`
+		Resume            string `json:"resume"`
+		YearsOfExperience int    `json:"years_of_experience"`
+		Degree            string `json:"degree"`
+		Major             string `json:"major"`
+		Campus            string `json:"campus"`
 	}
 	GetDOWAvailabilityRes struct {
 		DayOfWeeks []int `json:"day_of_weeks"`
