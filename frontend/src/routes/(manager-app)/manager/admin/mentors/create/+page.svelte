@@ -25,6 +25,12 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Add Mentor - Privat Unmei</title>
+	<meta name="description" content="Add Mentor - Privat Unmei" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</svelte:head>
+
 <div class="flex flex-col p-4">
 	<h3 class="mb-4 text-xl font-bold text-[var(--tertiary-color)]">Create New Mentor</h3>
 	<form

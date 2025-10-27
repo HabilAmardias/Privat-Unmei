@@ -28,6 +28,12 @@
 	Irreversible action, are you sure want to proceed?
 {/snippet}
 
+<svelte:head>
+	<title>Mentor Detail - Privat Unmei</title>
+	<meta name="description" content="Mentor Detail - Privat Unmei" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</svelte:head>
+
 <div class="flex flex-col gap-4 p-4">
 	<div class="flex gap-4">
 		<CldImage
@@ -43,7 +49,7 @@
 				<DownloadLink
 					download="resume.pdf"
 					className="cursor-pointer text-[var(--tertiary-color)] hover:text-[var(--primary-color)]"
-					href={data.profile.resume}>Download Resume</DownloadLink
+					href={`${data.profile.resume}?fl_attachment`}>Download Resume</DownloadLink
 				>
 			</div>
 			<AlertDialog
