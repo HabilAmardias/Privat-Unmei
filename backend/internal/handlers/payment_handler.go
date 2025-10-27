@@ -42,9 +42,7 @@ func (ph *PaymentHandlerImpl) GetMentorPaymentMethod(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
-		Data: dtos.ListResponse[dtos.GetPaymentMethodRes]{
-			Entries: entries,
-		},
+		Data:    entries,
 	})
 }
 

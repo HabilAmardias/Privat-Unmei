@@ -24,6 +24,58 @@ func CreateMentorHandler(ms *services.MentorServiceImpl) *MentorHandlerImpl {
 	return &MentorHandlerImpl{ms}
 }
 
+func (mh *MentorHandlerImpl) GetMyAvailability(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.GetMentorAvailabilityParam{
+		MentorID: claim.Subject,
+	}
+	scheds, err := mh.ms.GetMentorAvailability(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	res := []dtos.GetMentorAvailabilityRes{}
+	for _, sch := range *scheds {
+		res = append(res, dtos.GetMentorAvailabilityRes{
+			DayOfWeek: sch.DayOfWeek,
+			StartTime: sch.StartTime.ToString(),
+			EndTime:   sch.EndTime.ToString(),
+		})
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data:    res,
+	})
+}
+
+func (mh *MentorHandlerImpl) GetMentorAvailability(ctx *gin.Context) {
+	id := ctx.Param("id")
+	param := entity.GetMentorAvailabilityParam{
+		MentorID: id,
+	}
+	scheds, err := mh.ms.GetMentorAvailability(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	res := []dtos.GetMentorAvailabilityRes{}
+	for _, sch := range *scheds {
+		res = append(res, dtos.GetMentorAvailabilityRes{
+			DayOfWeek: sch.DayOfWeek,
+			StartTime: sch.StartTime.ToString(),
+			EndTime:   sch.EndTime.ToString(),
+		})
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data:    res,
+	})
+}
+
 func (mh *MentorHandlerImpl) GetDOWAvailability(ctx *gin.Context) {
 	courseID, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
@@ -57,80 +109,38 @@ func (mh *MentorHandlerImpl) GetDOWAvailability(ctx *gin.Context) {
 	})
 }
 
-func (mh *MentorHandlerImpl) GetMentorProfileForStudent(ctx *gin.Context) {
-	mentorID := ctx.Param("id")
-	param := entity.GetMentorProfileForStudentParam{
-		MentorID: mentorID,
-	}
-	detail, err := mh.ms.GetMentorProfileForStudent(ctx, param)
+func (mh *MentorHandlerImpl) GetMyProfile(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx)
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
-	profile := dtos.GetMentorProfileForStudentRes{
-		MentorID:                detail.MentorID,
-		MentorName:              detail.MentorName,
-		MentorEmail:             detail.MentorEmail,
-		MentorBio:               detail.MentorBio,
-		MentorProfileImage:      detail.MentorProfileImage,
-		MentorResume:            detail.MentorResume,
-		MentorAverageRating:     detail.MentorAverageRating,
-		MentorYearsOfExperience: detail.MentorYearsOfExperience,
-		MentorDegree:            detail.MentorDegree,
-		MentorMajor:             detail.MentorMajor,
-		MentorCampus:            detail.MentorCampus,
-		MentorAvailabilities:    []dtos.MentorAvailabilityRes{},
+	param := entity.MentorProfileParam{
+		ID: claim.Subject,
 	}
-	for _, sc := range detail.MentorAvailabilities {
-		profile.MentorAvailabilities = append(profile.MentorAvailabilities, dtos.MentorAvailabilityRes{
-			DayOfWeek: sc.DayOfWeek,
-			StartTime: dtos.TimeOnly(sc.StartTime),
-			EndTime:   dtos.TimeOnly(sc.EndTime),
-		})
+	detail, err := mh.ms.GetMentorProfile(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
 	}
+	profile := dtos.MentorProfileRes(*detail)
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
 		Data:    profile,
 	})
 }
 
-func (mh *MentorHandlerImpl) GetProfileForMentor(ctx *gin.Context) {
-	claims, err := getAuthenticationPayload(ctx)
+func (mh *MentorHandlerImpl) GetMentorProfile(ctx *gin.Context) {
+	mentorID := ctx.Param("id")
+	param := entity.MentorProfileParam{
+		ID: mentorID,
+	}
+	detail, err := mh.ms.GetMentorProfile(ctx, param)
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
-	param := entity.GetProfileMentorParam{
-		MentorID: claims.Subject,
-	}
-	res, err := mh.ms.GetProfileForMentor(ctx, param)
-	if err != nil {
-		ctx.Error(err)
-		return
-	}
-
-	profile := dtos.GetProfileMentorRes{
-		ResumeFile:           res.ResumeFile,
-		ProfileImage:         res.ProfileImage,
-		Name:                 res.Name,
-		Bio:                  res.Bio,
-		YearsOfExperience:    res.YearsOfExperience,
-		MentorPayments:       []dtos.MentorPaymentInfoRes{},
-		Degree:               res.Degree,
-		Major:                res.Major,
-		Campus:               res.Campus,
-		MentorAvailabilities: []dtos.MentorAvailabilityRes{},
-	}
-	for _, sched := range res.MentorAvailabilities {
-		profile.MentorAvailabilities = append(profile.MentorAvailabilities, dtos.MentorAvailabilityRes{
-			DayOfWeek: sched.DayOfWeek,
-			StartTime: dtos.TimeOnly(sched.StartTime),
-			EndTime:   dtos.TimeOnly(sched.EndTime),
-		})
-	}
-	for _, info := range res.MentorPayments {
-		profile.MentorPayments = append(profile.MentorPayments, dtos.MentorPaymentInfoRes(info))
-	}
+	profile := dtos.MentorProfileRes(*detail)
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
 		Data:    profile,
@@ -197,11 +207,6 @@ func (mh *MentorHandlerImpl) GetMentorList(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
-	if err != nil {
-		ctx.Error(err)
-		return
-	}
 	param := entity.ListMentorParam{
 		PaginatedParam: entity.PaginatedParam{
 			Limit: req.Limit,
@@ -209,7 +214,6 @@ func (mh *MentorHandlerImpl) GetMentorList(ctx *gin.Context) {
 		},
 		Search:               req.Search,
 		SortYearOfExperience: req.SortYearOfExperience,
-		UserID:               claim.Subject,
 	}
 	if param.Limit <= 0 || param.Limit > constants.MaxLimit {
 		param.Limit = constants.DefaultLimit
@@ -364,7 +368,7 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 		Name:              req.Name,
 		Bio:               req.Bio,
 		YearsOfExperience: req.YearsOfExperience,
-		MentorPayments:    []entity.MentorPaymentInfo{},
+		MentorPayments:    []entity.AddMentorPaymentInfo{},
 		Degree:            req.Degree,
 		Major:             req.Major,
 		Campus:            req.Campus,
@@ -385,7 +389,7 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 				ctx.Error(err)
 				return
 			}
-			param.MentorPayments = append(param.MentorPayments, entity.MentorPaymentInfo(payment))
+			param.MentorPayments = append(param.MentorPayments, entity.AddMentorPaymentInfo(payment))
 		}
 	}
 	if len(req.MentorSchedules) > 0 {
@@ -439,6 +443,14 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
+	if req.YearsOfExperience == nil {
+		ctx.Error(customerrors.NewError(
+			"years of experience should not empty",
+			errors.New("years of experience should not empty"),
+			customerrors.InvalidAction,
+		))
+		return
+	}
 	if err := ValidateDegree(req.Degree); err != nil {
 		ctx.Error(err)
 		return
@@ -489,9 +501,8 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 		Email:             req.Email,
 		Password:          req.Password,
 		ResumeFile:        file,
-		Bio:               req.Bio,
-		YearsOfExperience: req.YearsOfExperience,
-		MentorPayments:    []entity.MentorPaymentInfo{},
+		YearsOfExperience: *req.YearsOfExperience,
+		MentorPayments:    []entity.AddMentorPaymentInfo{},
 		Degree:            req.Degree,
 		Major:             req.Major,
 		Campus:            req.Campus,
@@ -511,7 +522,7 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 			ctx.Error(err)
 			return
 		}
-		param.MentorPayments = append(param.MentorPayments, entity.MentorPaymentInfo(payment))
+		param.MentorPayments = append(param.MentorPayments, entity.AddMentorPaymentInfo(payment))
 	}
 	dowsMap := make(map[int]bool)
 	for _, sched := range req.MentorSchedules {

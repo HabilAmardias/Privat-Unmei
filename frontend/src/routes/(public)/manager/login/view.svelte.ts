@@ -1,4 +1,4 @@
-import type { ManagerLoginType } from "./model";
+import type { ManagerLoginType } from './model';
 
 export class ManagerAuthView {
 	loginMenu = $state<ManagerLoginType>('admin');
@@ -19,16 +19,16 @@ export class ManagerAuthView {
 	passwordOnBlur() {
 		if (!this.#validatePassword(this.password)) {
 			this.passwordError = new Error('min 8 characters with !@#?');
-		} else {
-			this.passwordError = undefined;
+			return;
 		}
+		this.passwordError = undefined;
 	}
 	emailOnBlur() {
 		if (!this.#validateEmail(this.email)) {
 			this.emailError = new Error('please insert an valid email');
-		} else {
-			this.emailError = undefined;
+			return;
 		}
+		this.emailError = undefined;
 	}
 	#validateEmail(email: string) {
 		const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -47,11 +47,11 @@ export class ManagerAuthView {
 		this.isLoading = b;
 	}
 
-	switchForm(newState : ManagerLoginType) {
+	switchForm(newState: ManagerLoginType) {
 		this.loginMenu = newState;
 	}
 
-	setIsDesktop(b: boolean){
-		this.isDesktop = b
+	setIsDesktop(b: boolean) {
+		this.isDesktop = b;
 	}
 }

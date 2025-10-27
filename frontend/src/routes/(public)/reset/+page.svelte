@@ -4,11 +4,11 @@
 	import Card from '$lib/components/card/Card.svelte';
 	import Input from '$lib/components/form/Input.svelte';
 	import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
-	import toast from 'svelte-french-toast';
 	import { ResetView } from './view.svelte';
 	import type { PageProps } from './$types';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { CreateToast, DismissToast } from '$lib/utils/helper';
 
 	const View = new ResetView();
 	let { data }: PageProps = $props();
@@ -21,17 +21,16 @@
 
 	function onSendSubmit(args: EnhancementArgs) {
 		View.setIsLoading(true);
-		const loadID = toast.loading('loading....', { position: 'top-right' });
-		return async ({ result, update }: EnhancementReturn) => {
+		const loadID = CreateToast('loading', 'loading....');
+		return async ({ result }: EnhancementReturn) => {
 			View.setIsLoading(false);
-			toast.dismiss(loadID);
+			DismissToast(loadID);
 			if (result.type === 'success') {
-				toast.success(result.data?.message, { position: 'top-right' });
+				CreateToast('success', result.data?.message);
 			}
 			if (result.type === 'failure') {
-				toast.error(result.data?.message, { position: 'top-right' });
+				CreateToast('error', result.data?.message);
 			}
-			update();
 		};
 	}
 </script>

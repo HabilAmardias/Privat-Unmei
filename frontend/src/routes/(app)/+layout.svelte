@@ -5,16 +5,16 @@
 	import Menubar from '$lib/components/menubar/Menubar.svelte';
 	import MenuItem from '$lib/components/menubar/MenuItem.svelte';
 	import { loadingStore } from '$lib/stores/LoadingStore.svelte';
-	import { List, LogIn, LogOut, MessageCircleMore, User } from '@lucide/svelte';
-	import { ScrollArea } from 'bits-ui';
-	import toast from 'svelte-french-toast';
+	import { CircleUserRound, LogIn, LogOut, MessageCircleMore, Users } from '@lucide/svelte';
 	import type { LayoutProps } from './$types';
+	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import CldImage from '$lib/components/image/CldImage.svelte';
 	import { onMount } from 'svelte';
 	import { AppLayoutView } from './view.svelte';
+	import { CreateToast } from '$lib/utils/helper';
 
 	function onLogout() {
-		const loadID = toast.loading('logging out....', { position: 'top-right' });
+		const loadID = CreateToast('loading', 'logging out....');
 		loadingStore.setLogOutLoadID(loadID);
 		goto('/logout', { replaceState: true });
 	}
@@ -34,11 +34,9 @@
 </script>
 
 <main class="h-screen pb-24 md:pb-0 md:pt-24">
-	<ScrollArea.Root class="h-full">
-		<ScrollArea.Viewport class="h-full">
-			{@render children()}
-		</ScrollArea.Viewport>
-	</ScrollArea.Root>
+	<ScrollArea class="h-full" orientation="vertical" viewportClasses="h-full max-h-full">
+		{@render children()}
+	</ScrollArea>
 </main>
 <Menubar>
 	<MenuItem>
@@ -49,10 +47,10 @@
 		</Link>
 	</MenuItem>
 	<MenuItem>
-		<Link href="/courses">
+		<Link href="/mentors">
 			<div class="flex flex-col items-center">
-				<List />
-				Courses
+				<Users />
+				Mentors
 			</div>
 		</Link>
 	</MenuItem>
@@ -68,7 +66,7 @@
 		<MenuItem>
 			<Link href="/profile">
 				<div class="flex flex-col items-center">
-					<User />
+					<CircleUserRound />
 					Profile
 				</div>
 			</Link>

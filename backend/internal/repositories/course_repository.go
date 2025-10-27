@@ -327,7 +327,7 @@ func (cr *CourseRepositoryImpl) GetMaximumTransactionCount(ctx context.Context, 
 		driver = tx
 	}
 	query := `
-	SELECT MAX(transaction_count)
+	SELECT COALESCE(MAX(transaction_count), 0)
 	FROM courses
 	WHERE mentor_id = $1 AND deleted_at IS NULL
 	`

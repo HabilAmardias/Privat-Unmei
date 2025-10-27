@@ -1,11 +1,11 @@
-import type { Fetch, FetchReturn, HTTPMethod } from '$lib/types';
+import type { Fetch, HTTPMethod } from '$lib/types';
 
 export async function FetchData(
 	fetch: Fetch,
 	url: string | URL,
 	method?: HTTPMethod,
 	body?: BodyInit
-): Promise<FetchReturn> {
+) {
 	const res = await fetch(url, {
 		method,
 		body,

@@ -11,15 +11,9 @@ type (
 		StartTime TimeOnly `json:"start_time" binding:"required"`
 		EndTime   TimeOnly `json:"end_time" binding:"required"`
 	}
-	MentorAvailabilityRes struct {
-		DayOfWeek int      `json:"day_of_week"`
-		StartTime TimeOnly `json:"start_time"`
-		EndTime   TimeOnly `json:"end_time"`
-	}
 	MentorPaymentInfoReq struct {
-		PaymentMethodID   int    `json:"payment_method_id" binding:"required"`
-		PaymentMethodName string `json:"payment_method_name" binding:"required"`
-		AccountNumber     string `json:"account_number" binding:"required,numeric"`
+		PaymentMethodID int    `json:"payment_method_id" binding:"required"`
+		AccountNumber   string `json:"account_number" binding:"required,numeric"`
 	}
 	MentorPaymentInfoRes struct {
 		PaymentMethodID   int    `json:"payment_method_id"`
@@ -29,10 +23,9 @@ type (
 	AddNewMentorReq struct {
 		Name              string   `form:"name" binding:"required"`
 		Email             string   `form:"email" binding:"required,email"`
-		Bio               string   `form:"bio" binding:"required"`
 		Password          string   `form:"password" binding:"required,containsany=!@#?,min=8"`
 		MentorPayments    []string `form:"mentor_payment_info" binding:"dive"`
-		YearsOfExperience int      `form:"years_of_experience" binding:"required,gte=0"`
+		YearsOfExperience *int     `form:"years_of_experience" binding:"omitempty,gte=0"`
 		Degree            string   `form:"degree" binding:"required"`
 		Major             string   `form:"major" binding:"required"`
 		Campus            string   `form:"campus" binding:"required"`
@@ -81,33 +74,24 @@ type (
 	MentorChangePasswordReq struct {
 		NewPassword string `json:"password" binding:"required,containsany=!@#?,min=8"`
 	}
-	GetProfileMentorRes struct {
-		ResumeFile           string                  `json:"resume_file"`
-		ProfileImage         string                  `json:"profile_image"`
-		Name                 string                  `json:"name"`
-		Bio                  string                  `json:"bio"`
-		YearsOfExperience    int                     `json:"years_of_experience"`
-		Degree               string                  `json:"degree"`
-		Major                string                  `json:"major"`
-		Campus               string                  `json:"campus"`
-		MentorAvailabilities []MentorAvailabilityRes `json:"mentor_availability"`
-		MentorPayments       []MentorPaymentInfoRes  `json:"mentor_payment_info"`
-	}
-	GetMentorProfileForStudentRes struct {
-		MentorID                string                  `json:"id"`
-		MentorName              string                  `json:"name"`
-		MentorEmail             string                  `json:"email"`
-		MentorBio               string                  `json:"bio"`
-		MentorProfileImage      string                  `json:"profile_image"`
-		MentorAverageRating     float64                 `json:"rating"`
-		MentorResume            string                  `json:"resume"`
-		MentorYearsOfExperience int                     `json:"years_of_experience"`
-		MentorDegree            string                  `json:"degree"`
-		MentorMajor             string                  `json:"major"`
-		MentorCampus            string                  `json:"campus"`
-		MentorAvailabilities    []MentorAvailabilityRes `json:"mentor_availability"`
+	MentorProfileRes struct {
+		ID                string `json:"id"`
+		Name              string `json:"name"`
+		Email             string `json:"email"`
+		Bio               string `json:"bio"`
+		ProfileImage      string `json:"profile_image"`
+		Resume            string `json:"resume"`
+		YearsOfExperience int    `json:"years_of_experience"`
+		Degree            string `json:"degree"`
+		Major             string `json:"major"`
+		Campus            string `json:"campus"`
 	}
 	GetDOWAvailabilityRes struct {
 		DayOfWeeks []int `json:"day_of_weeks"`
+	}
+	GetMentorAvailabilityRes struct {
+		DayOfWeek int    `json:"day_of_week"`
+		StartTime string `json:"start_time"`
+		EndTime   string `json:"end_time"`
 	}
 )

@@ -2,12 +2,16 @@
 	type inputProps = {
 		placeholder?: string;
 		name: string;
-		value?: string;
+		value?: string | number;
 		id: string;
-		type: 'text' | 'email';
+		type: 'text' | 'email' | 'number' | 'time';
+		onInput?: (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => void;
 		onBlur?: (e: FocusEvent & { currentTarget: EventTarget & HTMLInputElement }) => void;
 		err?: Error;
 		width?: 'full' | number;
+		min?: number;
+		max?: number;
+		step?: number;
 	};
 
 	let {
@@ -15,10 +19,14 @@
 		value = $bindable(),
 		name,
 		onBlur,
+		onInput,
 		type,
 		id,
 		err,
-		width = 'full'
+		width = 'full',
+		min,
+		max,
+		step
 	}: inputProps = $props();
 	let containerClass = $state<string>('flex flex-col rounded-md');
 	if (width === 'full') {
@@ -36,11 +44,15 @@
 		<input
 			bind:value
 			onblur={onBlur}
+			oninput={onInput}
 			class="placeholder:text-[var(--secondary-color)]/60 w-full border-none bg-transparent text-[var(--secondary-color)]"
 			{id}
 			{name}
 			{placeholder}
 			{type}
+			{min}
+			{max}
+			{step}
 		/>
 	</label>
 </div>

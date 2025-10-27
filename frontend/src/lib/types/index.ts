@@ -8,6 +8,8 @@ export type SameSite = 'none' | 'lax' | 'strict';
 
 export type UserStatus = 'verified' | 'unverified'
 
+export type ToastType = "success" | "error" | "loading"
+
 export type MessageResponse = {
 	message: string;
 };

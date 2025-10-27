@@ -22,4 +22,14 @@ type (
 		AdminID  string
 		Password string
 	}
+	AdminProfileParam struct {
+		AdminID string
+	}
+	AdminProfileQuery struct {
+		Name         string
+		Email        string
+		Bio          string
+		ProfileImage string
+		Status       string
+	}
 )

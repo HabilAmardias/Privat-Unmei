@@ -40,19 +40,37 @@ type (
 		UpdatedAt time.Time
 		DeletedAt *time.Time
 	}
+	AddMentorPaymentInfo struct {
+		PaymentMethodID int
+		AccountNumber   string
+	}
 	MentorPaymentInfo struct {
 		PaymentMethodID   int
 		PaymentMethodName string
 		AccountNumber     string
 	}
+	MentorProfileParam struct {
+		ID string
+	}
+	MentorProfileQuery struct {
+		ID                string
+		Name              string
+		Email             string
+		Bio               string
+		ProfileImage      string
+		Resume            string
+		YearsOfExperience int
+		Degree            string
+		Major             string
+		Campus            string
+	}
 	AddNewMentorParam struct {
 		AdminID           string
 		Name              string
 		Email             string
-		Bio               string
 		Password          string
 		ResumeFile        multipart.File
-		MentorPayments    []MentorPaymentInfo
+		MentorPayments    []AddMentorPaymentInfo
 		YearsOfExperience int
 		Degree            string
 		Major             string
@@ -69,7 +87,7 @@ type (
 		Degree            *string
 		Major             *string
 		Campus            *string
-		MentorPayments    []MentorPaymentInfo
+		MentorPayments    []AddMentorPaymentInfo
 		MentorSchedules   []MentorSchedule
 	}
 	UpdateMentorQuery struct {
@@ -95,7 +113,6 @@ type (
 		PaginatedParam
 		Search               *string
 		SortYearOfExperience *bool
-		UserID               string
 	}
 	LoginMentorParam struct {
 		Email    string
@@ -104,9 +121,6 @@ type (
 	MentorChangePasswordParam struct {
 		ID          string
 		NewPassword string
-	}
-	GetProfileMentorParam struct {
-		MentorID string
 	}
 	GetProfileMentorQuery struct {
 		ResumeFile           string
@@ -120,23 +134,6 @@ type (
 		MentorAvailabilities []MentorSchedule
 		MentorPayments       []MentorPaymentInfo
 	}
-	GetMentorProfileForStudentParam struct {
-		MentorID string
-	}
-	GetMentorProfileForStudentQuery struct {
-		MentorID                string
-		MentorName              string
-		MentorEmail             string
-		MentorBio               string
-		MentorProfileImage      string
-		MentorAverageRating     float64
-		MentorResume            string
-		MentorYearsOfExperience int
-		MentorDegree            string
-		MentorMajor             string
-		MentorCampus            string
-		MentorAvailabilities    []MentorSchedule
-	}
 	AvailabilityResult struct {
 		TotalRequested   int
 		AvailableSlots   int
@@ -146,6 +143,9 @@ type (
 		Role     int
 		CourseID int
 		UserID   string
+	}
+	GetMentorAvailabilityParam struct {
+		MentorID string
 	}
 )
 

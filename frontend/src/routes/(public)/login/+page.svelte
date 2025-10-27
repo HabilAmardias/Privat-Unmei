@@ -7,7 +7,6 @@
 	import { PUBLIC_RECAPTCHA_SITE_KEY } from '$env/static/public';
 	import { enhance } from '$app/forms';
 	import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
-	import toast from 'svelte-french-toast';
 	import Link from '$lib/components/button/Link.svelte';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
@@ -15,6 +14,7 @@
 	import Google from '$lib/components/icons/Google.svelte';
 	import CldImage from '$lib/components/image/CldImage.svelte';
 	import { PrivatUnmeiLogo } from '$lib/utils/constants';
+	import { CreateToast, DismissToast } from '$lib/utils/helper';
 
 	const View = new AuthView();
 
@@ -24,9 +24,9 @@
 			View.setIsDesktop(window.innerWidth >= 768);
 		}
 		if (loadingStore.logOutLoadID) {
-			toast.dismiss(loadingStore.logOutLoadID);
+			DismissToast(loadingStore.logOutLoadID);
 			loadingStore.removeLogOutLoadID();
-			toast.success('log out success', { position: 'top-right' });
+			CreateToast('success', 'logout success');
 		}
 		window.addEventListener('resize', isDesktop);
 		return () => {
@@ -37,9 +37,7 @@
 
 	async function onRegisterSubmit(args: EnhancementArgs) {
 		View.setIsLoading(true);
-		const loadID = toast.loading('Creating account....', {
-			position: 'top-right'
-		});
+		const loadID = CreateToast('loading', 'creating account....');
 		await new Promise((resolve) => {
 			grecaptcha.ready(resolve);
 		});
@@ -48,17 +46,13 @@
 
 		return async ({ result, update }: EnhancementReturn) => {
 			View.setIsLoading(false);
-			toast.dismiss(loadID);
+			DismissToast(loadID);
 			if (result.type === 'success') {
-				toast.success('Successfully registered', {
-					position: 'top-right'
-				});
+				CreateToast('success', 'successfully registered');
 				View.switchForm();
 			}
 			if (result.type === 'failure') {
-				toast.error(result.data?.message, {
-					position: 'top-right'
-				});
+				CreateToast('error', result.data?.message);
 			}
 			update();
 		};
@@ -67,22 +61,18 @@
 	function onLoginSubmit(args: EnhancementArgs) {
 		if (args.action.search === '?/login') {
 			View.setIsLoading(true);
-			const loadID = toast.loading('logging in.....', { position: 'top-right' });
+			const loadID = CreateToast('loading', 'logging in....');
 			return async ({ result, update }: EnhancementReturn) => {
 				if (result.type === 'success') {
 					await goto('/courses', { replaceState: true });
 					View.setIsLoading(false);
-					toast.dismiss(loadID);
-					toast.success('login success', {
-						position: 'top-right'
-					});
+					DismissToast(loadID);
+					CreateToast('success', 'login success');
 				}
 				if (result.type === 'failure') {
 					View.setIsLoading(false);
-					toast.dismiss(loadID);
-					toast.error(result.data?.message, {
-						position: 'top-right'
-					});
+					DismissToast(loadID);
+					CreateToast('error', result.data?.message);
 				}
 				update();
 			};

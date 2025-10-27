@@ -1,16 +1,18 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { LayoutProps } from './$types';
-	import { adminRole, mentorRole } from '$lib/utils/constants';
+	import { mentorRole } from '$lib/utils/constants';
 	import { goto } from '$app/navigation';
 
 	const { children, data }: LayoutProps = $props();
 
 	onMount(() => {
-		if (data.role !== mentorRole && data.role !== adminRole) {
+		if (data.role !== mentorRole) {
 			goto('/courses', { replaceState: true });
 		}
 	});
 </script>
 
-{@render children()}
+<main class="flex-1">
+	{@render children()}
+</main>

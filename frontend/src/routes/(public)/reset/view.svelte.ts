@@ -20,22 +20,25 @@ export class ResetView {
 	});
 
 	passwordOnBlur() {
-		this.passwordError = undefined;
 		if (!this.#validatePassword(this.password)) {
 			this.passwordError = new Error('min 8 characters with !@#?');
+			return;
 		}
+		this.passwordError = undefined;
 	}
 	emailOnBlur() {
-		this.emailError = undefined;
 		if (!this.#validateEmail(this.email)) {
 			this.emailError = new Error('please insert an valid email');
+			return;
 		}
+		this.emailError = undefined;
 	}
 	repeatPasswordOnBlur() {
-		this.repeatPasswordError = undefined;
 		if (this.repeatPassword !== this.password) {
 			this.repeatPasswordError = new Error('password does not match');
+			return;
 		}
+		this.repeatPasswordError = undefined;
 	}
 	#validateEmail(email: string) {
 		const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

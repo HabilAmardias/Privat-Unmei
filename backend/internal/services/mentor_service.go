@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"errors"
-	"fmt"
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
@@ -50,6 +49,22 @@ func CreateMentorService(
 	return &MentorServiceImpl{tmr, ur, mr, tr, ccr, car, crr, cr, pr, ar, bu, ju, cu, gu, lg}
 }
 
+func (ms *MentorServiceImpl) GetMentorAvailability(ctx context.Context, param entity.GetMentorAvailabilityParam) (*[]entity.MentorAvailability, error) {
+	scheds := new([]entity.MentorAvailability)
+	user := new(entity.User)
+	mentor := new(entity.Mentor)
+	if err := ms.ur.FindByID(ctx, param.MentorID, user); err != nil {
+		return nil, err
+	}
+	if err := ms.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
+		return nil, err
+	}
+	if err := ms.car.GetAvailabilityByMentorID(ctx, param.MentorID, scheds); err != nil {
+		return nil, err
+	}
+	return scheds, nil
+}
+
 func (ms *MentorServiceImpl) GetDOWAvailability(ctx context.Context, param entity.GetDOWAvailabilityParam) (*[]int, error) {
 	dows := new([]int)
 	user := new(entity.User)
@@ -82,91 +97,26 @@ func (ms *MentorServiceImpl) GetDOWAvailability(ctx context.Context, param entit
 	return dows, nil
 }
 
-func (ms *MentorServiceImpl) GetMentorProfileForStudent(ctx context.Context, param entity.GetMentorProfileForStudentParam) (*entity.GetMentorProfileForStudentQuery, error) {
+func (ms *MentorServiceImpl) GetMentorProfile(ctx context.Context, param entity.MentorProfileParam) (*entity.MentorProfileQuery, error) {
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
-	mentorAvailability := new([]entity.MentorAvailability)
-	res := new(entity.GetMentorProfileForStudentQuery)
-	if err := ms.ur.FindByID(ctx, param.MentorID, user); err != nil {
+	res := new(entity.MentorProfileQuery)
+	if err := ms.ur.FindByID(ctx, param.ID, user); err != nil {
 		return nil, err
 	}
-	if err := ms.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
+	if err := ms.mr.FindByID(ctx, param.ID, mentor, false); err != nil {
 		return nil, err
 	}
-	if err := ms.car.GetAvailabilityByMentorID(ctx, param.MentorID, mentorAvailability); err != nil {
-		return nil, err
-	}
-
-	res.MentorAvailabilities = []entity.MentorSchedule{}
-	res.MentorAverageRating = constants.NoRating
-	if mentor.RatingCount > constants.NoRating {
-		res.MentorAverageRating = mentor.TotalRating / float64(mentor.RatingCount)
-	}
-	res.MentorBio = user.Bio
-	res.MentorCampus = mentor.Campus
-	res.MentorDegree = mentor.Degree
-	res.MentorEmail = user.Email
-	res.MentorID = mentor.ID
-	res.MentorMajor = mentor.Major
-	res.MentorName = user.Name
-	res.MentorProfileImage = user.ProfileImage
-	res.MentorResume = mentor.Resume
-	res.MentorYearsOfExperience = mentor.YearsOfExperience
-
-	for _, sc := range *mentorAvailability {
-		res.MentorAvailabilities = append(res.MentorAvailabilities, entity.MentorSchedule{
-			DayOfWeek: sc.DayOfWeek,
-			StartTime: sc.StartTime,
-			EndTime:   sc.EndTime,
-		})
-	}
-
-	return res, nil
-}
-
-func (ms *MentorServiceImpl) GetProfileForMentor(ctx context.Context, param entity.GetProfileMentorParam) (*entity.GetProfileMentorQuery, error) {
-	user := new(entity.User)
-	mentor := new(entity.Mentor)
-	mentorAvailability := new([]entity.MentorAvailability)
-	res := new(entity.GetProfileMentorQuery)
-	paymentInfo := new([]entity.MentorPaymentInfo)
-
-	if err := ms.ur.FindByID(ctx, param.MentorID, user); err != nil {
-		return nil, err
-	}
-	if err := ms.mr.FindByID(ctx, user.ID, mentor, false); err != nil {
-		return nil, err
-	}
-	if err := ms.car.GetAvailabilityByMentorID(ctx, mentor.ID, mentorAvailability); err != nil {
-		return nil, err
-	}
-	if err := ms.pr.MentorPaymentInfo(ctx, param.MentorID, paymentInfo); err != nil {
-		return nil, err
-	}
-	if len(*mentorAvailability) <= 0 {
-		return nil, customerrors.NewError(
-			"mentor data does not exist",
-			errors.New("mentor availability does not exist"),
-			customerrors.ItemNotExist,
-		)
-	}
-	res.ResumeFile = mentor.Resume
-	res.ProfileImage = user.ProfileImage
+	res.ID = user.ID
+	res.Name = user.Name
+	res.Email = user.Email
 	res.Bio = user.Bio
 	res.Campus = mentor.Campus
 	res.Degree = mentor.Degree
-	res.MentorPayments = *paymentInfo
 	res.Major = mentor.Major
-	res.Name = user.Name
+	res.ProfileImage = user.ProfileImage
+	res.Resume = mentor.Resume
 	res.YearsOfExperience = mentor.YearsOfExperience
-	res.MentorAvailabilities = []entity.MentorSchedule{}
-	for _, sched := range *mentorAvailability {
-		res.MentorAvailabilities = append(res.MentorAvailabilities, entity.MentorSchedule{
-			DayOfWeek: sched.DayOfWeek,
-			StartTime: sched.StartTime,
-			EndTime:   sched.EndTime,
-		})
-	}
 	return res, nil
 }
 
@@ -254,17 +204,6 @@ func (ms *MentorServiceImpl) Login(ctx context.Context, param entity.LoginMentor
 func (ms *MentorServiceImpl) GetMentorList(ctx context.Context, param entity.ListMentorParam) (*[]entity.ListMentorQuery, *int64, error) {
 	mentors := new([]entity.ListMentorQuery)
 	totalRow := new(int64)
-	user := new(entity.User)
-	if err := ms.ur.FindByID(ctx, param.UserID, user); err != nil {
-		return nil, nil, err
-	}
-	if user.Status == constants.UnverifiedStatus {
-		return nil, nil, customerrors.NewError(
-			"unauthorized",
-			errors.New("user is not verified yet"),
-			customerrors.Unauthenticate,
-		)
-	}
 	if err := ms.mr.GetMentorList(ctx, mentors, totalRow, param); err != nil {
 		return nil, nil, err
 	}
@@ -304,11 +243,9 @@ func (ms *MentorServiceImpl) DeleteMentor(ctx context.Context, param entity.Dele
 			return err
 		}
 		if *maxTransactionCount > 0 {
-			return customerrors.NewError(
-				"there are course that has been bought",
-				errors.New("max transaction count is more than zero"),
-				customerrors.InvalidAction,
-			)
+			if err := ms.crr.DeleteAllMentorOrders(ctx, mentor.ID); err != nil {
+				return err
+			}
 		}
 		if err := ms.cr.FindByMentorID(ctx, param.ID, courseIDs); err != nil {
 			return err
@@ -480,7 +417,6 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 
 		user.Email = param.Email
 		user.Name = param.Name
-		user.Bio = param.Bio
 		user.ProfileImage = constants.DefaultAvatar
 
 		hashedPass, err := ms.bu.HashPassword(param.Password)
@@ -501,9 +437,7 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 		mentor.Degree = param.Degree
 		mentor.Major = param.Major
 		mentor.YearsOfExperience = param.YearsOfExperience
-
-		newFilename := fmt.Sprintf("%s.pdf", mentor.ID)
-		uploadRes, err := ms.cu.UploadFile(ctx, param.ResumeFile, newFilename, constants.ResumeFolder)
+		uploadRes, err := ms.cu.UploadFile(ctx, param.ResumeFile, mentor.ID, constants.ResumeFolder)
 		if err != nil {
 			return err
 		}

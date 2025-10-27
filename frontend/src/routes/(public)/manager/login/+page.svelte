@@ -5,7 +5,6 @@
 	import { ManagerAuthView } from './view.svelte';
 	import { enhance } from '$app/forms';
 	import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
-	import toast from 'svelte-french-toast';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { loadingStore } from '$lib/stores/LoadingStore.svelte';
@@ -15,6 +14,7 @@
 	import { adminRole, mentorRole } from '$lib/utils/constants';
 	import NavigationButton from '$lib/components/button/NavigationButton.svelte';
 	import type { PageProps } from './$types';
+	import { CreateToast, DismissToast } from '$lib/utils/helper';
 
 	const View = new ManagerAuthView();
 
@@ -39,9 +39,9 @@
 			View.setIsDesktop(window.innerWidth >= 768);
 		}
 		if (loadingStore.logOutLoadID) {
-			toast.dismiss(loadingStore.logOutLoadID);
+			DismissToast(loadingStore.logOutLoadID);
 			loadingStore.removeLogOutLoadID();
-			toast.success('log out success', { position: 'top-right' });
+			CreateToast('success', 'logout success');
 		}
 		window.addEventListener('resize', isDesktop);
 		return () => {
@@ -51,46 +51,36 @@
 
 	function onAdminLoginSubmit(args: EnhancementArgs) {
 		View.setIsLoading(true);
-		const loadID = toast.loading('logging in.....', { position: 'top-right' });
-		return async ({ result, update }: EnhancementReturn) => {
+		const loadID = CreateToast('loading', 'logging in....');
+		return async ({ result }: EnhancementReturn) => {
 			if (result.type === 'success') {
 				await goto('/manager/admin', { replaceState: true });
 				View.setIsLoading(false);
-				toast.dismiss(loadID);
-				toast.success('login success', {
-					position: 'top-right'
-				});
+				DismissToast(loadID);
+				CreateToast('success', 'login success');
 			}
 			if (result.type === 'failure') {
 				View.setIsLoading(false);
-				toast.dismiss(loadID);
-				toast.error(result.data?.message, {
-					position: 'top-right'
-				});
+				DismissToast(loadID);
+				CreateToast('error', result.data?.message);
 			}
-			update();
 		};
 	}
 	function onMentorLoginSubmit(args: EnhancementArgs) {
 		View.setIsLoading(true);
-		const loadID = toast.loading('logging in.....', { position: 'top-right' });
-		return async ({ result, update }: EnhancementReturn) => {
+		const loadID = CreateToast('loading', 'logging in....');
+		return async ({ result }: EnhancementReturn) => {
 			if (result.type === 'success') {
 				await goto('/manager/mentor', { replaceState: true });
 				View.setIsLoading(false);
-				toast.dismiss(loadID);
-				toast.success('login success', {
-					position: 'top-right'
-				});
+				DismissToast(loadID);
+				CreateToast('success', 'login success');
 			}
 			if (result.type === 'failure') {
 				View.setIsLoading(false);
-				toast.dismiss(loadID);
-				toast.error(result.data?.message, {
-					position: 'top-right'
-				});
+				DismissToast(loadID);
+				CreateToast('error', result.data?.message);
 			}
-			update();
 		};
 	}
 </script>
