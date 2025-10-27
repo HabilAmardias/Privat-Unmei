@@ -4,7 +4,6 @@
 	import { goto } from '$app/navigation';
 	import CldImage from '$lib/components/image/CldImage.svelte';
 	import { MentorDetailView } from './view.svelte';
-	import DownloadLink from '$lib/components/button/DownloadLink.svelte';
 	import AlertDialog from '$lib/components/dialog/AlertDialog.svelte';
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import { dowMap } from './constants';
@@ -46,11 +45,6 @@
 			<div class="flex flex-col gap-1">
 				<p class="font-bold text-[var(--tertiary-color)]">{data.profile.name}</p>
 				<p>{data.profile.email}</p>
-				<DownloadLink
-					download="resume.pdf"
-					className="cursor-pointer text-[var(--tertiary-color)] hover:text-[var(--primary-color)]"
-					href={`${data.profile.resume}?fl_attachment`}>Download Resume</DownloadLink
-				>
 			</div>
 			<AlertDialog
 				action="?/deleteMentor"
