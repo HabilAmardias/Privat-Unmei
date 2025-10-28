@@ -1,8 +1,39 @@
 import type { Fetch, PaginatedResponse, ServerResponse } from '$lib/types';
 import { FetchData } from '$lib/utils';
-import type { AdditionalCost, adminProfile } from './model';
+import type { AdditionalCost, adminProfile, Discount } from './model';
 
 class CostManagementController {
+	getDiscounts = async (fetch: Fetch, req?: Request) => {
+		let url = 'http://localhost:8080/api/v1/discounts?';
+		if (req) {
+			const formData = await req.formData();
+			const page = formData.get('page');
+			if (page) {
+				url += `page=${page}`;
+			}
+		}
+		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
+		if (!success) {
+			return { success, message, status };
+		}
+		const resBody: ServerResponse<PaginatedResponse<Discount>> = await res?.json();
+		return { success, message, status, resBody };
+	};
+	updateDiscountAmount = async (fetch: Fetch, req: Request) => {
+		const formData = await req.formData();
+		const id = formData.get('id');
+		const amount = formData.get('amount');
+		if (!id) {
+			return { success: false, message: 'no discount selected', status: 400 };
+		}
+		const reqBody = JSON.stringify({
+			amount: amount ? parseFloat(amount as string) : null
+		});
+		const url = `http://localhost:8080/api/v1/discounts/${id}`;
+
+		const { success, message, status } = await FetchData(fetch, url, 'PATCH', reqBody);
+		return { success, message, status };
+	};
 	getCosts = async (fetch: Fetch, req?: Request) => {
 		let url = 'http://localhost:8080/api/v1/additional-costs?';
 		if (req) {
@@ -18,6 +49,34 @@ class CostManagementController {
 		}
 		const resBody: ServerResponse<PaginatedResponse<AdditionalCost>> = await res?.json();
 		return { success, message, status, resBody };
+	};
+	deleteDiscount = async (fetch: Fetch, req: Request) => {
+		const formData = await req.formData();
+		const id = formData.get('id');
+		if (!id) {
+			return { success: false, message: 'no discount selected', status: 400 };
+		}
+		const url = `http://localhost:8080/api/v1/discounts/${id}`;
+		const { success, message, status } = await FetchData(fetch, url, 'DELETE');
+		return { success, message, status };
+	};
+	createDiscount = async (fetch: Fetch, req: Request) => {
+		const formData = await req.formData();
+		const amount = formData.get('number_of_participant');
+		const number_of_participant = formData.get('name');
+		if (!amount) {
+			return { success: false, message: 'provide discount amount', status: 400 };
+		}
+		if (!number_of_participant) {
+			return { success: false, message: 'provide discount number of participant', status: 400 };
+		}
+		const reqBody = JSON.stringify({
+			number_of_participant,
+			amount: parseFloat(amount as string)
+		});
+		const url = 'http://localhost:8080/api/v1/discounts';
+		const { success, message, status } = await FetchData(fetch, url, 'POST', reqBody);
+		return { success, message, status };
 	};
 	updateCostAmount = async (fetch: Fetch, req: Request) => {
 		const formData = await req.formData();

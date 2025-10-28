@@ -4,6 +4,12 @@ export type AdditionalCost = {
 	amount: number;
 };
 
+export type Discount = {
+	id: number;
+	number_of_participant: number;
+	amount: number;
+};
+
 export type adminProfile = {
 	name: string;
 	email: string;

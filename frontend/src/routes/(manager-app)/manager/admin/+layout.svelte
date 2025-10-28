@@ -62,7 +62,7 @@
 				<p class="duration-300 ease-in-out {View.menuOpen ? 'opacity-100' : 'opacity-0'}">Costs</p>
 			</div>
 		</Link>
-		<Link href="/manager/admin/payment-methods">
+		<Link href="/manager/admin/payments">
 			<div class="flex flex-col items-center gap-1">
 				<Banknote />
 				<p class="duration-300 ease-in-out {View.menuOpen ? 'opacity-100' : 'opacity-0'}">
@@ -110,7 +110,7 @@
 			</Link>
 		</MenuItem>
 		<MenuItem>
-			<Link href="/manager/admin/payment">
+			<Link href="/manager/admin/payments">
 				<div class="flex flex-col items-center gap-1">
 					<Banknote />
 					<p>Payments</p>
