@@ -36,9 +36,9 @@ func (ph *PaymentHandlerImpl) GetMentorPaymentMethod(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	entries := []dtos.GetPaymentMethodRes{}
+	entries := []dtos.GetMentorPaymentMethodRes{}
 	for _, method := range *methods {
-		entries = append(entries, dtos.GetPaymentMethodRes(method))
+		entries = append(entries, dtos.GetMentorPaymentMethodRes(method))
 	}
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,

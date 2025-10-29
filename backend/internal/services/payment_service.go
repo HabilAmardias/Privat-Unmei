@@ -27,10 +27,10 @@ func CreatePaymentService(
 	return &PaymentServiceImpl{pr, ar, ur, mr, tmr}
 }
 
-func (ps *PaymentServiceImpl) GetMentorPaymentMethod(ctx context.Context, param entity.GetMentorPaymentMethodParam) (*[]entity.GetPaymentMethodQuery, error) {
+func (ps *PaymentServiceImpl) GetMentorPaymentMethod(ctx context.Context, param entity.GetMentorPaymentMethodParam) (*[]entity.GetMentorPaymentMethodQuery, error) {
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
-	methods := new([]entity.GetPaymentMethodQuery)
+	methods := new([]entity.GetMentorPaymentMethodQuery)
 	if err := ps.ur.FindByID(ctx, param.UserID, user); err != nil {
 		return nil, err
 	}

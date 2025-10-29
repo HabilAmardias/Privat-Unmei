@@ -35,10 +35,14 @@ type (
 		SeekPaginatedParam
 		Search *string
 	}
-	GetPaymentMethodQuery struct {
+	GetMentorPaymentMethodQuery struct {
 		ID            int
 		Name          string
 		AccountNumber string
+	}
+	GetPaymentMethodQuery struct {
+		ID   int
+		Name string
 	}
 	GetMentorPaymentMethodParam struct {
 		UserID   string

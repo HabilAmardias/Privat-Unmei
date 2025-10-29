@@ -35,7 +35,7 @@ func (pr *PaymentRepositoryImpl) HardDeleteMentorPayment(ctx context.Context, me
 func (pr *PaymentRepositoryImpl) GetMentorPaymentMethod(
 	ctx context.Context,
 	mentorID string,
-	methods *[]entity.GetPaymentMethodQuery,
+	methods *[]entity.GetMentorPaymentMethodQuery,
 ) error {
 	var driver RepoDriver
 	driver = pr.DB
@@ -61,7 +61,7 @@ func (pr *PaymentRepositoryImpl) GetMentorPaymentMethod(
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var item entity.GetPaymentMethodQuery
+		var item entity.GetMentorPaymentMethodQuery
 		if err := rows.Scan(
 			&item.ID,
 			&item.Name,
