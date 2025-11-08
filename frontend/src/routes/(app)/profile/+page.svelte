@@ -19,17 +19,10 @@
 	import { CreateToast, DismissToast } from '$lib/utils/helper';
 
 	let { data }: PageProps = $props();
-	const View = new profileView();
+	const View = new profileView(data.profile, data.orders);
 
 	onMount(() => {
 		View.setIsDesktop(window.innerWidth >= 768);
-		View.setBio(data.profile.bio);
-		View.setName(data.profile.name);
-		if (data.orders) {
-			View.setOrders(data.orders.entries);
-			View.setTotalRow(data.orders.page_info.total_row);
-			View.setLastID(data.orders.page_info.last_id);
-		}
 		function isDesktop() {
 			View.setIsDesktop(window.innerWidth >= 768);
 		}
