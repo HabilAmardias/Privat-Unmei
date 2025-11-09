@@ -5,7 +5,7 @@
 	import { goto } from '$app/navigation';
 	import Link from '$lib/components/button/Link.svelte';
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
-	import { Banknote, House, LogOut, Menu, Percent, User } from '@lucide/svelte';
+	import { Banknote, House, List, LogOut, Menu, Percent, User } from '@lucide/svelte';
 	import Button from '$lib/components/button/Button.svelte';
 	import Menubar from '$lib/components/menubar/Menubar.svelte';
 	import MenuItem from '$lib/components/menubar/MenuItem.svelte';
@@ -56,6 +56,14 @@
 				</p>
 			</div>
 		</Link>
+		<Link href="/manager/admin/course-categories">
+			<div class="flex flex-col items-center gap-1">
+				<List />
+				<p class="duration-300 ease-in-out {View.menuOpen ? 'opacity-100' : 'opacity-0'}">
+					Categories
+				</p>
+			</div>
+		</Link>
 		<Link href="/manager/admin/costs">
 			<div class="flex flex-col items-center gap-1">
 				<Percent />
@@ -98,6 +106,14 @@
 				<div class="flex flex-col items-center gap-1">
 					<User />
 					<p>Mentors</p>
+				</div>
+			</Link>
+		</MenuItem>
+		<MenuItem>
+			<Link href="/manager/admin/course-categories">
+				<div class="flex flex-col items-center gap-1">
+					<List />
+					<p>Categories</p>
 				</div>
 			</Link>
 		</MenuItem>

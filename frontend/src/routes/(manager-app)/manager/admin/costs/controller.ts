@@ -1,6 +1,6 @@
 import type { Fetch, PaginatedResponse, ServerResponse } from '$lib/types';
 import { FetchData } from '$lib/utils';
-import type { AdditionalCost, adminProfile, Discount } from './model';
+import type { AdditionalCost, adminProfile, Discount, newCost, newDiscount } from './model';
 
 class CostManagementController {
 	getDiscounts = async (fetch: Fetch, req?: Request) => {
@@ -75,8 +75,12 @@ class CostManagementController {
 			amount: parseFloat(amount as string)
 		});
 		const url = 'http://localhost:8080/api/v1/discounts';
-		const { success, message, status } = await FetchData(fetch, url, 'POST', reqBody);
-		return { success, message, status };
+		const { success, message, status, res } = await FetchData(fetch, url, 'POST', reqBody);
+		if (!success) {
+			return { success, message, status };
+		}
+		const resBody: ServerResponse<newDiscount> = await res?.json();
+		return { success, message, status, resBody };
 	};
 	updateCostAmount = async (fetch: Fetch, req: Request) => {
 		const formData = await req.formData();
@@ -118,8 +122,12 @@ class CostManagementController {
 			amount: parseFloat(amount as string)
 		});
 		const url = 'http://localhost:8080/api/v1/additional-costs';
-		const { success, message, status } = await FetchData(fetch, url, 'POST', reqBody);
-		return { success, message, status };
+		const { success, message, status, res } = await FetchData(fetch, url, 'POST', reqBody);
+		if (!success) {
+			return { success, message, status };
+		}
+		const resBody: ServerResponse<newCost> = await res?.json();
+		return { success, message, status, resBody };
 	};
 	getProfile = async (fetch: Fetch) => {
 		const url = 'http://localhost:8080/api/v1/admins/me';

@@ -17,3 +17,11 @@ export type adminProfile = {
 	profile_image: string;
 	status: 'verified' | 'unverified';
 };
+
+export type newCost = {
+	id: number;
+};
+
+export type newDiscount = {
+	id: number;
+};

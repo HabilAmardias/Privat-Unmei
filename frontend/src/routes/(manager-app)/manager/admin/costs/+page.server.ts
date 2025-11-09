@@ -41,11 +41,11 @@ export const actions = {
 		return { message };
 	},
 	addCost: async ({ fetch, request }) => {
-		const { success, message, status } = await controller.createCost(fetch, request);
+		const { success, message, status, resBody } = await controller.createCost(fetch, request);
 		if (!success) {
 			return fail(status, { message });
 		}
-		return { message };
+		return { newCost: resBody?.data, message };
 	},
 	updateCostAmount: async ({ fetch, request }) => {
 		const { success, message, status } = await controller.updateCostAmount(fetch, request);
@@ -59,7 +59,7 @@ export const actions = {
 		if (!success) {
 			return fail(status, { message });
 		}
-		return { costs: resBody.data };
+		return { discounts: resBody.data };
 	},
 	deleteDiscount: async ({ fetch, request }) => {
 		const { success, message, status } = await controller.deleteDiscount(fetch, request);
@@ -69,11 +69,11 @@ export const actions = {
 		return { message };
 	},
 	addDiscount: async ({ fetch, request }) => {
-		const { success, message, status } = await controller.createDiscount(fetch, request);
+		const { success, message, status, resBody } = await controller.createDiscount(fetch, request);
 		if (!success) {
 			return fail(status, { message });
 		}
-		return { message };
+		return { newDiscount: resBody?.data, message };
 	},
 	updateDiscountAmount: async ({ fetch, request }) => {
 		const { success, message, status } = await controller.updateDiscountAmount(fetch, request);
