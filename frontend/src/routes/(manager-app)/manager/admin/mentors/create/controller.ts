@@ -1,4 +1,4 @@
-import type { Fetch, SeekPaginatedResponse, ServerResponse } from '$lib/types';
+import type { Fetch, PaginatedResponse, ServerResponse } from '$lib/types';
 import { FetchData } from '$lib/utils';
 import type { generatedPassword, paymentMethod, adminProfile } from './model';
 
@@ -22,7 +22,7 @@ class CreateMentorController {
 		if (!success) {
 			return { success, message, status };
 		}
-		const resBody: ServerResponse<SeekPaginatedResponse<paymentMethod>> = await res?.json();
+		const resBody: ServerResponse<PaginatedResponse<paymentMethod>> = await res?.json();
 		return { success, message, status, resBody };
 	}
 	async getRandomizedPassword(fetch: Fetch) {

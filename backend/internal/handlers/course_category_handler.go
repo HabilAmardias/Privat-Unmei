@@ -124,17 +124,17 @@ func (cch *CourseCategoryHandlerImpl) GetCategoriesList(ctx *gin.Context) {
 		return
 	}
 	param := entity.ListCourseCategoryParam{
-		SeekPaginatedParam: entity.SeekPaginatedParam{
-			Limit:  req.Limit,
-			LastID: req.LastID,
+		PaginatedParam: entity.PaginatedParam{
+			Limit: req.Limit,
+			Page:  req.Page,
 		},
 		Search: req.Search,
 	}
 	if param.Limit <= 0 || param.Limit > constants.MaxLimit {
 		param.Limit = constants.DefaultLimit
 	}
-	if param.LastID <= 0 {
-		param.LastID = constants.DefaultLastID
+	if param.Page <= 0 {
+		param.Page = constants.DefaultPage
 	}
 	res, totalRow, err := cch.ccs.GetCategoriesList(ctx, param)
 	if err != nil {
@@ -153,18 +153,12 @@ func (cch *CourseCategoryHandlerImpl) GetCategoriesList(ctx *gin.Context) {
 		}
 		filters = append(filters, filter)
 	}
-	var lastID int
-	if len(entries) > 0 {
-		lastID = entries[len(entries)-1].ID
-	} else {
-		lastID = 0
-	}
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
-		Data: dtos.SeekPaginatedResponse[dtos.ListCourseCategoryRes]{
+		Data: dtos.PaginatedResponse[dtos.ListCourseCategoryRes]{
 			Entries: entries,
-			PageInfo: dtos.SeekPaginatedInfo{
-				LastID:   lastID,
+			PageInfo: dtos.PaginatedInfo{
+				Page:     param.Page,
 				Limit:    param.Limit,
 				TotalRow: *totalRow,
 				FilterBy: filters,

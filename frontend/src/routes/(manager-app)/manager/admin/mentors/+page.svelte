@@ -89,7 +89,7 @@
 		{:else if !View.mentors || View.mentors.length === 0}
 			<b class="mx-auto self-center text-[var(--tertiary-color)]">No mentors found</b>
 		{:else}
-			<ScrollArea orientation="vertical" class="flex-1" viewportClasses="h-full w-full max-h-full">
+			<ScrollArea orientation="vertical" class="flex-1" viewportClasses="w-full max-h-[500px]">
 				<table class="w-full border-separate border-spacing-4">
 					<thead>
 						<tr>

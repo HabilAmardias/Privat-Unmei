@@ -17,7 +17,7 @@ func CreateCourseRatingRepository(db *db.CustomDB) *CourseRatingRepositoryImpl {
 	return &CourseRatingRepositoryImpl{db}
 }
 
-func (cr *CourseRatingRepositoryImpl) GetCourseReviews(ctx context.Context, courseID int, lastID int, limit int, totalRow *int64, review *[]entity.CourseRatingQuery) error {
+func (cr *CourseRatingRepositoryImpl) GetCourseReviews(ctx context.Context, courseID int, page int, limit int, totalRow *int64, review *[]entity.CourseRatingQuery) error {
 	var driver RepoDriver = cr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
@@ -37,9 +37,9 @@ func (cr *CourseRatingRepositoryImpl) GetCourseReviews(ctx context.Context, cour
 		u.deleted_at IS NULL AND 
 		cr.course_id = $1 AND 
 		cr.deleted_at IS NULL AND
-		cr.id < $2
 	ORDER BY cr.id DESC
-	LIMIT $3
+	LIMIT $2
+	OFFSET $3
 	`
 	countQuery := `
 	SELECT count(*)
@@ -49,9 +49,8 @@ func (cr *CourseRatingRepositoryImpl) GetCourseReviews(ctx context.Context, cour
 		u.deleted_at IS NULL AND 
 		cr.course_id = $1 AND 
 		cr.deleted_at IS NULL AND
-		cr.id < $2
 	`
-	row := driver.QueryRow(countQuery, courseID, lastID)
+	row := driver.QueryRow(countQuery, courseID)
 	if err := row.Scan(totalRow); err != nil {
 		return customerrors.NewError(
 			"failed to get course reviews",
@@ -59,7 +58,7 @@ func (cr *CourseRatingRepositoryImpl) GetCourseReviews(ctx context.Context, cour
 			customerrors.DatabaseExecutionError,
 		)
 	}
-	rows, err := driver.Query(query, courseID, lastID, limit)
+	rows, err := driver.Query(query, courseID, limit, limit*(page-1))
 	if err != nil {
 		return customerrors.NewError(
 			"failed to get course reviews",

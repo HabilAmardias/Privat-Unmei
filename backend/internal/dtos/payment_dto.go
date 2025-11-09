@@ -17,7 +17,7 @@ type (
 		ID int `json:"payment_method_id"`
 	}
 	GetAllPaymentMethodReq struct {
-		SeekPaginatedReq
+		PaginatedReq
 		Search *string `form:"search"`
 	}
 	GetPaymentMethodRes struct {

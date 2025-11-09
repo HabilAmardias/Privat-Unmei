@@ -1,6 +1,6 @@
-import type { Fetch, SeekPaginatedResponse, ServerResponse } from '$lib/types';
+import type { Fetch, PaginatedResponse, ServerResponse } from '$lib/types';
 import { FetchData } from '$lib/utils';
-import type { PaymentMethods, adminProfile } from './model';
+import type { NewPaymentMethod, PaymentMethods, adminProfile } from './model';
 
 class PaymentController {
 	getPayments = async (fetch: Fetch, req?: Request) => {
@@ -9,12 +9,12 @@ class PaymentController {
 			const args: string[] = [];
 			const formData = await req.formData();
 			const search = formData.get('search');
-			const lastID = formData.get('last_id');
+			const page = formData.get('page');
 			if (search) {
 				args.push(`search=${search}`);
 			}
-			if (lastID) {
-				args.push(`last_id=${lastID}`);
+			if (page) {
+				args.push(`page=${page}`);
 			}
 			const joinedArgs = args.join('&');
 			url += joinedArgs;
@@ -23,7 +23,7 @@ class PaymentController {
 		if (!success) {
 			return { success, message, status };
 		}
-		const resBody: ServerResponse<SeekPaginatedResponse<PaymentMethods>> = await res?.json();
+		const resBody: ServerResponse<PaginatedResponse<PaymentMethods>> = await res?.json();
 		return { success, message, status, resBody };
 	};
 	updatePayment = async (fetch: Fetch, req: Request) => {
@@ -51,8 +51,12 @@ class PaymentController {
 		const reqBody = JSON.stringify({
 			payment_method_name: name
 		});
-		const { success, message, status } = await FetchData(fetch, url, 'POST', reqBody);
-		return { success, message, status };
+		const { success, message, status, res } = await FetchData(fetch, url, 'POST', reqBody);
+		if (!success) {
+			return { success, message, status };
+		}
+		const resBody: ServerResponse<NewPaymentMethod> = await res?.json();
+		return { success, message, status, resBody };
 	};
 	async getProfile(fetch: Fetch) {
 		const url = 'http://localhost:8080/api/v1/admins/me';

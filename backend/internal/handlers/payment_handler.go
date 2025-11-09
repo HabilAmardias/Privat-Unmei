@@ -53,17 +53,17 @@ func (ph *PaymentHandlerImpl) GetAllPaymentMethod(ctx *gin.Context) {
 		return
 	}
 	param := entity.GetAllPaymentMethodParam{
-		SeekPaginatedParam: entity.SeekPaginatedParam{
-			Limit:  req.Limit,
-			LastID: req.LastID,
+		PaginatedParam: entity.PaginatedParam{
+			Limit: req.Limit,
+			Page:  req.Page,
 		},
 		Search: req.Search,
 	}
 	if param.Limit <= 0 || param.Limit > constants.MaxLimit {
 		param.Limit = constants.DefaultLimit
 	}
-	if param.LastID <= 0 {
-		param.LastID = constants.DefaultLastID
+	if param.Page <= 0 {
+		param.Page = constants.DefaultPage
 	}
 	methods, totalRow, err := ph.ps.GetAllPaymentMethod(ctx, param)
 	if err != nil {
@@ -81,19 +81,15 @@ func (ph *PaymentHandlerImpl) GetAllPaymentMethod(ctx *gin.Context) {
 			Value: *req.Search,
 		})
 	}
-	lastID := constants.DefaultLastID
-	if len(entries) > 0 {
-		lastID = entries[len(entries)-1].ID
-	}
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
-		Data: dtos.SeekPaginatedResponse[dtos.GetPaymentMethodRes]{
+		Data: dtos.PaginatedResponse[dtos.GetPaymentMethodRes]{
 			Entries: entries,
-			PageInfo: dtos.SeekPaginatedInfo{
+			PageInfo: dtos.PaginatedInfo{
 				FilterBy: filter,
 				TotalRow: *totalRow,
 				Limit:    param.Limit,
-				LastID:   lastID,
+				Page:     param.Page,
 			},
 		},
 	})

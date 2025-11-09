@@ -1,4 +1,4 @@
-import type { Fetch, SeekPaginatedResponse, ServerResponse } from '$lib/types';
+import type { Fetch, PaginatedResponse, ServerResponse } from '$lib/types';
 import { FetchData } from '$lib/utils';
 import { FILE_IMAGE_THRESHOLD, MAX_BIO_LENGTH } from '$lib/utils/constants';
 import { IsAlphaOnly } from '$lib/utils/helper';
@@ -53,7 +53,7 @@ class profileController {
 			const formData = await req.formData();
 			const search = formData.get('search');
 			const orderStatus = formData.get('status');
-			const lastID = formData.get('last_id');
+			const page = formData.get('page');
 
 			if (search) {
 				queries.push(`search=${search}`);
@@ -61,8 +61,8 @@ class profileController {
 			if (orderStatus) {
 				queries.push(`status=${orderStatus}`);
 			}
-			if (lastID) {
-				queries.push(`last_id=${lastID}`);
+			if (page) {
+				queries.push(`page=${page}`);
 			}
 			if (queries.length > 0) {
 				url += queries.join('&');
@@ -72,7 +72,7 @@ class profileController {
 		if (!success) {
 			return { success, message, status };
 		}
-		const resBody: ServerResponse<SeekPaginatedResponse<StudentOrders>> = await res?.json();
+		const resBody: ServerResponse<PaginatedResponse<StudentOrders>> = await res?.json();
 		return { success, message, status, resBody: resBody.data };
 	}
 }

@@ -32,7 +32,7 @@ type (
 		MethodNewName *string
 	}
 	GetAllPaymentMethodParam struct {
-		SeekPaginatedParam
+		PaginatedParam
 		Search *string
 	}
 	GetMentorPaymentMethodQuery struct {

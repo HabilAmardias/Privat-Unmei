@@ -360,34 +360,38 @@ func (ccr *CourseCategoryRepositoryImpl) GetCourseCategoryList(
 	ctx context.Context,
 	categories *[]entity.ListCourseCategoryQuery,
 	totalRow *int64,
-	param entity.ListCourseCategoryParam,
+	page int,
+	limit int,
+	search *string,
 ) error {
 	var driver RepoDriver
 	driver = ccr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
 	}
-	args := []any{param.LastID}
-	countArgs := []any{param.LastID}
+	args := []any{}
+	countArgs := []any{}
 	query := `
 	SELECT id, name
 	FROM course_categories
-	WHERE id < $1 AND deleted_at IS NULL
+	WHERE deleted_at IS NULL
 	`
 	countQuery := `
 	SELECT count(*)
 	FROM course_categories
-	WHERE id < $1 AND deleted_at IS NULL
+	WHERE deleted_at IS NULL
 	`
-	if param.Search != nil {
+	if search != nil {
 		query += fmt.Sprintf(" AND name ILIKE $%d ", len(args)+1)
 		countQuery += fmt.Sprintf(" AND name ILIKE $%d ", len(countArgs)+1)
-		args = append(args, "%"+*param.Search+"%")
-		countArgs = append(countArgs, "%"+*param.Search+"%")
+		args = append(args, "%"+*search+"%")
+		countArgs = append(countArgs, "%"+*search+"%")
 	}
-	query += " ORDER BY id DESC "
-	query += fmt.Sprintf(" LIMIT $%d ", len(args)+1)
-	args = append(args, param.Limit)
+	args = append(args, limit)
+	query += fmt.Sprintf(" LIMIT $%d ", len(args))
+
+	args = append(args, limit*(page-1))
+	query += fmt.Sprintf(" OFFSET $%d ", len(args))
 
 	row := driver.QueryRow(countQuery, countArgs...)
 	if err := row.Scan(totalRow); err != nil {

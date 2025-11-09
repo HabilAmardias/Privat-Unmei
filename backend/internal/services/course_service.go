@@ -144,7 +144,7 @@ func (cs *CourseServiceImpl) CourseDetail(ctx context.Context, param entity.Cour
 func (cs *CourseServiceImpl) ListCourse(ctx context.Context, param entity.ListCourseParam) (*[]entity.CourseListQuery, *int64, error) {
 	query := new([]entity.CourseListQuery)
 	totalRow := new(int64)
-	if err := cs.cr.ListCourse(ctx, query, totalRow, param); err != nil {
+	if err := cs.cr.ListCourse(ctx, query, totalRow, param.Limit, param.Page, param.Search, param.Method, param.CourseCategory); err != nil {
 		return nil, nil, err
 	}
 	return query, totalRow, nil
@@ -165,7 +165,7 @@ func (cs *CourseServiceImpl) MentorListCourse(ctx context.Context, param entity.
 	if err := cs.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
 		return nil, nil, err
 	}
-	if err := cs.cr.MentorListCourse(ctx, query, totalRow, param); err != nil {
+	if err := cs.cr.MentorListCourse(ctx, query, totalRow, param.Limit, param.Page, param.MentorID, param.Search, param.CourseCategory); err != nil {
 		return nil, nil, err
 	}
 	return query, totalRow, nil

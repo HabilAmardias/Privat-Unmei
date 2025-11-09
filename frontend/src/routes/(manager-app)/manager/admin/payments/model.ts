@@ -10,3 +10,7 @@ export type adminProfile = {
 	profile_image: string;
 	status: 'verified' | 'unverified';
 };
+
+export type NewPaymentMethod = {
+	payment_method_id: number;
+};

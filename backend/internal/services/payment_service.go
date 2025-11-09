@@ -53,7 +53,7 @@ func (ps *PaymentServiceImpl) GetMentorPaymentMethod(ctx context.Context, param 
 func (ps *PaymentServiceImpl) GetAllPaymentMethod(ctx context.Context, param entity.GetAllPaymentMethodParam) (*[]entity.GetPaymentMethodQuery, *int64, error) {
 	methods := new([]entity.GetPaymentMethodQuery)
 	totalRow := new(int64)
-	if err := ps.pr.GetAllPaymentMethod(ctx, param.Search, param.Limit, param.LastID, totalRow, methods); err != nil {
+	if err := ps.pr.GetAllPaymentMethod(ctx, param.Search, param.Limit, param.Page, totalRow, methods); err != nil {
 		return nil, nil, err
 	}
 	return methods, totalRow, nil

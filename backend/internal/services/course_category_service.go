@@ -54,7 +54,7 @@ func (ccs *CourseCategoryServiceImpl) DeleteCategory(ctx context.Context, param 
 func (ccs *CourseCategoryServiceImpl) GetCategoriesList(ctx context.Context, param entity.ListCourseCategoryParam) (*[]entity.ListCourseCategoryQuery, *int64, error) {
 	categories := new([]entity.ListCourseCategoryQuery)
 	totalRow := new(int64)
-	if err := ccs.ccr.GetCourseCategoryList(ctx, categories, totalRow, param); err != nil {
+	if err := ccs.ccr.GetCourseCategoryList(ctx, categories, totalRow, param.Page, param.Limit, param.Search); err != nil {
 		return nil, nil, err
 	}
 	return categories, totalRow, nil

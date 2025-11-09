@@ -51,13 +51,13 @@ type (
 		CourseID int
 	}
 	MentorListCourseParam struct {
-		SeekPaginatedParam
+		PaginatedParam
 		MentorID       string
 		Search         *string
 		CourseCategory *int
 	}
 	ListCourseParam struct {
-		SeekPaginatedParam
+		PaginatedParam
 		Search         *string
 		CourseCategory *int
 		Method         *string

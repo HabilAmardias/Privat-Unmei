@@ -1,4 +1,4 @@
-import type { SeekPaginatedResponse } from '$lib/types';
+import type { PaginatedResponse } from '$lib/types';
 import { MAX_BIO_LENGTH } from '$lib/utils/constants';
 import { IsAlphaOnly } from '$lib/utils/helper';
 import type { StudentOrders, StudentProfile } from './model';
@@ -15,7 +15,6 @@ export class profileView {
 	status = $state<string>('');
 	totalRow = $state<number>(1); // temporary
 	limit = $state<number>(15);
-	lastID = $state<number>(15);
 	pageNumber = $state<number>(1);
 	paginationForm = $state<HTMLFormElement | undefined>();
 	nameError = $state<Error | undefined>();
@@ -35,24 +34,19 @@ export class profileView {
 		}
 		return 100;
 	});
-	constructor(s: StudentProfile, o?: SeekPaginatedResponse<StudentOrders>) {
+	constructor(s: StudentProfile, o?: PaginatedResponse<StudentOrders>) {
 		this.setBio(s.bio);
 		this.setName(s.name);
 		if (o) {
 			this.setOrders(o.entries);
 			this.setTotalRow(o.page_info.total_row);
-			this.setLastID(o.page_info.last_id);
+			this.setPageNumber(o.page_info.page);
 		}
 	}
+	setPageNumber(num: number) {
+		this.pageNumber = num;
+	}
 	onPageChange(num: number) {
-		if (num < this.pageNumber) {
-			const lastOrder = this.orders![0];
-			this.lastID = lastOrder.id;
-		} else if (num > this.pageNumber) {
-			const lastIndex = this.orders!.length - 1;
-			const lastOrder = this.orders![lastIndex];
-			this.lastID = lastOrder.id;
-		}
 		this.pageNumber = num;
 		this.paginationForm?.requestSubmit();
 	}
@@ -102,9 +96,6 @@ export class profileView {
 	}
 	setOrders(newOrders: StudentOrders[]) {
 		this.orders = newOrders;
-	}
-	setLastID(newID: number) {
-		this.lastID = newID;
 	}
 	setProfileImage(f: FileList | undefined) {
 		this.profileImage = f;

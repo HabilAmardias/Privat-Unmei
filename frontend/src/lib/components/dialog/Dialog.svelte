@@ -9,6 +9,7 @@
 		description: Snippet;
 		contentProps?: WithoutChild<Dialog.ContentProps>;
 		buttonClass?: string;
+		buttonOnClick?: (e: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) => void;
 		// ...other component props if you wish to pass them
 	};
 
@@ -19,12 +20,13 @@
 		contentProps,
 		title,
 		description,
+		buttonOnClick,
 		...restProps
 	}: Props = $props();
 </script>
 
 <Dialog.Root bind:open {...restProps}>
-	<Dialog.Trigger class={restProps.buttonClass}>
+	<Dialog.Trigger onclick={buttonOnClick} class={restProps.buttonClass}>
 		{buttonText}
 	</Dialog.Trigger>
 	<Dialog.Portal>

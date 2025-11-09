@@ -32,7 +32,7 @@ type (
 		ExpiredAt       *time.Time `json:"expired_at"`
 	}
 	MentorCourseRequestListReq struct {
-		SeekPaginatedReq
+		PaginatedReq
 		Status *string `form:"status"`
 	}
 	MentorCourseRequestRes struct {
@@ -62,7 +62,7 @@ type (
 		Schedules           []CourseScheduleRes `json:"schedules"`
 	}
 	StudentCourseRequestListReq struct {
-		SeekPaginatedReq
+		PaginatedReq
 		Status *string `form:"status"`
 		Search *string `form:"search"`
 	}

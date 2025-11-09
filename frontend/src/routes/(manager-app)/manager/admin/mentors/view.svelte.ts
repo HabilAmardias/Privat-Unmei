@@ -80,6 +80,7 @@ export class MentorManagerView {
 					this.filterMentors(this.mentorToDelete);
 				}
 				this.setMentorToDelete(undefined);
+				this.total_row -= 1;
 				CreateToast('success', 'successfully delete mentor');
 			}
 			if (result.type === 'failure') {

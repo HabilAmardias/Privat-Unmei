@@ -36,7 +36,7 @@ export const actions = {
 		}
 		return {
 			orders: resBody.entries,
-			lastID: resBody.page_info.last_id,
+			page: resBody.page_info.page,
 			limit: resBody.page_info.limit,
 			totalRow: resBody.page_info.total_row,
 			message

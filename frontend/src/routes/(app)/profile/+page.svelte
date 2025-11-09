@@ -59,7 +59,7 @@
 
 	function onUpdateOrders(args: EnhancementArgs) {
 		View.setOrdersIsLoading(true);
-		args.formData.append('last_id', `${View.lastID}`);
+		args.formData.append('page', `${View.pageNumber}`);
 		return async ({ result }: EnhancementReturn) => {
 			View.setOrdersIsLoading(false);
 			if (result.type === 'success') {
@@ -254,6 +254,7 @@
 						pageNumber={View.pageNumber}
 						count={View.totalRow}
 						perPage={View.limit}
+						offset
 					/>
 				</form>
 			</div>

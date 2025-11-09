@@ -42,10 +42,10 @@ export const actions = {
 		return { message };
 	},
 	createPayment: async ({ fetch, request }) => {
-		const { success, message, status } = await controller.createPayment(fetch, request);
+		const { success, message, status, resBody } = await controller.createPayment(fetch, request);
 		if (!success) {
 			return fail(status, { message });
 		}
-		return { message };
+		return { newPayment: resBody.data };
 	}
 } satisfies Actions;

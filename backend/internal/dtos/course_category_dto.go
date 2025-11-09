@@ -2,7 +2,7 @@ package dtos
 
 type (
 	ListCourseCategoryReq struct {
-		SeekPaginatedReq
+		PaginatedReq
 		Search *string `form:"search" binding:"omitempty"`
 	}
 	ListCourseCategoryRes struct {

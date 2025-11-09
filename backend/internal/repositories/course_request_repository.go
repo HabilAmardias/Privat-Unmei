@@ -76,7 +76,7 @@ func (cr *CourseRequestRepositoryImpl) StudentCourseRequestList(
 	studentID string,
 	status *string,
 	search *string,
-	lastID int,
+	page int,
 	limit int,
 	totalRow *int64,
 	requests *[]entity.StudentCourseRequestQuery,
@@ -85,8 +85,8 @@ func (cr *CourseRequestRepositoryImpl) StudentCourseRequestList(
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
 	}
-	args := []any{lastID, studentID}
-	countArgs := []any{lastID, studentID}
+	args := []any{studentID}
+	countArgs := []any{studentID}
 	query := `
 	SELECT
 		cr.id,
@@ -106,8 +106,7 @@ func (cr *CourseRequestRepositoryImpl) StudentCourseRequestList(
 		AND c.deleted_at IS NULL
 		AND m.deleted_at IS NULL
 		AND u.deleted_at IS NULL
-		AND cr.id < $1
-		AND cr.student_id = $2
+		AND cr.student_id = $1
 	`
 	countQuery := `
 	SELECT
@@ -121,8 +120,7 @@ func (cr *CourseRequestRepositoryImpl) StudentCourseRequestList(
 		AND c.deleted_at IS NULL
 		AND m.deleted_at IS NULL
 		AND u.deleted_at IS NULL
-		AND cr.id < $1
-		AND cr.student_id = $2
+		AND cr.student_id = $1
 	`
 	if status != nil {
 		args = append(args, *status)
@@ -144,10 +142,11 @@ func (cr *CourseRequestRepositoryImpl) StudentCourseRequestList(
 		AND c.title ILIKE $%d
 		`, len(countArgs))
 	}
-
-	query += `ORDER BY cr.id DESC `
 	args = append(args, limit)
 	query += fmt.Sprintf(`LIMIT $%d`, len(args))
+
+	args = append(args, limit*(page-1))
+	query += fmt.Sprintf(" OFFSET $%d", len(args))
 
 	if err := driver.QueryRow(countQuery, countArgs...).Scan(totalRow); err != nil {
 		return customerrors.NewError(
@@ -194,7 +193,7 @@ func (cr *CourseRequestRepositoryImpl) MentorCourseRequestList(
 	ctx context.Context,
 	mentorID string,
 	status *string,
-	lastID int,
+	page int,
 	limit int,
 	totalRow *int64,
 	requests *[]entity.MentorCourseRequestQuery,
@@ -203,8 +202,8 @@ func (cr *CourseRequestRepositoryImpl) MentorCourseRequestList(
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
 	}
-	args := []any{lastID, mentorID}
-	countArgs := []any{lastID, mentorID}
+	args := []any{mentorID}
+	countArgs := []any{mentorID}
 	query := `
 	SELECT
 		cr.id,
@@ -224,8 +223,7 @@ func (cr *CourseRequestRepositoryImpl) MentorCourseRequestList(
 		AND c.deleted_at IS NULL
 		AND s.deleted_at IS NULL
 		AND u.deleted_at IS NULL
-		AND cr.id < $1
-		AND c.mentor_id = $2
+		AND c.mentor_id = $1
 	`
 	countQuery := `
 	SELECT
@@ -239,8 +237,7 @@ func (cr *CourseRequestRepositoryImpl) MentorCourseRequestList(
 		AND c.deleted_at IS NULL
 		AND s.deleted_at IS NULL
 		AND u.deleted_at IS NULL
-		AND cr.id < $1
-		AND c.mentor_id = $2
+		AND c.mentor_id = $1
 	`
 	if status != nil {
 		args = append(args, *status)
@@ -252,10 +249,11 @@ func (cr *CourseRequestRepositoryImpl) MentorCourseRequestList(
 			AND cr.status = $%d
 		`, len(countArgs))
 	}
-
-	query += `ORDER BY cr.id DESC `
 	args = append(args, limit)
 	query += fmt.Sprintf(`LIMIT $%d`, len(args))
+
+	args = append(args, limit*(page-1))
+	query += fmt.Sprintf(" OFFSET $%d", len(args))
 
 	if err := driver.QueryRow(countQuery, countArgs...).Scan(totalRow); err != nil {
 		return customerrors.NewError(

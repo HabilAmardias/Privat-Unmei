@@ -30,11 +30,19 @@
 {/snippet}
 
 {#snippet createDialogTitle()}
-	Create Payment
+	Create Payment Method
 {/snippet}
 
 {#snippet createDialogDescription()}
 	Add New Payment Method
+{/snippet}
+
+{#snippet updateDialogTitle()}
+	Update Payment Method
+{/snippet}
+
+{#snippet updateDialogDescription()}
+	Update Payment Method Name
 {/snippet}
 
 <div class="flex h-full flex-col p-4">
@@ -68,6 +76,7 @@
 		method="POST"
 	>
 		<Input
+			bind:value={View.search}
 			onInput={View.onSearchInput}
 			type="text"
 			name="search"
@@ -81,8 +90,8 @@
 		{:else if !View.payments || View.payments.length === 0}
 			<b class="mx-auto self-center text-[var(--tertiary-color)]">No payments found</b>
 		{:else}
-			<ScrollArea orientation="vertical" class="flex-1" viewportClasses="h-full w-full max-h-full">
-				<table class="w-full border-separate border-spacing-4">
+			<ScrollArea orientation="vertical" class="flex-1" viewportClasses="max-h-[500px]">
+				<table class="w-full table-fixed border-separate border-spacing-4">
 					<thead>
 						<tr>
 							<th class="text-[var(--tertiary-color)]">Name</th>
@@ -95,7 +104,34 @@
 									{py.payment_method_name}
 								</td>
 								<td>
-									<div class="flex items-center justify-center">
+									<div class="flex items-center justify-center gap-4">
+										<div class="h-fit rounded-lg bg-[var(--tertiary-color)] p-2">
+											<Dialog
+												bind:open={View.updateDialogOpen}
+												buttonText="Update"
+												title={updateDialogTitle}
+												buttonOnClick={() => {
+													View.setPaymentToUpdate(py.payment_method_id);
+												}}
+												description={updateDialogDescription}
+												buttonClass="text-[var(--secondary-color)] cursor-pointer hover:text-[var(--primary-color)]"
+											>
+												<form
+													class="flex flex-col gap-4"
+													action="?/updatePayment"
+													method="POST"
+													use:enhance={View.onUpdatePayment}
+												>
+													<Input
+														type="text"
+														id="name"
+														name="name"
+														placeholder="Insert Payment Method Name"
+													/>
+													<Button full type="submit">Update</Button>
+												</form>
+											</Dialog>
+										</div>
 										<AlertDialog
 											action="?/deletePayment"
 											bind:open={View.deleteDialogOpen}
@@ -116,16 +152,18 @@
 		{/if}
 	</div>
 	<form
-		use:enhance={View.onSearchPayments}
+		use:enhance={View.onPageChangeForm}
 		action="?/getPayments"
 		class="flex w-full items-center justify-center"
 		method="POST"
+		bind:this={View.paginationForm}
 	>
 		<Pagination
 			onPageChange={(num) => View.onPageChange(num)}
-			pageNumber={View.page}
+			pageNumber={View.pageNumber}
 			perPage={View.limit}
 			count={View.totalRow}
+			offset
 		/>
 	</form>
 </div>
