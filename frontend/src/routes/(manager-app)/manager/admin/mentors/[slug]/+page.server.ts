@@ -10,10 +10,14 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 		controller.getAdminProfile(fetch)
 	]);
 	if (!mentorPayments.success) {
-		throw error(mentorPayments.status, { message: mentorPayments.message });
+		if (mentorPayments.status !== 404) {
+			throw error(mentorPayments.status, { message: mentorPayments.message });
+		}
 	}
 	if (!mentorSchedules.success) {
-		throw error(mentorSchedules.status, { message: mentorSchedules.message });
+		if (mentorSchedules.status !== 404) {
+			throw error(mentorSchedules.status, { message: mentorSchedules.message });
+		}
 	}
 	if (!mentorProfile.success) {
 		throw error(mentorProfile.status, { message: mentorProfile.message });
@@ -24,8 +28,8 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 	return {
 		isVerified: adminProfile.resBody.data.status === 'verified',
 		profile: mentorProfile.resBody.data,
-		schedules: mentorSchedules.resBody.data,
-		payments: mentorPayments.resBody.data
+		schedules: mentorSchedules.resBody?.data,
+		payments: mentorPayments.resBody?.data
 	};
 };
 

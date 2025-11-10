@@ -18,7 +18,7 @@ type (
 		DeletedAt  *time.Time
 	}
 	ListCourseCategoryParam struct {
-		SeekPaginatedParam
+		PaginatedParam
 		Search *string
 	}
 	ListCourseCategoryQuery struct {

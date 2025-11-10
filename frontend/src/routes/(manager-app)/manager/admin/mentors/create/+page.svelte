@@ -12,13 +12,11 @@
 	import { CloudUpload, X } from '@lucide/svelte';
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import { goto } from '$app/navigation';
-	const View = new CreateMentorView();
 
 	const { data }: PageProps = $props();
+	const View = new CreateMentorView(data.paymentMethods, data.generatedPassword);
 
 	onMount(() => {
-		View.setPaymentMethods(data.paymentMethods);
-		View.setGeneratedPassword(data.generatedPassword);
 		if (!data.isVerified) {
 			goto('/admins/verify', { replaceState: true });
 		}

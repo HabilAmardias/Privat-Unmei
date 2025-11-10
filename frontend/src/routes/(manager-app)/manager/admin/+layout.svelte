@@ -5,7 +5,7 @@
 	import { goto } from '$app/navigation';
 	import Link from '$lib/components/button/Link.svelte';
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
-	import { House, LogOut, Menu, Percent, User } from '@lucide/svelte';
+	import { Banknote, House, List, LogOut, Menu, Percent, User } from '@lucide/svelte';
 	import Button from '$lib/components/button/Button.svelte';
 	import Menubar from '$lib/components/menubar/Menubar.svelte';
 	import MenuItem from '$lib/components/menubar/MenuItem.svelte';
@@ -56,11 +56,25 @@
 				</p>
 			</div>
 		</Link>
-		<Link href="/manager/admin/maintenance">
+		<Link href="/manager/admin/course-categories">
+			<div class="flex flex-col items-center gap-1">
+				<List />
+				<p class="duration-300 ease-in-out {View.menuOpen ? 'opacity-100' : 'opacity-0'}">
+					Categories
+				</p>
+			</div>
+		</Link>
+		<Link href="/manager/admin/costs">
 			<div class="flex flex-col items-center gap-1">
 				<Percent />
+				<p class="duration-300 ease-in-out {View.menuOpen ? 'opacity-100' : 'opacity-0'}">Costs</p>
+			</div>
+		</Link>
+		<Link href="/manager/admin/payments">
+			<div class="flex flex-col items-center gap-1">
+				<Banknote />
 				<p class="duration-300 ease-in-out {View.menuOpen ? 'opacity-100' : 'opacity-0'}">
-					Maintenance
+					Payments
 				</p>
 			</div>
 		</Link>
@@ -96,10 +110,26 @@
 			</Link>
 		</MenuItem>
 		<MenuItem>
-			<Link href="/manager/admin/maintenance">
+			<Link href="/manager/admin/course-categories">
+				<div class="flex flex-col items-center gap-1">
+					<List />
+					<p>Categories</p>
+				</div>
+			</Link>
+		</MenuItem>
+		<MenuItem>
+			<Link href="/manager/admin/costs">
 				<div class="flex flex-col items-center gap-1">
 					<Percent />
-					<p>Maintenance</p>
+					<p>Costs</p>
+				</div>
+			</Link>
+		</MenuItem>
+		<MenuItem>
+			<Link href="/manager/admin/payments">
+				<div class="flex flex-col items-center gap-1">
+					<Banknote />
+					<p>Payments</p>
 				</div>
 			</Link>
 		</MenuItem>

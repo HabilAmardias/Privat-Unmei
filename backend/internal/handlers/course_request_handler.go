@@ -91,9 +91,9 @@ func (crh *CourseRequestHandlerImpl) StudentCourseRequestList(ctx *gin.Context) 
 		}
 	}
 	param := entity.StudentCourseRequestListParam{
-		SeekPaginatedParam: entity.SeekPaginatedParam{
-			Limit:  req.Limit,
-			LastID: req.LastID,
+		PaginatedParam: entity.PaginatedParam{
+			Limit: req.Limit,
+			Page:  req.Page,
 		},
 		Status:    req.Status,
 		StudentID: claim.Subject,
@@ -102,8 +102,8 @@ func (crh *CourseRequestHandlerImpl) StudentCourseRequestList(ctx *gin.Context) 
 	if param.Limit <= 0 || param.Limit > constants.MaxLimit {
 		param.Limit = constants.DefaultLimit
 	}
-	if param.LastID <= 0 {
-		param.LastID = constants.DefaultLastID
+	if param.Page <= 0 {
+		param.Page = constants.DefaultPage
 	}
 	res, totalRow, err := crh.cos.StudentCourseRequestList(ctx, param)
 	if err != nil {
@@ -127,18 +127,12 @@ func (crh *CourseRequestHandlerImpl) StudentCourseRequestList(ctx *gin.Context) 
 			Value: *req.Search,
 		})
 	}
-	var lastID int
-	if len(entries) > 0 {
-		lastID = entries[len(entries)-1].ID
-	} else {
-		lastID = 0
-	}
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
-		Data: dtos.SeekPaginatedResponse[dtos.StudentCourseRequestRes]{
+		Data: dtos.PaginatedResponse[dtos.StudentCourseRequestRes]{
 			Entries: entries,
-			PageInfo: dtos.SeekPaginatedInfo{
-				LastID:   lastID,
+			PageInfo: dtos.PaginatedInfo{
+				Page:     param.Page,
 				FilterBy: filters,
 				Limit:    param.Limit,
 				TotalRow: *totalRow,
@@ -218,9 +212,9 @@ func (crh *CourseRequestHandlerImpl) MentorCourseRequestList(ctx *gin.Context) {
 		}
 	}
 	param := entity.MentorCourseRequestListParam{
-		SeekPaginatedParam: entity.SeekPaginatedParam{
-			Limit:  req.Limit,
-			LastID: req.LastID,
+		PaginatedParam: entity.PaginatedParam{
+			Limit: req.Limit,
+			Page:  req.Page,
 		},
 		Status:   req.Status,
 		MentorID: claim.Subject,
@@ -228,8 +222,8 @@ func (crh *CourseRequestHandlerImpl) MentorCourseRequestList(ctx *gin.Context) {
 	if param.Limit <= 0 || param.Limit > constants.MaxLimit {
 		param.Limit = constants.DefaultLimit
 	}
-	if param.LastID <= 0 {
-		param.LastID = constants.DefaultLastID
+	if param.Page <= 0 {
+		param.Page = constants.DefaultPage
 	}
 	res, totalRow, err := crh.cos.MentorCourseRequestList(ctx, param)
 	if err != nil {
@@ -247,18 +241,12 @@ func (crh *CourseRequestHandlerImpl) MentorCourseRequestList(ctx *gin.Context) {
 			Value: *req.Status,
 		})
 	}
-	var lastID int
-	if len(entries) > 0 {
-		lastID = entries[len(entries)-1].ID
-	} else {
-		lastID = 0
-	}
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
-		Data: dtos.SeekPaginatedResponse[dtos.MentorCourseRequestRes]{
+		Data: dtos.PaginatedResponse[dtos.MentorCourseRequestRes]{
 			Entries: entries,
-			PageInfo: dtos.SeekPaginatedInfo{
-				LastID:   lastID,
+			PageInfo: dtos.PaginatedInfo{
+				Page:     param.Page,
 				FilterBy: filters,
 				Limit:    param.Limit,
 				TotalRow: *totalRow,

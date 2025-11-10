@@ -129,7 +129,7 @@ func (crs *CourseRequestServiceImpl) StudentCourseRequestList(ctx context.Contex
 			customerrors.Unauthenticate,
 		)
 	}
-	if err := crs.crr.StudentCourseRequestList(ctx, param.StudentID, param.Status, param.Search, param.LastID, param.Limit, totalRow, requests); err != nil {
+	if err := crs.crr.StudentCourseRequestList(ctx, param.StudentID, param.Status, param.Search, param.Page, param.Limit, totalRow, requests); err != nil {
 		return nil, nil, err
 	}
 	return requests, totalRow, nil
@@ -216,7 +216,7 @@ func (crs *CourseRequestServiceImpl) MentorCourseRequestList(ctx context.Context
 	if err := crs.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
 		return nil, nil, err
 	}
-	if err := crs.crr.MentorCourseRequestList(ctx, param.MentorID, param.Status, param.LastID, param.Limit, totalRow, requests); err != nil {
+	if err := crs.crr.MentorCourseRequestList(ctx, param.MentorID, param.Status, param.Page, param.Limit, totalRow, requests); err != nil {
 		return nil, nil, err
 	}
 	return requests, totalRow, nil

@@ -4,11 +4,11 @@
 	import { goto } from '$app/navigation';
 	import Loading from '$lib/components/loader/Loading.svelte';
 	let { data }: PageProps = $props();
-	onMount(async () => {
+	onMount(() => {
 		if (data.success) {
-			await goto('/courses', { replaceState: true });
+			goto('/courses', { replaceState: true });
 		} else {
-			await goto('/login', { replaceState: true });
+			goto('/login', { replaceState: true });
 		}
 	});
 </script>

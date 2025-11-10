@@ -149,15 +149,19 @@ func (cr *CourseRepositoryImpl) ListCourse(
 	ctx context.Context,
 	query *[]entity.CourseListQuery,
 	totalRow *int64,
-	param entity.ListCourseParam,
+	limit int,
+	page int,
+	search *string,
+	method *string,
+	courseCategory *int,
 ) error {
 	var driver RepoDriver
 	driver = cr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
 	}
-	countArgs := []any{param.LastID}
-	args := []any{param.LastID}
+	countArgs := []any{}
+	args := []any{}
 	sqlQuery := `
 		SELECT
 		c.id,
@@ -172,27 +176,27 @@ func (cr *CourseRepositoryImpl) ListCourse(
 		c.max_total_session
 	FROM courses c
 	JOIN users u ON u.id = c.mentor_id
-	WHERE c.deleted_at IS NULL AND u.deleted_at IS NULL AND c.id < $1
+	WHERE c.deleted_at IS NULL AND u.deleted_at IS NULL
 	`
 	countQuery := `
 	SELECT count(*)
 	FROM courses c
 	JOIN users u ON u.id = c.mentor_id
-	WHERE c.deleted_at IS NULL AND u.deleted_at IS NULL AND c.id < $1
+	WHERE c.deleted_at IS NULL AND u.deleted_at IS NULL
 	`
-	if param.Search != nil {
+	if search != nil {
 		countQuery += fmt.Sprintf(" AND (c.title ILIKE $%d OR u.name ILIKE $%d) ", len(countArgs)+1, len(countArgs)+1)
 		sqlQuery += fmt.Sprintf(" AND (c.title ILIKE $%d OR u.name ILIKE $%d) ", len(args)+1, len(args)+1)
-		args = append(args, "%"+*param.Search+"%")
-		countArgs = append(countArgs, "%"+*param.Search+"%")
+		args = append(args, "%"+*search+"%")
+		countArgs = append(countArgs, "%"+*search+"%")
 	}
-	if param.Method != nil {
+	if method != nil {
 		countQuery += fmt.Sprintf(" AND c.method = $%d", len(countArgs)+1)
 		sqlQuery += fmt.Sprintf(" AND c.method = $%d", len(args)+1)
-		args = append(args, *param.Method)
-		countArgs = append(countArgs, *param.Method)
+		args = append(args, *method)
+		countArgs = append(countArgs, *method)
 	}
-	if param.CourseCategory != nil {
+	if courseCategory != nil {
 		countQuery += fmt.Sprintf(` AND EXISTS (
 			SELECT 1 
 			FROM course_category_assignments cca_filter 
@@ -211,12 +215,16 @@ func (cr *CourseRepositoryImpl) ListCourse(
 			AND cc_filter.deleted_at IS NULL
 			AND cc_filter.id = $%d
 		)`, len(args)+1)
-		countArgs = append(countArgs, *param.CourseCategory)
-		args = append(args, *param.CourseCategory)
+		countArgs = append(countArgs, *courseCategory)
+		args = append(args, *courseCategory)
 	}
-	sqlQuery += " ORDER BY c.id DESC "
-	sqlQuery += fmt.Sprintf(" LIMIT $%d ", len(args)+1)
-	args = append(args, param.Limit)
+
+	args = append(args, limit)
+	sqlQuery += fmt.Sprintf(" LIMIT $%d ", len(args))
+
+	args = append(args, limit*(page-1))
+	sqlQuery += fmt.Sprintf(" OFFSET $%d", len(args))
+
 	row := driver.QueryRow(countQuery, countArgs...)
 	if err := row.Scan(totalRow); err != nil {
 		return customerrors.NewError(
@@ -382,15 +390,19 @@ func (cr *CourseRepositoryImpl) MentorListCourse(
 	ctx context.Context,
 	query *[]entity.MentorListCourseQuery,
 	totalRow *int64,
-	param entity.MentorListCourseParam,
+	limit int,
+	page int,
+	mentorID string,
+	search *string,
+	courseCategory *int,
 ) error {
 	var driver RepoDriver
 	driver = cr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
 	}
-	countArgs := []any{param.MentorID, param.LastID}
-	args := []any{param.MentorID, param.LastID}
+	countArgs := []any{mentorID}
+	args := []any{mentorID}
 	sqlQuery := `
 		SELECT
 		c.id,
@@ -401,20 +413,20 @@ func (cr *CourseRepositoryImpl) MentorListCourse(
 		c.session_duration_minutes,
 		c.max_total_session
 	FROM courses c
-	WHERE c.mentor_id = $1 AND c.deleted_at IS NULL AND c.id < $2
+	WHERE c.mentor_id = $1 AND c.deleted_at IS NULL
 	`
 	countQuery := `
 	SELECT count(*)
 	FROM courses c
-	WHERE c.mentor_id = $1 AND c.deleted_at IS NULL AND c.id < $2
+	WHERE c.mentor_id = $1 AND c.deleted_at IS NULL
 	`
-	if param.Search != nil {
+	if search != nil {
 		countQuery += fmt.Sprintf(" AND c.title ILIKE $%d ", len(countArgs)+1)
 		sqlQuery += fmt.Sprintf(" AND c.title ILIKE $%d ", len(args)+1)
-		args = append(args, "%"+*param.Search+"%")
-		countArgs = append(countArgs, "%"+*param.Search+"%")
+		args = append(args, "%"+*search+"%")
+		countArgs = append(countArgs, "%"+*search+"%")
 	}
-	if param.CourseCategory != nil {
+	if courseCategory != nil {
 		countQuery += fmt.Sprintf(` AND EXISTS (
 			SELECT 1 
 			FROM course_category_assignments cca_filter 
@@ -433,12 +445,15 @@ func (cr *CourseRepositoryImpl) MentorListCourse(
 			AND cc_filter.deleted_at IS NULL
 			AND cc_filter.id = $%d
 		)`, len(args)+1)
-		countArgs = append(countArgs, *param.CourseCategory)
-		args = append(args, *param.CourseCategory)
+		countArgs = append(countArgs, *courseCategory)
+		args = append(args, *courseCategory)
 	}
-	sqlQuery += " ORDER BY c.id DESC "
-	sqlQuery += fmt.Sprintf(" LIMIT $%d ", len(args)+1)
-	args = append(args, param.Limit)
+
+	args = append(args, limit)
+	sqlQuery += fmt.Sprintf(" LIMIT $%d ", len(args))
+
+	args = append(args, limit*(page-1))
+	sqlQuery += fmt.Sprintf(" OFFSET $%d ", len(args))
 	row := driver.QueryRow(countQuery, countArgs...)
 	if err := row.Scan(totalRow); err != nil {
 		return customerrors.NewError(

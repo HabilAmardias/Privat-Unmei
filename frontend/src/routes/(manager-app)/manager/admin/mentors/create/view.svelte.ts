@@ -145,6 +145,11 @@ export class CreateMentorView {
 		return false;
 	});
 
+	constructor(p: paymentMethod[], password: string) {
+		this.setPaymentMethods(p);
+		this.setGeneratedPassword(password);
+	}
+
 	#validateEmail(email: string) {
 		const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		return pattern.test(email);

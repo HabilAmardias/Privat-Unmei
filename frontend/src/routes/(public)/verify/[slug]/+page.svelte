@@ -29,11 +29,11 @@
 	Successfully Verified
 {/snippet}
 
-{#snippet dialogContent()}
+{#snippet dialogContent()}{/snippet}
+
+<Dialog buttonText="" bind:open={View.openDialog} title={dialogTitle} description={dialogContent}>
 	<CircleCheck size={128} />
 	<p>Your account is now successfully verified</p>
 	<p>You can now login with your account</p>
 	<Button full={true} onClick={() => navigateToLogin()}>Login</Button>
-{/snippet}
-
-<Dialog bind:open={View.openDialog} {dialogTitle} {dialogContent} />
+</Dialog>

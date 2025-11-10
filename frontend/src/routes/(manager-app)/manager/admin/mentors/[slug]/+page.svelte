@@ -4,7 +4,6 @@
 	import { goto } from '$app/navigation';
 	import CldImage from '$lib/components/image/CldImage.svelte';
 	import { MentorDetailView } from './view.svelte';
-	import DownloadLink from '$lib/components/button/DownloadLink.svelte';
 	import AlertDialog from '$lib/components/dialog/AlertDialog.svelte';
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import { dowMap } from './constants';
@@ -46,11 +45,6 @@
 			<div class="flex flex-col gap-1">
 				<p class="font-bold text-[var(--tertiary-color)]">{data.profile.name}</p>
 				<p>{data.profile.email}</p>
-				<DownloadLink
-					download="resume.pdf"
-					className="cursor-pointer text-[var(--tertiary-color)] hover:text-[var(--primary-color)]"
-					href={`${data.profile.resume}?fl_attachment`}>Download Resume</DownloadLink
-				>
 			</div>
 			<AlertDialog
 				action="?/deleteMentor"
@@ -83,26 +77,34 @@
 		<p class="font-bold text-[var(--tertiary-color)]">Bio:</p>
 		<p>{data.profile.bio}</p>
 	</div>
-	<div class="flex flex-col gap-2 md:grid md:grid-cols-2">
+	<div class="flex flex-col gap-4 md:grid md:grid-cols-2">
 		<div class="flex flex-col gap-4">
 			<p class="font-bold text-[var(--tertiary-color)]">Schedules:</p>
-			<ScrollArea class="h-[100px]" orientation="vertical" viewportClasses="max-h-[100px]">
-				{#each data.schedules as sch, i (i)}
-					<div class="rounded-lg bg-[var(--tertiary-color)] p-4 text-[var(--secondary-color)]">
-						<p>{dowMap.get(sch.day_of_week)}, {sch.start_time} - {sch.end_time}</p>
-					</div>
-				{/each}
-			</ScrollArea>
+			{#if data.schedules}
+				<ScrollArea class="h-[100px]" orientation="vertical" viewportClasses="max-h-[100px]">
+					{#each data.schedules as sch, i (i)}
+						<div class="rounded-lg bg-[var(--tertiary-color)] p-4 text-[var(--secondary-color)]">
+							<p>{dowMap.get(sch.day_of_week)}, {sch.start_time} - {sch.end_time}</p>
+						</div>
+					{/each}
+				</ScrollArea>
+			{:else}
+				<b class="mx-auto self-center text-[var(--tertiary-color)]">No schedules found</b>
+			{/if}
 		</div>
 		<div class="flex flex-col gap-4">
 			<p class="font-bold text-[var(--tertiary-color)]">Payments:</p>
-			<ScrollArea class="h-[100px]" orientation="vertical" viewportClasses="max-h-[100px]">
-				{#each data.payments as py, i (i)}
-					<div class="rounded-lg bg-[var(--tertiary-color)] p-4 text-[var(--secondary-color)]">
-						<p>{py.payment_method_name} - {py.account_number}</p>
-					</div>
-				{/each}
-			</ScrollArea>
+			{#if data.payments}
+				<ScrollArea class="h-[100px]" orientation="vertical" viewportClasses="max-h-[100px]">
+					{#each data.payments as py, i (i)}
+						<div class="rounded-lg bg-[var(--tertiary-color)] p-4 text-[var(--secondary-color)]">
+							<p>{py.payment_method_name} - {py.account_number}</p>
+						</div>
+					{/each}
+				</ScrollArea>
+			{:else}
+				<b class="text-[var(--tertiary-color)]">No payments found</b>
+			{/if}
 		</div>
 	</div>
 </div>

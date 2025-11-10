@@ -29,7 +29,7 @@ type (
 		CreatedAt   time.Time
 	}
 	GetCourseRatingParam struct {
-		SeekPaginatedParam
+		PaginatedParam
 		CourseID int
 	}
 )

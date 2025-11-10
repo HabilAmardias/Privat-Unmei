@@ -1,4 +1,4 @@
-import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
+import type { EnhancementArgs, EnhancementReturn, PaginatedResponse } from '$lib/types';
 import type { mentorList } from './model';
 import { CreateToast } from '$lib/utils/helper';
 import { debounce } from '$lib/utils/helper';
@@ -18,6 +18,11 @@ export class MentorManagerView {
 	#SearchSubmit = debounce(() => {
 		this.searchForm?.requestSubmit();
 	}, 500);
+
+	constructor(m: PaginatedResponse<mentorList>) {
+		this.setMentors(m.entries);
+		this.setPaginationData(m.page_info.page, m.page_info.limit, m.page_info.total_row);
+	}
 
 	onSearchInput = (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
 		this.search = e.currentTarget.value;
@@ -75,6 +80,7 @@ export class MentorManagerView {
 					this.filterMentors(this.mentorToDelete);
 				}
 				this.setMentorToDelete(undefined);
+				this.total_row -= 1;
 				CreateToast('success', 'successfully delete mentor');
 			}
 			if (result.type === 'failure') {

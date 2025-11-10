@@ -14,7 +14,7 @@
 	import AlertDialog from '$lib/components/dialog/AlertDialog.svelte';
 
 	let { data }: PageProps = $props();
-	const View = new MentorManagerView();
+	const View = new MentorManagerView(data.mentorsList);
 
 	onMount(() => {
 		if (!data.isVerified) {
@@ -26,12 +26,7 @@
 			View.setIsDesktop(window.innerWidth >= 768);
 		}
 		window.addEventListener('resize', setIsDesktop);
-		View.setMentors(data.mentorsList.entries);
-		View.setPaginationData(
-			data.mentorsList.page_info.page,
-			data.mentorsList.page_info.limit,
-			data.mentorsList.page_info.total_row
-		);
+
 		return () => {
 			window.removeEventListener('resize', setIsDesktop);
 		};
@@ -94,8 +89,8 @@
 		{:else if !View.mentors || View.mentors.length === 0}
 			<b class="mx-auto self-center text-[var(--tertiary-color)]">No mentors found</b>
 		{:else}
-			<ScrollArea orientation="vertical" class="flex-1" viewportClasses="h-full w-full max-h-full">
-				<table class="w-full">
+			<ScrollArea orientation="vertical" class="flex-1" viewportClasses="w-full max-h-[500px]">
+				<table class="w-full border-separate border-spacing-4">
 					<thead>
 						<tr>
 							<th class="text-[var(--tertiary-color)]">Email</th>

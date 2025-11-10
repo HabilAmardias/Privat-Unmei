@@ -35,7 +35,7 @@ func (pr *PaymentRepositoryImpl) HardDeleteMentorPayment(ctx context.Context, me
 func (pr *PaymentRepositoryImpl) GetMentorPaymentMethod(
 	ctx context.Context,
 	mentorID string,
-	methods *[]entity.GetPaymentMethodQuery,
+	methods *[]entity.GetMentorPaymentMethodQuery,
 ) error {
 	var driver RepoDriver
 	driver = pr.DB
@@ -61,7 +61,7 @@ func (pr *PaymentRepositoryImpl) GetMentorPaymentMethod(
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var item entity.GetPaymentMethodQuery
+		var item entity.GetMentorPaymentMethodQuery
 		if err := rows.Scan(
 			&item.ID,
 			&item.Name,
@@ -82,7 +82,7 @@ func (pr *PaymentRepositoryImpl) GetAllPaymentMethod(
 	ctx context.Context,
 	search *string,
 	limit int,
-	lastID int,
+	page int,
 	totalRow *int64,
 	methods *[]entity.GetPaymentMethodQuery,
 ) error {
@@ -91,19 +91,19 @@ func (pr *PaymentRepositoryImpl) GetAllPaymentMethod(
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
 	}
-	args := []any{lastID}
-	countArgs := []any{lastID}
+	args := []any{}
+	countArgs := []any{}
 	query := `
 	SELECT
 		id,
 		name
 	FROM payment_methods
-	WHERE deleted_at IS NULL AND id < $1
+	WHERE deleted_at IS NULL
 	`
 	countQuery := `
 	SELECT count(*)
 	FROM payment_methods
-	WHERE deleted_at IS NULL AND id < $1
+	WHERE deleted_at IS NULL
 	`
 	if search != nil {
 		args = append(args, "%"+*search+"%")
@@ -115,9 +115,12 @@ func (pr *PaymentRepositoryImpl) GetAllPaymentMethod(
 		AND name ILIKE $%d
 		`, len(countArgs))
 	}
-	query += `ORDER BY id DESC`
+
 	args = append(args, limit)
 	query += fmt.Sprintf(` LIMIT $%d`, len(args))
+
+	args = append(args, limit*(page-1))
+	query += fmt.Sprintf(" OFFSET $%d", len(args))
 	if err := driver.QueryRow(countQuery, countArgs...).Scan(totalRow); err != nil {
 		return customerrors.NewError(
 			"failed to get payment method list",

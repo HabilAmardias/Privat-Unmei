@@ -69,7 +69,7 @@ type (
 		CourseName string
 	}
 	MentorCourseRequestListParam struct {
-		SeekPaginatedParam
+		PaginatedParam
 		MentorID string
 		Status   *string
 	}
@@ -104,7 +104,7 @@ type (
 		CourseName  string
 	}
 	StudentCourseRequestListParam struct {
-		SeekPaginatedParam
+		PaginatedParam
 		StudentID string
 		Status    *string
 		Search    *string

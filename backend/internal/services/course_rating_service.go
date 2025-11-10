@@ -33,7 +33,7 @@ func (crs *CourseRatingServiceImpl) GetCourseReview(ctx context.Context, param e
 	if err := crs.cr.FindByID(ctx, param.CourseID, course, false); err != nil {
 		return nil, nil, err
 	}
-	if err := crs.crr.GetCourseReviews(ctx, param.CourseID, param.LastID, param.Limit, totalRow, reviews); err != nil {
+	if err := crs.crr.GetCourseReviews(ctx, param.CourseID, param.Page, param.Limit, totalRow, reviews); err != nil {
 		return nil, nil, err
 	}
 	return reviews, totalRow, nil

@@ -17,10 +17,14 @@ type (
 		ID int `json:"payment_method_id"`
 	}
 	GetAllPaymentMethodReq struct {
-		SeekPaginatedReq
+		PaginatedReq
 		Search *string `form:"search"`
 	}
 	GetPaymentMethodRes struct {
+		ID   int    `json:"payment_method_id"`
+		Name string `json:"payment_method_name"`
+	}
+	GetMentorPaymentMethodRes struct {
 		ID            int    `json:"payment_method_id"`
 		Name          string `json:"payment_method_name"`
 		AccountNumber string `json:"account_number"`
