@@ -108,7 +108,7 @@ export class CostManagementView {
 						if (m.id === this.costToUpdate) {
 							return {
 								id: this.costToUpdate,
-								name: args.formData.get('name') as string,
+								name: m.name,
 								amount: parseFloat(args.formData.get('amount') as string)
 							};
 						}
@@ -196,9 +196,7 @@ export class CostManagementView {
 						if (m.id === this.discountToUpdate) {
 							return {
 								id: this.discountToUpdate,
-								number_of_participant: parseInt(
-									args.formData.get('number_of_participant') as string
-								),
+								number_of_participant: m.number_of_participant,
 								amount: parseFloat(args.formData.get('amount') as string)
 							};
 						}
@@ -211,7 +209,7 @@ export class CostManagementView {
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);
 			}
-			this.updateCostDialogOpen = false;
+			this.updateDiscountDialogOpen = false;
 		};
 	};
 	onDiscountPageChangeForm = (args: EnhancementArgs) => {

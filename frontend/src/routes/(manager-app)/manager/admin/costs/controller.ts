@@ -62,8 +62,8 @@ class CostManagementController {
 	};
 	createDiscount = async (fetch: Fetch, req: Request) => {
 		const formData = await req.formData();
-		const amount = formData.get('number_of_participant');
-		const number_of_participant = formData.get('name');
+		const amount = formData.get('amount');
+		const number_of_participant = formData.get('number_of_participant');
 		if (!amount) {
 			return { success: false, message: 'provide discount amount', status: 400 };
 		}
@@ -71,7 +71,7 @@ class CostManagementController {
 			return { success: false, message: 'provide discount number of participant', status: 400 };
 		}
 		const reqBody = JSON.stringify({
-			number_of_participant,
+			number_of_participant: parseInt(number_of_participant as string),
 			amount: parseFloat(amount as string)
 		});
 		const url = 'http://localhost:8080/api/v1/discounts';
