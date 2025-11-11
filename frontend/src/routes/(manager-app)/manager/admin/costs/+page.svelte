@@ -22,28 +22,48 @@
 	});
 </script>
 
-{#snippet deleteDialogTitle()}
+{#snippet deleteCostDialogTitle()}
 	Delete Cost Confirmation
+{/snippet}
+
+{#snippet deleteDiscountDialogTitle()}
+	Delete Discount Confirmation
 {/snippet}
 
 {#snippet deleteDialogDescription()}
 	Irreversible action, are you sure want to proceed?
 {/snippet}
 
-{#snippet createDialogTitle()}
+{#snippet createCostDialogTitle()}
 	Create Additional Cost
 {/snippet}
 
-{#snippet createDialogDescription()}
+{#snippet createDiscountDialogTitle()}
+	Create Discount
+{/snippet}
+
+{#snippet createCostDialogDescription()}
 	Add New Cost
 {/snippet}
 
-{#snippet updateDialogTitle()}
+{#snippet createDiscountDialogDescription()}
+	Add New Discount
+{/snippet}
+
+{#snippet updateCostDialogTitle()}
 	Update Additional Cost
 {/snippet}
 
-{#snippet updateDialogDescription()}
+{#snippet updateDiscountDialogTitle()}
+	Update Discount
+{/snippet}
+
+{#snippet updateCostDialogDescription()}
 	Update Cost Amount
+{/snippet}
+
+{#snippet updateDiscountDialogDescription()}
+	Update Discount Amount
 {/snippet}
 
 <div class="flex h-full flex-col p-4">
@@ -68,8 +88,8 @@
 				<Dialog
 					bind:open={View.createCostDialogOpen}
 					buttonText="Create Cost"
-					title={createDialogTitle}
-					description={createDialogDescription}
+					title={createCostDialogTitle}
+					description={createCostDialogDescription}
 					buttonClass="text-[var(--secondary-color)] cursor-pointer hover:text-[var(--primary-color)]"
 				>
 					<form
@@ -114,11 +134,11 @@
 												<Dialog
 													bind:open={View.updateCostDialogOpen}
 													buttonText="Update"
-													title={updateDialogTitle}
+													title={updateCostDialogTitle}
 													buttonOnClick={() => {
 														View.costToUpdate = c.id;
 													}}
-													description={updateDialogDescription}
+													description={updateCostDialogDescription}
 													buttonClass="text-[var(--secondary-color)] cursor-pointer hover:text-[var(--primary-color)]"
 												>
 													<form
@@ -141,7 +161,7 @@
 												action="?/deleteCost"
 												bind:open={View.deleteCostDialogOpen}
 												enhancement={View.onDeleteCost}
-												title={deleteDialogTitle}
+												title={deleteCostDialogTitle}
 												onClick={() => {
 													View.costToDelete = c.id;
 												}}
@@ -178,8 +198,8 @@
 				<Dialog
 					bind:open={View.createDiscountDialogOpen}
 					buttonText="Create Discount"
-					title={createDialogTitle}
-					description={createDialogDescription}
+					title={createDiscountDialogTitle}
+					description={createDiscountDialogDescription}
 					buttonClass="text-[var(--secondary-color)] cursor-pointer hover:text-[var(--primary-color)]"
 				>
 					<form
@@ -229,11 +249,11 @@
 												<Dialog
 													bind:open={View.updateDiscountDialogOpen}
 													buttonText="Update"
-													title={updateDialogTitle}
+													title={updateDiscountDialogTitle}
 													buttonOnClick={() => {
 														View.discountToUpdate = d.id;
 													}}
-													description={updateDialogDescription}
+													description={updateDiscountDialogDescription}
 													buttonClass="text-[var(--secondary-color)] cursor-pointer hover:text-[var(--primary-color)]"
 												>
 													<form
@@ -256,7 +276,7 @@
 												action="?/deleteDiscount"
 												bind:open={View.deleteDiscountDialogOpen}
 												enhancement={View.onDeleteDiscount}
-												title={deleteDialogTitle}
+												title={deleteDiscountDialogTitle}
 												onClick={() => {
 													View.discountToDelete = d.id;
 												}}
