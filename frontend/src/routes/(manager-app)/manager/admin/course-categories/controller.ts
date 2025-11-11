@@ -50,15 +50,17 @@ class CourseCategoryManagementController {
 	async getCategories(fetch: Fetch, req?: Request) {
 		let url = 'http://localhost:8080/api/v1/course-categories?';
 		if (req) {
+			const args: string[] = [];
 			const formData = await req.formData();
 			const search = formData.get('search');
 			const page = formData.get('page');
 			if (search) {
-				url += `search=${search}`;
+				args.push(`search=${search}`);
 			}
 			if (page) {
-				url += `page=${page}`;
+				args.push(`page=${page}`);
 			}
+			url += args.join('&');
 		}
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {

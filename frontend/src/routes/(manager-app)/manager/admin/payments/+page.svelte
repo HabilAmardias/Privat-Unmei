@@ -21,6 +21,12 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Payment Management Method - Privat Unmei</title>
+	<meta name="description" content="Payment Management Method - Privat Unmei" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</svelte:head>
+
 {#snippet deleteDialogTitle()}
 	Delete Payment Confirmation
 {/snippet}

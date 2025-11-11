@@ -21,6 +21,12 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Course Categories - Privat Unmei</title>
+	<meta name="description" content="Course Categories - Privat Unmei" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</svelte:head>
+
 {#snippet deleteDialogTitle()}
 	Delete Category Confirmation
 {/snippet}

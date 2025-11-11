@@ -22,6 +22,12 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Cost Management - Privat Unmei</title>
+	<meta name="description" content="Cost Management - Privat Unmei" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</svelte:head>
+
 {#snippet deleteCostDialogTitle()}
 	Delete Cost Confirmation
 {/snippet}
