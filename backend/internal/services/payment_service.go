@@ -99,6 +99,7 @@ func (ps *PaymentServiceImpl) DeletePaymentMethod(ctx context.Context, param ent
 	admin := new(entity.Admin)
 	method := new(entity.PaymentMethod)
 	user := new(entity.User)
+	count := new(int)
 	return ps.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := ps.ur.FindByID(ctx, param.AdminID, user); err != nil {
 			return err
@@ -115,6 +116,18 @@ func (ps *PaymentServiceImpl) DeletePaymentMethod(ctx context.Context, param ent
 		}
 		if err := ps.pr.FindPaymentMethodByID(ctx, param.MethodID, method); err != nil {
 			return err
+		}
+		if err := ps.pr.GetLeastPaymentMethodCount(ctx, param.MethodID, count); err != nil {
+			return err
+		}
+		if count != nil {
+			if *count <= 1 {
+				return customerrors.NewError(
+					"there is a mentor with only one method",
+					errors.New("there is a mentor with only one method"),
+					customerrors.InvalidAction,
+				)
+			}
 		}
 		if err := ps.pr.UnassignPaymentMethodFromAllMentor(ctx, param.MethodID); err != nil {
 			return err

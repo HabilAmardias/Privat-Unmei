@@ -18,6 +18,35 @@ func CreatePaymentRepository(db *db.CustomDB) *PaymentRepositoryImpl {
 	return &PaymentRepositoryImpl{db}
 }
 
+func (pr *PaymentRepositoryImpl) GetLeastPaymentMethodCount(ctx context.Context, id int, count *int) error {
+	var driver RepoDriver = pr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+
+	query := `
+	with counts as (
+		select mp.mentor_id, count(*) as payment_method_count
+		from mentor_payments mp
+		where mp.mentor_id in (
+			select mentor_id
+			from mentor_payments
+			where payment_method_id = $1 and deleted_at is null
+		) and mp.deleted_at is null
+		group by mp.mentor_id
+	)
+	select min(c.payment_method_count) from counts c;
+	`
+	if err := driver.QueryRow(query, id).Scan(count); err != nil {
+		return customerrors.NewError(
+			"failed to get payment method",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (pr *PaymentRepositoryImpl) HardDeleteMentorPayment(ctx context.Context, mentorID string) error {
 	var driver RepoDriver
 	driver = pr.DB

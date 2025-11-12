@@ -24,6 +24,7 @@ func (ccs *CourseCategoryServiceImpl) DeleteCategory(ctx context.Context, param 
 	admin := new(entity.Admin)
 	user := new(entity.User)
 	category := new(entity.CourseCategory)
+	count := new(int)
 	return ccs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := ccs.ur.FindByID(ctx, param.AdminID, user); err != nil {
 			return err
@@ -40,6 +41,18 @@ func (ccs *CourseCategoryServiceImpl) DeleteCategory(ctx context.Context, param 
 		}
 		if err := ccs.ccr.FindByID(ctx, param.ID, category); err != nil {
 			return err
+		}
+		if err := ccs.ccr.GetLeastCategoryCount(ctx, param.ID, count); err != nil {
+			return err
+		}
+		if count != nil {
+			if *count <= 1 {
+				return customerrors.NewError(
+					"there is a course with only one category",
+					errors.New("there is a course with only one category"),
+					customerrors.InvalidAction,
+				)
+			}
 		}
 		if err := ccs.ccr.UnassignCategoriesByCategoryID(ctx, param.ID); err != nil {
 			return err
