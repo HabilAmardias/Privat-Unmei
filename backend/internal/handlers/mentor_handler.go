@@ -24,6 +24,30 @@ func CreateMentorHandler(ms *services.MentorServiceImpl) *MentorHandlerImpl {
 	return &MentorHandlerImpl{ms}
 }
 
+func (mh *MentorHandlerImpl) GetMyPaymentMethod(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.GetMyPaymentMethodParam{
+		MentorID: claim.Subject,
+	}
+	methods, err := mh.ms.GetMyPaymentMethod(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	entries := []dtos.GetMentorPaymentMethodRes{}
+	for _, method := range *methods {
+		entries = append(entries, dtos.GetMentorPaymentMethodRes(method))
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data:    entries,
+	})
+}
+
 func (mh *MentorHandlerImpl) GetMyAvailability(ctx *gin.Context) {
 	claim, err := getAuthenticationPayload(ctx)
 	if err != nil {

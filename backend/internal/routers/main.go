@@ -342,6 +342,13 @@ func (c *RouteConfig) SetupPrivateRoute() {
 	), c.PaymentHandler.UpdatePaymentMethod)
 	v1.GET("/payment-methods", c.PaymentHandler.GetAllPaymentMethod)
 	v1.GET("/mentors/:id/payment-methods", c.PaymentHandler.GetMentorPaymentMethod)
+	v1.GET("/mentors/me/payment-methods", middlewares.AuthorizationMiddleware(
+		constants.ReadOwnPermission,
+		constants.MentorResource,
+		c.RBACRepository,
+		c.RBACCacheRepository,
+		c.Logger,
+	), c.MentorHandler.GetMyPaymentMethod)
 	v1.POST("/discounts", middlewares.AuthorizationMiddleware(
 		constants.CreatePermission,
 		constants.DiscountResource,
