@@ -6,10 +6,19 @@
 		value?: string;
 		name: string;
 		id: string;
+		placeholder?: string;
 		onBlur?: (e?: FocusEvent & { currentTarget: EventTarget & HTMLTextAreaElement }) => void;
 		err?: Error;
 	};
-	let { value = $bindable(), name, children, id, onBlur, err }: textAreaProps = $props();
+	let {
+		value = $bindable(),
+		name,
+		children,
+		id,
+		placeholder,
+		onBlur,
+		err
+	}: textAreaProps = $props();
 </script>
 
 <div>
@@ -21,6 +30,7 @@
 		{id}
 		{name}
 		onblur={onBlur}
+		{placeholder}
 		class="w-full rounded-lg bg-[var(--tertiary-color)] text-[var(--secondary-color)]"
 		bind:value
 	></textarea>

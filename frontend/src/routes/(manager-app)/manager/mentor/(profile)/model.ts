@@ -27,5 +27,4 @@ export type MentorProfile = {
 	major: string;
 	campus: string;
 	email: string;
-	status: 'verified' | 'unverified';
 };

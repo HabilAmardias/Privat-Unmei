@@ -21,6 +21,9 @@
 		if (data.role !== mentorRole) {
 			goto('/login', { replaceState: true });
 		}
+		if (window.location.pathname !== '/manager/mentor/verify' && data.userStatus !== 'verified') {
+			goto('/manager/admin/verify', { replaceState: true });
+		}
 	});
 
 	function onLogout() {
@@ -43,7 +46,7 @@
 				<Menu class="duration-300 ease-in-out {View.menuOpen ? 'rotate-90' : ''}" />
 			</Button>
 		</div>
-		<Link href="/manager/admin">
+		<Link href="/manager/mentor">
 			<div class="flex flex-col items-center gap-1">
 				<House />
 				<p class="duration-300 ease-in-out {View.menuOpen ? 'opacity-100' : 'opacity-0'}">Home</p>
@@ -89,7 +92,7 @@
 <div class="block md:hidden">
 	<Menubar>
 		<MenuItem>
-			<Link href="/manager/admin">
+			<Link href="/manager/mentor">
 				<div class="flex flex-col items-center gap-1">
 					<House />
 					<p>Home</p>

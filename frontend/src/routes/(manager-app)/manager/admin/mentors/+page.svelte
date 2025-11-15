@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { PageProps } from './$types';
-	import { goto } from '$app/navigation';
 	import { MentorManagerView } from './view.svelte';
 	import Input from '$lib/components/form/Input.svelte';
 	import Button from '$lib/components/button/Button.svelte';
@@ -17,10 +16,6 @@
 	const View = new MentorManagerView(data.mentorsList);
 
 	onMount(() => {
-		if (!data.isVerified) {
-			goto('/manager/admin/verify', { replaceState: true });
-			return;
-		}
 		View.setIsDesktop(window.innerWidth >= 768);
 		function setIsDesktop() {
 			View.setIsDesktop(window.innerWidth >= 768);

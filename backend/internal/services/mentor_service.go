@@ -140,7 +140,6 @@ func (ms *MentorServiceImpl) GetMentorProfile(ctx context.Context, param entity.
 	res.ProfileImage = user.ProfileImage
 	res.Resume = mentor.Resume
 	res.YearsOfExperience = mentor.YearsOfExperience
-	res.Status = user.Status
 
 	return res, nil
 }
@@ -179,7 +178,7 @@ func (ms *MentorServiceImpl) ChangePassword(ctx context.Context, param entity.Me
 	})
 }
 
-func (ms *MentorServiceImpl) Login(ctx context.Context, param entity.LoginMentorParam) (string, string, error) {
+func (ms *MentorServiceImpl) Login(ctx context.Context, param entity.LoginMentorParam) (string, string, string, error) {
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
 	authToken := new(string)
@@ -221,9 +220,9 @@ func (ms *MentorServiceImpl) Login(ctx context.Context, param entity.LoginMentor
 		*refreshToken = rtoken
 		return nil
 	}); err != nil {
-		return "", "", err
+		return "", "", "", err
 	}
-	return *authToken, *refreshToken, nil
+	return *authToken, *refreshToken, user.Status, nil
 }
 
 func (ms *MentorServiceImpl) GetMentorList(ctx context.Context, param entity.ListMentorParam) (*[]entity.ListMentorQuery, *int64, error) {

@@ -3,7 +3,7 @@
 	import { Check, ChevronsUpDown, ChevronsDown, ChevronsUp } from '@lucide/svelte';
 
 	type selectProps = {
-		value: string;
+		value?: string;
 		options: { value: string; label: string }[];
 		onChange?: (val: string) => void;
 		defaultLable: string;

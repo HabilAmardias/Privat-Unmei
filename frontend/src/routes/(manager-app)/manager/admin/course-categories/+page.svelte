@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import type { PageProps } from './$types';
 	import { CourseCategoryManagementView } from './view.svelte';
-	import { goto } from '$app/navigation';
 	import AlertDialog from '$lib/components/dialog/AlertDialog.svelte';
 	import Input from '$lib/components/form/Input.svelte';
 	import Loading from '$lib/components/loader/Loading.svelte';
@@ -14,11 +12,6 @@
 
 	let { data }: PageProps = $props();
 	const View = new CourseCategoryManagementView(data.categories);
-	onMount(() => {
-		if (!data.isVerified) {
-			goto('/managet/admin/verify', { replaceState: true });
-		}
-	});
 </script>
 
 <svelte:head>

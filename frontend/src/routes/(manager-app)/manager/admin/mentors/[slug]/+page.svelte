@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { PageProps } from './$types';
-	import { goto } from '$app/navigation';
 	import CldImage from '$lib/components/image/CldImage.svelte';
 	import { MentorDetailView } from './view.svelte';
 	import AlertDialog from '$lib/components/dialog/AlertDialog.svelte';
@@ -12,9 +11,6 @@
 	let { data }: PageProps = $props();
 
 	onMount(() => {
-		if (!data.isVerified) {
-			goto('/admin/verify', { replaceState: true });
-		}
 		View.setIsDesktop(window.innerWidth >= 768);
 	});
 </script>

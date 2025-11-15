@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import type { PageProps } from './$types';
 	import { CostManagementView } from './view.svelte';
-	import { goto } from '$app/navigation';
 	import AlertDialog from '$lib/components/dialog/AlertDialog.svelte';
 	import Input from '$lib/components/form/Input.svelte';
 	import Loading from '$lib/components/loader/Loading.svelte';
@@ -15,11 +13,6 @@
 
 	let { data }: PageProps = $props();
 	const View = new CostManagementView(data.costs, data.discounts);
-	onMount(() => {
-		if (!data.isVerified) {
-			goto('/managet/admin/verify', { replaceState: true });
-		}
-	});
 </script>
 
 <svelte:head>

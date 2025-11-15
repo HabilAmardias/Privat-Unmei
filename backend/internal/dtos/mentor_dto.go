@@ -85,7 +85,6 @@ type (
 		Degree            string `json:"degree"`
 		Major             string `json:"major"`
 		Campus            string `json:"campus"`
-		Status            string `json:"status"`
 	}
 	GetDOWAvailabilityRes struct {
 		DayOfWeeks []int `json:"day_of_weeks"`

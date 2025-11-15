@@ -20,6 +20,9 @@
 		if (data.role !== adminRole) {
 			goto('/login', { replaceState: true });
 		}
+		if (window.location.pathname !== '/manager/admin/verify' && data.userStatus !== 'verified') {
+			goto('/manager/admin/verify', { replaceState: true });
+		}
 	});
 
 	function onLogout() {

@@ -2,28 +2,28 @@
 	import Button from '$lib/components/button/Button.svelte';
 	import Input from '$lib/components/form/Input.svelte';
 	import Select from '$lib/components/select/Select.svelte';
-	import { onMount } from 'svelte';
 	import { dayofWeeks, degreeOpts } from './constants';
-	import { CreateMentorView } from './view.svelte';
+	import { UpdateMentorProfileView } from './view.svelte';
 	import type { PageProps } from './$types';
 	import Search from '$lib/components/search/Search.svelte';
 	import { enhance } from '$app/forms';
 	import FileInput from '$lib/components/form/FileInput.svelte';
 	import { CloudUpload, X } from '@lucide/svelte';
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
+	import Textarea from '$lib/components/form/Textarea.svelte';
 
 	const { data }: PageProps = $props();
-	const View = new CreateMentorView(data.paymentMethods, data.generatedPassword);
+	const View = new UpdateMentorProfileView(data.paymentMethods);
 </script>
 
 <svelte:head>
-	<title>Add Mentor - Privat Unmei</title>
-	<meta name="description" content="Add Mentor - Privat Unmei" />
+	<title>Update Profile - Privat Unmei</title>
+	<meta name="description" content="Update Profile - Privat Unmei" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </svelte:head>
 
 <div class="flex flex-col p-4">
-	<h3 class="mb-4 text-xl font-bold text-[var(--tertiary-color)]">Create New Mentor</h3>
+	<h3 class="mb-4 text-xl font-bold text-[var(--tertiary-color)]">Update Profile</h3>
 	<form
 		bind:this={View.paymentMethodForm}
 		use:enhance={View.onGetPaymentMethods}
@@ -31,14 +31,8 @@
 		method="POST"
 	></form>
 	<form
-		action="?/generatePassword"
-		method="POST"
-		bind:this={View.generatePasswordForm}
-		use:enhance={View.onGetPassword}
-	></form>
-	<form
-		use:enhance={View.onCreateMentor}
-		action="?/createMentor"
+		use:enhance={View.onUpdateMentor}
+		action="?/updateProfile"
 		method="POST"
 		class="flex flex-col gap-4"
 		enctype="multipart/form-data"
@@ -53,25 +47,10 @@
 				id="name"
 			/>
 		</div>
-		<div class="flex items-center gap-4">
-			<p class="font-bold text-[var(--tertiary-color)]">Email:</p>
-			<Input
-				err={View.emailErr}
-				bind:value={View.email}
-				type="email"
-				placeholder="Input mentor email"
-				name="email"
-				id="email"
-			/>
-		</div>
-		<div class="flex items-center gap-4">
-			<p class="font-bold text-[var(--tertiary-color)]">Password:</p>
-			<div
-				class="flex flex-1 gap-1 rounded-lg bg-[var(--tertiary-color)] px-4 py-2 text-[var(--secondary-color)]"
+		<div class="flex flex-col gap-4">
+			<Textarea bind:value={View.bio} name="bio" id="bio" placeholder="Insert new bio"
+				><p class="font-bold text-[var(--tertiary-color)]">Bio:</p></Textarea
 			>
-				<p>{View.generatedPassword}</p>
-			</div>
-			<Button type="button" onClick={View.generatePassword}>Generate</Button>
 		</div>
 		<div class="flex items-center gap-4">
 			<p class="font-bold text-[var(--tertiary-color)]">Experience:</p>
@@ -97,7 +76,12 @@
 		{#if View.resumeErr}
 			<p class="text-red-500">{View.resumeErr.message}</p>
 		{/if}
-		<FileInput bind:files={View.resumeFile} accept="application/pdf" name="file" id="file">
+		<FileInput
+			bind:files={View.resumeFile}
+			accept="application/pdf"
+			name="resume_file"
+			id="resume_file"
+		>
 			<div
 				class="border-1 flex w-full flex-col items-center justify-center rounded-lg border-dashed border-[var(--tertiary-color)] p-3 font-bold text-[var(--tertiary-color)] hover:text-[var(--primary-color)]"
 			>
@@ -154,7 +138,7 @@
 		<p class="font-bold text-[var(--tertiary-color)]">Payment Methods:</p>
 		<div class="grid grid-cols-2 place-items-center gap-4">
 			<div class="flex w-full flex-col gap-4">
-				<div class="flex gap-4">
+				<div class="flex flex-col gap-4 md:flex-row">
 					<Search
 						bind:value={View.selectedPaymentMethod}
 						items={View.paymentMethods}
@@ -205,7 +189,7 @@
 		</div>
 		<div class="flex gap-4">
 			<Button type="button">Cancel</Button>
-			<Button disabled={View.disableCreateMentor} type="submit">Create</Button>
+			<Button disabled={View.disableCreateMentor} type="submit">Update</Button>
 		</div>
 	</form>
 </div>
