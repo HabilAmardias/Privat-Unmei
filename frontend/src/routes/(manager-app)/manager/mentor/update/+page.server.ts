@@ -3,12 +3,29 @@ import type { PageServerLoad } from './$types';
 import { controller } from './controller';
 
 export const load: PageServerLoad = async ({ fetch }) => {
-	const res = await controller.getPaymentMethods(fetch);
-	if (!res.success) {
-		throw error(res.status, { message: res.message });
+	const [paymentMethodRes, schedulesRes, mentorPaymentRes, mentorProfileRes] = await Promise.all([
+		controller.getPaymentMethods(fetch),
+		controller.getMentorSchedules(fetch),
+		controller.getMentorPayments(fetch),
+		controller.getMentorProfile(fetch)
+	]);
+	if (!paymentMethodRes.success) {
+		throw error(paymentMethodRes.status, { message: paymentMethodRes.message });
+	}
+	if (!schedulesRes.success) {
+		throw error(schedulesRes.status, { message: schedulesRes.message });
+	}
+	if (!mentorPaymentRes.success) {
+		throw error(mentorPaymentRes.status, { message: mentorPaymentRes.message });
+	}
+	if (!mentorProfileRes.success) {
+		throw error(mentorProfileRes.status, { message: mentorProfileRes.message });
 	}
 	return {
-		paymentMethods: res.resBody.data.entries
+		paymentMethods: paymentMethodRes.resBody.data.entries,
+		mentorSchedules: schedulesRes.resBody.data,
+		mentorPayments: mentorPaymentRes.resBody.data,
+		profile: mentorProfileRes.resBody.data
 	};
 };
 

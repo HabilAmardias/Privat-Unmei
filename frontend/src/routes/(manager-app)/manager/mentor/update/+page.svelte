@@ -11,9 +11,31 @@
 	import { CloudUpload, X } from '@lucide/svelte';
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import Textarea from '$lib/components/form/Textarea.svelte';
+	import Image from '$lib/components/image/Image.svelte';
+	import CldImage from '$lib/components/image/CldImage.svelte';
+	import { Pencil } from '@lucide/svelte';
+	import { onMount } from 'svelte';
+	import Link from '$lib/components/button/Link.svelte';
 
 	const { data }: PageProps = $props();
-	const View = new UpdateMentorProfileView(data.paymentMethods);
+	const View = new UpdateMentorProfileView(
+		data.paymentMethods,
+		data.mentorSchedules,
+		data.mentorPayments,
+		data.profile
+	);
+
+	onMount(() => {
+		View.isDesktop = window.innerWidth >= 768;
+		function setIsDesktop() {
+			View.isDesktop = window.innerWidth >= 768;
+		}
+		window.addEventListener('resize', setIsDesktop);
+
+		return () => {
+			window.removeEventListener('resize', setIsDesktop);
+		};
+	});
 </script>
 
 <svelte:head>
@@ -24,6 +46,7 @@
 
 <div class="flex flex-col p-4">
 	<h3 class="mb-4 text-xl font-bold text-[var(--tertiary-color)]">Update Profile</h3>
+
 	<form
 		bind:this={View.paymentMethodForm}
 		use:enhance={View.onGetPaymentMethods}
@@ -37,15 +60,48 @@
 		class="flex flex-col gap-4"
 		enctype="multipart/form-data"
 	>
-		<div class="flex items-center gap-4">
-			<p class="font-bold text-[var(--tertiary-color)]">Name:</p>
-			<Input
-				bind:value={View.name}
-				type="text"
-				placeholder="Input mentor name"
-				name="name"
-				id="name"
-			/>
+		<div class="flex gap-4">
+			<FileInput
+				accept="image/png"
+				bind:files={View.profileImage}
+				id="profile_image"
+				name="profile_image"
+			>
+				<div class="group relative inline-block overflow-hidden rounded-full">
+					{#if View.profileImage}
+						<Image
+							src={URL.createObjectURL(View.profileImage[0])}
+							width={View.size}
+							height={View.size}
+							className="rounded-full shadow-2xl border-gray-400 brightness-60 md:brightness-100 md:border-none md:shadow-none md:hover:shadow-2xl md:group-hover:border-gray-400 md:transition-all md:duration-300 md:group-hover:brightness-60"
+						/>
+					{:else}
+						<CldImage
+							src={data.profile.profile_image}
+							width={View.size}
+							height={View.size}
+							className="rounded-full shadow-2xl border-gray-400 brightness-60 md:brightness-100 md:border-none md:shadow-none md:hover:shadow-2xl md:group-hover:border-gray-400 md:transition-all md:duration-300 md:group-hover:brightness-60"
+						/>
+					{/if}
+					<div
+						class="absolute inset-0 flex items-center justify-center bg-opacity-0 transition-all duration-300 group-hover:bg-opacity-30"
+					>
+						<Pencil
+							class="text-white md:scale-50 md:transform md:opacity-0 md:transition-all md:duration-300 md:group-hover:scale-100 md:group-hover:opacity-100"
+						/>
+					</div>
+				</div>
+			</FileInput>
+			<div class="flex flex-col md:flex-row md:items-center md:gap-4">
+				<p class="font-bold text-[var(--tertiary-color)]">Name:</p>
+				<Input
+					bind:value={View.name}
+					type="text"
+					placeholder="Input mentor name"
+					name="name"
+					id="name"
+				/>
+			</div>
 		</div>
 		<div class="flex flex-col gap-4">
 			<Textarea bind:value={View.bio} name="bio" id="bio" placeholder="Insert new bio"
@@ -188,8 +244,10 @@
 			</ScrollArea>
 		</div>
 		<div class="flex gap-4">
-			<Button type="button">Cancel</Button>
-			<Button disabled={View.disableCreateMentor} type="submit">Update</Button>
+			<div class="w-fit rounded-lg bg-[var(--tertiary-color)] p-3">
+				<Link href="/manager/mentor">Cancel</Link>
+			</div>
+			<Button disabled={View.disableUpdateMentor} type="submit">Update</Button>
 		</div>
 	</form>
 </div>

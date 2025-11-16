@@ -3,14 +3,24 @@ import { CreateToast, debounce, DismissToast } from '$lib/utils/helper';
 import { FILE_IMAGE_THRESHOLD, MAX_BIO_LENGTH } from '$lib/utils/constants';
 import { dayofWeeks } from './constants';
 import {
-	type mentorPaymentMethods,
+	type MentorPaymentInfo,
+	type MentorProfile,
 	type MentorSchedule,
+	type MentorScheduleInfo,
 	type paymentMethod,
 	type paymentMethodOpts,
 	type TimeOnly
 } from './model';
 
 export class UpdateMentorProfileView {
+	isDesktop = $state<boolean>(false);
+	size = $derived.by<number>(() => {
+		if (this.isDesktop) {
+			return 150;
+		}
+		return 100;
+	});
+	profileImage = $state<FileList>();
 	name = $state<string | undefined>();
 	bio = $state<string | undefined>();
 	bioErr = $derived.by<Error | undefined>(() => {
@@ -43,7 +53,7 @@ export class UpdateMentorProfileView {
 
 	paymentMethods = $state<paymentMethodOpts[]>([]);
 	selectedPaymentMethod = $state<string>('');
-	mentorPaymentMethods = $state<mentorPaymentMethods[]>([]);
+	mentorPaymentMethods = $state<MentorPaymentInfo[]>([]);
 	accountNumber = $state<string>('');
 	paymentMethodForm = $state<HTMLFormElement>();
 	searchValue = $state<string>('');
@@ -122,15 +132,53 @@ export class UpdateMentorProfileView {
 		}
 	});
 
-	disableCreateMentor = $derived.by<boolean>(() => {
-		if (this.yoeErr || this.resumeErr) {
+	disableUpdateMentor = $derived.by<boolean>(() => {
+		if (
+			!this.name ||
+			!this.bio ||
+			this.yearsOfExperience === undefined ||
+			!this.campus ||
+			!this.degree ||
+			!this.major ||
+			this.yoeErr ||
+			this.resumeErr
+		) {
 			return true;
 		}
 		return false;
 	});
 
-	constructor(p: paymentMethod[]) {
+	constructor(
+		p: paymentMethod[],
+		sch: MentorScheduleInfo[],
+		pym: MentorPaymentInfo[],
+		profile: MentorProfile
+	) {
 		this.setPaymentMethods(p);
+		this.mentorPaymentMethods = pym;
+		this.setMentorSchedules(sch);
+		this.name = profile.name;
+		this.bio = profile.bio;
+		this.yearsOfExperience = profile.years_of_experience;
+		this.campus = profile.campus;
+		this.major = profile.major;
+		this.degree = profile.degree;
+	}
+
+	setMentorSchedules(newSchedules: MentorScheduleInfo[]) {
+		const schedules: MentorSchedule[] = [];
+		newSchedules.forEach((v) => {
+			const label = dayofWeeks.filter((d) => {
+				return parseInt(d.value) === v.day_of_week;
+			});
+			schedules.push({
+				start_time: this.#stringToTimeOnly(v.start_time),
+				end_time: this.#stringToTimeOnly(v.end_time),
+				day_of_week: v.day_of_week,
+				day_of_week_label: label[0].label
+			});
+		});
+		this.mentorSchedules = schedules;
 	}
 	setPaymentMethods(newPayments: paymentMethod[]) {
 		const opts: paymentMethodOpts[] = [];

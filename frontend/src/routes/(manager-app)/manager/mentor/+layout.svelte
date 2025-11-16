@@ -22,7 +22,7 @@
 			goto('/login', { replaceState: true });
 		}
 		if (window.location.pathname !== '/manager/mentor/verify' && data.userStatus !== 'verified') {
-			goto('/manager/admin/verify', { replaceState: true });
+			goto('/manager/mentor/verify', { replaceState: true });
 		}
 	});
 

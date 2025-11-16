@@ -61,12 +61,14 @@
 		<div class="flex flex-col gap-4">
 			<p class="font-bold text-[var(--tertiary-color)]">Schedules:</p>
 			{#if data.schedules}
-				<ScrollArea class="h-[100px]" orientation="vertical" viewportClasses="max-h-[100px]">
-					{#each data.schedules as sch, i (i)}
-						<div class="rounded-lg bg-[var(--tertiary-color)] p-4 text-[var(--secondary-color)]">
-							<p>{dowMap.get(sch.day_of_week)}, {sch.start_time} - {sch.end_time}</p>
-						</div>
-					{/each}
+				<ScrollArea orientation="vertical" viewportClasses="max-h-[300px]">
+					<ul class="flex flex-col gap-4">
+						{#each data.schedules as sch, i (i)}
+							<li class="rounded-lg bg-[var(--tertiary-color)] p-4 text-[var(--secondary-color)]">
+								<p>{dowMap.get(sch.day_of_week)}, {sch.start_time} - {sch.end_time}</p>
+							</li>
+						{/each}
+					</ul>
 				</ScrollArea>
 			{:else}
 				<b class="mx-auto self-center text-[var(--tertiary-color)]">No schedules found</b>
@@ -75,12 +77,14 @@
 		<div class="flex flex-col gap-4">
 			<p class="font-bold text-[var(--tertiary-color)]">Payments:</p>
 			{#if data.payments}
-				<ScrollArea class="h-[100px]" orientation="vertical" viewportClasses="max-h-[100px]">
-					{#each data.payments as py, i (i)}
-						<div class="rounded-lg bg-[var(--tertiary-color)] p-4 text-[var(--secondary-color)]">
-							<p>{py.payment_method_name} - {py.account_number}</p>
-						</div>
-					{/each}
+				<ScrollArea orientation="vertical" viewportClasses="max-h-[300px]">
+					<ul class="flex flex-col gap-4">
+						{#each data.payments as py, i (i)}
+							<li class="rounded-lg bg-[var(--tertiary-color)] p-4 text-[var(--secondary-color)]">
+								<p>{py.payment_method_name} - {py.account_number}</p>
+							</li>
+						{/each}
+					</ul>
 				</ScrollArea>
 			{:else}
 				<b class="text-[var(--tertiary-color)]">No payments found</b>

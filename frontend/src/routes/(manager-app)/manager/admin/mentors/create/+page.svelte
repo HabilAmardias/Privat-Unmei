@@ -2,7 +2,7 @@
 	import Button from '$lib/components/button/Button.svelte';
 	import Input from '$lib/components/form/Input.svelte';
 	import Select from '$lib/components/select/Select.svelte';
-	import { onMount } from 'svelte';
+	import Link from '$lib/components/button/Link.svelte';
 	import { dayofWeeks, degreeOpts } from './constants';
 	import { CreateMentorView } from './view.svelte';
 	import type { PageProps } from './$types';
@@ -204,7 +204,9 @@
 			</ScrollArea>
 		</div>
 		<div class="flex gap-4">
-			<Button type="button">Cancel</Button>
+			<div class="w-fit rounded-lg bg-[var(--tertiary-color)] p-3">
+				<Link href="/manager/admin">Cancel</Link>
+			</div>
 			<Button disabled={View.disableCreateMentor} type="submit">Create</Button>
 		</div>
 	</form>

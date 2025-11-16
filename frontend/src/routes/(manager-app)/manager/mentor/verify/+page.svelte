@@ -5,7 +5,6 @@
 	import Card from '$lib/components/card/Card.svelte';
 	import { enhance } from '$app/forms';
 	import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
-	import Input from '$lib/components/form/Input.svelte';
 	import Button from '$lib/components/button/Button.svelte';
 	import { loadingStore } from '$lib/stores/LoadingStore.svelte';
 	import { VerifyMentorView } from './view.svelte';
@@ -17,7 +16,7 @@
 
 	onMount(() => {
 		if (data.isVerified) {
-			goto('/manager/admin', { replaceState: true });
+			goto('/manager/mentor', { replaceState: true });
 		}
 	});
 
