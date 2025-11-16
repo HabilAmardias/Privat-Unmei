@@ -32,10 +32,9 @@ export class CourseCategoryManagementView {
 	onSearchInput = () => {
 		this.#SearchSubmit();
 	};
-	setPageNumber(num: number) {
-		this.pageNumber = num;
+	setPageNumber = () => {
 		this.paginationForm?.requestSubmit();
-	}
+	};
 	onCreateCategory = (args: EnhancementArgs) => {
 		const loadID = CreateToast('loading', 'Creating Course Category.....');
 		return async ({ result }: EnhancementReturn) => {
@@ -113,7 +112,8 @@ export class CourseCategoryManagementView {
 	}
 	onSearchCategory = (args: EnhancementArgs) => {
 		this.isLoading = true;
-		args.formData.append('page', '1');
+		this.pageNumber = 1;
+		args.formData.append('page', `${this.pageNumber}`);
 		return async ({ result }: EnhancementReturn) => {
 			this.isLoading = false;
 			if (result.type === 'success') {

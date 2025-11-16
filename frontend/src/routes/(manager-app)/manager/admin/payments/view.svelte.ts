@@ -58,10 +58,9 @@ export class PaymentManagementView {
 	filterPayments(id: number) {
 		this.payments = this.payments.filter((m) => m.payment_method_id !== id);
 	}
-	onPageChange(num: number) {
-		this.pageNumber = num;
+	onPageChange = () => {
 		this.paginationForm?.requestSubmit();
-	}
+	};
 	onCreatePayment = (args: EnhancementArgs) => {
 		const loadID = CreateToast('loading', 'Creating Payment Method.....');
 		return async ({ result }: EnhancementReturn) => {
@@ -139,7 +138,8 @@ export class PaymentManagementView {
 	}
 	onSearchPayments = (args: EnhancementArgs) => {
 		this.setIsLoading(true);
-		args.formData.append('page', '1');
+		this.pageNumber = 1;
+		args.formData.append('page', `${this.pageNumber}`);
 		return async ({ result }: EnhancementReturn) => {
 			this.setIsLoading(false);
 			if (result.type === 'success') {

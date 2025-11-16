@@ -43,12 +43,10 @@ export class CostManagementView {
 		this.discounts = d.entries;
 	}
 
-	setPageChange = (num: number) => {
+	setPageChange = () => {
 		if (this.menuState === 'costs') {
-			this.costPageNumber = num;
 			this.costPaginationForm?.requestSubmit();
 		} else {
-			this.discountPageNumber = num;
 			this.discountPaginationForm?.requestSubmit();
 		}
 	};

@@ -158,11 +158,10 @@
 		bind:this={View.paginationForm}
 	>
 		<Pagination
-			onPageChange={(num) => View.onPageChange(num)}
-			pageNumber={View.pageNumber}
+			onPageChange={View.onPageChange}
+			bind:pageNumber={View.pageNumber}
 			perPage={View.limit}
 			count={View.totalRow}
-			offset
 		/>
 	</form>
 </div>

@@ -45,9 +45,6 @@ export class MentorManagerView {
 	setIsDesktop(b: boolean) {
 		this.isDesktop = b;
 	}
-	onPageChange(num: number) {
-		this.page = num;
-	}
 	onSort() {
 		switch (this.sortByYears) {
 			case null:
@@ -88,11 +85,34 @@ export class MentorManagerView {
 			}
 		};
 	};
-	onUpdateMentors = (args: EnhancementArgs) => {
+	onSearchMentors = (args: EnhancementArgs) => {
 		this.setMentorsIsLoading(true);
 		if (this.sortByYears !== null) {
 			args.formData.append('sort_year_of_experience', `${this.sortByYears}`);
 		}
+		this.page = 1;
+		args.formData.append('page', `${this.page}`);
+		return async ({ result }: EnhancementReturn) => {
+			this.setMentorsIsLoading(false);
+			if (result.type === 'success') {
+				this.setMentors(result.data?.mentorsList.entries);
+				this.setPaginationData(
+					result.data?.mentorsList.page_info.page,
+					result.data?.mentorsList.page_info.limit,
+					result.data?.mentorsList.page_info.total_row
+				);
+			}
+			if (result.type === 'failure') {
+				CreateToast('error', result.data?.message);
+			}
+		};
+	};
+	onPageChange = (args: EnhancementArgs) => {
+		this.setMentorsIsLoading(true);
+		if (this.sortByYears !== null) {
+			args.formData.append('sort_year_of_experience', `${this.sortByYears}`);
+		}
+		args.formData.append('search', this.search);
 		args.formData.append('page', `${this.page}`);
 		return async ({ result }: EnhancementReturn) => {
 			this.setMentorsIsLoading(false);

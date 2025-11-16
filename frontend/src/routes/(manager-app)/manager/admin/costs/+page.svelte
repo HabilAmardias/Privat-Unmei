@@ -183,11 +183,10 @@
 			bind:this={View.costPaginationForm}
 		>
 			<Pagination
-				onPageChange={(num) => View.setPageChange(num)}
-				pageNumber={View.costPageNumber}
+				bind:pageNumber={View.costPageNumber}
+				onPageChange={View.setPageChange}
 				perPage={View.costLimit}
 				count={View.costTotalRow}
-				offset
 			/>
 		</form>
 	{:else}
@@ -291,18 +290,17 @@
 			{/if}
 		</div>
 		<form
-			use:enhance={View.onCostPageChangeForm}
-			action="?/getCosts"
+			use:enhance={View.onDiscountPageChangeForm}
+			action="?/getDisocunts"
 			class="flex w-full items-center justify-center"
 			method="POST"
-			bind:this={View.costPaginationForm}
+			bind:this={View.discountPaginationForm}
 		>
 			<Pagination
-				onPageChange={(num) => View.setPageChange(num)}
-				pageNumber={View.costPageNumber}
-				perPage={View.costLimit}
-				count={View.costTotalRow}
-				offset
+				onPageChange={View.setPageChange}
+				bind:pageNumber={View.discountPageNumber}
+				perPage={View.discountLimit}
+				count={View.discountTotalRow}
 			/>
 		</form>
 	{/if}

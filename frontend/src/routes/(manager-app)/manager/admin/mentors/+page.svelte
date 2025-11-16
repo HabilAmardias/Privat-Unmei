@@ -53,7 +53,7 @@
 		</Link>
 	</div>
 	<form
-		use:enhance={View.onUpdateMentors}
+		use:enhance={View.onSearchMentors}
 		bind:this={View.searchForm}
 		class="grid grid-cols-2 gap-4"
 		action="?/getMentors"
@@ -122,17 +122,11 @@
 		{/if}
 	</div>
 	<form
-		use:enhance={View.onUpdateMentors}
+		use:enhance={View.onPageChange}
 		action="?/getMentors"
 		class="flex w-full items-center justify-center"
 		method="POST"
 	>
-		<Pagination
-			onPageChange={(num) => View.onPageChange(num)}
-			pageNumber={View.page}
-			perPage={View.limit}
-			count={View.total_row}
-			offset
-		/>
+		<Pagination bind:pageNumber={View.page} perPage={View.limit} count={View.total_row} />
 	</form>
 </div>
