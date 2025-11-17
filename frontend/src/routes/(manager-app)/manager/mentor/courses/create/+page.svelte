@@ -7,14 +7,13 @@
 	import type { PageProps } from './$types';
 	import Search from '$lib/components/search/Search.svelte';
 	import { enhance } from '$app/forms';
-	import FileInput from '$lib/components/form/FileInput.svelte';
-	import { CloudUpload, X } from '@lucide/svelte';
+	import { X } from '@lucide/svelte';
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import Textarea from '$lib/components/form/Textarea.svelte';
 	import { methodOpts } from './constants';
 
 	const { data }: PageProps = $props();
-	const View = new CreateCourseView(data.paymentMethods, data.generatedPassword);
+	const View = new CreateCourseView(data.categories);
 </script>
 
 <svelte:head>
@@ -26,11 +25,16 @@
 <div class="flex flex-col p-4">
 	<h3 class="mb-4 text-xl font-bold text-[var(--tertiary-color)]">Create New Course</h3>
 	<form
-		use:enhance
+		use:enhance={View.onGetCategory}
+		method="POST"
+		action="?/getCategories"
+		bind:this={View.searchCategoryForm}
+	></form>
+	<form
+		use:enhance={View.onCreateCourse}
 		action="?/createCourse"
 		method="POST"
 		class="flex flex-col gap-4"
-		enctype="multipart/form-data"
 	>
 		<div class="flex items-center gap-4">
 			<p class="font-bold text-[var(--tertiary-color)]">Title:</p>
@@ -70,12 +74,16 @@
 				min={1}
 			/>
 		</div>
-		<Select
-			bind:value={View.method}
-			options={methodOpts}
-			defaultLable="Choose Method"
-			name="method"
-		/>
+		<div class="flex items-center gap-4">
+			<p class="font-bold text-[var(--tertiary-color)]">Method:</p>
+			<Select
+				bind:value={View.method}
+				options={methodOpts}
+				defaultLable="Choose Method"
+				name="method"
+			/>
+		</div>
+
 		<div class="flex items-center gap-4">
 			<p class="font-bold text-[var(--tertiary-color)]">Session Duration (minutes):</p>
 			<Input
@@ -98,11 +106,15 @@
 				min={1}
 			/>
 		</div>
-		<p class="font-bold text-[var(--tertiary-color)]">Schedules:</p>
+		<p class="font-bold text-[var(--tertiary-color)]">Topics:</p>
 		<div class="grid grid-cols-2 place-items-center gap-4">
 			<div class="flex w-full flex-col gap-4">
-				<div class="flex gap-4">
-					<Input bind:value={View.topicTitle} type="text" name="title" id="title" />
+				<div class="flex flex-col gap-4">
+					<div class="flex flex-col">
+						<p class="font-bold text-[var(--tertiary-color)]">Topic Title:</p>
+						<Input bind:value={View.topicTitle} type="text" name="title" id="title" />
+					</div>
+
 					<Textarea
 						bind:value={View.topicDescription}
 						placeholder="Input topic description"
@@ -111,14 +123,8 @@
 						>Topic Description:
 					</Textarea>
 				</div>
-				{#if View.selectMentorScheduleErr}
-					<p class="text-red-500">{View.selectMentorScheduleErr.message}</p>
-				{/if}
-				<Button
-					disabled={View.disableAddMentorSchedule}
-					full
-					type="button"
-					onClick={View.addMentorSchedule}>Add Course Topic</Button
+				<Button disabled={View.disableAddTopic} full type="button" onClick={View.addCourseTopic}
+					>Add</Button
 				>
 			</div>
 			<ScrollArea class="w-full" orientation="vertical" viewportClasses="max-h-[300px]">
@@ -134,7 +140,7 @@
 								withPadding={false}
 								textColor="dark"
 								onClick={() => {
-									View.removeMentorSchedule(i);
+									View.removeAddedTopic(i);
 								}}
 							>
 								<X />
@@ -153,17 +159,14 @@
 						items={View.categories}
 						label="Course Category"
 						keyword={View.searchCategory}
-						onKeywordChange={View.onSearchPaymentMethodChange}
+						onKeywordChange={View.onSearchCategory}
 					/>
 				</div>
-				{#if View.selectPaymentMethodErr}
-					<p class="text-red-500">{View.selectPaymentMethodErr.message}</p>
-				{/if}
 				<Button
-					disabled={View.disableAddPaymentMethod}
+					disabled={View.disableAddCategory}
 					full
 					type="button"
-					onClick={View.addMentorPaymentMethod}>Add Course Category</Button
+					onClick={View.addCourseCategory}>Add</Button
 				>
 			</div>
 			<ScrollArea class="w-full" orientation="vertical" viewportClasses="max-h-[300px]">
@@ -179,7 +182,7 @@
 								withPadding={false}
 								textColor="dark"
 								onClick={() => {
-									View.removeMentorPaymentMethod(i);
+									View.removeAddedCategories(i);
 								}}
 							>
 								<X />
@@ -193,7 +196,7 @@
 			<div class="w-fit rounded-lg bg-[var(--tertiary-color)] p-3">
 				<Link href="/manager/mentor/courses">Cancel</Link>
 			</div>
-			<Button disabled={View.disableCreateMentor} type="submit">Create</Button>
+			<Button disabled={View.disableCreateCourse} type="submit">Create</Button>
 		</div>
 	</form>
 </div>

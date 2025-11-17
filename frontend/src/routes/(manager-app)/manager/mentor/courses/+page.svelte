@@ -69,8 +69,6 @@
 					<thead>
 						<tr>
 							<th class="text-[var(--tertiary-color)]">Name</th>
-						</tr>
-						<tr>
 							<th class="text-[var(--tertiary-color)]">Price</th>
 						</tr>
 					</thead>
@@ -84,8 +82,10 @@
 									{c.price}
 								</td>
 								<td>
-									<div class="h-fit w-fit rounded-lg bg-[var(--tertiary-color)] p-2">
-										<Link href={`/manager/mentor/courses/${c.id}`}>Detail</Link>
+									<div class="flex items-center justify-center">
+										<div class="h-fit w-fit rounded-lg bg-[var(--tertiary-color)] p-2">
+											<Link href={`/manager/mentor/courses/${c.id}`}>Detail</Link>
+										</div>
 									</div>
 								</td>
 								<td>
