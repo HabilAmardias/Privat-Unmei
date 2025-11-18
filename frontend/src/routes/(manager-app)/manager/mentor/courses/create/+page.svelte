@@ -47,11 +47,12 @@
 			/>
 		</div>
 		<Textarea
+			err={View.descriptionErr}
 			bind:value={View.description}
 			placeholder="Input course description"
 			id="description"
 			name="description"
-			>Description:
+			><p class="font-bold text-[var(--tertiary-color)]">Description:</p>
 		</Textarea>
 		<div class="flex items-center gap-4">
 			<p class="font-bold text-[var(--tertiary-color)]">Domicile:</p>
@@ -66,6 +67,7 @@
 		<div class="flex items-center gap-4">
 			<p class="font-bold text-[var(--tertiary-color)]">Price:</p>
 			<Input
+				err={View.priceErr}
 				bind:value={View.price}
 				type="number"
 				placeholder="Input course price"
@@ -88,6 +90,7 @@
 			<p class="font-bold text-[var(--tertiary-color)]">Session Duration (minutes):</p>
 			<Input
 				bind:value={View.sessionDuration}
+				err={View.sessionDurationErr}
 				type="number"
 				placeholder="Input per session duration"
 				name="session_duration"
@@ -98,6 +101,7 @@
 		<div class="flex items-center gap-4">
 			<p class="font-bold text-[var(--tertiary-color)]">Max Session:</p>
 			<Input
+				err={View.maxSessionErr}
 				bind:value={View.maxSession}
 				type="number"
 				placeholder="Input maximum number of session"
@@ -112,7 +116,13 @@
 				<div class="flex flex-col gap-4">
 					<div class="flex flex-col">
 						<p class="font-bold text-[var(--tertiary-color)]">Topic Title:</p>
-						<Input bind:value={View.topicTitle} type="text" name="title" id="title" />
+						<Input
+							bind:value={View.topicTitle}
+							type="text"
+							name="title"
+							id="title"
+							placeholder="Insert topic title"
+						/>
 					</div>
 
 					<Textarea
@@ -120,7 +130,7 @@
 						placeholder="Input topic description"
 						id="topic_description"
 						name="topic_description"
-						>Topic Description:
+						><p class="font-bold text-[var(--tertiary-color)]">Topic Description:</p>
 					</Textarea>
 				</div>
 				<Button disabled={View.disableAddTopic} full type="button" onClick={View.addCourseTopic}
@@ -162,6 +172,9 @@
 						onKeywordChange={View.onSearchCategory}
 					/>
 				</div>
+				{#if View.addedCategoryErr}
+					<p class="font-bold text-[var(--tertiary-color)]">{View.addedCategoryErr.message}</p>
+				{/if}
 				<Button
 					disabled={View.disableAddCategory}
 					full

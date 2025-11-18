@@ -17,7 +17,7 @@ export class CourseManagementView {
 	totalRow = $state<number>(0);
 
 	courseToDelete = $state<number | undefined>(undefined);
-	deleteCourseOpen = $derived<boolean[]>(new Array<boolean>(this.courses.length).fill(false));
+	deleteCourseOpenDialogs = $state<boolean[]>([]);
 	paginationForm = $state<HTMLFormElement>();
 	#searchCategorySubmit = debounce(() => {
 		this.searchCategoryForm?.requestSubmit();
@@ -28,6 +28,7 @@ export class CourseManagementView {
 		this.page = courses.page_info.page;
 		this.totalRow = courses.page_info.total_row;
 		this.courses = courses.entries;
+		this.deleteCourseOpenDialogs = new Array<boolean>(this.courses.length).fill(false);
 		this.#ConvertCategoryOpts(categories);
 	}
 
@@ -52,6 +53,7 @@ export class CourseManagementView {
 				this.page = result.data?.courses.page_info.page;
 				this.totalRow = result.data?.courses.page_info.total_row;
 				this.courses = result.data?.courses.entries;
+				this.deleteCourseOpenDialogs = new Array<boolean>(this.courses.length).fill(false);
 			}
 		};
 	};
@@ -84,6 +86,7 @@ export class CourseManagementView {
 				this.page = result.data?.courses.page_info.page;
 				this.totalRow = result.data?.courses.page_info.total_row;
 				this.courses = result.data?.courses.entries;
+				this.deleteCourseOpenDialogs = new Array<boolean>(this.courses.length).fill(false);
 			}
 		};
 	};
@@ -98,6 +101,7 @@ export class CourseManagementView {
 			if (result.type === 'success') {
 				if (this.courseToDelete) {
 					this.courses = this.courses.filter((v) => v.id !== this.courseToDelete);
+					this.deleteCourseOpenDialogs = new Array<boolean>(this.courses.length).fill(false);
 				}
 				this.totalRow -= 1;
 				this.courseToDelete = undefined;

@@ -1,15 +1,41 @@
 import type { CourseCategory, CourseCategoryOpts, CourseTopic } from './model';
 import { CreateToast, debounce, DismissToast } from '$lib/utils/helper';
 import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
+import { MAX_COURSE_CATEGORIES_COUNT } from './constants';
+import { MAX_BIO_LENGTH } from '$lib/utils/constants';
 
 export class CreateCourseView {
 	title = $state<string>('');
 	description = $state<string>('');
+	descriptionErr = $derived.by<Error | undefined>(() => {
+		if (this.description.length > MAX_BIO_LENGTH) {
+			return new Error(`description can only consist of ${MAX_BIO_LENGTH} characters`);
+		}
+		return undefined;
+	});
 	domicile = $state<string>('');
 	price = $state<number>(1);
+	priceErr = $derived.by<Error | undefined>(() => {
+		if (this.price <= 0) {
+			return new Error('Price must be greater than zero');
+		}
+		return undefined;
+	});
 	method = $state<string>('');
 	sessionDuration = $state<number>(1);
+	sessionDurationErr = $derived.by<Error | undefined>(() => {
+		if (this.sessionDuration <= 0) {
+			return new Error('Session duration must be greater than zero');
+		}
+		return undefined;
+	});
 	maxSession = $state<number>(1);
+	maxSessionErr = $derived.by<Error | undefined>(() => {
+		if (this.maxSession <= 0) {
+			return new Error('Max Session Count must be greater than zero');
+		}
+		return undefined;
+	});
 	categories = $state<CourseCategoryOpts[]>([]);
 	addedCategories = $state<CourseCategory[]>([]);
 	searchCategoryForm = $state<HTMLFormElement>();
@@ -31,10 +57,17 @@ export class CreateCourseView {
 	}, 500);
 
 	disableAddCategory = $derived.by<boolean>(() => {
-		if (!this.selectedCategory) {
+		if (!this.selectedCategory || this.addedCategoryErr) {
 			return true;
 		}
 		return false;
+	});
+
+	addedCategoryErr = $derived.by<Error | null>(() => {
+		if (this.addedCategories.length > MAX_COURSE_CATEGORIES_COUNT) {
+			return new Error(`cannot have more than ${MAX_COURSE_CATEGORIES_COUNT} categories`);
+		}
+		return null;
 	});
 
 	disableCreateCourse = $derived.by<boolean>(() => {
@@ -47,7 +80,12 @@ export class CreateCourseView {
 			!this.sessionDuration ||
 			!this.maxSession ||
 			this.addedCategories.length === 0 ||
-			this.addedTopic.length === 0
+			this.addedTopic.length === 0 ||
+			this.descriptionErr ||
+			this.addedCategoryErr ||
+			this.maxSessionErr ||
+			this.priceErr ||
+			this.sessionDurationErr
 		) {
 			return true;
 		}
@@ -72,6 +110,8 @@ export class CreateCourseView {
 			title: this.topicTitle,
 			description: this.topicDescription
 		});
+		this.topicTitle = '';
+		this.topicDescription = '';
 	};
 
 	addCourseCategory = () => {

@@ -12,3 +12,4 @@ export const methodOpts = [
 		label: 'Hybrid'
 	}
 ];
+export const MAX_COURSE_CATEGORIES_COUNT = 5;

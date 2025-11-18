@@ -70,6 +70,7 @@
 						<tr>
 							<th class="text-[var(--tertiary-color)]">Name</th>
 							<th class="text-[var(--tertiary-color)]">Price</th>
+							<th class="text-[var(--tertiary-color)]">Method</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -80,6 +81,9 @@
 								</td>
 								<td class="text-center">
 									{c.price}
+								</td>
+								<td class="text-center">
+									{c.method}
 								</td>
 								<td>
 									<div class="flex items-center justify-center">
@@ -92,7 +96,7 @@
 									<div class="flex items-center justify-center">
 										<AlertDialog
 											action="?/deleteCourse"
-											bind:open={View.deleteCourseOpen[i]}
+											bind:open={View.deleteCourseOpenDialogs[i]}
 											enhancement={View.onDeleteCourse}
 											title={deleteDialogTitle}
 											onClick={() => {
