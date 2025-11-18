@@ -97,7 +97,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each View.categories as c (c.id)}
+						{#each View.categories as c, i (c.id)}
 							<tr>
 								<td class="text-center">
 									{c.name}
@@ -106,7 +106,7 @@
 									<div class="flex items-center justify-center gap-4">
 										<div class="h-fit rounded-lg bg-[var(--tertiary-color)] p-2">
 											<Dialog
-												bind:open={View.updateDialogOpen}
+												bind:open={View.updateDialogOpen[i]}
 												buttonText="Update"
 												title={updateDialogTitle}
 												buttonOnClick={() => {
@@ -133,7 +133,7 @@
 										</div>
 										<AlertDialog
 											action="?/deleteCategory"
-											bind:open={View.deleteDialogOpen}
+											bind:open={View.deleteDialogOpen[i]}
 											enhancement={View.onDeleteCategory}
 											title={deleteDialogTitle}
 											onClick={() => {

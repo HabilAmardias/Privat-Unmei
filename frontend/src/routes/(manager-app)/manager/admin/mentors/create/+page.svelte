@@ -43,7 +43,7 @@
 		class="flex flex-col gap-4"
 		enctype="multipart/form-data"
 	>
-		<div class="flex items-center gap-4">
+		<div class="grid grid-cols-[30%_70%] md:grid-cols-[10%_90%]">
 			<p class="font-bold text-[var(--tertiary-color)]">Name:</p>
 			<Input
 				bind:value={View.name}
@@ -53,7 +53,7 @@
 				id="name"
 			/>
 		</div>
-		<div class="flex items-center gap-4">
+		<div class="grid grid-cols-[30%_70%] md:grid-cols-[10%_90%]">
 			<p class="font-bold text-[var(--tertiary-color)]">Email:</p>
 			<Input
 				err={View.emailErr}
@@ -64,16 +64,18 @@
 				id="email"
 			/>
 		</div>
-		<div class="flex items-center gap-4">
+		<div class="grid grid-cols-[30%_40%_30%] md:grid-cols-[10%_80%_10%]">
 			<p class="font-bold text-[var(--tertiary-color)]">Password:</p>
 			<div
 				class="flex flex-1 gap-1 rounded-lg bg-[var(--tertiary-color)] px-4 py-2 text-[var(--secondary-color)]"
 			>
 				<p>{View.generatedPassword}</p>
 			</div>
-			<Button type="button" onClick={View.generatePassword}>Generate</Button>
+			<div class="flex justify-end">
+				<Button type="button" onClick={View.generatePassword}>Generate</Button>
+			</div>
 		</div>
-		<div class="flex items-center gap-4">
+		<div class="grid grid-cols-[30%_70%] md:grid-cols-[10%_90%]">
 			<p class="font-bold text-[var(--tertiary-color)]">Experience:</p>
 			<Input
 				type="number"
@@ -154,7 +156,7 @@
 		<p class="font-bold text-[var(--tertiary-color)]">Payment Methods:</p>
 		<div class="grid grid-cols-2 place-items-center gap-4">
 			<div class="flex w-full flex-col gap-4">
-				<div class="flex gap-4">
+				<div class="flex flex-col gap-4 md:flex-row">
 					<Search
 						bind:value={View.selectedPaymentMethod}
 						items={View.paymentMethods}

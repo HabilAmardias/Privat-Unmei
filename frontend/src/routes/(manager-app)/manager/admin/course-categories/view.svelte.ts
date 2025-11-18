@@ -9,8 +9,8 @@ export class CourseCategoryManagementView {
 	totalRow = $state<number>(0);
 	search = $state<string>('');
 	isLoading = $state<boolean>(false);
-	deleteDialogOpen = $state<boolean>(false);
-	updateDialogOpen = $state<boolean>(false);
+	deleteDialogOpen = $state<boolean[]>([]);
+	updateDialogOpen = $state<boolean[]>([]);
 	createDialogOpen = $state<boolean>(false);
 	categoryToDelete = $state<number>();
 	limit = $state<number>(0);
@@ -28,6 +28,8 @@ export class CourseCategoryManagementView {
 		this.categories = c.entries;
 		this.totalRow = c.page_info.total_row;
 		this.limit = c.page_info.limit;
+		this.deleteDialogOpen = new Array<boolean>(this.categories.length).fill(false);
+		this.updateDialogOpen = new Array<boolean>(this.categories.length).fill(false);
 	}
 	onSearchInput = () => {
 		this.#SearchSubmit();
@@ -49,6 +51,8 @@ export class CourseCategoryManagementView {
 				};
 				if (this.categories.length < this.limit) {
 					this.categories.push(newCategory);
+					this.deleteDialogOpen = new Array<boolean>(this.categories.length).fill(false);
+					this.updateDialogOpen = new Array<boolean>(this.categories.length).fill(false);
 				}
 				this.totalRow += 1;
 				CreateToast('success', 'successfully create course category');
@@ -66,6 +70,8 @@ export class CourseCategoryManagementView {
 			if (result.type === 'success') {
 				if (this.categoryToDelete) {
 					this.categories = this.categories.filter((m) => m.id !== this.categoryToDelete);
+					this.deleteDialogOpen = new Array<boolean>(this.categories.length).fill(false);
+					this.updateDialogOpen = new Array<boolean>(this.categories.length).fill(false);
 				}
 				this.totalRow -= 1;
 				this.categoryToDelete = undefined;
@@ -74,7 +80,6 @@ export class CourseCategoryManagementView {
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);
 			}
-			this.deleteDialogOpen = false;
 		};
 	};
 	onUpdateCategory = (args: EnhancementArgs) => {
@@ -102,7 +107,6 @@ export class CourseCategoryManagementView {
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);
 			}
-			this.updateDialogOpen = false;
 		};
 	};
 	setPaginationData(limit: number, total_row: number, page: number) {
@@ -118,6 +122,8 @@ export class CourseCategoryManagementView {
 			this.isLoading = false;
 			if (result.type === 'success') {
 				this.categories = result.data?.categories.entries;
+				this.deleteDialogOpen = new Array<boolean>(this.categories.length).fill(false);
+				this.updateDialogOpen = new Array<boolean>(this.categories.length).fill(false);
 				this.setPaginationData(
 					result.data?.categories.page_info.limit,
 					result.data?.categories.page_info.total_row,
@@ -137,6 +143,8 @@ export class CourseCategoryManagementView {
 			this.isLoading = false;
 			if (result.type === 'success') {
 				this.categories = result.data?.categories.entries;
+				this.deleteDialogOpen = new Array<boolean>(this.categories.length).fill(false);
+				this.updateDialogOpen = new Array<boolean>(this.categories.length).fill(false);
 				this.setPaginationData(
 					result.data?.categories.page_info.limit,
 					result.data?.categories.page_info.total_row,

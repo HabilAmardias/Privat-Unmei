@@ -97,7 +97,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each View.payments as py (py.payment_method_id)}
+						{#each View.payments as py, i (py.payment_method_id)}
 							<tr>
 								<td class="text-center">
 									{py.payment_method_name}
@@ -106,7 +106,7 @@
 									<div class="flex items-center justify-center gap-4">
 										<div class="h-fit rounded-lg bg-[var(--tertiary-color)] p-2">
 											<Dialog
-												bind:open={View.updateDialogOpen}
+												bind:open={View.updateDialogOpen[i]}
 												buttonText="Update"
 												title={updateDialogTitle}
 												buttonOnClick={() => {
@@ -133,7 +133,7 @@
 										</div>
 										<AlertDialog
 											action="?/deletePayment"
-											bind:open={View.deleteDialogOpen}
+											bind:open={View.deleteDialogOpen[i]}
 											enhancement={View.onDeletePayment}
 											title={deleteDialogTitle}
 											onClick={() => {

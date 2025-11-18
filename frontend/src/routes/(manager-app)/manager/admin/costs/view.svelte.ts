@@ -10,8 +10,8 @@ export class CostManagementView {
 	costTotalRow = $state<number>(0);
 	costLimit = $state<number>(0);
 	costToDelete = $state<number>();
-	deleteCostDialogOpen = $state<boolean>(false);
-	updateCostDialogOpen = $state<boolean>(false);
+	deleteCostDialogOpen = $state<boolean[]>([]);
+	updateCostDialogOpen = $state<boolean[]>([]);
 	createCostDialogOpen = $state<boolean>(false);
 	costPaginationForm = $state<HTMLFormElement>();
 	costToUpdate = $state<number>();
@@ -22,8 +22,8 @@ export class CostManagementView {
 	discountTotalRow = $state<number>(0);
 	discountLimit = $state<number>(0);
 	discountToDelete = $state<number>();
-	deleteDiscountDialogOpen = $state<boolean>(false);
-	updateDiscountDialogOpen = $state<boolean>(false);
+	deleteDiscountDialogOpen = $state<boolean[]>([]);
+	updateDiscountDialogOpen = $state<boolean[]>([]);
 	createDiscountDialogOpen = $state<boolean>(false);
 	discountPaginationForm = $state<HTMLFormElement>();
 	discountToUpdate = $state<number>();
@@ -37,10 +37,16 @@ export class CostManagementView {
 		this.costTotalRow = c.page_info.total_row;
 		this.costs = c.entries;
 
+		this.deleteCostDialogOpen = new Array<boolean>(this.costs.length).fill(false);
+		this.updateCostDialogOpen = new Array<boolean>(this.costs.length).fill(false);
+
 		this.discountLimit = d.page_info.limit;
 		this.discountPageNumber = d.page_info.page;
 		this.discountTotalRow = d.page_info.total_row;
 		this.discounts = d.entries;
+
+		this.deleteDiscountDialogOpen = new Array<boolean>(this.discounts.length).fill(false);
+		this.updateDiscountDialogOpen = new Array<boolean>(this.discounts.length).fill(false);
 	}
 
 	setPageChange = () => {
@@ -65,6 +71,8 @@ export class CostManagementView {
 				};
 				if (this.costs.length < this.costLimit) {
 					this.costs.push(newCost);
+					this.deleteCostDialogOpen = new Array<boolean>(this.costs.length).fill(false);
+					this.updateCostDialogOpen = new Array<boolean>(this.costs.length).fill(false);
 				}
 				this.costTotalRow += 1;
 				CreateToast('success', 'successfully create cost');
@@ -82,6 +90,8 @@ export class CostManagementView {
 			if (result.type === 'success') {
 				if (this.costToDelete) {
 					this.costs = this.costs.filter((c) => c.id !== this.costToDelete);
+					this.deleteCostDialogOpen = new Array<boolean>(this.costs.length).fill(false);
+					this.updateCostDialogOpen = new Array<boolean>(this.costs.length).fill(false);
 				}
 				this.costTotalRow -= 1;
 				this.costToDelete = undefined;
@@ -90,7 +100,6 @@ export class CostManagementView {
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);
 			}
-			this.deleteCostDialogOpen = false;
 		};
 	};
 	onUpdateCost = (args: EnhancementArgs) => {
@@ -119,7 +128,6 @@ export class CostManagementView {
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);
 			}
-			this.updateCostDialogOpen = false;
 		};
 	};
 	onCostPageChangeForm = (args: EnhancementArgs) => {
@@ -129,6 +137,8 @@ export class CostManagementView {
 			this.isLoading = false;
 			if (result.type === 'success') {
 				this.costs = result.data?.costs.entries;
+				this.deleteCostDialogOpen = new Array<boolean>(this.costs.length).fill(false);
+				this.updateCostDialogOpen = new Array<boolean>(this.costs.length).fill(false);
 				this.costLimit = result.data?.costs.page_info.limit;
 				this.costTotalRow = result.data?.costs.page_info.total_row;
 				this.costPageNumber = result.data?.costs.page_info.page;
@@ -153,6 +163,8 @@ export class CostManagementView {
 				};
 				if (this.discounts.length < this.discountLimit) {
 					this.discounts.push(newDiscount);
+					this.deleteDiscountDialogOpen = new Array<boolean>(this.discounts.length).fill(false);
+					this.updateDiscountDialogOpen = new Array<boolean>(this.discounts.length).fill(false);
 				}
 				this.discountTotalRow += 1;
 				CreateToast('success', 'successfully create discount');
@@ -170,6 +182,8 @@ export class CostManagementView {
 			if (result.type === 'success') {
 				if (this.discountToDelete) {
 					this.discounts = this.discounts.filter((c) => c.id !== this.discountToDelete);
+					this.deleteDiscountDialogOpen = new Array<boolean>(this.discounts.length).fill(false);
+					this.updateDiscountDialogOpen = new Array<boolean>(this.discounts.length).fill(false);
 				}
 				this.discountTotalRow -= 1;
 				this.discountToDelete = undefined;
@@ -178,7 +192,6 @@ export class CostManagementView {
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);
 			}
-			this.deleteDiscountDialogOpen = false;
 		};
 	};
 	onUpdateDiscount = (args: EnhancementArgs) => {
@@ -207,7 +220,6 @@ export class CostManagementView {
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);
 			}
-			this.updateDiscountDialogOpen = false;
 		};
 	};
 	onDiscountPageChangeForm = (args: EnhancementArgs) => {
@@ -217,6 +229,8 @@ export class CostManagementView {
 			this.isLoading = false;
 			if (result.type === 'success') {
 				this.discounts = result.data?.discounts.entries;
+				this.deleteDiscountDialogOpen = new Array<boolean>(this.discounts.length).fill(false);
+				this.updateDiscountDialogOpen = new Array<boolean>(this.discounts.length).fill(false);
 				this.costLimit = result.data?.discounts.page_info.limit;
 				this.costTotalRow = result.data?.discounts.page_info.total_row;
 				this.costPageNumber = result.data?.discounts.page_info.page;

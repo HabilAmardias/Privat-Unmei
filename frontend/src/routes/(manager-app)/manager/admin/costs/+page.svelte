@@ -119,7 +119,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							{#each View.costs as c (c.id)}
+							{#each View.costs as c, i (c.id)}
 								<tr>
 									<td class="text-center">
 										{c.name}
@@ -131,7 +131,7 @@
 										<div class="flex items-center justify-center gap-4">
 											<div class="h-fit rounded-lg bg-[var(--tertiary-color)] p-2">
 												<Dialog
-													bind:open={View.updateCostDialogOpen}
+													bind:open={View.updateCostDialogOpen[i]}
 													buttonText="Update"
 													title={updateCostDialogTitle}
 													buttonOnClick={() => {
@@ -158,7 +158,7 @@
 											</div>
 											<AlertDialog
 												action="?/deleteCost"
-												bind:open={View.deleteCostDialogOpen}
+												bind:open={View.deleteCostDialogOpen[i]}
 												enhancement={View.onDeleteCost}
 												title={deleteCostDialogTitle}
 												onClick={() => {
@@ -233,7 +233,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							{#each View.discounts as d (d.id)}
+							{#each View.discounts as d, i (d.id)}
 								<tr>
 									<td class="text-center">
 										{d.number_of_participant}
@@ -245,7 +245,7 @@
 										<div class="flex items-center justify-center gap-4">
 											<div class="h-fit rounded-lg bg-[var(--tertiary-color)] p-2">
 												<Dialog
-													bind:open={View.updateDiscountDialogOpen}
+													bind:open={View.updateDiscountDialogOpen[i]}
 													buttonText="Update"
 													title={updateDiscountDialogTitle}
 													buttonOnClick={() => {
@@ -272,7 +272,7 @@
 											</div>
 											<AlertDialog
 												action="?/deleteDiscount"
-												bind:open={View.deleteDiscountDialogOpen}
+												bind:open={View.deleteDiscountDialogOpen[i]}
 												enhancement={View.onDeleteDiscount}
 												title={deleteDiscountDialogTitle}
 												onClick={() => {

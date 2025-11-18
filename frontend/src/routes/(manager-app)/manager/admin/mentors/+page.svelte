@@ -94,7 +94,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each View.mentors as mentor (mentor.id)}
+						{#each View.mentors as mentor, i (mentor.id)}
 							<tr>
 								<td class="overflow-x-auto text-center">{mentor.email}</td>
 								<td class="overflow-x-auto text-center">{mentor.name}</td>
@@ -105,7 +105,7 @@
 								<td>
 									<AlertDialog
 										action="?/deleteMentor"
-										bind:open={View.alertOpen}
+										bind:open={View.alertOpen[i]}
 										enhancement={View.onDeleteMentor}
 										title={dialogTitle}
 										onClick={() => {

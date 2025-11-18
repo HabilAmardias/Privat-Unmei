@@ -3,7 +3,7 @@
 	import Input from '$lib/components/form/Input.svelte';
 	import Select from '$lib/components/select/Select.svelte';
 	import Link from '$lib/components/button/Link.svelte';
-	import { CreateCourseView } from './view.svelte';
+	import { UpdateCourseView } from './view.svelte';
 	import type { PageProps } from './$types';
 	import Search from '$lib/components/search/Search.svelte';
 	import { enhance } from '$app/forms';
@@ -13,7 +13,7 @@
 	import { methodOpts } from './constants';
 
 	const { data }: PageProps = $props();
-	const View = new CreateCourseView(data.categories);
+	const View = new UpdateCourseView(data.categories);
 </script>
 
 <svelte:head>

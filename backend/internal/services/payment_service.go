@@ -121,7 +121,7 @@ func (ps *PaymentServiceImpl) DeletePaymentMethod(ctx context.Context, param ent
 			return err
 		}
 		if count != nil {
-			if *count <= 1 {
+			if *count == 1 {
 				return customerrors.NewError(
 					"there is a mentor with only one method",
 					errors.New("there is a mentor with only one method"),

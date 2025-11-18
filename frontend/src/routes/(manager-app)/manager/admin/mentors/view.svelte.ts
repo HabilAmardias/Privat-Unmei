@@ -13,7 +13,7 @@ export class MentorManagerView {
 	mentorToDelete = $state<string>();
 	sortByYears = $state<boolean | null>(null);
 	search = $state<string>('');
-	alertOpen = $state<boolean>(false);
+	alertOpen = $state<boolean[]>([]);
 	searchForm = $state<HTMLFormElement | null>(null);
 	#SearchSubmit = debounce(() => {
 		this.searchForm?.requestSubmit();
@@ -21,6 +21,7 @@ export class MentorManagerView {
 
 	constructor(m: PaginatedResponse<mentorList>) {
 		this.setMentors(m.entries);
+		this.alertOpen = new Array<boolean>(this.mentors.length).fill(false);
 		this.setPaginationData(m.page_info.page, m.page_info.limit, m.page_info.total_row);
 	}
 
@@ -75,6 +76,7 @@ export class MentorManagerView {
 			if (result.type === 'success') {
 				if (this.mentorToDelete) {
 					this.filterMentors(this.mentorToDelete);
+					this.alertOpen = new Array<boolean>(this.mentors.length).fill(false);
 				}
 				this.setMentorToDelete(undefined);
 				this.total_row -= 1;
@@ -96,6 +98,7 @@ export class MentorManagerView {
 			this.setMentorsIsLoading(false);
 			if (result.type === 'success') {
 				this.setMentors(result.data?.mentorsList.entries);
+				this.alertOpen = new Array<boolean>(this.mentors.length).fill(false);
 				this.setPaginationData(
 					result.data?.mentorsList.page_info.page,
 					result.data?.mentorsList.page_info.limit,
@@ -118,6 +121,7 @@ export class MentorManagerView {
 			this.setMentorsIsLoading(false);
 			if (result.type === 'success') {
 				this.setMentors(result.data?.mentorsList.entries);
+				this.alertOpen = new Array<boolean>(this.mentors.length).fill(false);
 				this.setPaginationData(
 					result.data?.mentorsList.page_info.page,
 					result.data?.mentorsList.page_info.limit,

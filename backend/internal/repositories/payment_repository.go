@@ -35,7 +35,7 @@ func (pr *PaymentRepositoryImpl) GetLeastPaymentMethodCount(ctx context.Context,
 		) and mp.deleted_at is null
 		group by mp.mentor_id
 	)
-	select min(c.payment_method_count) from counts c;
+	select coalesce(min(c.payment_method_count), 0) from counts c;
 	`
 	if err := driver.QueryRow(query, id).Scan(count); err != nil {
 		return customerrors.NewError(

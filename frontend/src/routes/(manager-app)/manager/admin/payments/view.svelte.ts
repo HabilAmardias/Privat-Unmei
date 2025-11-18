@@ -11,8 +11,8 @@ export class PaymentManagementView {
 	search = $state<string>('');
 	isLoading = $state<boolean>(false);
 	selectedDeletePayment = $state<number>(1);
-	deleteDialogOpen = $state<boolean>(false);
-	updateDialogOpen = $state<boolean>(false);
+	deleteDialogOpen = $state<boolean[]>([]);
+	updateDialogOpen = $state<boolean[]>([]);
 	createDialogOpen = $state<boolean>(false);
 	paymentToDelete = $state<number>();
 	limit = $state<number>(0);
@@ -28,6 +28,8 @@ export class PaymentManagementView {
 	constructor(p: PaginatedResponse<PaymentMethods>) {
 		this.setPageNumber(p.page_info.page);
 		this.setPayments(p.entries);
+		this.deleteDialogOpen = new Array<boolean>(this.payments.length).fill(false);
+		this.updateDialogOpen = new Array<boolean>(this.payments.length).fill(false);
 		this.setTotalRow(p.page_info.total_row);
 		this.setLimit(p.page_info.limit);
 	}
@@ -75,6 +77,8 @@ export class PaymentManagementView {
 				};
 				if (this.payments.length < this.limit) {
 					this.payments.push(newPayment);
+					this.deleteDialogOpen = new Array<boolean>(this.payments.length).fill(false);
+					this.updateDialogOpen = new Array<boolean>(this.payments.length).fill(false);
 				}
 				this.totalRow += 1;
 				CreateToast('success', 'successfully create payment method');
@@ -92,6 +96,8 @@ export class PaymentManagementView {
 			if (result.type === 'success') {
 				if (this.paymentToDelete) {
 					this.filterPayments(this.paymentToDelete);
+					this.deleteDialogOpen = new Array<boolean>(this.payments.length).fill(false);
+					this.updateDialogOpen = new Array<boolean>(this.payments.length).fill(false);
 				}
 				this.totalRow -= 1;
 				this.setPaymentToDelete(undefined);
@@ -100,7 +106,6 @@ export class PaymentManagementView {
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);
 			}
-			this.deleteDialogOpen = false;
 		};
 	};
 	onUpdatePayment = (args: EnhancementArgs) => {
@@ -128,7 +133,6 @@ export class PaymentManagementView {
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);
 			}
-			this.updateDialogOpen = false;
 		};
 	};
 	setPaginationData(limit: number, total_row: number, page: number) {
@@ -144,6 +148,8 @@ export class PaymentManagementView {
 			this.setIsLoading(false);
 			if (result.type === 'success') {
 				this.setPayments(result.data?.payments.entries);
+				this.deleteDialogOpen = new Array<boolean>(this.payments.length).fill(false);
+				this.updateDialogOpen = new Array<boolean>(this.payments.length).fill(false);
 				this.setPaginationData(
 					result.data?.payments.page_info.limit,
 					result.data?.payments.page_info.total_row,
@@ -163,6 +169,8 @@ export class PaymentManagementView {
 			this.setIsLoading(false);
 			if (result.type === 'success') {
 				this.setPayments(result.data?.payments.entries);
+				this.deleteDialogOpen = new Array<boolean>(this.payments.length).fill(false);
+				this.updateDialogOpen = new Array<boolean>(this.payments.length).fill(false);
 				this.setPaginationData(
 					result.data?.payments.page_info.limit,
 					result.data?.payments.page_info.total_row,
