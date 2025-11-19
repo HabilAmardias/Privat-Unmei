@@ -144,7 +144,7 @@ export class UpdateCourseView {
 			}
 		};
 	};
-	onCreateCourse = (args: EnhancementArgs) => {
+	onUpdateCourse = (args: EnhancementArgs) => {
 		const catIDs = this.addedCategories.map<number>((item) => {
 			return item.id;
 		});

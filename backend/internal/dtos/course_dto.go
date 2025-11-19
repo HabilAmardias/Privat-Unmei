@@ -38,8 +38,8 @@ type (
 		Method         *string `form:"method"`
 	}
 	GetCategoriesRes struct {
-		CategoryID   int    `json:"category_id"`
-		CategoryName string `json:"category_name"`
+		CategoryID   int    `json:"id"`
+		CategoryName string `json:"name"`
 	}
 	MentorListCourseRes struct {
 		ID              int     `json:"id"`
@@ -58,9 +58,7 @@ type (
 	}
 	CourseDetailRes struct {
 		CourseListRes
-		Description      string             `json:"description"`
-		Topics           []CourseTopicRes   `json:"topics"`
-		CourseCategories []GetCategoriesRes `json:"course_categories"`
+		Description string `json:"description"`
 	}
 	UpdateCourseReq struct {
 		Title            *string          `json:"title"`

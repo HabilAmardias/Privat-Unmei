@@ -25,8 +25,8 @@ export const actions = {
 			categories: resBody.data.entries
 		};
 	},
-	createCourse: async ({ fetch, request }) => {
-		const { success, message, status } = await controller.createCourse(fetch, request);
+	updateCourse: async ({ fetch, request }) => {
+		const { success, message, status } = await controller.updateCourse(fetch, request);
 		if (!success) {
 			return fail(status, { message });
 		}

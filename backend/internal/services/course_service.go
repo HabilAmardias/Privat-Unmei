@@ -108,35 +108,41 @@ func (cs *CourseServiceImpl) UpdateCourse(ctx context.Context, param entity.Upda
 	})
 }
 
+func (cs *CourseServiceImpl) GetCourseTopic(ctx context.Context, param entity.CourseDetailParam) (*[]entity.CourseTopic, error) {
+	query := new([]entity.CourseTopic)
+	if err := cs.tr.GetTopicsByCourseID(ctx, param.ID, query); err != nil {
+		return nil, err
+	}
+	if len(*query) == 0 {
+		return nil, customerrors.NewError(
+			"no topic found",
+			errors.New("no topic found"),
+			customerrors.ItemNotExist,
+		)
+	}
+	return query, nil
+}
+
+func (cs *CourseServiceImpl) GetCourseCategory(ctx context.Context, param entity.CourseDetailParam) (*[]entity.GetCategoriesQuery, error) {
+	query := new([]entity.GetCategoriesQuery)
+	if err := cs.ccr.GetCategoriesByCourseID(ctx, param.ID, query); err != nil {
+		return nil, err
+	}
+	if len(*query) == 0 {
+		return nil, customerrors.NewError(
+			"no categories found",
+			errors.New("no categories found"),
+			customerrors.ItemNotExist,
+		)
+	}
+	return query, nil
+}
+
 func (cs *CourseServiceImpl) CourseDetail(ctx context.Context, param entity.CourseDetailParam) (*entity.CourseDetailQuery, error) {
 	query := new(entity.CourseDetailQuery)
-	topics := new([]entity.CourseTopic)
-	categories := new([]entity.GetCategoriesQuery)
 	if err := cs.cr.CourseDetail(ctx, query, param.ID); err != nil {
 		return nil, err
 	}
-	if err := cs.tr.GetTopicsByCourseID(ctx, param.ID, topics); err != nil {
-		return nil, err
-	}
-	if err := cs.ccr.GetCategoriesByCourseID(ctx, param.ID, categories); err != nil {
-		return nil, err
-	}
-	if len(*categories) == 0 {
-		return nil, customerrors.NewError(
-			"no course categories found",
-			errors.New("the course does not have course category"),
-			customerrors.ItemNotExist,
-		)
-	}
-	if len(*topics) == 0 {
-		return nil, customerrors.NewError(
-			"no course topic found",
-			errors.New("the course does not have a topic"),
-			customerrors.ItemNotExist,
-		)
-	}
-	query.Topics = *topics
-	query.CourseCategories = *categories
 
 	return query, nil
 }

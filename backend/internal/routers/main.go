@@ -93,6 +93,8 @@ func (c *RouteConfig) SetupPublicRoute() {
 	v1.GET("/auth/google/callback", c.StudentHandler.GoogleLoginCallback)
 	v1.GET("/courses", c.CourseHandler.ListCourse)
 	v1.GET("/courses/:id", c.CourseHandler.CourseDetail)
+	v1.GET("/courses/:id/topics", c.CourseHandler.CourseTopics)
+	v1.GET("/courses/:id/categories", c.CourseHandler.CourseCategories)
 	v1.GET("/mentors", c.MentorHandler.GetMentorList)
 	v1.GET("/mentors/:id", c.MentorHandler.GetMentorProfile)
 	v1.GET("/mentors/:id/availability", c.MentorHandler.GetMentorAvailability)

@@ -95,6 +95,70 @@ func (ch *CourseHandlerImpl) UpdateCourse(ctx *gin.Context) {
 	})
 }
 
+func (ch *CourseHandlerImpl) CourseCategories(ctx *gin.Context) {
+	idStr := ctx.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		ctx.Error(customerrors.NewError(
+			"invalid course",
+			err,
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	param := entity.CourseDetailParam{
+		ID: id,
+	}
+	topics, err := ch.cs.GetCourseCategory(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	res := []dtos.GetCategoriesRes{}
+	for _, c := range *topics {
+		res = append(res, dtos.GetCategoriesRes{
+			CategoryID:   c.CategoryID,
+			CategoryName: c.CategoryName,
+		})
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data:    res,
+	})
+}
+
+func (ch *CourseHandlerImpl) CourseTopics(ctx *gin.Context) {
+	idStr := ctx.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		ctx.Error(customerrors.NewError(
+			"invalid course",
+			err,
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	param := entity.CourseDetailParam{
+		ID: id,
+	}
+	topics, err := ch.cs.GetCourseTopic(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	res := []dtos.CourseTopicRes{}
+	for _, c := range *topics {
+		res = append(res, dtos.CourseTopicRes{
+			Title:       c.Title,
+			Description: c.Description,
+		})
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data:    res,
+	})
+}
+
 func (ch *CourseHandlerImpl) CourseDetail(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -129,18 +193,7 @@ func (ch *CourseHandlerImpl) CourseDetail(ctx *gin.Context) {
 			MentorName:  res.MentorName,
 			MentorEmail: res.MentorEmail,
 		},
-		Description:      res.Description,
-		Topics:           []dtos.CourseTopicRes{},
-		CourseCategories: []dtos.GetCategoriesRes{},
-	}
-	for _, topic := range res.Topics {
-		entry.Topics = append(entry.Topics, dtos.CourseTopicRes{
-			Title:       topic.Title,
-			Description: topic.Description,
-		})
-	}
-	for _, cat := range res.CourseCategories {
-		entry.CourseCategories = append(entry.CourseCategories, dtos.GetCategoriesRes(cat))
+		Description: res.Description,
 	}
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,

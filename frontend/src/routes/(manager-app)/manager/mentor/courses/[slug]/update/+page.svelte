@@ -17,13 +17,13 @@
 </script>
 
 <svelte:head>
-	<title>Add Course - Privat Unmei</title>
-	<meta name="description" content="Add Course - Privat Unmei" />
+	<title>Update Course - Privat Unmei</title>
+	<meta name="description" content="Update Course - Privat Unmei" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </svelte:head>
 
 <div class="flex flex-col p-4">
-	<h3 class="mb-4 text-xl font-bold text-[var(--tertiary-color)]">Create New Course</h3>
+	<h3 class="mb-4 text-xl font-bold text-[var(--tertiary-color)]">Update Course</h3>
 	<form
 		use:enhance={View.onGetCategory}
 		method="POST"
@@ -31,8 +31,8 @@
 		bind:this={View.searchCategoryForm}
 	></form>
 	<form
-		use:enhance={View.onCreateCourse}
-		action="?/createCourse"
+		use:enhance={View.onUpdateCourse}
+		action="?/updateCourse"
 		method="POST"
 		class="flex flex-col gap-4"
 	>

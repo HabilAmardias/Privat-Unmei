@@ -1,5 +1,5 @@
 import type { Fetch, ServerResponse, PaginatedResponse } from '$lib/types';
-import type { CourseCategory } from './model';
+import type { CourseCategory, CourseDetail, CourseTopic } from './model';
 import { FetchData } from '$lib/utils';
 
 class UpdateCourseController {
@@ -53,6 +53,33 @@ class UpdateCourseController {
 
 		const { success, message, status } = await FetchData(fetch, url, 'PATCH', reqBody);
 		return { success, message, status };
+	}
+	async getCourseDetail(fetch: Fetch, id: number) {
+		const url = `http://localhost:8080/api/v1/course/${id}`;
+		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
+		if (!success) {
+			return { success, message, status };
+		}
+		const resBody: ServerResponse<CourseDetail> = await res?.json();
+		return { success, message, status, resBody };
+	}
+	async getCourseTopics(fetch: Fetch, id: number) {
+		const url = `http://localhost:8080/api/v1/course/${id}/topics`;
+		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
+		if (!success) {
+			return { success, message, status };
+		}
+		const resBody: ServerResponse<CourseTopic[]> = await res?.json();
+		return { success, message, status, resBody };
+	}
+	async getCourseDetailCategories(fetch: Fetch, id: number) {
+		const url = `http://localhost:8080/api/v1/course/${id}/categories`;
+		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
+		if (!success) {
+			return { success, message, status };
+		}
+		const resBody: ServerResponse<CourseCategory[]> = await res?.json();
+		return { success, message, status, resBody };
 	}
 }
 
