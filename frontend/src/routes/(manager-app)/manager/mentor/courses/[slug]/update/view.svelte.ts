@@ -1,4 +1,4 @@
-import type { CourseCategory, CourseCategoryOpts, CourseTopic } from './model';
+import type { CourseCategory, CourseCategoryOpts, CourseDetail, CourseTopic } from './model';
 import { CreateToast, debounce, DismissToast } from '$lib/utils/helper';
 import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
 import { MAX_COURSE_CATEGORIES_COUNT } from './constants';
@@ -70,7 +70,7 @@ export class UpdateCourseView {
 		return null;
 	});
 
-	disableCreateCourse = $derived.by<boolean>(() => {
+	disableUpdateCourse = $derived.by<boolean>(() => {
 		if (
 			!this.title ||
 			!this.description ||
@@ -92,8 +92,17 @@ export class UpdateCourseView {
 		return false;
 	});
 
-	constructor(c: CourseCategory[]) {
+	constructor(c: CourseCategory[], t: CourseTopic[], ac: CourseCategory[], d: CourseDetail) {
 		this.#convertCategory(c);
+		this.addedTopic = t;
+		this.addedCategories = ac;
+		this.title = d.title;
+		this.description = d.description;
+		this.price = d.price;
+		this.domicile = d.domicile;
+		this.method = d.method;
+		this.sessionDuration = d.session_duration_minutes;
+		this.maxSession = d.max_total_session;
 	}
 	#convertCategory = (c: CourseCategory[]) => {
 		const options: CourseCategoryOpts[] = [];
@@ -150,14 +159,15 @@ export class UpdateCourseView {
 		});
 		args.formData.append('categories', catIDs.join(','));
 		args.formData.append('topics', JSON.stringify(this.addedTopic));
-		const loadID = CreateToast('loading', 'creating course....');
-		return async ({ result }: EnhancementReturn) => {
+		const loadID = CreateToast('loading', 'updating course....');
+		return async ({ result, update }: EnhancementReturn) => {
 			DismissToast(loadID);
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);
 			}
-			if (result.type === 'success') {
-				CreateToast('success', 'successfully create course');
+			if (result.type === 'redirect') {
+				CreateToast('success', 'successfully update course');
+				await update();
 			}
 		};
 	};

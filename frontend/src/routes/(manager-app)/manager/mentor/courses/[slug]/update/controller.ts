@@ -25,9 +25,8 @@ class UpdateCourseController {
 		const resBody: ServerResponse<PaginatedResponse<CourseCategory>> = await res?.json();
 		return { success, message, status, resBody };
 	}
-	async updateCourse(fetch: Fetch, req: Request) {
+	async updateCourse(fetch: Fetch, req: Request, id: string) {
 		const formData = await req.formData();
-		const id = formData.get('id');
 		const url = `http://localhost:8080/api/v1/courses/${id}`;
 		const title = formData.get('title');
 		const description = formData.get('description');
@@ -54,8 +53,8 @@ class UpdateCourseController {
 		const { success, message, status } = await FetchData(fetch, url, 'PATCH', reqBody);
 		return { success, message, status };
 	}
-	async getCourseDetail(fetch: Fetch, id: number) {
-		const url = `http://localhost:8080/api/v1/course/${id}`;
+	async getCourseDetail(fetch: Fetch, id: string) {
+		const url = `http://localhost:8080/api/v1/courses/${id}`;
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
@@ -63,8 +62,8 @@ class UpdateCourseController {
 		const resBody: ServerResponse<CourseDetail> = await res?.json();
 		return { success, message, status, resBody };
 	}
-	async getCourseTopics(fetch: Fetch, id: number) {
-		const url = `http://localhost:8080/api/v1/course/${id}/topics`;
+	async getCourseTopics(fetch: Fetch, id: string) {
+		const url = `http://localhost:8080/api/v1/courses/${id}/topics`;
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
@@ -72,8 +71,8 @@ class UpdateCourseController {
 		const resBody: ServerResponse<CourseTopic[]> = await res?.json();
 		return { success, message, status, resBody };
 	}
-	async getCourseDetailCategories(fetch: Fetch, id: number) {
-		const url = `http://localhost:8080/api/v1/course/${id}/categories`;
+	async getCourseDetailCategories(fetch: Fetch, id: string) {
+		const url = `http://localhost:8080/api/v1/courses/${id}/categories`;
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };

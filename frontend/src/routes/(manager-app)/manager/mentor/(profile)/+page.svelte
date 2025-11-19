@@ -4,7 +4,6 @@
 	import { MentorDetailView } from './view.svelte';
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import { dowMap } from './constants';
-	import Button from '$lib/components/button/Button.svelte';
 	import Link from '$lib/components/button/Link.svelte';
 
 	const View = new MentorDetailView();

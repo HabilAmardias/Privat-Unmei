@@ -3,15 +3,11 @@ import type { PageServerLoad } from './$types';
 import { controller } from './controller';
 
 export const load: PageServerLoad = async ({ fetch, params }) => {
-	const [categoriesRes, courseCategoriesRes, topicsRes, courseRes] = await Promise.all([
-		controller.getCourseCategories(fetch),
+	const [courseCategoriesRes, topicsRes, courseRes] = await Promise.all([
 		controller.getCourseDetailCategories(fetch, params.slug),
 		controller.getCourseTopics(fetch, params.slug),
 		controller.getCourseDetail(fetch, params.slug)
 	]);
-	if (!categoriesRes.success) {
-		throw error(categoriesRes.status, { message: categoriesRes.message });
-	}
 	if (!courseCategoriesRes.success) {
 		throw error(courseCategoriesRes.status, { message: courseCategoriesRes.message });
 	}
@@ -22,7 +18,6 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 		throw error(courseRes.status, { message: courseRes.message });
 	}
 	return {
-		categories: categoriesRes.resBody.data.entries,
 		courseCategories: courseCategoriesRes.resBody.data,
 		topics: topicsRes.resBody.data,
 		detail: courseRes.resBody.data
@@ -30,26 +25,14 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 };
 
 export const actions = {
-	getCategories: async ({ fetch, request }) => {
-		const { success, message, status, resBody } = await controller.getCourseCategories(
-			fetch,
-			request
-		);
-		if (!success) {
-			return fail(status, { message });
-		}
-		return {
-			categories: resBody.data.entries
-		};
-	},
-	updateCourse: async ({ fetch, request, params }) => {
+	deleteCourse: async ({ fetch, params }) => {
 		if (!params.slug) {
-			throw error(400, { message: 'no course selected' });
+			throw error(500, 'something went wrong');
 		}
-		const { success, message, status } = await controller.updateCourse(fetch, request, params.slug);
+		const { success, message, status } = await controller.deleteCourse(fetch, params.slug);
 		if (!success) {
 			return fail(status, { message });
 		}
-		redirect(303, `/manager/mentor/courses/${params.slug}`);
+		redirect(303, '/manager/mentor/courses');
 	}
 } satisfies Actions;

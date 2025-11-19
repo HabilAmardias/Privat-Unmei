@@ -95,7 +95,7 @@ func (cs *CourseServiceImpl) UpdateCourse(ctx context.Context, param entity.Upda
 
 		updateCourseQuery.Title = param.Title
 		updateCourseQuery.Description = param.Description
-		updateCourseQuery.Domicile = param.Description
+		updateCourseQuery.Domicile = param.Domicile
 		updateCourseQuery.SessionDuration = param.SessionDuration
 		updateCourseQuery.Price = param.Price
 		updateCourseQuery.Method = param.Method

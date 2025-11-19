@@ -13,7 +13,12 @@
 	import { methodOpts } from './constants';
 
 	const { data }: PageProps = $props();
-	const View = new UpdateCourseView(data.categories);
+	const View = new UpdateCourseView(
+		data.categories,
+		data.topics,
+		data.courseCategories,
+		data.detail
+	);
 </script>
 
 <svelte:head>
@@ -209,7 +214,7 @@
 			<div class="w-fit rounded-lg bg-[var(--tertiary-color)] p-3">
 				<Link href="/manager/mentor/courses">Cancel</Link>
 			</div>
-			<Button disabled={View.disableCreateCourse} type="submit">Create</Button>
+			<Button disabled={View.disableUpdateCourse} type="submit">Update</Button>
 		</div>
 	</form>
 </div>

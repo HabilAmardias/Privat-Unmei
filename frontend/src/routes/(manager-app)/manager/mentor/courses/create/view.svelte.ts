@@ -151,13 +151,14 @@ export class CreateCourseView {
 		args.formData.append('categories', catIDs.join(','));
 		args.formData.append('topics', JSON.stringify(this.addedTopic));
 		const loadID = CreateToast('loading', 'creating course....');
-		return async ({ result }: EnhancementReturn) => {
+		return async ({ result, update }: EnhancementReturn) => {
 			DismissToast(loadID);
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);
 			}
-			if (result.type === 'success') {
+			if (result.type === 'redirect') {
 				CreateToast('success', 'successfully create course');
+				await update();
 			}
 		};
 	};
