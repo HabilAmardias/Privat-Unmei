@@ -79,8 +79,6 @@ export class UpdateCourseView {
 			!this.method ||
 			!this.sessionDuration ||
 			!this.maxSession ||
-			this.addedCategories.length === 0 ||
-			this.addedTopic.length === 0 ||
 			this.descriptionErr ||
 			this.addedCategoryErr ||
 			this.maxSessionErr ||

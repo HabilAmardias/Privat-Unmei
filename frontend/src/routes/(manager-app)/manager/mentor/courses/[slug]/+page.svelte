@@ -2,9 +2,7 @@
 	import type { PageProps } from './$types';
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import Link from '$lib/components/button/Link.svelte';
-	import Button from '$lib/components/button/Button.svelte';
 	import { Trash } from '@lucide/svelte';
-	import { enhance } from '$app/forms';
 	import { CourseDetailView } from './view.svelte';
 	import AlertDialog from '$lib/components/dialog/AlertDialog.svelte';
 
@@ -68,7 +66,7 @@
 		<p class="font-bold text-[var(--tertiary-color)]">Description:</p>
 		<p>{data.detail.description}</p>
 	</div>
-	<div class="flex flex-col gap-4">
+	<div class="grid grid-cols-2 gap-4">
 		<div class="flex flex-col gap-4">
 			<p class="font-bold text-[var(--tertiary-color)]">Categories:</p>
 			{#if data.courseCategories}
@@ -91,8 +89,8 @@
 				<ScrollArea orientation="vertical" viewportClasses="max-h-[300px]">
 					<ul class="flex flex-col gap-4">
 						{#each data.topics as t, i (i)}
-							<li>
-								<p class="font-bold text-[var(--tertiary-color)]">{t.title}</p>
+							<li class="rounded-lg bg-[var(--tertiary-color)] p-4 text-[var(--secondary-color)]">
+								<p class="font-bold text-[var(--primary-color)]">{t.title}</p>
 								<p>{t.description}</p>
 							</li>
 						{/each}
