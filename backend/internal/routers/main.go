@@ -93,6 +93,8 @@ func (c *RouteConfig) SetupPublicRoute() {
 	v1.GET("/auth/google/callback", c.StudentHandler.GoogleLoginCallback)
 	v1.GET("/courses", c.CourseHandler.ListCourse)
 	v1.GET("/courses/:id", c.CourseHandler.CourseDetail)
+	v1.GET("/courses/:id/topics", c.CourseHandler.CourseTopics)
+	v1.GET("/courses/:id/categories", c.CourseHandler.CourseCategories)
 	v1.GET("/mentors", c.MentorHandler.GetMentorList)
 	v1.GET("/mentors/:id", c.MentorHandler.GetMentorProfile)
 	v1.GET("/mentors/:id/availability", c.MentorHandler.GetMentorAvailability)
@@ -342,6 +344,13 @@ func (c *RouteConfig) SetupPrivateRoute() {
 	), c.PaymentHandler.UpdatePaymentMethod)
 	v1.GET("/payment-methods", c.PaymentHandler.GetAllPaymentMethod)
 	v1.GET("/mentors/:id/payment-methods", c.PaymentHandler.GetMentorPaymentMethod)
+	v1.GET("/mentors/me/payment-methods", middlewares.AuthorizationMiddleware(
+		constants.ReadOwnPermission,
+		constants.MentorResource,
+		c.RBACRepository,
+		c.RBACCacheRepository,
+		c.Logger,
+	), c.MentorHandler.GetMyPaymentMethod)
 	v1.POST("/discounts", middlewares.AuthorizationMiddleware(
 		constants.CreatePermission,
 		constants.DiscountResource,

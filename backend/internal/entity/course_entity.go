@@ -79,9 +79,7 @@ type (
 	}
 	CourseDetailQuery struct {
 		CourseListQuery
-		Description      string
-		Topics           []CourseTopic
-		CourseCategories []GetCategoriesQuery
+		Description string
 	}
 	CourseDetailParam struct {
 		ID int

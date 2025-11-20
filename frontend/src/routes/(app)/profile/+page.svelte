@@ -57,9 +57,28 @@
 		};
 	}
 
-	function onUpdateOrders(args: EnhancementArgs) {
+	function onSearchOrders(args: EnhancementArgs) {
+		View.setOrdersIsLoading(true);
+		View.pageNumber = 1;
+		args.formData.append('page', `${View.pageNumber}`);
+		return async ({ result }: EnhancementReturn) => {
+			View.setOrdersIsLoading(false);
+			if (result.type === 'success') {
+				View.setOrders(result.data?.orders);
+				View.setTotalRow(result.data?.totalRow);
+				CreateToast('success', result.data?.message);
+			}
+			if (result.type === 'failure') {
+				CreateToast('error', result.data?.message);
+			}
+		};
+	}
+
+	function onSetPage(args: EnhancementArgs) {
 		View.setOrdersIsLoading(true);
 		args.formData.append('page', `${View.pageNumber}`);
+		args.formData.append('status', `${View.status}`);
+		args.formData.append('search', View.search);
 		return async ({ result }: EnhancementReturn) => {
 			View.setOrdersIsLoading(false);
 			if (result.type === 'success') {
@@ -75,10 +94,9 @@
 
 	function onUpdateProfile(args: EnhancementArgs) {
 		const loadID = CreateToast('loading', 'updating....');
-		return async ({ result, update }: EnhancementReturn) => {
+		return async ({ result }: EnhancementReturn) => {
 			View.setIsEdit();
 			View.setProfileIsLoading(true);
-			await update({ reset: false });
 			View.setProfileImage(undefined);
 			View.setBio(data.profile.bio);
 			View.setName(data.profile.name);
@@ -204,12 +222,19 @@
 			<div class="flex flex-1 flex-col gap-4">
 				<h3 class="text-xl font-bold text-[var(--tertiary-color)]">Orders</h3>
 				<form
-					use:enhance={onUpdateOrders}
+					use:enhance={onSearchOrders}
 					class="grid grid-cols-3 gap-4"
 					action="?/myOrders"
 					method="POST"
 				>
-					<Input width="full" placeholder="Search" id="search" name="search" type="text" />
+					<Input
+						bind:value={View.search}
+						width="full"
+						placeholder="Search"
+						id="search"
+						name="search"
+						type="text"
+					/>
 					<Select
 						defaultLable="Status"
 						name="status"
@@ -245,16 +270,13 @@
 					action="?/myOrders"
 					method="POST"
 					class="flex items-center justify-center"
-					use:enhance={onUpdateOrders}
+					use:enhance={onSetPage}
 				>
 					<Pagination
-						onPageChange={(num) => {
-							View.onPageChange(num);
-						}}
-						pageNumber={View.pageNumber}
+						onPageChange={View.onPageChange}
+						bind:pageNumber={View.pageNumber}
 						count={View.totalRow}
 						perPage={View.limit}
-						offset
 					/>
 				</form>
 			</div>

@@ -18,7 +18,10 @@
 
 	onMount(() => {
 		if (data.role !== adminRole) {
-			goto('/courses', { replaceState: true });
+			goto('/login', { replaceState: true });
+		}
+		if (window.location.pathname !== '/manager/admin/verify' && data.userStatus !== 'verified') {
+			goto('/manager/admin/verify', { replaceState: true });
 		}
 	});
 
@@ -86,7 +89,7 @@
 		</Button>
 	</nav>
 	<main class="flex flex-1 pb-24 md:pb-0">
-		<ScrollArea class="flex-1" orientation="vertical" viewportClasses="h-full max-h-full">
+		<ScrollArea class="flex-1" orientation="vertical" viewportClasses="h-full max-h-[850px]">
 			{@render children()}
 		</ScrollArea>
 	</main>

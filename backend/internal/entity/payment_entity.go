@@ -48,4 +48,7 @@ type (
 		UserID   string
 		MentorID string
 	}
+	GetMyPaymentMethodParam struct {
+		MentorID string
+	}
 )

@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import type { PageProps } from './$types';
 	import { CostManagementView } from './view.svelte';
-	import { goto } from '$app/navigation';
 	import AlertDialog from '$lib/components/dialog/AlertDialog.svelte';
 	import Input from '$lib/components/form/Input.svelte';
 	import Loading from '$lib/components/loader/Loading.svelte';
@@ -15,11 +13,6 @@
 
 	let { data }: PageProps = $props();
 	const View = new CostManagementView(data.costs, data.discounts);
-	onMount(() => {
-		if (!data.isVerified) {
-			goto('/managet/admin/verify', { replaceState: true });
-		}
-	});
 </script>
 
 <svelte:head>
@@ -126,7 +119,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							{#each View.costs as c (c.id)}
+							{#each View.costs as c, i (c.id)}
 								<tr>
 									<td class="text-center">
 										{c.name}
@@ -138,7 +131,7 @@
 										<div class="flex items-center justify-center gap-4">
 											<div class="h-fit rounded-lg bg-[var(--tertiary-color)] p-2">
 												<Dialog
-													bind:open={View.updateCostDialogOpen}
+													bind:open={View.updateCostDialogOpen[i]}
 													buttonText="Update"
 													title={updateCostDialogTitle}
 													buttonOnClick={() => {
@@ -165,7 +158,7 @@
 											</div>
 											<AlertDialog
 												action="?/deleteCost"
-												bind:open={View.deleteCostDialogOpen}
+												bind:open={View.deleteCostDialogOpen[i]}
 												enhancement={View.onDeleteCost}
 												title={deleteCostDialogTitle}
 												onClick={() => {
@@ -190,11 +183,10 @@
 			bind:this={View.costPaginationForm}
 		>
 			<Pagination
-				onPageChange={(num) => View.setPageChange(num)}
-				pageNumber={View.costPageNumber}
+				bind:pageNumber={View.costPageNumber}
+				onPageChange={View.setPageChange}
 				perPage={View.costLimit}
 				count={View.costTotalRow}
-				offset
 			/>
 		</form>
 	{:else}
@@ -241,7 +233,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							{#each View.discounts as d (d.id)}
+							{#each View.discounts as d, i (d.id)}
 								<tr>
 									<td class="text-center">
 										{d.number_of_participant}
@@ -253,7 +245,7 @@
 										<div class="flex items-center justify-center gap-4">
 											<div class="h-fit rounded-lg bg-[var(--tertiary-color)] p-2">
 												<Dialog
-													bind:open={View.updateDiscountDialogOpen}
+													bind:open={View.updateDiscountDialogOpen[i]}
 													buttonText="Update"
 													title={updateDiscountDialogTitle}
 													buttonOnClick={() => {
@@ -280,7 +272,7 @@
 											</div>
 											<AlertDialog
 												action="?/deleteDiscount"
-												bind:open={View.deleteDiscountDialogOpen}
+												bind:open={View.deleteDiscountDialogOpen[i]}
 												enhancement={View.onDeleteDiscount}
 												title={deleteDiscountDialogTitle}
 												onClick={() => {
@@ -298,18 +290,17 @@
 			{/if}
 		</div>
 		<form
-			use:enhance={View.onCostPageChangeForm}
-			action="?/getCosts"
+			use:enhance={View.onDiscountPageChangeForm}
+			action="?/getDisocunts"
 			class="flex w-full items-center justify-center"
 			method="POST"
-			bind:this={View.costPaginationForm}
+			bind:this={View.discountPaginationForm}
 		>
 			<Pagination
-				onPageChange={(num) => View.setPageChange(num)}
-				pageNumber={View.costPageNumber}
-				perPage={View.costLimit}
-				count={View.costTotalRow}
-				offset
+				onPageChange={View.setPageChange}
+				bind:pageNumber={View.discountPageNumber}
+				perPage={View.discountLimit}
+				count={View.discountTotalRow}
 			/>
 		</form>
 	{/if}

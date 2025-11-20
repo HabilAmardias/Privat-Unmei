@@ -20,6 +20,34 @@ func CreateCourseCategoryRepository(db *db.CustomDB) *CourseCategoryRepositoryIm
 	return &CourseCategoryRepositoryImpl{db}
 }
 
+func (ccr *CourseCategoryRepositoryImpl) GetLeastCategoryCount(ctx context.Context, id int, count *int) error {
+	var driver RepoDriver = ccr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	with counts as (
+		select cca.course_id , count(*) as category_count
+		from course_category_assignments cca
+		where cca.course_id in (
+			select course_id
+			from course_category_assignments
+			where category_id = $1 and deleted_at is null
+		) and cca.deleted_at is null
+		group by cca.course_id
+	)
+	select min(c.category_count) from counts c;
+	`
+	if err := driver.QueryRow(query, id).Scan(count); err != nil {
+		return customerrors.NewError(
+			"failed to get category",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (ccr *CourseCategoryRepositoryImpl) DeleteCategory(ctx context.Context, categoryID int) error {
 	var driver RepoDriver
 	driver = ccr.DB

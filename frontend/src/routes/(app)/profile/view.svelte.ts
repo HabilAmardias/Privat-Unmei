@@ -7,6 +7,7 @@ export class profileView {
 	verifyIsLoading = $state<boolean>(false);
 	ordersIsLoading = $state<boolean>(false);
 	profileIsLoading = $state<boolean>(false);
+	search = $state<string>('');
 	isDesktop = $state<boolean>(false);
 	isEdit = $state<boolean>(false);
 	name = $state<string>('');
@@ -46,10 +47,9 @@ export class profileView {
 	setPageNumber(num: number) {
 		this.pageNumber = num;
 	}
-	onPageChange(num: number) {
-		this.pageNumber = num;
+	onPageChange = () => {
 		this.paginationForm?.requestSubmit();
-	}
+	};
 	setTotalRow(row: number) {
 		this.totalRow = row;
 	}

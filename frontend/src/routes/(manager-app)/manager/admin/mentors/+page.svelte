@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { PageProps } from './$types';
-	import { goto } from '$app/navigation';
 	import { MentorManagerView } from './view.svelte';
 	import Input from '$lib/components/form/Input.svelte';
 	import Button from '$lib/components/button/Button.svelte';
@@ -17,10 +16,6 @@
 	const View = new MentorManagerView(data.mentorsList);
 
 	onMount(() => {
-		if (!data.isVerified) {
-			goto('/manager/admin/verify', { replaceState: true });
-			return;
-		}
 		View.setIsDesktop(window.innerWidth >= 768);
 		function setIsDesktop() {
 			View.setIsDesktop(window.innerWidth >= 768);
@@ -58,7 +53,7 @@
 		</Link>
 	</div>
 	<form
-		use:enhance={View.onUpdateMentors}
+		use:enhance={View.onSearchMentors}
 		bind:this={View.searchForm}
 		class="grid grid-cols-2 gap-4"
 		action="?/getMentors"
@@ -99,7 +94,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each View.mentors as mentor (mentor.id)}
+						{#each View.mentors as mentor, i (mentor.id)}
 							<tr>
 								<td class="overflow-x-auto text-center">{mentor.email}</td>
 								<td class="overflow-x-auto text-center">{mentor.name}</td>
@@ -110,7 +105,7 @@
 								<td>
 									<AlertDialog
 										action="?/deleteMentor"
-										bind:open={View.alertOpen}
+										bind:open={View.alertOpen[i]}
 										enhancement={View.onDeleteMentor}
 										title={dialogTitle}
 										onClick={() => {
@@ -127,17 +122,11 @@
 		{/if}
 	</div>
 	<form
-		use:enhance={View.onUpdateMentors}
+		use:enhance={View.onPageChange}
 		action="?/getMentors"
 		class="flex w-full items-center justify-center"
 		method="POST"
 	>
-		<Pagination
-			onPageChange={(num) => View.onPageChange(num)}
-			pageNumber={View.page}
-			perPage={View.limit}
-			count={View.total_row}
-			offset
-		/>
+		<Pagination bind:pageNumber={View.page} perPage={View.limit} count={View.total_row} />
 	</form>
 </div>

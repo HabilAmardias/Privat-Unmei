@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import type { PageProps } from './$types';
 	import { PaymentManagementView } from './view.svelte';
-	import { goto } from '$app/navigation';
 	import AlertDialog from '$lib/components/dialog/AlertDialog.svelte';
 	import Input from '$lib/components/form/Input.svelte';
 	import Loading from '$lib/components/loader/Loading.svelte';
@@ -14,11 +12,6 @@
 
 	let { data }: PageProps = $props();
 	const View = new PaymentManagementView(data.payments);
-	onMount(() => {
-		if (!data.isVerified) {
-			goto('/managet/admin/verify', { replaceState: true });
-		}
-	});
 </script>
 
 <svelte:head>
@@ -104,7 +97,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each View.payments as py (py.payment_method_id)}
+						{#each View.payments as py, i (py.payment_method_id)}
 							<tr>
 								<td class="text-center">
 									{py.payment_method_name}
@@ -113,7 +106,7 @@
 									<div class="flex items-center justify-center gap-4">
 										<div class="h-fit rounded-lg bg-[var(--tertiary-color)] p-2">
 											<Dialog
-												bind:open={View.updateDialogOpen}
+												bind:open={View.updateDialogOpen[i]}
 												buttonText="Update"
 												title={updateDialogTitle}
 												buttonOnClick={() => {
@@ -140,7 +133,7 @@
 										</div>
 										<AlertDialog
 											action="?/deletePayment"
-											bind:open={View.deleteDialogOpen}
+											bind:open={View.deleteDialogOpen[i]}
 											enhancement={View.onDeletePayment}
 											title={deleteDialogTitle}
 											onClick={() => {
@@ -165,11 +158,10 @@
 		bind:this={View.paginationForm}
 	>
 		<Pagination
-			onPageChange={(num) => View.onPageChange(num)}
-			pageNumber={View.pageNumber}
+			onPageChange={View.onPageChange}
+			bind:pageNumber={View.pageNumber}
 			perPage={View.limit}
 			count={View.totalRow}
-			offset
 		/>
 	</form>
 </div>
