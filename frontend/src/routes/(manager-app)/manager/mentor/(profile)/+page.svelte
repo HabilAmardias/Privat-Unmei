@@ -34,7 +34,7 @@
 			<Link href="/manager/mentor/update">Update</Link>
 		</div>
 	</div>
-	<div class="flex justify-between text-center">
+	<div class="grid grid-cols-2 gap-4 md:flex md:justify-between">
 		<div>
 			<p class="font-bold text-[var(--tertiary-color)]">YoE:</p>
 			<p>{data.profile.years_of_experience}</p>
