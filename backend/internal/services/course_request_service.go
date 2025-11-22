@@ -50,6 +50,7 @@ func (crs *CourseRequestServiceImpl) StudentCourseRequestDetail(ctx context.Cont
 	student := new(entity.Student)
 	schedules := new([]entity.CourseRequestSchedule)
 	res := new(entity.StudentCourseRequestDetailQuery)
+	payment := new(entity.Payment)
 
 	if err := crs.crr.FindByID(ctx, param.CourseRequestID, courseRequest); err != nil {
 		return nil, err
@@ -95,13 +96,17 @@ func (crs *CourseRequestServiceImpl) StudentCourseRequestDetail(ctx context.Cont
 		)
 	}
 
+	if err := crs.pr.FindPaymentByRequestID(ctx, courseRequest.ID, payment); err != nil {
+		return nil, err
+	}
+
 	res.CourseRequestID = courseRequest.ID
 	res.CourseName = course.Title
 	res.MentorName = userMentor.Name
 	res.MentorEmail = userMentor.Email
-	res.TotalPrice = courseRequest.TotalPrice
-	res.Subtotal = courseRequest.SubTotal
-	res.OperationalCost = courseRequest.OperationalCost
+	res.TotalPrice = payment.TotalPrice
+	res.Subtotal = payment.SubTotal
+	res.OperationalCost = payment.OperationalCost
 	res.NumberOfSessions = courseRequest.NumberOfSessions
 	res.NumberOfParticipant = courseRequest.NumberOfParticipant
 	res.Status = courseRequest.Status
@@ -144,8 +149,7 @@ func (crs *CourseRequestServiceImpl) MentorCourseRequestDetail(ctx context.Conte
 	student := new(entity.Student)
 	schedules := new([]entity.CourseRequestSchedule)
 	res := new(entity.MentorCourseRequestDetailQuery)
-	mentorPaymentInfo := new(entity.MentorPayment)
-	paymentMethod := new(entity.PaymentMethod)
+	payment := new(entity.Payment)
 
 	if err := crs.crr.FindByID(ctx, param.CourseRequestID, courseRequest); err != nil {
 		return nil, err
@@ -184,10 +188,7 @@ func (crs *CourseRequestServiceImpl) MentorCourseRequestDetail(ctx context.Conte
 		)
 	}
 
-	if err := crs.pr.FindPaymentMethodByID(ctx, courseRequest.PaymentMethodID, paymentMethod); err != nil {
-		return nil, err
-	}
-	if err := crs.pr.GetPaymentInfoByMentorAndMethodID(ctx, course.MentorID, courseRequest.PaymentMethodID, mentorPaymentInfo); err != nil {
+	if err := crs.pr.FindPaymentByRequestID(ctx, param.CourseRequestID, payment); err != nil {
 		return nil, err
 	}
 
@@ -195,12 +196,12 @@ func (crs *CourseRequestServiceImpl) MentorCourseRequestDetail(ctx context.Conte
 	res.CourseName = course.Title
 	res.StudentName = userStudent.Name
 	res.StudentEmail = userStudent.Email
-	res.TotalPrice = courseRequest.TotalPrice
-	res.Subtotal = courseRequest.SubTotal
-	res.OperationalCost = courseRequest.OperationalCost
+	res.TotalPrice = payment.TotalPrice
+	res.Subtotal = payment.SubTotal
+	res.OperationalCost = payment.OperationalCost
 	res.NumberOfSessions = courseRequest.NumberOfSessions
-	res.PaymentMethod = paymentMethod.Name
-	res.AccountNumber = mentorPaymentInfo.AccountNumber
+	res.PaymentMethod = payment.PaymentMethodName
+	res.AccountNumber = payment.AccountNumber
 	res.Status = courseRequest.Status
 	res.NumberOfParticipant = courseRequest.NumberOfParticipant
 	res.ExpiredAt = courseRequest.ExpiredAt
@@ -220,88 +221,6 @@ func (crs *CourseRequestServiceImpl) MentorCourseRequestList(ctx context.Context
 		return nil, nil, err
 	}
 	return requests, totalRow, nil
-}
-
-func (crs *CourseRequestServiceImpl) GetPaymentDetail(ctx context.Context, param entity.GetPaymentDetailParam) (*entity.PaymentDetailQuery, error) {
-	courseRequest := new(entity.CourseRequest)
-	course := new(entity.Course)
-	userMentor := new(entity.User)
-	mentor := new(entity.Mentor)
-	userStudent := new(entity.User)
-	student := new(entity.Student)
-	query := new(entity.PaymentDetailQuery)
-	mentorPaymentInfo := new(entity.MentorPayment)
-	paymentMethod := new(entity.PaymentMethod)
-	now := time.Now()
-
-	if err := crs.ur.FindByID(ctx, param.UserID, userStudent); err != nil {
-		return nil, err
-	}
-	if err := crs.sr.FindByID(ctx, userStudent.ID, student); err != nil {
-		return nil, err
-	}
-	if userStudent.Status != constants.VerifiedStatus {
-		return nil, customerrors.NewError(
-			"need to verify account",
-			errors.New("user is still unverified"),
-			customerrors.Unauthenticate,
-		)
-	}
-	if err := crs.crr.GetPaymentDetail(ctx, param.CourseRequestID, courseRequest); err != nil {
-		return nil, err
-	}
-	if courseRequest.ExpiredAt != nil {
-		if now.After(*courseRequest.ExpiredAt) {
-			return nil, customerrors.NewError(
-				"course request has expired",
-				errors.New("course request has expired"),
-				customerrors.InvalidAction,
-			)
-		}
-	}
-	if courseRequest.StudentID != student.ID {
-		return nil, customerrors.NewError(
-			"unauthorized",
-			errors.New("course request student id is different"),
-			customerrors.Unauthenticate,
-		)
-	}
-	if !isOngoing(courseRequest.Status) {
-		return nil, customerrors.NewError(
-			"unauthorized",
-			errors.New("cannot see payment detail of completed transaction"),
-			customerrors.Unauthenticate,
-		)
-	}
-	if err := crs.cr.FindByID(ctx, courseRequest.CourseID, course, false); err != nil {
-		return nil, err
-	}
-	if err := crs.ur.FindByID(ctx, course.MentorID, userMentor); err != nil {
-		return nil, err
-	}
-	if err := crs.mr.FindByID(ctx, userMentor.ID, mentor, false); err != nil {
-		return nil, err
-	}
-	if err := crs.pr.GetPaymentInfoByMentorAndMethodID(ctx, course.MentorID, courseRequest.PaymentMethodID, mentorPaymentInfo); err != nil {
-		return nil, err
-	}
-	if err := crs.pr.FindPaymentMethodByID(ctx, courseRequest.PaymentMethodID, paymentMethod); err != nil {
-		return nil, err
-	}
-
-	query.CourseID = course.ID
-	query.CourseRequestID = param.CourseRequestID
-	query.CourseTitle = course.Title
-	query.ExpiredAt = courseRequest.ExpiredAt
-	query.AccountNumber = mentorPaymentInfo.AccountNumber
-	query.PaymentMethod = paymentMethod.Name
-	query.MentorID = mentor.ID
-	query.MentorName = userMentor.Name
-	query.OperationalCost = courseRequest.OperationalCost
-	query.Subtotal = courseRequest.SubTotal
-	query.TotalCost = courseRequest.TotalPrice
-
-	return query, nil
 }
 
 func (crs *CourseRequestServiceImpl) MentorConfirmPayment(ctx context.Context, param entity.ConfirmPaymentParam) error {
@@ -578,13 +497,12 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 			pricePerSession = course.Price
 		}
 
-		courseRequest.SubTotal = pricePerSession * float64(len(param.PreferredSlots))
-		courseRequest.OperationalCost = *operationalCost * float64(len(param.PreferredSlots))
+		subTotal := pricePerSession * float64(len(param.PreferredSlots))
+		*operationalCost = *operationalCost * float64(len(param.PreferredSlots))
 		courseRequest.StudentID = param.StudentID
 		courseRequest.CourseID = param.CourseID
-		courseRequest.TotalPrice = courseRequest.SubTotal + courseRequest.OperationalCost
+		totalPrice := subTotal + *operationalCost
 		courseRequest.NumberOfParticipant = param.NumberOfParticipant
-		courseRequest.PaymentMethodID = param.PaymentMethodID
 		courseRequest.NumberOfSessions = len(param.PreferredSlots)
 		eat := now.Add(constants.ExpiredInterval)
 		courseRequest.ExpiredAt = &eat
@@ -592,7 +510,11 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 		if err := crs.crr.CreateOrder(ctx, courseRequest); err != nil {
 			return err
 		}
+
 		if err := crs.csr.CreateSchedule(ctx, courseRequest.ID, newScheds); err != nil {
+			return err
+		}
+		if err := crs.pr.CreatePaymentDetail(ctx, courseRequest.ID, subTotal, *operationalCost, totalPrice, paymentInfo.PaymentMethodName, paymentInfo.AccountNumber); err != nil {
 			return err
 		}
 

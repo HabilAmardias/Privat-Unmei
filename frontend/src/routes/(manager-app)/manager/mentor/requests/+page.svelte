@@ -1,13 +1,10 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
 	import { RequestManagementView } from './view.svelte';
-	import AlertDialog from '$lib/components/dialog/AlertDialog.svelte';
-	import Input from '$lib/components/form/Input.svelte';
 	import Loading from '$lib/components/loader/Loading.svelte';
 	import { enhance } from '$app/forms';
 	import Pagination from '$lib/components/pagination/Pagination.svelte';
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
-	import Search from '$lib/components/search/Search.svelte';
 	import Link from '$lib/components/button/Link.svelte';
 	import Button from '$lib/components/button/Button.svelte';
 	import Select from '$lib/components/select/Select.svelte';

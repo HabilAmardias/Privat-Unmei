@@ -233,7 +233,7 @@ export class UpdateMentorProfileView {
 		this.#paymentMethodSubmit();
 	};
 	onUpdateMentor = (args: EnhancementArgs) => {
-		const loadID = CreateToast('loading', 'creating....');
+		const loadID = CreateToast('loading', 'updating....');
 		this.mentorPaymentMethods.forEach((val) => {
 			args.formData.append('mentor_payment_info', JSON.stringify(val));
 		});

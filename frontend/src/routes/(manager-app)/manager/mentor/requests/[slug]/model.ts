@@ -13,7 +13,7 @@ export type RequestDetail = {
 	subtotal: number;
 	operational_cost: number;
 	number_of_sessions: number;
-	status: string;
+	status: 'reserved' | 'pending payment' | 'scheduled' | 'completed' | 'cancelled';
 	expired_at: string | null;
 	payment_method: string;
 	account_number: string;

@@ -18,6 +18,83 @@ func CreatePaymentRepository(db *db.CustomDB) *PaymentRepositoryImpl {
 	return &PaymentRepositoryImpl{db}
 }
 
+func (pr *PaymentRepositoryImpl) CreatePaymentDetail(ctx context.Context, id int, subtotal float64, operationalCost float64, totalPrice float64, methodName string, accountNumber string) error {
+	var driver RepoDriver = pr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	INSERT INTO payments (
+		course_request_id,
+		subtotal,
+		operational_cost,
+		total_price,
+		payment_method_name,
+		account_number
+	)
+	VALUES
+	($1, $2, $3, $4, $5, $6)
+	`
+	_, err := driver.Exec(query, id, subtotal, operationalCost, totalPrice, methodName, accountNumber)
+	if err != nil {
+		return customerrors.NewError(
+			"failed to create payment",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (pr *PaymentRepositoryImpl) FindPaymentByRequestID(ctx context.Context, id int, payment *entity.Payment) error {
+	var driver RepoDriver = pr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+
+	query := `
+	SELECT
+		id,
+		course_request_id,
+		subtotal,
+		operational_cost,
+		total_price,
+		payment_method_name,
+		account_number,
+		created_at,
+		updated_at,
+		deleted_at
+	FROM payments
+	WHERE course_request_id = $1 AND deleted_at IS NULL
+	`
+	if err := driver.QueryRow(query, id).Scan(
+		&payment.ID,
+		&payment.CourseRequestID,
+		&payment.SubTotal,
+		&payment.OperationalCost,
+		&payment.TotalPrice,
+		&payment.PaymentMethodName,
+		&payment.AccountNumber,
+		&payment.CreatedAt,
+		&payment.UpdatedAt,
+		&payment.DeletedAt,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return customerrors.NewError(
+				"payment does not found",
+				err,
+				customerrors.ItemNotExist,
+			)
+		}
+		return customerrors.NewError(
+			"failed to get payment",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (pr *PaymentRepositoryImpl) GetLeastPaymentMethodCount(ctx context.Context, id int, count *int) error {
 	var driver RepoDriver = pr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
@@ -460,22 +537,19 @@ func (pr *PaymentRepositoryImpl) GetPaymentInfoByMentorAndMethodID(ctx context.C
 	}
 	query := `
 	SELECT
-		payment_method_id,
-		mentor_id,
-		account_number,
-		created_at,
-		updated_at,
-		deleted_at
-	FROM mentor_payments
-	WHERE mentor_id = $1 AND payment_method_id = $2 AND deleted_at IS NULL
+		mp.payment_method_id,
+		p.name
+		mp.mentor_id,
+		mp.account_number
+	FROM mentor_payments mp
+	JOIN ON payment_methods p ON p.id = mp.payment_method_id
+	WHERE mp.mentor_id = $1 AND mp.payment_method_id = $2 AND mp.deleted_at IS NULL AND p.deleted_at IS NULL
 	`
 	if err := driver.QueryRow(query, mentorID, paymentMethodID).Scan(
 		&mentorPayment.PaymentMethodID,
+		&mentorPayment.PaymentMethodName,
 		&mentorPayment.MentorID,
 		&mentorPayment.AccountNumber,
-		&mentorPayment.CreatedAt,
-		&mentorPayment.UpdatedAt,
-		&mentorPayment.DeletedAt,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return customerrors.NewError(

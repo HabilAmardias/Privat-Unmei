@@ -31,7 +31,7 @@ func CreateCourseService(
 func (cs *CourseServiceImpl) UpdateCourse(ctx context.Context, param entity.UpdateCourseParam) error {
 	updateCourseQuery := new(entity.UpdateCourseQuery)
 	course := new(entity.Course)
-	orders := new([]entity.CourseRequest)
+	count := new(int)
 	categories := new([]entity.CourseCategory)
 	mentor := new(entity.Mentor)
 	return cs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
@@ -48,10 +48,10 @@ func (cs *CourseServiceImpl) UpdateCourse(ctx context.Context, param entity.Upda
 				customerrors.InvalidAction,
 			)
 		}
-		if err := cs.cor.FindOngoingByCourseID(ctx, param.CourseID, orders); err != nil {
+		if err := cs.cor.FindOngoingByCourseID(ctx, param.CourseID, count); err != nil {
 			return err
 		}
-		if len(*orders) > 0 {
+		if *count > 0 {
 			return customerrors.NewError(
 				"there is an ongoing order for this course",
 				errors.New("there is an ongoing order for this course"),

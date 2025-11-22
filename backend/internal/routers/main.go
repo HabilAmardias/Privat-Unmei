@@ -267,13 +267,6 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		c.RBACCacheRepository,
 		c.Logger,
 	), c.CourseRequestHandler.ConfirmPayment)
-	v1.GET("/course-requests/:id/payment-detail", middlewares.AuthorizationMiddleware(
-		constants.ReadOwnPermission,
-		constants.PaymentDetailResource,
-		c.RBACRepository,
-		c.RBACCacheRepository,
-		c.Logger,
-	), c.CourseRequestHandler.GetPaymentDetail)
 	v1.GET("/mentors/me", middlewares.AuthorizationMiddleware(
 		constants.ReadOwnPermission,
 		constants.MentorResource,

@@ -1,8 +1,11 @@
 CREATE TABLE payments (
     id BIGSERIAL PRIMARY KEY,
-    course_request_id BIGINT REFERENCES course_requests(id),
+    course_request_id BIGINT UNIQUE REFERENCES course_requests(id),
     subtotal NUMERIC NOT NULL,
-    payment_method_id BIGINT REFERENCES payment_methods(id),
+    operational_cost NUMERIC NOT NULL,
+    total_price NUMERIC NOT NULL,
+    payment_method_name VARCHAR NOT NULL,
+    account_number VARCHAR NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMPTZ

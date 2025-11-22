@@ -11,10 +11,6 @@ type (
 		CourseID            int
 		Status              string
 		NumberOfParticipant int
-		SubTotal            float64
-		OperationalCost     float64
-		TotalPrice          float64
-		PaymentMethodID     int
 		NumberOfSessions    int
 		ExpiredAt           *time.Time
 		CreatedAt           time.Time
@@ -47,7 +43,7 @@ type (
 	}
 	PaymentDetailQuery struct {
 		CourseRequestID int
-		MentorID        string
+		StudentName     string
 		MentorName      string
 		CourseID        int
 		CourseTitle     string

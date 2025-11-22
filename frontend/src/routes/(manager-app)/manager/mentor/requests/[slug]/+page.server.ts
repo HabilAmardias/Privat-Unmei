@@ -3,36 +3,47 @@ import type { PageServerLoad } from './$types';
 import { controller } from './controller';
 
 export const load: PageServerLoad = async ({ fetch, params }) => {
-	const [courseCategoriesRes, topicsRes, courseRes] = await Promise.all([
-		controller.getCourseDetailCategories(fetch, params.slug),
-		controller.getCourseTopics(fetch, params.slug),
-		controller.getCourseDetail(fetch, params.slug)
-	]);
-	if (!courseCategoriesRes.success) {
-		throw error(courseCategoriesRes.status, { message: courseCategoriesRes.message });
-	}
-	if (!topicsRes.success) {
-		throw error(topicsRes.status, { message: topicsRes.message });
-	}
-	if (!courseRes.success) {
-		throw error(courseRes.status, { message: courseRes.message });
+	const { success, message, status, resBody } = await controller.getRequestDetail(
+		fetch,
+		params.slug
+	);
+	if (!success) {
+		throw error(status, { message });
 	}
 	return {
-		courseCategories: courseCategoriesRes.resBody.data,
-		topics: topicsRes.resBody.data,
-		detail: courseRes.resBody.data
+		detail: resBody.data
 	};
 };
 
 export const actions = {
-	deleteCourse: async ({ fetch, params }) => {
+	acceptRequest: async ({ fetch, params }) => {
 		if (!params.slug) {
 			throw error(500, 'something went wrong');
 		}
-		const { success, message, status } = await controller.deleteCourse(fetch, params.slug);
+		const { success, message, status } = await controller.acceptRequest(fetch, params.slug);
 		if (!success) {
 			return fail(status, { message });
 		}
-		redirect(303, '/manager/mentor/courses');
+		redirect(303, '/manager/mentor/requests');
+	},
+	rejectRequest: async ({ fetch, params }) => {
+		if (!params.slug) {
+			throw error(500, 'something went wrong');
+		}
+		const { success, message, status } = await controller.rejectRequest(fetch, params.slug);
+		if (!success) {
+			return fail(status, { message });
+		}
+		redirect(303, '/manager/mentor/requests');
+	},
+	confirmPayment: async ({ fetch, params }) => {
+		if (!params.slug) {
+			throw error(500, 'something went wrong');
+		}
+		const { success, message, status } = await controller.confirmPayment(fetch, params.slug);
+		if (!success) {
+			return fail(status, { message });
+		}
+		redirect(303, '/manager/mentor/requests');
 	}
 } satisfies Actions;
