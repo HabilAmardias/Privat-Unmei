@@ -6,28 +6,10 @@
 	import Button from '$lib/components/button/Button.svelte';
 	import { enhance } from '$app/forms';
 	import InputSecret from '$lib/components/form/InputSecret.svelte';
-	import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
 	import { onMount } from 'svelte';
-	import { CreateToast, DismissToast } from '$lib/utils/helper';
 
 	let { data }: PageProps = $props();
 	const View = new adminProfileView();
-
-	function onChangePasswordSubmit(args: EnhancementArgs) {
-		View.setIsLoading(true);
-		const loadID = CreateToast('loading', 'loading....');
-		return async ({ result }: EnhancementReturn) => {
-			DismissToast(loadID);
-			View.setIsLoading(false);
-			if (result.type === 'success') {
-				CreateToast('success', 'successfully change password');
-				View.switchForm();
-			}
-			if (result.type === 'failure') {
-				CreateToast('error', result.data?.message);
-			}
-		};
-	}
 	onMount(() => {
 		View.setIsDesktop(window.innerWidth >= 768);
 		function setIsDesktop() {
@@ -51,7 +33,7 @@
 		<Card>
 			<h2 class="mb-3 text-2xl font-bold text-[var(--tertiary-color)]">Change Password</h2>
 			<form
-				use:enhance={onChangePasswordSubmit}
+				use:enhance={View.onChangePasswordSubmit}
 				action="?/changePassword"
 				method="post"
 				class="flex flex-col gap-4"

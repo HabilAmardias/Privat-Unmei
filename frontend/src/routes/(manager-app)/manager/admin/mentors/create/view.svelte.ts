@@ -232,13 +232,14 @@ export class CreateMentorView {
 			args.formData.append('mentor_availability', JSON.stringify(val));
 		});
 		args.formData.append('password', this.generatedPassword);
-		return async ({ result }: EnhancementReturn) => {
+		return async ({ result, update }: EnhancementReturn) => {
 			DismissToast(loadID);
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);
 			}
-			if (result.type === 'success') {
-				CreateToast('success', result.data?.message);
+			if (result.type === 'redirect') {
+				CreateToast('success', 'Successfully create mentor account');
+				await update();
 			}
 		};
 	};

@@ -1,4 +1,4 @@
-import { error, fail, type Actions } from '@sveltejs/kit';
+import { error, fail, redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { controller } from './controller';
 
@@ -45,6 +45,6 @@ export const actions = {
 		if (!success) {
 			return fail(status, { message });
 		}
-		return { message };
+		throw redirect(303, '/manager/mentor');
 	}
 } satisfies Actions;

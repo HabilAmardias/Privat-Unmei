@@ -1,6 +1,7 @@
-import { error } from '@sveltejs/kit';
+import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { controller } from './controller';
+import type { Actions } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ fetch }) => {
 	const [mentorProfile, mentorPayments, mentorSchedules] = await Promise.all([
@@ -28,12 +29,12 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	};
 };
 
-// export const actions = {
-// 	deleteMentor: async ({ fetch, params }) => {
-// 		const { success, message, status } = await controller.deleteMentor(fetch, params.slug);
-// 		if (!success) {
-// 			return fail(status, { message });
-// 		}
-// 		throw redirect(303, '/manager/admin/mentors');
-// 	}
-// } satisfies Actions;
+export const actions = {
+	changePassword: async ({ fetch, request }) => {
+		const { success, message, status } = await controller.changePassword(fetch, request);
+		if (!success) {
+			return fail(status, { message });
+		}
+		return { message };
+	}
+} satisfies Actions;

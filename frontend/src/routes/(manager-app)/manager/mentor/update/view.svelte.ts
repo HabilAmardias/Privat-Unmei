@@ -240,13 +240,14 @@ export class UpdateMentorProfileView {
 		this.mentorSchedules.forEach((val) => {
 			args.formData.append('mentor_availability', JSON.stringify(val));
 		});
-		return async ({ result }: EnhancementReturn) => {
+		return async ({ result, update }: EnhancementReturn) => {
 			DismissToast(loadID);
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);
 			}
-			if (result.type === 'success') {
-				CreateToast('success', result.data?.message);
+			if (result.type === 'redirect') {
+				CreateToast('success', 'Successfully update profile');
+				await update();
 			}
 		};
 	};
