@@ -26,7 +26,6 @@ export type adminProfile = {
 
 export type MentorProfile = {
 	id: string;
-	resume: string;
 	profile_image: string;
 	name: string;
 	bio: string;

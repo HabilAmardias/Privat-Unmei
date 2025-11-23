@@ -1,6 +1,5 @@
 import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
 import { CreateToast, debounce, DismissToast } from '$lib/utils/helper';
-import { FILE_IMAGE_THRESHOLD } from '$lib/utils/constants';
 import { dayofWeeks } from './constants';
 import {
 	type mentorPaymentMethods,
@@ -13,16 +12,6 @@ import {
 export class CreateMentorView {
 	name = $state<string>('');
 	degree = $state<string>('');
-	resumeFile = $state<FileList>();
-	resumeErr = $derived.by<Error | undefined>(() => {
-		if (this.resumeFile && this.resumeFile.length > 0) {
-			const file = this.resumeFile[0];
-			if (file.type !== 'application/pdf' || file.size > FILE_IMAGE_THRESHOLD) {
-				return new Error('invalid file');
-			}
-		}
-		return undefined;
-	});
 	email = $state<string>('');
 	emailErr = $derived.by<Error | undefined>(() => {
 		if (this.email.length > 0 && !this.#validateEmail(this.email)) {
@@ -134,9 +123,6 @@ export class CreateMentorView {
 			!this.campus ||
 			!this.degree ||
 			!this.major ||
-			!this.resumeFile ||
-			this.resumeFile.length === 0 ||
-			this.resumeErr ||
 			this.mentorPaymentMethods.length === 0 ||
 			this.mentorSchedules.length === 0
 		) {

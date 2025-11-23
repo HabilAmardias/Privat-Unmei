@@ -1,6 +1,6 @@
 import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
 import { CreateToast, debounce, DismissToast } from '$lib/utils/helper';
-import { FILE_IMAGE_THRESHOLD, MAX_BIO_LENGTH } from '$lib/utils/constants';
+import { MAX_BIO_LENGTH } from '$lib/utils/constants';
 import { dayofWeeks } from './constants';
 import {
 	type MentorPaymentInfo,
@@ -30,17 +30,6 @@ export class UpdateMentorProfileView {
 		return undefined;
 	});
 	degree = $state<string | undefined>();
-	resumeFile = $state<FileList | undefined>();
-	resumeErr = $derived.by<Error | undefined>(() => {
-		if (this.resumeFile && this.resumeFile.length > 0) {
-			const file = this.resumeFile[0];
-			if (file.type !== 'application/pdf' || file.size > FILE_IMAGE_THRESHOLD) {
-				return new Error('invalid file');
-			}
-			return undefined;
-		}
-		return undefined;
-	});
 	yearsOfExperience = $state<number | undefined>(undefined);
 	yoeErr = $derived.by<Error | undefined>(() => {
 		if (this.yearsOfExperience && (this.yearsOfExperience < 0 || this.yearsOfExperience > 40)) {
@@ -140,8 +129,7 @@ export class UpdateMentorProfileView {
 			!this.campus ||
 			!this.degree ||
 			!this.major ||
-			this.yoeErr ||
-			this.resumeErr
+			this.yoeErr
 		) {
 			return true;
 		}

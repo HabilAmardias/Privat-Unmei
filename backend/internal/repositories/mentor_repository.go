@@ -137,8 +137,7 @@ func (mr *MentorRepositoryImpl) FindByID(ctx context.Context, id string, mentor 
 	SELECT 
 		id, 
 		total_rating, 
-		rating_count, 
-		resume_url, 
+		rating_count,
 		years_of_experience,
 		degree, 
 		major, 
@@ -162,7 +161,6 @@ func (mr *MentorRepositoryImpl) FindByID(ctx context.Context, id string, mentor 
 		&mentor.ID,
 		&mentor.TotalRating,
 		&mentor.RatingCount,
-		&mentor.Resume,
 		&mentor.YearsOfExperience,
 		&mentor.Degree,
 		&mentor.Major,
@@ -194,13 +192,12 @@ func (mr *MentorRepositoryImpl) AddNewMentor(ctx context.Context, mentor *entity
 		driver = tx
 	}
 	query := `
-	INSERT INTO mentors(id, resume_url, years_of_experience, degree, major, campus)
-	VALUES ($1, $2, $3, $4, $5, $6);
+	INSERT INTO mentors(id, years_of_experience, degree, major, campus)
+	VALUES ($1, $2, $3, $4, $5);
 	`
 	_, err := driver.Exec(
 		query,
 		mentor.ID,
-		mentor.Resume,
 		mentor.YearsOfExperience,
 		mentor.Degree,
 		mentor.Major,
@@ -225,19 +222,17 @@ func (mr *MentorRepositoryImpl) UpdateMentor(ctx context.Context, id string, que
 	query := `
 	UPDATE mentors
 	SET
-		resume_url = COALESCE($1, resume_url),
-		years_of_experience = COALESCE($2, years_of_experience),
-		degree = COALESCE($3, degree),
-		major = COALESCE($4, major),
-		campus = COALESCE($5, campus),
-		total_rating = COALESCE($6, total_rating),
-		rating_count = COALESCE($7, rating_count),
+		years_of_experience = COALESCE($1, years_of_experience),
+		degree = COALESCE($2, degree),
+		major = COALESCE($3, major),
+		campus = COALESCE($4, campus),
+		total_rating = COALESCE($5, total_rating),
+		rating_count = COALESCE($6, rating_count),
 		updated_at = NOW()
-	WHERE id = $8 AND deleted_at IS NULL;
+	WHERE id = $7 AND deleted_at IS NULL;
 	`
 	_, err := driver.Exec(
 		query,
-		queryEntity.Resume,
 		queryEntity.YearsOfExperience,
 		queryEntity.Degree,
 		queryEntity.Major,

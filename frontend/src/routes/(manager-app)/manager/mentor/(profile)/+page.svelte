@@ -20,28 +20,30 @@
 </svelte:head>
 
 {#if View.openChangePassword}
-	<form
-		use:enhance={View.onChangePassword}
-		action="?/changePassword"
-		method="POST"
-		class="flex h-full w-full flex-col items-center justify-center gap-4"
-	>
-		<h1 class="text-lg font-bold text-[var(--tertiary-color)]">Change Password</h1>
-		<div>
-			<p class="font-bold text-[var(--tertiary-color)]">Password:</p>
-			<InputSecret
-				name="password"
-				id="password"
-				bind:value={View.password}
-				placeholder="Insert new password"
-				err={View.passwordErr}
-			/>
-		</div>
-		<div class="flex gap-4">
-			<Button type="button" onClick={() => (View.openChangePassword = false)}>Cancel</Button>
-			<Button type="submit" disabled={View.changePasswordDisabled}>Submit</Button>
-		</div>
-	</form>
+	<div class="flex h-full w-full items-center justify-center">
+		<form
+			use:enhance={View.onChangePassword}
+			action="?/changePassword"
+			method="POST"
+			class="flex flex-col gap-4"
+		>
+			<h1 class="text-lg font-bold text-[var(--tertiary-color)]">Change Password</h1>
+			<div>
+				<p class="font-bold text-[var(--tertiary-color)]">Password:</p>
+				<InputSecret
+					name="password"
+					id="password"
+					bind:value={View.password}
+					placeholder="Insert new password"
+					err={View.passwordErr}
+				/>
+			</div>
+			<div class="flex gap-4">
+				<Button type="button" onClick={() => (View.openChangePassword = false)}>Cancel</Button>
+				<Button type="submit" disabled={View.changePasswordDisabled}>Submit</Button>
+			</div>
+		</form>
+	</div>
 {:else}
 	<div class="flex flex-col gap-4 p-4">
 		<div class="flex items-center gap-4">
@@ -55,13 +57,14 @@
 				<div class="flex flex-col gap-1">
 					<p class="font-bold text-[var(--tertiary-color)]">{data.profile.name}</p>
 					<p>{data.profile.email}</p>
+					<Button type="button" onClick={() => (View.openChangePassword = true)}
+						>Change Password</Button
+					>
 				</div>
 			</div>
 			<div class="h-fit w-fit rounded-lg bg-[var(--tertiary-color)] p-2">
 				<Link href="/manager/mentor/update">Update</Link>
 			</div>
-			<Button type="button" onClick={() => (View.openChangePassword = true)}>Change Password</Button
-			>
 		</div>
 		<div class="grid grid-cols-2 gap-4 md:flex md:justify-between">
 			<div>
