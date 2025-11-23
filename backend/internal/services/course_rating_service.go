@@ -42,7 +42,7 @@ func (crs *CourseRatingServiceImpl) GetCourseReview(ctx context.Context, param e
 func (crs *CourseRatingServiceImpl) AddReview(ctx context.Context, param entity.CreateRatingParam) (int, error) {
 	course := new(entity.Course)
 	rating := new(entity.CourseRating)
-	orders := new([]entity.CourseRequest)
+	count := new(int)
 	mentor := new(entity.Mentor)
 	updateMentor := new(entity.UpdateMentorQuery)
 
@@ -50,10 +50,10 @@ func (crs *CourseRatingServiceImpl) AddReview(ctx context.Context, param entity.
 		if err := crs.cr.FindByID(ctx, param.CourseID, course, false); err != nil {
 			return err
 		}
-		if err := crs.cor.FindCompletedByStudentIDAndCourseID(ctx, param.StudentID, param.CourseID, orders); err != nil {
+		if err := crs.cor.FindCompletedByStudentIDAndCourseID(ctx, param.StudentID, param.CourseID, count); err != nil {
 			return err
 		}
-		if len(*orders) == 0 {
+		if *count == 0 {
 			return customerrors.NewError(
 				"user have not bought or completed the course",
 				errors.New("user have not bought or completed the course"),

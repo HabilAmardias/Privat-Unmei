@@ -2,8 +2,6 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
-	"errors"
 	"fmt"
 
 	"privat-unmei/internal/customerrors"
@@ -209,7 +207,7 @@ func (cr *CourseRequestRepositoryImpl) MentorCourseRequestList(
 		cr.id,
 		cr.student_id,
 		cr.course_id,
-		cr.total_price,
+		p.total_price,
 		cr.status,
 		u.name,
 		u.email,
@@ -218,11 +216,13 @@ func (cr *CourseRequestRepositoryImpl) MentorCourseRequestList(
 	JOIN courses c on cr.course_id = c.id
 	JOIN students s on cr.student_id = s.id
 	JOIN users u on u.id = s.id
+	JOIN payments p on p.course_request_id = cr.id
 	WHERE
 		cr.deleted_at IS NULL
 		AND c.deleted_at IS NULL
 		AND s.deleted_at IS NULL
 		AND u.deleted_at IS NULL
+		AND p.deleted_at IS NULL
 		AND c.mentor_id = $1
 	`
 	countQuery := `
@@ -232,11 +232,13 @@ func (cr *CourseRequestRepositoryImpl) MentorCourseRequestList(
 	JOIN courses c on cr.course_id = c.id
 	JOIN students s on cr.student_id = s.id
 	JOIN users u on u.id = s.id
+	JOIN payments p on p.course_request_id = cr.id
 	WHERE
 		cr.deleted_at IS NULL
 		AND c.deleted_at IS NULL
 		AND s.deleted_at IS NULL
 		AND u.deleted_at IS NULL
+		AND p.deleted_at IS NULL
 		AND c.mentor_id = $1
 	`
 	if status != nil {
@@ -292,50 +294,6 @@ func (cr *CourseRequestRepositoryImpl) MentorCourseRequestList(
 			)
 		}
 		*requests = append(*requests, item)
-	}
-	return nil
-}
-
-func (cr *CourseRequestRepositoryImpl) GetPaymentDetail(ctx context.Context, id int, cre *entity.CourseRequest) error {
-	var driver RepoDriver = cr.DB
-	if tx := GetTransactionFromContext(ctx); tx != nil {
-		driver = tx
-	}
-	query := `
-	SELECT
-		student_id,
-		course_id,
-		status,
-		subtotal,
-		operational_cost,
-		total_price,
-		payment_method_id,
-		expired_at
-	FROM course_requests
-	WHERE id = $1 AND deleted_at IS NULL
-	`
-	if err := driver.QueryRow(query, id).Scan(
-		&cre.StudentID,
-		&cre.CourseID,
-		&cre.Status,
-		&cre.SubTotal,
-		&cre.OperationalCost,
-		&cre.TotalPrice,
-		&cre.PaymentMethodID,
-		&cre.ExpiredAt,
-	); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return customerrors.NewError(
-				"no course request found",
-				err,
-				customerrors.ItemNotExist,
-			)
-		}
-		return customerrors.NewError(
-			"failed to get course request",
-			err,
-			customerrors.DatabaseExecutionError,
-		)
 	}
 	return nil
 }
@@ -433,11 +391,7 @@ func (cr *CourseRequestRepositoryImpl) FindByID(ctx context.Context, id int, cou
 		student_id,
 		course_id,
 		status,
-		subtotal,
-		operational_cost,
-		total_price,
 		number_of_sessions,
-		payment_method_id,
 		number_of_participant,
 		expired_at,
 		created_at,
@@ -451,11 +405,7 @@ func (cr *CourseRequestRepositoryImpl) FindByID(ctx context.Context, id int, cou
 		&courseRequest.StudentID,
 		&courseRequest.CourseID,
 		&courseRequest.Status,
-		&courseRequest.SubTotal,
-		&courseRequest.OperationalCost,
-		&courseRequest.TotalPrice,
 		&courseRequest.NumberOfSessions,
-		&courseRequest.PaymentMethodID,
 		&courseRequest.NumberOfParticipant,
 		&courseRequest.ExpiredAt,
 		&courseRequest.CreatedAt,
@@ -505,20 +455,16 @@ func (cr *CourseRequestRepositoryImpl) CreateOrder(
 		driver = tx
 	}
 	query := `
-	INSERT INTO course_requests (student_id, course_id, subtotal, operational_cost, total_price, number_of_sessions, payment_method_id, number_of_participant, expired_at)
+	INSERT INTO course_requests (student_id, course_id, number_of_sessions, number_of_participant, expired_at)
 	VALUES
-	($1, $2, $3, $4, $5, $6, $7, $8, $9)
+	($1, $2, $3, $4, $5)
 	RETURNING (id)
 	`
 	row := driver.QueryRow(
 		query,
 		courseRequest.StudentID,
 		courseRequest.CourseID,
-		courseRequest.SubTotal,
-		courseRequest.OperationalCost,
-		courseRequest.TotalPrice,
 		courseRequest.NumberOfSessions,
-		courseRequest.PaymentMethodID,
 		courseRequest.NumberOfParticipant,
 		courseRequest.ExpiredAt,
 	)
@@ -532,114 +478,42 @@ func (cr *CourseRequestRepositoryImpl) CreateOrder(
 	return nil
 }
 
-func (cr *CourseRequestRepositoryImpl) FindOngoingByCourseID(ctx context.Context, courseID int, orders *[]entity.CourseRequest) error {
+func (cr *CourseRequestRepositoryImpl) FindOngoingByCourseID(ctx context.Context, courseID int, count *int) error {
 	var driver RepoDriver = cr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
 	}
 	query := `
-	SELECT
-		id,
-		student_id,
-		course_id,
-		status,
-		total_price,
-		number_of_sessions,
-		payment_method_id,
-		expired_at,
-		created_at,
-		updated_at,
-		deleted_at
+	SELECT COALESCE(COUNT(*), 0)
 	FROM course_requests
 	WHERE course_id = $1 AND status NOT IN ('scheduled', 'completed', 'cancelled') AND deleted_at IS NULL AND expired_at > CURRENT_TIMESTAMP
 	`
-	rows, err := driver.Query(query, courseID)
-	if err != nil {
+	if err := driver.QueryRow(query, courseID).Scan(count); err != nil {
 		return customerrors.NewError(
-			"failed to get order",
+			"failed to get order count",
 			err,
 			customerrors.DatabaseExecutionError,
 		)
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var item entity.CourseRequest
-		if err := rows.Scan(
-			&item.ID,
-			&item.StudentID,
-			&item.CourseID,
-			&item.Status,
-			&item.TotalPrice,
-			&item.NumberOfSessions,
-			&item.PaymentMethodID,
-			&item.ExpiredAt,
-			&item.CreatedAt,
-			&item.UpdatedAt,
-			&item.DeletedAt,
-		); err != nil {
-			return customerrors.NewError(
-				"failed to get orders",
-				err,
-				customerrors.DatabaseExecutionError,
-			)
-		}
-		*orders = append(*orders, item)
 	}
 	return nil
 }
 
-func (cr *CourseRequestRepositoryImpl) FindCompletedByStudentIDAndCourseID(ctx context.Context, studentID string, courseID int, orders *[]entity.CourseRequest) error {
+func (cr *CourseRequestRepositoryImpl) FindCompletedByStudentIDAndCourseID(ctx context.Context, studentID string, courseID int, count *int) error {
 	var driver RepoDriver = cr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
 	}
 	query := `
-	SELECT
-		id,
-		student_id,
-		course_id,
-		status,
-		total_price,
-		number_of_sessions,
-		payment_method_id,
-		expired_at,
-		created_at,
-		updated_at,
-		deleted_at
+	SELECT COALESCE(COUNT(*), 0)
 	FROM course_requests
 	WHERE student_id = $1 AND course_id = $2 AND status = 'completed' AND deleted_at IS NULL
 	`
-	rows, err := driver.Query(query, studentID, courseID)
-	if err != nil {
+	if err := driver.QueryRow(query, studentID, courseID).Scan(count); err != nil {
 		return customerrors.NewError(
-			"failed to get order",
+			"failed to get order count",
 			err,
 			customerrors.DatabaseExecutionError,
 		)
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var item entity.CourseRequest
-		if err := rows.Scan(
-			&item.ID,
-			&item.StudentID,
-			&item.CourseID,
-			&item.Status,
-			&item.TotalPrice,
-			&item.NumberOfSessions,
-			&item.PaymentMethodID,
-			&item.ExpiredAt,
-			&item.CreatedAt,
-			&item.UpdatedAt,
-			&item.DeletedAt,
-		); err != nil {
-			return customerrors.NewError(
-				"failed to get orders",
-				err,
-				customerrors.DatabaseExecutionError,
-			)
-		}
-		*orders = append(*orders, item)
 	}
 	return nil
 }

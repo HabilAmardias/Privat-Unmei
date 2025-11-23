@@ -20,7 +20,7 @@ type (
 	}
 	PaymentDetailRes struct {
 		CourseRequestID int        `json:"id"`
-		MentorID        string     `json:"mentor_id"`
+		StudentName     string     `json:"student_name"`
 		MentorName      string     `json:"mentor_name"`
 		CourseID        int        `json:"course_id"`
 		CourseTitle     string     `json:"course_title"`

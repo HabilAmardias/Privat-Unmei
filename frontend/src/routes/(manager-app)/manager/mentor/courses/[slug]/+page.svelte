@@ -40,7 +40,7 @@
 			>
 		</div>
 	</div>
-	<div class="flex justify-between text-center">
+	<div class="grid grid-cols-2 gap-4 text-center md:flex md:justify-between">
 		<div>
 			<p class="font-bold text-[var(--tertiary-color)]">Method:</p>
 			<p>{data.detail.method}</p>
@@ -66,7 +66,7 @@
 		<p class="font-bold text-[var(--tertiary-color)]">Description:</p>
 		<p>{data.detail.description}</p>
 	</div>
-	<div class="grid grid-cols-2 gap-4">
+	<div class="flex flex-col gap-4 md:grid md:grid-cols-2">
 		<div class="flex flex-col gap-4">
 			<p class="font-bold text-[var(--tertiary-color)]">Categories:</p>
 			{#if data.courseCategories}

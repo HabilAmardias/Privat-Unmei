@@ -3,6 +3,18 @@ package entity
 import "time"
 
 type (
+	Payment struct {
+		ID                int
+		CourseRequestID   int
+		SubTotal          float64
+		OperationalCost   float64
+		TotalPrice        float64
+		PaymentMethodName string
+		AccountNumber     string
+		CreatedAt         time.Time
+		UpdatedAt         time.Time
+		DeletedAt         *time.Time
+	}
 	PaymentMethod struct {
 		ID        int
 		Name      string
@@ -11,12 +23,13 @@ type (
 		DeletedAt *time.Time
 	}
 	MentorPayment struct {
-		PaymentMethodID int
-		MentorID        string
-		AccountNumber   string
-		CreatedAt       time.Time
-		UpdatedAt       time.Time
-		DeletedAt       *time.Time
+		PaymentMethodID   int
+		PaymentMethodName string
+		MentorID          string
+		AccountNumber     string
+		CreatedAt         time.Time
+		UpdatedAt         time.Time
+		DeletedAt         *time.Time
 	}
 	CreatePaymentMethodParam struct {
 		AdminID    string

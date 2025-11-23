@@ -45,17 +45,19 @@
 	<form
 		use:enhance={View.onSearchCourse}
 		action="?/getMyCourses"
-		class="mb-4 flex gap-4"
+		class="mb-4 flex flex-col gap-4 md:flex-row md:justify-between"
 		method="POST"
 	>
-		<Input bind:value={View.search} type="text" name="search" id="search" placeholder="Search" />
-		<Search
-			bind:value={View.selectedCategory}
-			items={View.categories}
-			label="Categories"
-			keyword={View.searchCategory}
-			onKeywordChange={View.onSearchCategoryChange}
-		/>
+		<div class="flex gap-4">
+			<Input bind:value={View.search} type="text" name="search" id="search" placeholder="Search" />
+			<Search
+				bind:value={View.selectedCategory}
+				items={View.categories}
+				label="Categories"
+				keyword={View.searchCategory}
+				onKeywordChange={View.onSearchCategoryChange}
+			/>
+		</div>
 		<Button type="submit">Search</Button>
 	</form>
 	<div class="flex flex-1">

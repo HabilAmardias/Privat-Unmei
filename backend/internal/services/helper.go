@@ -3,7 +3,6 @@ package services
 import (
 	"crypto/rand"
 	"math/big"
-	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"time"
 )
@@ -15,19 +14,6 @@ const (
 	allChars = letters + digits + specials
 	length   = 10
 )
-
-var (
-	ongoingStatus = []string{constants.ReservedStatus, constants.PendingPaymentStatus}
-)
-
-func isOngoing(status string) bool {
-	for _, st := range ongoingStatus {
-		if status == st {
-			return true
-		}
-	}
-	return false
-}
 
 func generateRandomPassword() (string, error) {
 	password := make([]byte, length)
