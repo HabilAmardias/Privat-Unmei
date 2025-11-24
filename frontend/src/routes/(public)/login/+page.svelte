@@ -64,7 +64,7 @@
 			const loadID = CreateToast('loading', 'logging in....');
 			return async ({ result, update }: EnhancementReturn) => {
 				if (result.type === 'success') {
-					await goto('/courses', { replaceState: true });
+					await goto('/home', { replaceState: true });
 					View.setIsLoading(false);
 					DismissToast(loadID);
 					CreateToast('success', 'login success');

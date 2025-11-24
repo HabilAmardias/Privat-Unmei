@@ -2,7 +2,8 @@ import type { PaginatedResponse } from '$lib/types';
 import { MAX_BIO_LENGTH } from '$lib/utils/constants';
 import { IsAlphaOnly } from '$lib/utils/helper';
 import type { StudentOrders, StudentProfile } from './model';
-
+import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
+import { CreateToast, DismissToast } from '$lib/utils/helper';
 export class profileView {
 	verifyIsLoading = $state<boolean>(false);
 	ordersIsLoading = $state<boolean>(false);
@@ -100,4 +101,68 @@ export class profileView {
 	setProfileImage(f: FileList | undefined) {
 		this.profileImage = f;
 	}
+	onUpdateProfile = () => {
+		const loadID = CreateToast('loading', 'updating....');
+		this.setProfileIsLoading(true);
+		return async ({ result }: EnhancementReturn) => {
+			this.setIsEdit();
+			this.setProfileIsLoading(false);
+			DismissToast(loadID);
+			if (result.type === 'success') {
+				CreateToast('success', 'update profile success');
+			}
+			if (result.type === 'failure') {
+				CreateToast('error', result.data?.message);
+			}
+		};
+	};
+	onSetPage = (args: EnhancementArgs) => {
+		this.setOrdersIsLoading(true);
+		args.formData.append('page', `${this.pageNumber}`);
+		args.formData.append('status', `${this.status}`);
+		args.formData.append('search', this.search);
+		return async ({ result }: EnhancementReturn) => {
+			this.setOrdersIsLoading(false);
+			if (result.type === 'success') {
+				this.setOrders(result.data?.orders);
+				this.setTotalRow(result.data?.totalRow);
+				CreateToast('success', result.data?.message);
+			}
+			if (result.type === 'failure') {
+				CreateToast('error', result.data?.message);
+			}
+		};
+	};
+
+	onSearchOrders = (args: EnhancementArgs) => {
+		this.setOrdersIsLoading(true);
+		this.pageNumber = 1;
+		args.formData.append('page', `${this.pageNumber}`);
+		return async ({ result }: EnhancementReturn) => {
+			this.setOrdersIsLoading(false);
+			if (result.type === 'success') {
+				this.setOrders(result.data?.orders);
+				this.setTotalRow(result.data?.totalRow);
+				CreateToast('success', result.data?.message);
+			}
+			if (result.type === 'failure') {
+				CreateToast('error', result.data?.message);
+			}
+		};
+	};
+
+	onVerifySubmit = () => {
+		this.setVerifyIsLoading(true);
+		const loadID = CreateToast('loading', 'sending....');
+		return async ({ result }: EnhancementReturn) => {
+			this.setVerifyIsLoading(false);
+			DismissToast(loadID);
+			if (result.type === 'success') {
+				CreateToast('success', result.data?.message);
+			}
+			if (result.type === 'failure') {
+				CreateToast('error', result.data?.message);
+			}
+		};
+	};
 }

@@ -2,7 +2,7 @@ import type { Fetch, PaginatedResponse, ServerResponse } from '$lib/types';
 import { FetchData } from '$lib/utils';
 import type { CourseList } from './model';
 
-class CoursesController {
+class HomeController {
 	async getCourses(fetch: Fetch, req?: Request) {
 		let url = 'http://localhost:8080/api/v1/courses?';
 		if (req) {
@@ -35,14 +35,5 @@ class CoursesController {
 		const resBody: ServerResponse<PaginatedResponse<CourseList>> = await res?.json();
 		return { success, resBody, status, message };
 	}
-	async getMostBoughtCourses(fetch: Fetch) {
-		const url = 'http://localhost:8080/api/v1/courses/most-bought';
-		const { success, res, status, message } = await FetchData(fetch, url, 'GET');
-		if (!success) {
-			return { success, status, message };
-		}
-		const resBody: ServerResponse<CourseList[]> = await res?.json();
-		return { success, resBody, status, message };
-	}
 }
-export const controller = new CoursesController();
+export const controller = new HomeController();

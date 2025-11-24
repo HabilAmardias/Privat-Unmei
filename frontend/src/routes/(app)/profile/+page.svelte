@@ -41,77 +41,6 @@
 		View.setBioError(undefined);
 		View.setIsEdit();
 	}
-
-	function onVerifySubmit(args: EnhancementArgs) {
-		View.setVerifyIsLoading(true);
-		const loadID = CreateToast('loading', 'sending....');
-		return async ({ result }: EnhancementReturn) => {
-			View.setVerifyIsLoading(false);
-			DismissToast(loadID);
-			if (result.type === 'success') {
-				CreateToast('success', result.data?.message);
-			}
-			if (result.type === 'failure') {
-				CreateToast('error', result.data?.message);
-			}
-		};
-	}
-
-	function onSearchOrders(args: EnhancementArgs) {
-		View.setOrdersIsLoading(true);
-		View.pageNumber = 1;
-		args.formData.append('page', `${View.pageNumber}`);
-		return async ({ result }: EnhancementReturn) => {
-			View.setOrdersIsLoading(false);
-			if (result.type === 'success') {
-				View.setOrders(result.data?.orders);
-				View.setTotalRow(result.data?.totalRow);
-				CreateToast('success', result.data?.message);
-			}
-			if (result.type === 'failure') {
-				CreateToast('error', result.data?.message);
-			}
-		};
-	}
-
-	function onSetPage(args: EnhancementArgs) {
-		View.setOrdersIsLoading(true);
-		args.formData.append('page', `${View.pageNumber}`);
-		args.formData.append('status', `${View.status}`);
-		args.formData.append('search', View.search);
-		return async ({ result }: EnhancementReturn) => {
-			View.setOrdersIsLoading(false);
-			if (result.type === 'success') {
-				View.setOrders(result.data?.orders);
-				View.setTotalRow(result.data?.totalRow);
-				CreateToast('success', result.data?.message);
-			}
-			if (result.type === 'failure') {
-				CreateToast('error', result.data?.message);
-			}
-		};
-	}
-
-	function onUpdateProfile(args: EnhancementArgs) {
-		const loadID = CreateToast('loading', 'updating....');
-		return async ({ result }: EnhancementReturn) => {
-			View.setIsEdit();
-			View.setProfileIsLoading(true);
-			View.setProfileImage(undefined);
-			View.setBio(data.profile.bio);
-			View.setName(data.profile.name);
-			View.setNameError(undefined);
-			View.setBioError(undefined);
-			View.setProfileIsLoading(false);
-			DismissToast(loadID);
-			if (result.type === 'success') {
-				CreateToast('success', 'update profile success');
-			}
-			if (result.type === 'failure') {
-				CreateToast('error', result.data?.message);
-			}
-		};
-	}
 </script>
 
 <svelte:head>
@@ -122,7 +51,7 @@
 
 {#if View.isEdit}
 	<form
-		use:enhance={onUpdateProfile}
+		use:enhance={View.onUpdateProfile}
 		action="?/updateProfile"
 		method="POST"
 		enctype="multipart/form-data"
@@ -184,7 +113,7 @@
 		</div>
 	</form>
 {:else}
-	<div class="flex h-full flex-col gap-4 p-4">
+	<div class="flex h-full flex-col gap-4 p-4 md:grid md:grid-cols-2">
 		<div class="flex flex-col gap-4">
 			{#if View.profileIsLoading}
 				<Loading />
@@ -222,7 +151,7 @@
 			<div class="flex flex-1 flex-col gap-4">
 				<h3 class="text-xl font-bold text-[var(--tertiary-color)]">Orders</h3>
 				<form
-					use:enhance={onSearchOrders}
+					use:enhance={View.onSearchOrders}
 					class="grid grid-cols-3 gap-4"
 					action="?/myOrders"
 					method="POST"
@@ -270,7 +199,7 @@
 					action="?/myOrders"
 					method="POST"
 					class="flex items-center justify-center"
-					use:enhance={onSetPage}
+					use:enhance={View.onSetPage}
 				>
 					<Pagination
 						onPageChange={View.onPageChange}
@@ -282,7 +211,7 @@
 			</div>
 		{:else}
 			<form
-				use:enhance={onVerifySubmit}
+				use:enhance={View.onVerifySubmit}
 				method="POST"
 				action="?/sendVerification"
 				class="flex w-full flex-1 items-center justify-center"
