@@ -138,7 +138,6 @@ func (ms *MentorServiceImpl) GetMentorProfile(ctx context.Context, param entity.
 	res.Degree = mentor.Degree
 	res.Major = mentor.Major
 	res.ProfileImage = user.ProfileImage
-	res.Resume = mentor.Resume
 	res.YearsOfExperience = mentor.YearsOfExperience
 
 	return res, nil
@@ -347,14 +346,6 @@ func (ms *MentorServiceImpl) UpdateMentorProfile(ctx context.Context, param enti
 		mentorQuery.Major = param.Major
 		mentorQuery.YearsOfExperience = param.YearsOfExperience
 
-		if param.Resume != nil {
-			filename := mentor.ID
-			res, err := ms.cu.UploadFile(ctx, param.Resume, filename, constants.ResumeFolder)
-			if err != nil {
-				return err
-			}
-			mentorQuery.Resume = &res.SecureURL
-		}
 		if err := ms.ur.UpdateUserProfile(ctx, userQuery, param.ID); err != nil {
 			return err
 		}
@@ -461,12 +452,7 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 		mentor.Degree = param.Degree
 		mentor.Major = param.Major
 		mentor.YearsOfExperience = param.YearsOfExperience
-		uploadRes, err := ms.cu.UploadFile(ctx, param.ResumeFile, mentor.ID, constants.ResumeFolder)
-		if err != nil {
-			return err
-		}
 
-		mentor.Resume = uploadRes.SecureURL
 		if err := ms.mr.AddNewMentor(ctx, mentor); err != nil {
 			return err
 		}

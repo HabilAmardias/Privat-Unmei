@@ -18,7 +18,6 @@ export type MentorPaymentInfo = {
 
 export type MentorProfile = {
 	id: string;
-	resume: string;
 	profile_image: string;
 	name: string;
 	bio: string;

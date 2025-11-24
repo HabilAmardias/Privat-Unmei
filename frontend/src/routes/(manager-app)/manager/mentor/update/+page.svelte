@@ -128,23 +128,6 @@
 			<Select options={degreeOpts} defaultLable="Degree" name="degree" bind:value={View.degree} />
 			<Input bind:value={View.major} type="text" name="major" id="major" placeholder="Major" />
 		</div>
-		<p class="font-bold text-[var(--tertiary-color)]">Resume:</p>
-		{#if View.resumeErr}
-			<p class="text-red-500">{View.resumeErr.message}</p>
-		{/if}
-		<FileInput
-			bind:files={View.resumeFile}
-			accept="application/pdf"
-			name="resume_file"
-			id="resume_file"
-		>
-			<div
-				class="border-1 flex w-full flex-col items-center justify-center rounded-lg border-dashed border-[var(--tertiary-color)] p-3 font-bold text-[var(--tertiary-color)] hover:text-[var(--primary-color)]"
-			>
-				<CloudUpload />
-				{View.resumeFile ? View.resumeFile[0].name : 'Upload Resume'}
-			</div>
-		</FileInput>
 		<p class="font-bold text-[var(--tertiary-color)]">Schedules:</p>
 		<div class="grid grid-cols-2 place-items-center gap-4">
 			<div class="flex w-full flex-col gap-4">

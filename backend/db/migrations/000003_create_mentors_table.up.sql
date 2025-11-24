@@ -2,7 +2,6 @@ CREATE TABLE mentors (
     id UUID PRIMARY KEY NOT NULL REFERENCES users(id),
     total_rating NUMERIC DEFAULT 0,
     rating_count INTEGER DEFAULT 0,
-    resume_url VARCHAR NOT NULL,
     years_of_experience INT not null,
     degree VARCHAR NOT NULL CHECK(degree in ('bachelor','diploma','high school','master','professor')),
     major VARCHAR NOT NULL,

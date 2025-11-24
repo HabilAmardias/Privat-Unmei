@@ -46,7 +46,7 @@
 				<table class="w-full table-fixed border-separate border-spacing-4">
 					<thead>
 						<tr>
-							<th class="text-[var(--tertiary-color)]">Name</th>
+							<th class="text-[var(--tertiary-color)]">Title</th>
 							<th class="text-[var(--tertiary-color)]">Status</th>
 							<th class="text-[var(--tertiary-color)]">Student Name</th>
 							<th class="text-[var(--tertiary-color)]">Student Email</th>

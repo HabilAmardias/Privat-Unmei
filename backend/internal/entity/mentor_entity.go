@@ -21,7 +21,6 @@ type (
 		ID                string
 		TotalRating       float64
 		RatingCount       int
-		Resume            string
 		YearsOfExperience int
 		Degree            string
 		Major             string
@@ -58,7 +57,6 @@ type (
 		Email             string
 		Bio               string
 		ProfileImage      string
-		Resume            string
 		YearsOfExperience int
 		Degree            string
 		Major             string
@@ -69,7 +67,6 @@ type (
 		Name              string
 		Email             string
 		Password          string
-		ResumeFile        multipart.File
 		MentorPayments    []AddMentorPaymentInfo
 		YearsOfExperience int
 		Degree            string
@@ -79,7 +76,6 @@ type (
 	}
 	UpdateMentorParam struct {
 		ID                string
-		Resume            multipart.File
 		ProfileImage      multipart.File
 		Name              *string
 		Bio               *string
@@ -93,7 +89,6 @@ type (
 	UpdateMentorQuery struct {
 		TotalRating       *float64
 		RatingCount       *int
-		Resume            *string
 		YearsOfExperience *int
 		Degree            *string
 		Major             *string
@@ -123,7 +118,6 @@ type (
 		NewPassword string
 	}
 	GetProfileMentorQuery struct {
-		ResumeFile           string
 		ProfileImage         string
 		Name                 string
 		Bio                  string

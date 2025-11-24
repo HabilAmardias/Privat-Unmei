@@ -360,17 +360,7 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	resumeHeader, _ := ctx.FormFile("resume_file")
 	profileHeader, _ := ctx.FormFile("profile_image")
-
-	resumeFile, err := ValidateFile(resumeHeader, constants.FileSizeThreshold, constants.PDFType)
-	if err != nil {
-		ctx.Error(err)
-		return
-	}
-	if resumeFile != nil {
-		defer resumeFile.Close()
-	}
 	profileImageFile, err := ValidateFile(profileHeader, constants.FileSizeThreshold, constants.PNGType)
 	if err != nil {
 		ctx.Error(err)
@@ -388,7 +378,6 @@ func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
 
 	param := entity.UpdateMentorParam{
 		ID:                claim.Subject,
-		Resume:            resumeFile,
 		ProfileImage:      profileImageFile,
 		Name:              req.Name,
 		Bio:               req.Bio,
@@ -496,25 +485,6 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 		))
 		return
 	}
-	headerFile, err := ctx.FormFile("file")
-	if err != nil {
-		ctx.Error(
-			customerrors.NewError(
-				"Failed to upload resume",
-				err,
-				customerrors.InvalidAction,
-			),
-		)
-		return
-	}
-	file, err := ValidateFile(headerFile, constants.FileSizeThreshold, constants.PDFType)
-	if err != nil {
-		ctx.Error(err)
-		return
-	}
-	if file != nil {
-		defer file.Close()
-	}
 	claim, err := getAuthenticationPayload(ctx)
 	if err != nil {
 		ctx.Error(err)
@@ -525,7 +495,6 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 		Name:              req.Name,
 		Email:             req.Email,
 		Password:          req.Password,
-		ResumeFile:        file,
 		YearsOfExperience: *req.YearsOfExperience,
 		MentorPayments:    []entity.AddMentorPaymentInfo{},
 		Degree:            req.Degree,

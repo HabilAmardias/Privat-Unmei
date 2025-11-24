@@ -80,7 +80,6 @@ type (
 		Email             string `json:"email"`
 		Bio               string `json:"bio"`
 		ProfileImage      string `json:"profile_image"`
-		Resume            string `json:"resume"`
 		YearsOfExperience int    `json:"years_of_experience"`
 		Degree            string `json:"degree"`
 		Major             string `json:"major"`
