@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	if (!courses.success) {
 		throw error(courses.status, { message: courses.message });
 	}
-	return { mostBought: mostBought.resBody, courses: courses.resBody };
+	return { mostBought: mostBought.resBody.data, courses: courses.resBody.data };
 };
 
 export const actions = {
@@ -24,6 +24,18 @@ export const actions = {
 		}
 		return {
 			courses: resBody.data
+		};
+	},
+	getCategories: async ({ fetch, request }) => {
+		const { success, message, status, resBody } = await controller.getCourseCategories(
+			fetch,
+			request
+		);
+		if (!success) {
+			return fail(status, { message });
+		}
+		return {
+			categories: resBody.data.entries
 		};
 	}
 } satisfies Actions;
