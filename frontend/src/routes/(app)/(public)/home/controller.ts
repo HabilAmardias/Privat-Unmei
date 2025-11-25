@@ -1,6 +1,6 @@
 import type { Fetch, PaginatedResponse, ServerResponse } from '$lib/types';
 import { FetchData } from '$lib/utils';
-import type { CourseList } from './model';
+import type { CourseList, MentorList } from './model';
 
 class HomeController {
 	async getCourses(fetch: Fetch, req?: Request) {
@@ -34,6 +34,15 @@ class HomeController {
 		}
 		const resBody: ServerResponse<PaginatedResponse<CourseList>> = await res?.json();
 		return { success, resBody, status, message };
+	}
+	async getMentors(fetch: Fetch) {
+		const url = 'http://localhost:8080/api/v1/mentors';
+		const { success, res, status, message } = await FetchData(fetch, url, 'GET');
+		if (!success) {
+			return { success, message, status };
+		}
+		const resBody: ServerResponse<PaginatedResponse<MentorList>> = await res?.json();
+		return { success, message, status, resBody };
 	}
 }
 export const controller = new HomeController();
