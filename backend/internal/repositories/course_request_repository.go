@@ -90,7 +90,7 @@ func (cr *CourseRequestRepositoryImpl) StudentCourseRequestList(
 		cr.id,
 		cr.student_id,
 		cr.course_id,
-		cr.total_price,
+		py.total_price,
 		cr.status,
 		u.name,
 		u.email,
@@ -99,6 +99,7 @@ func (cr *CourseRequestRepositoryImpl) StudentCourseRequestList(
 	JOIN courses c on cr.course_id = c.id
 	JOIN mentors m on c.mentor_id = m.id
 	JOIN users u on u.id = m.id
+	JOIN payments py on py.course_request_id = cr.id
 	WHERE
 		cr.deleted_at IS NULL
 		AND c.deleted_at IS NULL
@@ -113,6 +114,7 @@ func (cr *CourseRequestRepositoryImpl) StudentCourseRequestList(
 	JOIN courses c on cr.course_id = c.id
 	JOIN mentors m on c.mentor_id = m.id
 	JOIN users u on u.id = m.id
+	JOIN payments py on py.course_request_id = cr.id
 	WHERE
 		cr.deleted_at IS NULL
 		AND c.deleted_at IS NULL

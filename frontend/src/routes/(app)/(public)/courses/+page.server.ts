@@ -3,17 +3,11 @@ import { controller } from './controller';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch }) => {
-	const [mostBought, courses] = await Promise.all([
-		controller.getMostBoughtCourses(fetch),
-		controller.getCourses(fetch)
-	]);
-	if (!mostBought.success) {
-		throw error(mostBought.status, { message: mostBought.message });
+	const { success, message, status, resBody } = await controller.getCourses(fetch);
+	if (!success) {
+		throw error(status, { message });
 	}
-	if (!courses.success) {
-		throw error(courses.status, { message: courses.message });
-	}
-	return { mostBought: mostBought.resBody.data, courses: courses.resBody.data };
+	return { courses: resBody.data };
 };
 
 export const actions = {

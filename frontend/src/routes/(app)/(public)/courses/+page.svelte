@@ -27,7 +27,7 @@
 	action="?/getCategories"
 	method="POST"
 ></form>
-<div class="flex flex-col gap-4 p-4">
+<div class="flex h-full flex-col gap-4 p-4">
 	<h1 class="text-2xl font-bold text-[var(--tertiary-color)]">Courses</h1>
 	<form
 		use:enhance={View.onSearchCourse}
@@ -59,7 +59,9 @@
 		{#if View.isLoading}
 			<Loading />
 		{:else if !View.courses || View.courses.length === 0}
-			<b class="mx-auto self-center text-[var(--tertiary-color)]">No courses found</b>
+			<div class="flex h-full items-center justify-center">
+				<b class="mx-auto self-center text-[var(--tertiary-color)]">No courses found</b>
+			</div>
 		{:else}
 			<ScrollArea orientation="vertical" viewportClasses="h-[400px] max-h-[400px]">
 				<ul class="flex flex-col gap-4 md:grid md:grid-cols-3">
