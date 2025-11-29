@@ -277,21 +277,27 @@ func (cr *CourseRepositoryImpl) GetMostBoughtCourses(ctx context.Context, course
 	}
 	sqlQuery := `
 		SELECT
-		c.id,
-		c.mentor_id,
-		u.name,
-		u.email,
-		c.title,
-		c.domicile,
-		c.price,
-		c.method,
-		c.session_duration_minutes,
-		c.max_total_session
-	FROM courses c
-	JOIN users u ON u.id = c.mentor_id
-	WHERE c.deleted_at IS NULL AND u.deleted_at IS NULL
-	ORDER BY c.transaction_count DESC
-	LIMIT 10
+			c.id,
+			c.mentor_id,
+			u.name,
+			u.email,
+			c.title,
+			c.domicile,
+			c.price,
+			c.method,
+			c.session_duration_minutes,
+			c.max_total_session
+		FROM courses c
+		LEFT JOIN course_requests cr ON c.id = cr.course_id
+			AND cr.deleted_at IS NULL 
+			AND cr.status != 'cancelled'
+			AND EXTRACT(MONTH FROM cr.created_at) = EXTRACT(MONTH FROM CURRENT_TIMESTAMP)
+			AND EXTRACT(YEAR FROM cr.created_at) = EXTRACT(YEAR FROM CURRENT_TIMESTAMP)
+		JOIN users u ON u.id = c.mentor_id AND u.deleted_at is NULL
+		WHERE c.deleted_at IS NULL
+		GROUP BY c.id, u.id
+		ORDER BY COUNT(cr.id) DESC
+		LIMIT 10;
 	`
 	rows, err := driver.Query(sqlQuery)
 	if err != nil {
