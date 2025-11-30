@@ -1,5 +1,12 @@
 import type { Fetch, PaginatedResponse, ServerResponse } from '$lib/types';
-import type { CourseCategory, CourseDetail, CourseReview, CourseTopic } from './model';
+import type {
+	CourseCategory,
+	CourseDetail,
+	CourseReview,
+	CourseTopic,
+	CreateReview,
+	StudentProfile
+} from './model';
 import { FetchData } from '$lib/utils';
 
 class CourseDetailController {
@@ -45,6 +52,33 @@ class CourseDetailController {
 		}
 		const resBody: ServerResponse<PaginatedResponse<CourseReview>> = await res?.json();
 		return { success, message, status, resBody };
+	}
+	async createReview(fetch: Fetch, req: Request, id: string) {
+		const url = `http://localhost:8080/api/v1/courses/${id}/reviews`;
+		const formData = await req.formData();
+		const rating = formData.get('rating');
+		const feedback = formData.get('feedback');
+
+		const reqBody = JSON.stringify({
+			rating: parseInt(rating as string),
+			feedback
+		});
+
+		const { success, status, message, res } = await FetchData(fetch, url, 'POST', reqBody);
+		if (!success) {
+			return { success, status, message };
+		}
+		const resBody: ServerResponse<CreateReview> = await res?.json();
+		return { success, status, message, resBody };
+	}
+	async getProfile(fetch: Fetch) {
+		const url = 'http://localhost:8080/api/v1/me';
+		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
+		if (!success) {
+			return { success, message, status };
+		}
+		const resBody: ServerResponse<StudentProfile> = await res?.json();
+		return { resBody, status, success, message };
 	}
 }
 

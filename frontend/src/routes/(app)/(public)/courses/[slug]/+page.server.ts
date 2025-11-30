@@ -3,11 +3,12 @@ import type { PageServerLoad } from './$types';
 import { controller } from './controller';
 
 export const load: PageServerLoad = async ({ fetch, params }) => {
-	const [courseCategoriesRes, topicsRes, courseRes, reviewRes] = await Promise.all([
+	const [courseCategoriesRes, topicsRes, courseRes, reviewRes, profileRes] = await Promise.all([
 		controller.getCourseDetailCategories(fetch, params.slug),
 		controller.getCourseTopics(fetch, params.slug),
 		controller.getCourseDetail(fetch, params.slug),
-		controller.getCourseReviews(fetch, params.slug)
+		controller.getCourseReviews(fetch, params.slug),
+		controller.getProfile(fetch)
 	]);
 	if (!courseCategoriesRes.success) {
 		throw error(courseCategoriesRes.status, { message: courseCategoriesRes.message });
@@ -25,7 +26,8 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 		courseCategories: courseCategoriesRes.resBody.data,
 		topics: topicsRes.resBody.data,
 		detail: courseRes.resBody.data,
-		reviews: reviewRes.resBody.data
+		reviews: reviewRes.resBody.data,
+		profile: profileRes.resBody?.data
 	};
 };
 
@@ -44,6 +46,23 @@ export const actions = {
 		}
 		return {
 			reviews: resBody.data
+		};
+	},
+	createReview: async ({ fetch, request, params }) => {
+		if (!params.slug) {
+			return fail(404, { message: 'course not found' });
+		}
+		const { success, message, status, resBody } = await controller.createReview(
+			fetch,
+			request,
+			params.slug
+		);
+		if (!success) {
+			return fail(status, { message });
+		}
+		return {
+			id: resBody.data.id,
+			course_id: parseInt(params.slug)
 		};
 	}
 } satisfies Actions;

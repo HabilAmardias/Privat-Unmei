@@ -134,7 +134,7 @@
 		</div>
 		{#if data.userStatus === 'verified'}
 			<div class="flex flex-1 flex-col gap-4">
-				<h3 class="text-xl font-bold text-[var(--tertiary-color)]">Orders</h3>
+				<h3 class="text-xl font-bold text-[var(--tertiary-color)]">Requests</h3>
 				<form
 					use:enhance={View.onSearchOrders}
 					class="grid grid-cols-3 gap-4"

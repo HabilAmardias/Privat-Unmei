@@ -1,6 +1,6 @@
 import type { Fetch, ServerResponse, PaginatedResponse } from '$lib/types';
 import { FetchData } from '$lib/utils';
-import type { MentorPaymentInfo, MentorProfile, MentorScheduleInfo, MentorCourse } from './model';
+import type { MentorProfile, MentorScheduleInfo, MentorCourse } from './model';
 
 class MentorProfileController {
 	async getMentorProfile(fetch: Fetch, id: string) {
@@ -19,15 +19,6 @@ class MentorProfileController {
 			return { success, status, message };
 		}
 		const resBody: ServerResponse<MentorScheduleInfo[]> = await res?.json();
-		return { success, status, message, resBody };
-	}
-	async getMentorPayments(fetch: Fetch, id: string) {
-		const url = `http://localhost:8080/api/v1/mentors/${id}/payment-methods`;
-		const { success, res, status, message } = await FetchData(fetch, url, 'GET');
-		if (!success) {
-			return { success, status, message };
-		}
-		const resBody: ServerResponse<MentorPaymentInfo[]> = await res?.json();
 		return { success, status, message, resBody };
 	}
 	async getMentorCourses(fetch: Fetch, id: string, req?: Request) {
