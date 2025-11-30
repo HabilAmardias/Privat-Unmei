@@ -85,7 +85,7 @@
 									{c.price}
 								</td>
 								<td class="text-center">
-									{c.method}
+									{View.capitalizeFirstLetter(c.method)}
 								</td>
 								<td>
 									<div class="flex items-center justify-center">

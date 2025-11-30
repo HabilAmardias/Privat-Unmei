@@ -1,13 +1,33 @@
 export class AuthView {
 	login = $state<boolean>(true);
 	email = $state<string>('');
-	emailError = $state<Error | undefined>();
+	emailError = $derived.by<Error | undefined>(() => {
+		if (this.email && !this.#validateEmail(this.email)) {
+			return new Error('invalid email');
+		}
+		return undefined;
+	});
 	password = $state<string>('');
-	passwordError = $state<Error | undefined>();
+	passwordError = $derived.by<Error | undefined>(() => {
+		if (this.password && !this.#validatePassword(this.password)) {
+			return new Error('need at least 8 char with 1 special char');
+		}
+		return undefined;
+	});
 	repeatPassword = $state<string>('');
-	repeatPasswordError = $state<Error | undefined>();
+	repeatPasswordError = $derived.by<Error | undefined>(() => {
+		if (this.password !== this.repeatPassword) {
+			return new Error('must be same as password');
+		}
+		return undefined;
+	});
 	name = $state<string>('');
-	nameError = $state<Error | undefined>();
+	nameError = $derived.by<Error | undefined>(() => {
+		if (!this.name) {
+			return new Error('please insert name');
+		}
+		return undefined;
+	});
 	isLoading = $state<boolean>(false);
 	googleScript = $state<HTMLScriptElement>();
 	isDesktop = $state<boolean>(false);
@@ -43,32 +63,6 @@ export class AuthView {
 		}
 	}
 
-	passwordOnBlur() {
-		if (!this.#validatePassword(this.password)) {
-			this.passwordError = new Error('min 8 characters with !@#?');
-		}
-		this.passwordError = undefined;
-	}
-	emailOnBlur() {
-		if (!this.#validateEmail(this.email)) {
-			this.emailError = new Error('please insert an valid email');
-		}
-		this.emailError = undefined;
-	}
-	repeatPasswordOnBlur() {
-		if (this.repeatPassword !== this.password) {
-			this.repeatPasswordError = new Error('password does not match');
-			return;
-		}
-		this.repeatPasswordError = undefined;
-	}
-	nameOnBlur() {
-		if (!this.name) {
-			this.nameError = new Error('please insert a name');
-			return;
-		}
-		this.nameError = undefined;
-	}
 	#validateEmail(email: string) {
 		const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		return pattern.test(email);

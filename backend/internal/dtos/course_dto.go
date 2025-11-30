@@ -68,7 +68,7 @@ type (
 		Price            *float64         `json:"price" binding:"omitempty,min=1"`
 		Method           *string          `json:"method"`
 		SessionDuration  *int             `json:"session_duration_minutes" binding:"omitempty,min=1"`
-		MaxSession       *int             `json:"max_total_session" binding:"omitempty,min=1,max=7"`
+		MaxSession       *int             `json:"max_total_session" binding:"omitempty,min=1"`
 		CourseTopic      []CourseTopicReq `json:"course_topics"`
 		CourseCategories []int            `json:"course_categories"`
 	}

@@ -8,7 +8,7 @@
 	import Search from '$lib/components/search/Search.svelte';
 	import { enhance } from '$app/forms';
 	import FileInput from '$lib/components/form/FileInput.svelte';
-	import { CloudUpload, X } from '@lucide/svelte';
+	import { X } from '@lucide/svelte';
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import Textarea from '$lib/components/form/Textarea.svelte';
 	import Image from '$lib/components/image/Image.svelte';

@@ -108,7 +108,6 @@
 			>
 				<Input
 					err={View.nameError}
-					onBlur={() => View.nameOnBlur()}
 					type="text"
 					name="name"
 					placeholder="Username"
@@ -117,7 +116,6 @@
 				/>
 				<Input
 					err={View.emailError}
-					onBlur={() => View.emailOnBlur()}
 					type="email"
 					name="email"
 					placeholder="Email"
@@ -126,7 +124,6 @@
 				/>
 				<InputSecret
 					err={View.passwordError}
-					onBlur={() => View.passwordOnBlur()}
 					id="password"
 					placeholder="Password"
 					name="password"
@@ -134,7 +131,6 @@
 				/>
 				<InputSecret
 					err={View.repeatPasswordError}
-					onBlur={() => View.repeatPasswordOnBlur()}
 					id="repeat-password"
 					placeholder="Repeat Password"
 					name="repeat-password"
@@ -158,7 +154,6 @@
 			<form use:enhance={onLoginSubmit} action="?/login" method="post" class="flex flex-col gap-4">
 				<Input
 					err={View.emailError}
-					onBlur={() => View.emailOnBlur()}
 					type="email"
 					name="email"
 					placeholder="Email"
@@ -167,7 +162,6 @@
 				/>
 				<InputSecret
 					err={View.passwordError}
-					onBlur={() => View.passwordOnBlur()}
 					id="password"
 					placeholder="Password"
 					name="password"

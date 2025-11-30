@@ -1,10 +1,28 @@
+import type { EnhancementReturn } from '$lib/types';
+import { CreateToast, DismissToast } from '$lib/utils/helper';
+
 export class ResetView {
 	email = $state<string>('');
-	emailError = $state<Error | undefined>();
+	emailError = $derived.by<Error | undefined>(() => {
+		if (this.email && !this.#validateEmail(this.email)) {
+			return new Error('please insert a valid email');
+		}
+		return undefined;
+	});
 	password = $state<string>('');
-	passwordError = $state<Error | undefined>();
+	passwordError = $derived.by<Error | undefined>(() => {
+		if (this.password && !this.#validatePassword(this.password)) {
+			return new Error('password need at least 8 characters with one special character');
+		}
+		return undefined;
+	});
 	repeatPassword = $state<string>('');
-	repeatPasswordError = $state<Error | undefined>();
+	repeatPasswordError = $derived.by<Error | undefined>(() => {
+		if (this.password !== this.repeatPassword) {
+			return new Error('must be same as password');
+		}
+		return undefined;
+	});
 	isLoading = $state<boolean>(false);
 	sendDisabled = $derived.by<boolean>(() => {
 		if (!this.email || this.emailError || this.isLoading) {
@@ -18,28 +36,6 @@ export class ResetView {
 		}
 		return false;
 	});
-
-	passwordOnBlur() {
-		if (!this.#validatePassword(this.password)) {
-			this.passwordError = new Error('min 8 characters with !@#?');
-			return;
-		}
-		this.passwordError = undefined;
-	}
-	emailOnBlur() {
-		if (!this.#validateEmail(this.email)) {
-			this.emailError = new Error('please insert an valid email');
-			return;
-		}
-		this.emailError = undefined;
-	}
-	repeatPasswordOnBlur() {
-		if (this.repeatPassword !== this.password) {
-			this.repeatPasswordError = new Error('password does not match');
-			return;
-		}
-		this.repeatPasswordError = undefined;
-	}
 	#validateEmail(email: string) {
 		const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		return pattern.test(email);
@@ -56,4 +52,18 @@ export class ResetView {
 	setIsLoading(b: boolean) {
 		this.isLoading = b;
 	}
+	onSendSubmit = () => {
+		this.setIsLoading(true);
+		const loadID = CreateToast('loading', 'loading....');
+		return async ({ result }: EnhancementReturn) => {
+			this.setIsLoading(false);
+			DismissToast(loadID);
+			if (result.type === 'success') {
+				CreateToast('success', result.data?.message);
+			}
+			if (result.type === 'failure') {
+				CreateToast('error', result.data?.message);
+			}
+		};
+	};
 }

@@ -46,8 +46,8 @@
 	</div>
 	<div class="flex flex-col gap-4">
 		<div>
-			<p class="font-bold text-[var(--tertiary-color)]">YoE:</p>
-			<p>{data.profile.years_of_experience}</p>
+			<p class="font-bold text-[var(--tertiary-color)]">Experience:</p>
+			<p>{data.profile.years_of_experience} Year</p>
 		</div>
 		<div>
 			<p class="font-bold text-[var(--tertiary-color)]">Campus:</p>
@@ -55,7 +55,7 @@
 		</div>
 		<div>
 			<p class="font-bold text-[var(--tertiary-color)]">Degree:</p>
-			<p>{data.profile.degree}</p>
+			<p>{View.capitalizeFirstLetter(data.profile.degree)}</p>
 		</div>
 		<div>
 			<p class="font-bold text-[var(--tertiary-color)]">Major:</p>
@@ -66,40 +66,23 @@
 		<p class="font-bold text-[var(--tertiary-color)]">Bio:</p>
 		<p>{data.profile.bio}</p>
 	</div>
-	<div class="flex flex-col gap-4 md:grid md:grid-cols-2">
-		<div class="flex flex-col gap-4">
-			<p class="font-bold text-[var(--tertiary-color)]">Schedules:</p>
-			{#if data.schedules}
-				<ScrollArea orientation="vertical" viewportClasses="max-h-[300px]">
-					<ul class="flex flex-col gap-4">
-						{#each data.schedules as sch, i (i)}
-							<li class="rounded-lg bg-[var(--tertiary-color)] p-4 text-[var(--secondary-color)]">
-								<p>{dowMap.get(sch.day_of_week)}, {sch.start_time} - {sch.end_time}</p>
-							</li>
-						{/each}
-					</ul>
-				</ScrollArea>
-			{:else}
-				<b class="mx-auto self-center text-[var(--tertiary-color)]">No schedules found</b>
-			{/if}
-		</div>
-		<div class="flex flex-col gap-4">
-			<p class="font-bold text-[var(--tertiary-color)]">Payments:</p>
-			{#if data.payments}
-				<ScrollArea orientation="vertical" viewportClasses="max-h-[300px]">
-					<ul class="flex flex-col gap-4">
-						{#each data.payments as py, i (i)}
-							<li class="rounded-lg bg-[var(--tertiary-color)] p-4 text-[var(--secondary-color)]">
-								<p>{py.payment_method_name} - {py.account_number}</p>
-							</li>
-						{/each}
-					</ul>
-				</ScrollArea>
-			{:else}
-				<b class="text-[var(--tertiary-color)]">No payments found</b>
-			{/if}
-		</div>
+	<div class="flex flex-col gap-4">
+		<p class="font-bold text-[var(--tertiary-color)]">Schedules:</p>
+		{#if data.schedules}
+			<ScrollArea orientation="vertical" viewportClasses="max-h-[300px]">
+				<ul class="flex flex-col gap-4">
+					{#each data.schedules as sch, i (i)}
+						<li class="rounded-lg bg-[var(--tertiary-color)] p-4 text-[var(--secondary-color)]">
+							<p>{dowMap.get(sch.day_of_week)}, {sch.start_time} - {sch.end_time}</p>
+						</li>
+					{/each}
+				</ul>
+			</ScrollArea>
+		{:else}
+			<b class="mx-auto self-center text-[var(--tertiary-color)]">No schedules found</b>
+		{/if}
 	</div>
+
 	<h3 class="font-bold text-[var(--tertiary-color)]">Courses:</h3>
 	<ScrollArea orientation="vertical" viewportClasses="h-[300px] max-h-[300px]">
 		{#if View.isLoading}

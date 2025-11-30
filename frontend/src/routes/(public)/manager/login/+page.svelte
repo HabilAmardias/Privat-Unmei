@@ -122,7 +122,6 @@
 				<h2 class="mb-3 text-2xl text-[var(--tertiary-color)]">Mentor Login</h2>
 				<Input
 					err={View.emailError}
-					onBlur={() => View.emailOnBlur()}
 					type="email"
 					name="email"
 					placeholder="Email"
@@ -131,7 +130,6 @@
 				/>
 				<InputSecret
 					err={View.passwordError}
-					onBlur={() => View.passwordOnBlur()}
 					id="password"
 					placeholder="Password"
 					name="password"
@@ -151,7 +149,6 @@
 				<h2 class="mb-3 text-2xl text-[var(--tertiary-color)]">Admin Login</h2>
 				<Input
 					err={View.emailError}
-					onBlur={() => View.emailOnBlur()}
 					type="email"
 					name="email"
 					placeholder="Email"
@@ -160,7 +157,6 @@
 				/>
 				<InputSecret
 					err={View.passwordError}
-					onBlur={() => View.passwordOnBlur()}
 					id="password"
 					placeholder="Password"
 					name="password"

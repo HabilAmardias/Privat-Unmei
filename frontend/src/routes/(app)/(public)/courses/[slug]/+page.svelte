@@ -42,18 +42,14 @@
 		<div class="flex flex-col gap-2">
 			<div class="flex gap-2">
 				<p class="font-bold text-[var(--tertiary-color)]">Method:</p>
-				<p>{data.detail.method}</p>
+				<p>{View.capitalizeFirstLetter(data.detail.method)}</p>
 			</div>
 			<div class="flex gap-2">
 				<p class="font-bold text-[var(--tertiary-color)]">Domicile:</p>
 				<p>{data.detail.domicile}</p>
 			</div>
 			<div class="flex gap-2">
-				<p class="font-bold text-[var(--tertiary-color)]">Max Session:</p>
-				<p>{data.detail.max_total_session}</p>
-			</div>
-			<div class="flex gap-2">
-				<p class="font-bold text-[var(--tertiary-color)]">Session Duration:</p>
+				<p class="font-bold text-[var(--tertiary-color)]">Per Session Duration (minutes):</p>
 				<p>{data.detail.session_duration_minutes}</p>
 			</div>
 		</div>

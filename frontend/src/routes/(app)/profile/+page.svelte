@@ -9,14 +9,12 @@
 	import Input from '$lib/components/form/Input.svelte';
 	import FileInput from '$lib/components/form/FileInput.svelte';
 	import Select from '$lib/components/select/Select.svelte';
-	import { statusOptions } from './model';
+	import { statusOptions } from './constants';
 	import Pagination from '$lib/components/pagination/Pagination.svelte';
-	import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
 	import { enhance } from '$app/forms';
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import Loading from '$lib/components/loader/Loading.svelte';
 	import Image from '$lib/components/image/Image.svelte';
-	import { CreateToast, DismissToast } from '$lib/utils/helper';
 
 	let { data }: PageProps = $props();
 	const View = new profileView(data.profile, data.orders);
@@ -85,25 +83,12 @@
 				</div>
 			</FileInput>
 			<div class="flex flex-col gap-1">
-				<Input
-					err={View.nameError}
-					onBlur={() => View.nameOnBlur()}
-					id="name"
-					name="name"
-					type="text"
-					bind:value={View.name}
-				/>
+				<Input err={View.nameError} id="name" name="name" type="text" bind:value={View.name} />
 				<p class="text-md">{data.profile.email}</p>
 			</div>
 		</div>
 		<div class="flex flex-col gap-2">
-			<Textarea
-				err={View.bioError}
-				onBlur={() => View.bioOnBlur()}
-				id="bio"
-				name="bio"
-				bind:value={View.bio}>Bio:</Textarea
-			>
+			<Textarea err={View.bioError} id="bio" name="bio" bind:value={View.bio}>Bio:</Textarea>
 		</div>
 		<div class="flex gap-1">
 			<Button type="button" onClick={onCancel}>Cancel</Button>

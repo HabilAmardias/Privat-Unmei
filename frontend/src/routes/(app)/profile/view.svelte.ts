@@ -19,8 +19,18 @@ export class profileView {
 	limit = $state<number>(15);
 	pageNumber = $state<number>(1);
 	paginationForm = $state<HTMLFormElement | undefined>();
-	nameError = $state<Error | undefined>();
-	bioError = $state<Error | undefined>();
+	nameError = $derived.by<Error | undefined>(() => {
+		if (this.name && !IsAlphaOnly(this.name)) {
+			return new Error('name must only contain alphabets');
+		}
+		return undefined;
+	});
+	bioError = $derived.by<Error | undefined>(() => {
+		if (this.bio.length > MAX_BIO_LENGTH) {
+			return new Error('name must only contain alphabets');
+		}
+		return undefined;
+	});
 	orders = $state<StudentOrders[]>();
 
 	updateProfileDisable = $derived.by<boolean>(() => {
@@ -72,20 +82,6 @@ export class profileView {
 	setIsDesktop(b: boolean) {
 		this.isDesktop = b;
 	}
-	nameOnBlur() {
-		if (this.name && !IsAlphaOnly(this.name)) {
-			this.nameError = new Error('name must only contain alphabets');
-		} else {
-			this.nameError = undefined;
-		}
-	}
-	bioOnBlur() {
-		if (this.bio.length > MAX_BIO_LENGTH) {
-			this.bioError = new Error(`bio must not more than ${MAX_BIO_LENGTH} characters`);
-		} else {
-			this.bioError = undefined;
-		}
-	}
 	setBioError(e: Error | undefined) {
 		this.bioError = e;
 	}
@@ -104,12 +100,13 @@ export class profileView {
 	onUpdateProfile = () => {
 		const loadID = CreateToast('loading', 'updating....');
 		this.setProfileIsLoading(true);
-		return async ({ result }: EnhancementReturn) => {
+		return async ({ result, update }: EnhancementReturn) => {
 			this.setIsEdit();
 			this.setProfileIsLoading(false);
 			DismissToast(loadID);
 			if (result.type === 'success') {
 				CreateToast('success', 'update profile success');
+				await update();
 			}
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);
