@@ -29,5 +29,6 @@ export type CourseDetail = {
 	mentor_id: string;
 	mentor_name: string;
 	mentor_email: string;
+	mentor_profile_image: string;
 	description: string;
 };

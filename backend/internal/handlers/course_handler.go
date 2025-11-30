@@ -189,9 +189,10 @@ func (ch *CourseHandlerImpl) CourseDetail(ctx *gin.Context) {
 				SessionDuration: res.SessionDuration,
 				MaxSession:      res.MaxSession,
 			},
-			MentorID:    res.MentorID,
-			MentorName:  res.MentorName,
-			MentorEmail: res.MentorEmail,
+			MentorID:           res.MentorID,
+			MentorName:         res.MentorName,
+			MentorEmail:        res.MentorEmail,
+			MentorProfileImage: res.MentorProfileImage,
 		},
 		Description: res.Description,
 	}

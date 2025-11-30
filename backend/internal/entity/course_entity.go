@@ -73,9 +73,10 @@ type (
 	}
 	CourseListQuery struct {
 		MentorListCourseQuery
-		MentorID    string
-		MentorName  string
-		MentorEmail string
+		MentorID           string
+		MentorName         string
+		MentorEmail        string
+		MentorProfileImage string
 	}
 	CourseDetailQuery struct {
 		CourseListQuery

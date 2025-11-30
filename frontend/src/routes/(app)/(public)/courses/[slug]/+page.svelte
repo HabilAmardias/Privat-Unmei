@@ -5,6 +5,8 @@
 	import { enhance } from '$app/forms';
 	import Pagination from '$lib/components/pagination/Pagination.svelte';
 	import Loading from '$lib/components/loader/Loading.svelte';
+	import Link from '$lib/components/button/Link.svelte';
+	import CldImage from '$lib/components/image/CldImage.svelte';
 
 	let { data }: PageProps = $props();
 	const View = new CourseDetailView(data.reviews);
@@ -17,52 +19,69 @@
 </svelte:head>
 
 <div class="flex flex-col gap-4 p-4">
-	<h1 class="text-xl font-bold text-[var(--tertiary-color)]">{data.detail.title}</h1>
-	<div class="grid grid-cols-2 gap-4 text-center md:flex md:justify-between">
-		<div>
-			<p class="font-bold text-[var(--tertiary-color)]">Method:</p>
-			<p>{data.detail.method}</p>
+	<div class="flex flex-col gap-2 md:flex-row md:justify-between">
+		<h1 class="text-2xl font-bold text-[var(--tertiary-color)]">{data.detail.title}</h1>
+		<div class="w-fit rounded-lg bg-[var(--tertiary-color)] p-2">
+			<p class="font-bold text-[var(--secondary-color)]">
+				{new Intl.NumberFormat('id-ID', { currency: 'IDR', style: 'currency' }).format(
+					data.detail.price
+				)} / session
+			</p>
 		</div>
-		<div>
-			<p class="font-bold text-[var(--tertiary-color)]">Domicile:</p>
-			<p>{data.detail.domicile}</p>
-		</div>
-		<div>
-			<p class="font-bold text-[var(--tertiary-color)]">Max Session:</p>
-			<p>{data.detail.max_total_session}</p>
-		</div>
-		<div>
-			<p class="font-bold text-[var(--tertiary-color)]">Session Duration:</p>
-			<p>{data.detail.session_duration_minutes}</p>
-		</div>
-		<div>
-			<p class="font-bold text-[var(--tertiary-color)]">Price:</p>
-			<p>{data.detail.price}</p>
+	</div>
+	<ScrollArea orientation="horizontal" viewportClasses="max-w-[300px]">
+		<ul class="flex gap-4">
+			{#each data.courseCategories as cc, i (cc.id)}
+				<li class="w-fit rounded-lg bg-[var(--tertiary-color)] p-2 text-[var(--secondary-color)]">
+					<p>{cc.name}</p>
+				</li>
+			{/each}
+		</ul>
+	</ScrollArea>
+	<div class="grid grid-cols-2">
+		<div class="flex flex-col gap-2">
+			<div class="flex gap-2">
+				<p class="font-bold text-[var(--tertiary-color)]">Method:</p>
+				<p>{data.detail.method}</p>
+			</div>
+			<div class="flex gap-2">
+				<p class="font-bold text-[var(--tertiary-color)]">Domicile:</p>
+				<p>{data.detail.domicile}</p>
+			</div>
+			<div class="flex gap-2">
+				<p class="font-bold text-[var(--tertiary-color)]">Max Session:</p>
+				<p>{data.detail.max_total_session}</p>
+			</div>
+			<div class="flex gap-2">
+				<p class="font-bold text-[var(--tertiary-color)]">Session Duration:</p>
+				<p>{data.detail.session_duration_minutes}</p>
+			</div>
 		</div>
 	</div>
 	<div class="flex flex-col">
-		<p class="font-bold text-[var(--tertiary-color)]">Description:</p>
+		<p class="font-bold text-[var(--tertiary-color)]">Description</p>
 		<p>{data.detail.description}</p>
 	</div>
-	<div class="flex flex-col gap-4 md:grid md:grid-cols-2">
-		<div class="flex flex-col gap-4">
-			<p class="font-bold text-[var(--tertiary-color)]">Categories:</p>
-			{#if data.courseCategories}
-				<ScrollArea orientation="vertical" viewportClasses="max-h-[300px]">
-					<ul class="flex flex-col gap-4">
-						{#each data.courseCategories as cc, i (cc.id)}
-							<li class="rounded-lg bg-[var(--tertiary-color)] p-4 text-[var(--secondary-color)]">
-								<p>{cc.name}</p>
-							</li>
-						{/each}
-					</ul>
-				</ScrollArea>
-			{:else}
-				<b class="mx-auto self-center text-[var(--tertiary-color)]">No categories found</b>
-			{/if}
+	<Link href={`/mentors/${data.detail.mentor_id}`}>
+		<p class="font-bold text-[var(--tertiary-color)]">Mentor</p>
+		<div
+			class="hover:-translate-y-0.25 flex transform items-center gap-4 rounded-md bg-[var(--tertiary-color)] p-2 transition-transform"
+		>
+			<CldImage
+				src={data.detail.mentor_profile_image}
+				width={50}
+				height={50}
+				className="rounded-full"
+			/>
+			<div>
+				<p class="font-bold text-[var(--primary-color)]">{data.detail.mentor_name}</p>
+				<p class="text-[var(--secondary-color)]">{data.detail.mentor_email}</p>
+			</div>
 		</div>
+	</Link>
+	<div class="flex flex-col gap-4">
 		<div class="flex flex-col gap-4">
-			<p class="font-bold text-[var(--tertiary-color)]">Topics:</p>
+			<p class="font-bold text-[var(--tertiary-color)]">Topics</p>
 			{#if data.topics}
 				<ScrollArea orientation="vertical" viewportClasses="max-h-[300px]">
 					<ul class="flex flex-col gap-4">
@@ -80,7 +99,7 @@
 		</div>
 	</div>
 	<h2 class="text-xl font-bold text-[var(--tertiary-color)]">Reviews</h2>
-	<div class="flex-1">
+	<div>
 		{#if View.isLoading}
 			<Loading />
 		{:else if !View.reviews || View.reviews.length === 0}
