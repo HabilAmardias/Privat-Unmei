@@ -93,7 +93,7 @@
 	</div>
 	<form
 		use:enhance={View.onPageChangeEnhance}
-		action="?/getMyCourses"
+		action="?/getCourses"
 		class="flex w-full items-center justify-center"
 		method="POST"
 		bind:this={View.paginationForm}

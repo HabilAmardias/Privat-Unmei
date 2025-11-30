@@ -313,18 +313,14 @@ func (ch *CourseHandlerImpl) MostBoughtCourses(ctx *gin.Context) {
 }
 
 func (ch *CourseHandlerImpl) MentorListCourse(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
-	if err != nil {
-		ctx.Error(err)
-		return
-	}
+	id := ctx.Param("id")
 	var req dtos.MentorListCourseReq
 	if err := ctx.ShouldBind(&req); err != nil {
 		ctx.Error(err)
 		return
 	}
 	param := entity.MentorListCourseParam{
-		MentorID: claim.Subject,
+		MentorID: id,
 		PaginatedParam: entity.PaginatedParam{
 			Limit: req.Limit,
 			Page:  req.Page,

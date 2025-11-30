@@ -18,10 +18,84 @@ import (
 
 type MentorHandlerImpl struct {
 	ms *services.MentorServiceImpl
+	cs *services.CourseServiceImpl
 }
 
-func CreateMentorHandler(ms *services.MentorServiceImpl) *MentorHandlerImpl {
-	return &MentorHandlerImpl{ms}
+func CreateMentorHandler(ms *services.MentorServiceImpl, cs *services.CourseServiceImpl) *MentorHandlerImpl {
+	return &MentorHandlerImpl{ms, cs}
+}
+
+func (mh *MentorHandlerImpl) GetMyCourses(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	var req dtos.MentorListCourseReq
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.MentorListCourseParam{
+		MentorID: claim.Subject,
+		PaginatedParam: entity.PaginatedParam{
+			Limit: req.Limit,
+			Page:  req.Page,
+		},
+		Search:         req.Search,
+		CourseCategory: req.CourseCategory,
+	}
+	if param.Limit <= 0 || param.Limit > constants.MaxLimit {
+		param.Limit = constants.DefaultLimit
+	}
+	if param.Page <= 0 {
+		param.Page = constants.DefaultPage
+	}
+	res, totalRow, err := mh.cs.MentorListCourse(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	entries := []dtos.MentorListCourseRes{}
+	for _, item := range *res {
+		entry := dtos.MentorListCourseRes{
+			ID:              item.ID,
+			Title:           item.Title,
+			Domicile:        item.Domicile,
+			Method:          item.Method,
+			Price:           item.Price,
+			SessionDuration: item.SessionDuration,
+			MaxSession:      item.MaxSession,
+		}
+		entries = append(entries, entry)
+	}
+	var filters []dtos.FilterInfo
+	if req.Search != nil {
+		filter := dtos.FilterInfo{
+			Name:  "Search",
+			Value: *req.Search,
+		}
+		filters = append(filters, filter)
+	}
+	if req.CourseCategory != nil {
+		filter := dtos.FilterInfo{
+			Name:  "Course Category",
+			Value: *req.CourseCategory,
+		}
+		filters = append(filters, filter)
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.PaginatedResponse[dtos.MentorListCourseRes]{
+			Entries: entries,
+			PageInfo: dtos.PaginatedInfo{
+				Page:     param.Page,
+				FilterBy: filters,
+				Limit:    param.Limit,
+				TotalRow: *totalRow,
+			},
+		},
+	})
 }
 
 func (mh *MentorHandlerImpl) GetMyPaymentMethod(ctx *gin.Context) {

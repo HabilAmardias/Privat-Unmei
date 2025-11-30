@@ -16,7 +16,7 @@ class CoursesController {
 			if (search) {
 				args.push(`search=${search}`);
 			}
-			const category = formData.get('category');
+			const category = formData.get('course_category');
 			if (category) {
 				args.push(`course_category=${category}`);
 			}

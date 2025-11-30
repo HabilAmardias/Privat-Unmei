@@ -98,6 +98,7 @@ func (c *RouteConfig) SetupPublicRoute() {
 	v1.GET("/mentors", c.MentorHandler.GetMentorList)
 	v1.GET("/mentors/:id", c.MentorHandler.GetMentorProfile)
 	v1.GET("/mentors/:id/availability", c.MentorHandler.GetMentorAvailability)
+	v1.GET("/mentors/:id/courses", c.CourseHandler.MentorListCourse)
 	v1.GET("/courses/:id/reviews", c.CourseRatingHandler.GetCourseReview)
 	v1.GET("/refresh", middlewares.RefreshAuthMiddleware(c.TokenUtil), c.StudentHandler.RefreshToken)
 }
@@ -231,7 +232,7 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		c.RBACRepository,
 		c.RBACCacheRepository,
 		c.Logger,
-	), c.CourseHandler.MentorListCourse)
+	), c.MentorHandler.GetMyCourses)
 	v1.PATCH("/mentors/me", middlewares.AuthorizationMiddleware(
 		constants.UpdateOwnPermission,
 		constants.MentorResource,
