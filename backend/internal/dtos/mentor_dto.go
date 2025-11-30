@@ -62,6 +62,7 @@ type (
 		ID                string `json:"id"`
 		Name              string `json:"name"`
 		Email             string `json:"email"`
+		ProfileImage      string `json:"profile_image"`
 		YearsOfExperience int    `json:"years_of_experience"`
 	}
 	LoginMentorReq struct {

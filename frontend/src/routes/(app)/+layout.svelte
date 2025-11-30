@@ -5,7 +5,7 @@
 	import Menubar from '$lib/components/menubar/Menubar.svelte';
 	import MenuItem from '$lib/components/menubar/MenuItem.svelte';
 	import { loadingStore } from '$lib/stores/LoadingStore.svelte';
-	import { CircleUserRound, LogIn, LogOut, MessageCircleMore, Users } from '@lucide/svelte';
+	import { CircleUserRound, List, LogIn, LogOut, MessageCircleMore, Users } from '@lucide/svelte';
 	import type { LayoutProps } from './$types';
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import CldImage from '$lib/components/image/CldImage.svelte';
@@ -34,15 +34,23 @@
 </script>
 
 <main class="h-screen pb-24 md:pb-0 md:pt-24">
-	<ScrollArea class="h-full" orientation="vertical" viewportClasses="h-full max-h-full">
+	<ScrollArea class="h-full" orientation="vertical" viewportClasses="h-full max-h-[850px]">
 		{@render children()}
 	</ScrollArea>
 </main>
 <Menubar>
 	<MenuItem>
-		<Link href="/courses">
+		<Link href="/home">
 			<div class="flex h-full items-center">
 				<CldImage src={View.logoSrc} width={View.logoWidth} height={View.logoHeight} />
+			</div>
+		</Link>
+	</MenuItem>
+	<MenuItem>
+		<Link href="/courses">
+			<div class="flex flex-col items-center">
+				<List />
+				Courses
 			</div>
 		</Link>
 	</MenuItem>

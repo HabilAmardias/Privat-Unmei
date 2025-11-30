@@ -9,14 +9,12 @@
 	import Input from '$lib/components/form/Input.svelte';
 	import FileInput from '$lib/components/form/FileInput.svelte';
 	import Select from '$lib/components/select/Select.svelte';
-	import { statusOptions } from './model';
+	import { statusOptions } from './constants';
 	import Pagination from '$lib/components/pagination/Pagination.svelte';
-	import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
 	import { enhance } from '$app/forms';
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import Loading from '$lib/components/loader/Loading.svelte';
 	import Image from '$lib/components/image/Image.svelte';
-	import { CreateToast, DismissToast } from '$lib/utils/helper';
 
 	let { data }: PageProps = $props();
 	const View = new profileView(data.profile, data.orders);
@@ -41,77 +39,6 @@
 		View.setBioError(undefined);
 		View.setIsEdit();
 	}
-
-	function onVerifySubmit(args: EnhancementArgs) {
-		View.setVerifyIsLoading(true);
-		const loadID = CreateToast('loading', 'sending....');
-		return async ({ result }: EnhancementReturn) => {
-			View.setVerifyIsLoading(false);
-			DismissToast(loadID);
-			if (result.type === 'success') {
-				CreateToast('success', result.data?.message);
-			}
-			if (result.type === 'failure') {
-				CreateToast('error', result.data?.message);
-			}
-		};
-	}
-
-	function onSearchOrders(args: EnhancementArgs) {
-		View.setOrdersIsLoading(true);
-		View.pageNumber = 1;
-		args.formData.append('page', `${View.pageNumber}`);
-		return async ({ result }: EnhancementReturn) => {
-			View.setOrdersIsLoading(false);
-			if (result.type === 'success') {
-				View.setOrders(result.data?.orders);
-				View.setTotalRow(result.data?.totalRow);
-				CreateToast('success', result.data?.message);
-			}
-			if (result.type === 'failure') {
-				CreateToast('error', result.data?.message);
-			}
-		};
-	}
-
-	function onSetPage(args: EnhancementArgs) {
-		View.setOrdersIsLoading(true);
-		args.formData.append('page', `${View.pageNumber}`);
-		args.formData.append('status', `${View.status}`);
-		args.formData.append('search', View.search);
-		return async ({ result }: EnhancementReturn) => {
-			View.setOrdersIsLoading(false);
-			if (result.type === 'success') {
-				View.setOrders(result.data?.orders);
-				View.setTotalRow(result.data?.totalRow);
-				CreateToast('success', result.data?.message);
-			}
-			if (result.type === 'failure') {
-				CreateToast('error', result.data?.message);
-			}
-		};
-	}
-
-	function onUpdateProfile(args: EnhancementArgs) {
-		const loadID = CreateToast('loading', 'updating....');
-		return async ({ result }: EnhancementReturn) => {
-			View.setIsEdit();
-			View.setProfileIsLoading(true);
-			View.setProfileImage(undefined);
-			View.setBio(data.profile.bio);
-			View.setName(data.profile.name);
-			View.setNameError(undefined);
-			View.setBioError(undefined);
-			View.setProfileIsLoading(false);
-			DismissToast(loadID);
-			if (result.type === 'success') {
-				CreateToast('success', 'update profile success');
-			}
-			if (result.type === 'failure') {
-				CreateToast('error', result.data?.message);
-			}
-		};
-	}
 </script>
 
 <svelte:head>
@@ -122,7 +49,7 @@
 
 {#if View.isEdit}
 	<form
-		use:enhance={onUpdateProfile}
+		use:enhance={View.onUpdateProfile}
 		action="?/updateProfile"
 		method="POST"
 		enctype="multipart/form-data"
@@ -156,25 +83,12 @@
 				</div>
 			</FileInput>
 			<div class="flex flex-col gap-1">
-				<Input
-					err={View.nameError}
-					onBlur={() => View.nameOnBlur()}
-					id="name"
-					name="name"
-					type="text"
-					bind:value={View.name}
-				/>
+				<Input err={View.nameError} id="name" name="name" type="text" bind:value={View.name} />
 				<p class="text-md">{data.profile.email}</p>
 			</div>
 		</div>
 		<div class="flex flex-col gap-2">
-			<Textarea
-				err={View.bioError}
-				onBlur={() => View.bioOnBlur()}
-				id="bio"
-				name="bio"
-				bind:value={View.bio}>Bio:</Textarea
-			>
+			<Textarea err={View.bioError} id="bio" name="bio" bind:value={View.bio}>Bio:</Textarea>
 		</div>
 		<div class="flex gap-1">
 			<Button type="button" onClick={onCancel}>Cancel</Button>
@@ -184,7 +98,7 @@
 		</div>
 	</form>
 {:else}
-	<div class="flex h-full flex-col gap-4 p-4">
+	<div class="flex h-full flex-col gap-4 p-4 md:grid md:grid-cols-2">
 		<div class="flex flex-col gap-4">
 			{#if View.profileIsLoading}
 				<Loading />
@@ -222,7 +136,7 @@
 			<div class="flex flex-1 flex-col gap-4">
 				<h3 class="text-xl font-bold text-[var(--tertiary-color)]">Orders</h3>
 				<form
-					use:enhance={onSearchOrders}
+					use:enhance={View.onSearchOrders}
 					class="grid grid-cols-3 gap-4"
 					action="?/myOrders"
 					method="POST"
@@ -270,7 +184,7 @@
 					action="?/myOrders"
 					method="POST"
 					class="flex items-center justify-center"
-					use:enhance={onSetPage}
+					use:enhance={View.onSetPage}
 				>
 					<Pagination
 						onPageChange={View.onPageChange}
@@ -282,7 +196,7 @@
 			</div>
 		{:else}
 			<form
-				use:enhance={onVerifySubmit}
+				use:enhance={View.onVerifySubmit}
 				method="POST"
 				action="?/sendVerification"
 				class="flex w-full flex-1 items-center justify-center"

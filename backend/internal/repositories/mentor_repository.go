@@ -45,6 +45,7 @@ func (mr *MentorRepositoryImpl) GetMentorList(ctx context.Context, mentors *[]en
 		m.id,
 		u.name,
 		u.email,
+		u.profile_image,
 		m.years_of_experience
 	FROM users u
 	JOIN mentors m ON m.id = u.id
@@ -114,6 +115,7 @@ func (mr *MentorRepositoryImpl) GetMentorList(ctx context.Context, mentors *[]en
 			&mentor.ID,
 			&mentor.Name,
 			&mentor.Email,
+			&mentor.ProfileImage,
 			&mentor.YearsOfExperience,
 		); err != nil {
 			return customerrors.NewError(

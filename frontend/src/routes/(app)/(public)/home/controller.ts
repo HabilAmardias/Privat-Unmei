@@ -1,8 +1,8 @@
 import type { Fetch, PaginatedResponse, ServerResponse } from '$lib/types';
 import { FetchData } from '$lib/utils';
-import type { CourseList, CourseCategory } from './model';
+import type { CourseList, MentorList } from './model';
 
-class CoursesController {
+class HomeController {
 	async getCourses(fetch: Fetch, req?: Request) {
 		let url = 'http://localhost:8080/api/v1/courses?';
 		if (req) {
@@ -16,7 +16,7 @@ class CoursesController {
 			if (search) {
 				args.push(`search=${search}`);
 			}
-			const category = formData.get('course_category');
+			const category = formData.get('category');
 			if (category) {
 				args.push(`course_category=${category}`);
 			}
@@ -35,27 +35,23 @@ class CoursesController {
 		const resBody: ServerResponse<PaginatedResponse<CourseList>> = await res?.json();
 		return { success, resBody, status, message };
 	}
-	async getCourseCategories(fetch: Fetch, req?: Request) {
-		let url = 'http://localhost:8080/api/v1/course-categories?';
-		if (req) {
-			const formData = await req.formData();
-			const limit = formData.get('limit');
-			const search = formData.get('search');
-			const args: string[] = [];
-			if (limit) {
-				args.push(`limit=${limit}`);
-			}
-			if (search) {
-				args.push(`search=${search}`);
-			}
-			url += args.join('&');
-		}
-		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
+	async getMentors(fetch: Fetch) {
+		const url = 'http://localhost:8080/api/v1/mentors';
+		const { success, res, status, message } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
 		}
-		const resBody: ServerResponse<PaginatedResponse<CourseCategory>> = await res?.json();
+		const resBody: ServerResponse<PaginatedResponse<MentorList>> = await res?.json();
 		return { success, message, status, resBody };
 	}
+	async getMostBought(fetch: Fetch) {
+		const url = 'http://localhost:8080/api/v1/courses/most-bought';
+		const { success, res, status, message } = await FetchData(fetch, url, 'GET');
+		if (!success) {
+			return { success, status, message };
+		}
+		const resBody: ServerResponse<CourseList[]> = await res?.json();
+		return { success, resBody, status, message };
+	}
 }
-export const controller = new CoursesController();
+export const controller = new HomeController();

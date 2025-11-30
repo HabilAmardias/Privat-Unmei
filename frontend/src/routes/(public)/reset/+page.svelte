@@ -18,21 +18,6 @@
 			goto('/', { replaceState: true });
 		}
 	});
-
-	function onSendSubmit(args: EnhancementArgs) {
-		View.setIsLoading(true);
-		const loadID = CreateToast('loading', 'loading....');
-		return async ({ result }: EnhancementReturn) => {
-			View.setIsLoading(false);
-			DismissToast(loadID);
-			if (result.type === 'success') {
-				CreateToast('success', result.data?.message);
-			}
-			if (result.type === 'failure') {
-				CreateToast('error', result.data?.message);
-			}
-		};
-	}
 </script>
 
 <svelte:head>
@@ -44,10 +29,9 @@
 <div class="flex h-dvh w-full items-center justify-center">
 	<Card>
 		<h2 class="mb-3 text-2xl font-bold text-[var(--tertiary-color)]">Reset Password</h2>
-		<form use:enhance={onSendSubmit} action="?/send" method="post" class="flex flex-col gap-4">
+		<form use:enhance={View.onSendSubmit} action="?/send" method="post" class="flex flex-col gap-4">
 			<Input
 				err={View.emailError}
-				onBlur={() => View.emailOnBlur()}
 				bind:value={View.email}
 				type="email"
 				name="email"

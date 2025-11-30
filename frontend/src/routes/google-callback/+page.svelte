@@ -6,7 +6,7 @@
 	let { data }: PageProps = $props();
 	onMount(() => {
 		if (data.success) {
-			goto('/courses', { replaceState: true });
+			goto('/home', { replaceState: true });
 		} else {
 			goto('/login', { replaceState: true });
 		}

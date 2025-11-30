@@ -52,9 +52,10 @@ type (
 	}
 	CourseListRes struct {
 		MentorListCourseRes
-		MentorID    string `json:"mentor_id"`
-		MentorName  string `json:"mentor_name"`
-		MentorEmail string `json:"mentor_email"`
+		MentorID           string `json:"mentor_id"`
+		MentorName         string `json:"mentor_name"`
+		MentorEmail        string `json:"mentor_email"`
+		MentorProfileImage string `json:"mentor_profile_image"`
 	}
 	CourseDetailRes struct {
 		CourseListRes
@@ -67,7 +68,7 @@ type (
 		Price            *float64         `json:"price" binding:"omitempty,min=1"`
 		Method           *string          `json:"method"`
 		SessionDuration  *int             `json:"session_duration_minutes" binding:"omitempty,min=1"`
-		MaxSession       *int             `json:"max_total_session" binding:"omitempty,min=1,max=7"`
+		MaxSession       *int             `json:"max_total_session" binding:"omitempty,min=1"`
 		CourseTopic      []CourseTopicReq `json:"course_topics"`
 		CourseCategories []int            `json:"course_categories"`
 	}

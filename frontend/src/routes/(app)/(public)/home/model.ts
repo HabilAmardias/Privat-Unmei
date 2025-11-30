@@ -11,12 +11,10 @@ export type CourseList = {
 	mentor_email: string;
 };
 
-export type CourseCategoryOpts = {
-	value: string;
-	label: string;
-};
-
-export type CourseCategory = {
-	id: number;
+export type MentorList = {
+	id: string;
 	name: string;
+	email: string;
+	profile_image: string;
+	years_of_experience: number;
 };

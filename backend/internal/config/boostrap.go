@@ -56,7 +56,7 @@ func Bootstrap(db *db.CustomDB, rc *redis.Client, logger logger.CustomLogger, ap
 
 	studentHandler := handlers.CreateStudentHandler(studentService)
 	adminHandler := handlers.CreateAdminHandler(adminService)
-	mentorHandler := handlers.CreateMentorHandler(mentorService)
+	mentorHandler := handlers.CreateMentorHandler(mentorService, courseService)
 	courseCategoryHandler := handlers.CreateCourseCategoryHandler(courseCategoryService)
 	courseHandler := handlers.CreateCourseHandler(courseService)
 	courseRatingHandler := handlers.CreateCourseRatingHandler(courseRatingService)

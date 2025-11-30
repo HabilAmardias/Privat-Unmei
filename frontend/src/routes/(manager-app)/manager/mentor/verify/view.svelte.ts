@@ -1,21 +1,18 @@
 export class VerifyMentorView {
 	password = $state<string>('');
-	passwordError = $state<Error | undefined>();
+	passwordError = $derived.by<Error | undefined>(() => {
+		if (this.password && !this.#validatePassword(this.password)) {
+			return new Error('password need at least 8 chars with 1 special char');
+		}
+		return undefined;
+	});
 	isLoading = $state<boolean>(false);
 	verifyDisabled = $derived.by<boolean>(() => {
-		if (this.passwordError || this.isLoading) {
+		if (!this.password || this.passwordError || this.isLoading) {
 			return true;
 		}
 		return false;
 	});
-
-	passwordOnBlur() {
-		if (!this.#validatePassword(this.password)) {
-			this.passwordError = new Error('min 8 characters with !@#?');
-		} else {
-			this.passwordError = undefined;
-		}
-	}
 	#validatePassword(password: string) {
 		const minLength = password.length >= 8;
 		const hasSpecialChar =

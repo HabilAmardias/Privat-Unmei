@@ -102,6 +102,7 @@ type (
 		ID                string
 		Name              string
 		Email             string
+		ProfileImage      string
 		YearsOfExperience int
 	}
 	ListMentorParam struct {

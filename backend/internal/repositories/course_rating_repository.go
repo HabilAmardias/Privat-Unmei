@@ -36,7 +36,7 @@ func (cr *CourseRatingRepositoryImpl) GetCourseReviews(ctx context.Context, cour
 	WHERE
 		u.deleted_at IS NULL AND 
 		cr.course_id = $1 AND 
-		cr.deleted_at IS NULL AND
+		cr.deleted_at IS NULL
 	ORDER BY cr.id DESC
 	LIMIT $2
 	OFFSET $3
@@ -48,7 +48,7 @@ func (cr *CourseRatingRepositoryImpl) GetCourseReviews(ctx context.Context, cour
 	WHERE
 		u.deleted_at IS NULL AND 
 		cr.course_id = $1 AND 
-		cr.deleted_at IS NULL AND
+		cr.deleted_at IS NULL
 	`
 	row := driver.QueryRow(countQuery, courseID)
 	if err := row.Scan(totalRow); err != nil {

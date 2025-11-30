@@ -53,7 +53,6 @@
 		>
 			<InputSecret
 				err={View.passwordError}
-				onBlur={() => View.passwordOnBlur()}
 				id="password"
 				placeholder="New Password"
 				bind:value={View.password}
@@ -61,7 +60,6 @@
 			/>
 			<InputSecret
 				err={View.repeatPasswordError}
-				onBlur={() => View.repeatPasswordOnBlur()}
 				id="password"
 				placeholder="Repeat New Password"
 				bind:value={View.repeatPassword}

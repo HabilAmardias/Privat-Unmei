@@ -54,7 +54,6 @@
 		>
 			<InputSecret
 				err={View.passwordError}
-				onBlur={() => View.passwordOnBlur()}
 				id="password"
 				placeholder="Password"
 				name="password"
