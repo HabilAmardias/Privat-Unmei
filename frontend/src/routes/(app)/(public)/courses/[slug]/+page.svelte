@@ -24,12 +24,19 @@
 <div class="flex flex-col gap-4 p-4">
 	<div class="flex flex-col gap-2 md:flex-row md:justify-between">
 		<h1 class="text-2xl font-bold text-[var(--tertiary-color)]">{data.detail.title}</h1>
-		<div class="w-fit rounded-lg bg-[var(--tertiary-color)] p-2">
-			<p class="font-bold text-[var(--secondary-color)]">
-				{new Intl.NumberFormat('id-ID', { currency: 'IDR', style: 'currency' }).format(
-					data.detail.price
-				)} / session
-			</p>
+		<div class="flex flex-col gap-2 md:items-end">
+			<div class="w-fit rounded-lg bg-[var(--tertiary-color)] p-2">
+				<p class="font-bold text-[var(--secondary-color)]">
+					{new Intl.NumberFormat('id-ID', { currency: 'IDR', style: 'currency' }).format(
+						data.detail.price
+					)} / session
+				</p>
+			</div>
+			{#if data.profile}
+				<div class="w-fit rounded-lg bg-[var(--tertiary-color)] p-2">
+					<Link href={`/requests/create/${data.detail.id}`}>Buy Course</Link>
+				</div>
+			{/if}
 		</div>
 	</div>
 	<ScrollArea orientation="horizontal" viewportClasses="max-w-[300px]">

@@ -15,7 +15,7 @@ export class CourseDetailView {
 	profile = $state<StudentProfile>();
 	feedbackErr = $derived.by<Error | undefined>(() => {
 		if (this.feedback.length < 15) {
-			return new Error('Feedback must at least contain 15 chars');
+			return new Error('Feedback must at least contain 15 characters');
 		}
 		return undefined;
 	});
