@@ -90,4 +90,7 @@ type (
 		NumberOfParticipant int                 `json:"number_of_participant"`
 		Schedules           []CourseScheduleRes `json:"schedules"`
 	}
+	OperationalCostRes struct {
+		Cost float64 `json:"operational_cost"`
+	}
 )

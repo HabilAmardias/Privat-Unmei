@@ -9,9 +9,15 @@
 	import Select from '$lib/components/select/Select.svelte';
 	import Datepicker from '$lib/components/calendar/Datepicker.svelte';
 	import Button from '$lib/components/button/Button.svelte';
+	import { X } from '@lucide/svelte';
 
 	let { data }: PageProps = $props();
-	const View = new CreateRequestView(data.detail, data.payments);
+	const View = new CreateRequestView(
+		data.detail,
+		data.payments,
+		data.operationalCost,
+		data.discount
+	);
 </script>
 
 <svelte:head>
@@ -21,6 +27,12 @@
 </svelte:head>
 
 <div class="flex flex-col gap-4 p-4">
+	<form
+		bind:this={View.getDiscountForm}
+		use:enhance={View.onGetDiscount}
+		action="?/getDiscount"
+		method="POST"
+	></form>
 	<div class="flex flex-col gap-2 md:flex-row md:justify-between">
 		<h1 class="text-2xl font-bold text-[var(--tertiary-color)]">{data.detail.title}</h1>
 		<div class="w-fit rounded-lg bg-[var(--tertiary-color)] p-2">
@@ -95,7 +107,9 @@
 			<div>
 				<p class="font-bold text-[var(--tertiary-color)]">Participant</p>
 				<Input
+					err={View.participantErr}
 					bind:value={View.participant}
+					onInput={View.onParticipantChange}
 					type="number"
 					min={1}
 					name="participant"
@@ -112,13 +126,66 @@
 				/>
 			</div>
 		</div>
-		<div class="flex gap-4">
-			<Datepicker dows={data.dows} onChange={View.onCalendarValueChange} label="Pick a date" />
-			<div class="flex flex-col gap-4">
-				<Input type="time" bind:value={View.selectedStartTime} name="start_time" id="start_time" />
-				<Button type="button" disabled={View.disableAddSchedule}>Add</Button>
+		<div class="flex flex-col gap-4 md:grid md:grid-cols-2">
+			<div class="flex items-center gap-4">
+				<div>
+					{#if View.dateErr}
+						<p class="text-red-500">{View.dateErr.message}</p>
+					{/if}
+					<Datepicker dows={data.dows} onChange={View.onCalendarValueChange} />
+				</div>
+				<div class="flex items-center gap-4">
+					<Input
+						type="time"
+						bind:value={View.selectedStartTime}
+						name="start_time"
+						id="start_time"
+					/>
+					<Button type="button" disabled={View.disableAddSchedule} onClick={View.addSchedule}
+						>Add</Button
+					>
+				</div>
+			</div>
+			{#if View.schedules.length >= 0}
+				<ScrollArea orientation="vertical" viewportClasses="max-h-[100px]">
+					<ul>
+						{#each View.schedules as sc (sc.date)}
+							<li class="flex items-center gap-2">
+								<Button
+									withBg={false}
+									textColor="dark"
+									type="button"
+									onClick={() => {
+										View.removeSchedule(sc.date);
+									}}><X /></Button
+								>
+								<p class="text-[var(--tertiary-color)]">
+									{sc.date} - {View.TimeOnlyToString(sc.start_time)}
+								</p>
+							</li>
+						{/each}
+					</ul>
+				</ScrollArea>
+			{/if}
+		</div>
+		<div class="flex flex-col gap-4">
+			<div class="flex items-center gap-2">
+				<p class="font-bold text-[var(--tertiary-color)]">Subtotal:</p>
+				<p class="text-[var(--tertiary-color)]">{View.subtotal}</p>
+			</div>
+			<div class="flex items-center gap-2">
+				<p class="font-bold text-[var(--tertiary-color)]">Operational Cost:</p>
+				<p class="text-[var(--tertiary-color)]">{View.operational}</p>
+			</div>
+			<div class="flex items-center gap-2">
+				<p class="font-bold text-[var(--tertiary-color)]">Discount:</p>
+				<p class="text-[var(--tertiary-color)]">{View.discount}</p>
+			</div>
+			<div class="flex items-center gap-2">
+				<p class="font-bold text-[var(--tertiary-color)]">Total:</p>
+				<p class="text-[var(--tertiary-color)]">{View.total}</p>
 			</div>
 		</div>
-		<Button disabled={View.disableSubmit} type="submit">Create Request</Button>
+		<Button full disabled={View.disableSubmit} type="submit">Create Request</Button>
 	</form>
 </div>

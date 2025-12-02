@@ -25,6 +25,39 @@ func CreateDiscountService(
 	return &DiscountServiceImpl{dr, ur, ar, tmr}
 }
 
+func (ds *DiscountServiceImpl) GetDiscount(ctx context.Context, param entity.GetDiscountParam) (*float64, error) {
+	user := new(entity.User)
+	discount := new(entity.Discount)
+	maxParticipant := new(int)
+
+	if err := ds.ur.FindByID(ctx, param.UserID, user); err != nil {
+		return nil, err
+	}
+	if user.Status != "verified" {
+		return nil, customerrors.NewError(
+			"unauthorized",
+			errors.New("user is not verified"),
+			customerrors.Unauthenticate,
+		)
+	}
+	if err := ds.dr.GetMaxParticipant(ctx, maxParticipant); err != nil {
+		return nil, err
+	}
+	participant := param.Participant
+	if participant > *maxParticipant {
+		participant = *maxParticipant
+	}
+	if err := ds.dr.GetDiscountByNumberOfParticipant(ctx, participant, discount); err != nil {
+		var parsedErr *customerrors.CustomError
+		if errors.As(err, &parsedErr) {
+			if parsedErr.ErrCode != customerrors.ItemNotExist {
+				return nil, err
+			}
+		}
+	}
+	return &discount.Amount, nil
+}
+
 func (ds *DiscountServiceImpl) GetAllDiscount(ctx context.Context, param entity.GetAllDiscountParam) (*[]entity.GetDiscountQuery, *int64, error) {
 	admin := new(entity.Admin)
 	totalRow := new(int64)

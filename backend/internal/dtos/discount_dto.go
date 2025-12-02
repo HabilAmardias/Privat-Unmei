@@ -14,9 +14,12 @@ type (
 	GetAllDiscountReq struct {
 		PaginatedReq
 	}
-	GetDiscountRes struct {
+	GetAllDiscountRes struct {
 		ID                  int     `json:"id"`
 		NumberOfParticipant int     `json:"number_of_participant"`
 		Amount              float64 `json:"amount"`
+	}
+	GetDiscountRes struct {
+		Amount float64 `json:"amount"`
 	}
 )

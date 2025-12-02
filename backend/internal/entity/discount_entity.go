@@ -11,6 +11,10 @@ type (
 		UpdatedAt           time.Time
 		DeletedAt           *time.Time
 	}
+	GetDiscountParam struct {
+		UserID      string
+		Participant int
+	}
 	CreateNewDiscountParam struct {
 		AdminID             string
 		NumberOfParticipant int

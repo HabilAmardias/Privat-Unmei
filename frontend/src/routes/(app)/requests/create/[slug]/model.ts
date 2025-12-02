@@ -39,3 +39,11 @@ export type MentorPaymentInfo = {
 export type DowRes = {
 	day_of_weeks: number[];
 };
+
+export type OperationalCostRes = {
+	operational_cost: number;
+};
+
+export type DiscountRes = {
+	amount: number;
+};

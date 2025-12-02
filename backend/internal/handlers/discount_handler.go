@@ -20,6 +20,39 @@ func CreateDiscountHandler(ds *services.DiscountServiceImpl) *DiscountHandlerImp
 	return &DiscountHandlerImpl{ds}
 }
 
+func (dh *DiscountHandlerImpl) GetDiscount(ctx *gin.Context) {
+	participantStr := ctx.Param("participant")
+	participant, err := strconv.Atoi(participantStr)
+	if err != nil {
+		ctx.Error(customerrors.NewError(
+			"invalid data",
+			err,
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.GetDiscountParam{
+		Participant: participant,
+		UserID:      claim.Subject,
+	}
+	discount, err := dh.ds.GetDiscount(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.GetDiscountRes{
+			Amount: *discount,
+		},
+	})
+}
+
 func (dh *DiscountHandlerImpl) GetAllDiscount(ctx *gin.Context) {
 	var req dtos.GetAllDiscountReq
 	if err := ctx.ShouldBind(&req); err != nil {
@@ -49,13 +82,13 @@ func (dh *DiscountHandlerImpl) GetAllDiscount(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	entries := []dtos.GetDiscountRes{}
+	entries := []dtos.GetAllDiscountRes{}
 	for _, d := range *discounts {
-		entries = append(entries, dtos.GetDiscountRes(d))
+		entries = append(entries, dtos.GetAllDiscountRes(d))
 	}
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
-		Data: dtos.PaginatedResponse[dtos.GetDiscountRes]{
+		Data: dtos.PaginatedResponse[dtos.GetAllDiscountRes]{
 			Entries: entries,
 			PageInfo: dtos.PaginatedInfo{
 				Limit:    param.Limit,

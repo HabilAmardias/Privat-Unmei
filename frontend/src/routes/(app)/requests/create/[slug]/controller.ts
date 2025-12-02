@@ -4,7 +4,9 @@ import type {
 	MentorPaymentInfo,
 	ScheduleSlot,
 	MentorScheduleInfo,
-	DowRes
+	DowRes,
+	OperationalCostRes,
+	DiscountRes
 } from './model';
 import { FetchData } from '$lib/utils';
 
@@ -25,6 +27,32 @@ class CreateRequestController {
 			return { success, message, status };
 		}
 		const resBody: ServerResponse<DowRes> = await res?.json();
+		return { success, message, status, resBody };
+	}
+	async getAdditionalCost(fetch: Fetch) {
+		const url = 'http://localhost:8080/api/v1/additional-cost/operational';
+		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
+		if (!success) {
+			return { success, message, status };
+		}
+		const resBody: ServerResponse<OperationalCostRes> = await res?.json();
+		return { success, message, status, resBody };
+	}
+	async getDiscount(fetch: Fetch, req?: Request) {
+		let participant: number = 1;
+		if (req) {
+			const formData = await req.formData();
+			const participantInput = formData.get('participant');
+			if (participantInput) {
+				participant = parseInt(participantInput as string);
+			}
+		}
+		const url = `http://localhost:8080/api/v1/discounts/final-discount/${participant}`;
+		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
+		if (!success) {
+			return { success, message, status };
+		}
+		const resBody: ServerResponse<DiscountRes> = await res?.json();
 		return { success, message, status, resBody };
 	}
 	async createRequest(fetch: Fetch, id: string, req: Request) {
