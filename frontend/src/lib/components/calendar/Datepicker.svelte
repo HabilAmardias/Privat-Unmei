@@ -3,10 +3,11 @@
 	import { Calendar, ChevronLeft, ChevronRight } from '@lucide/svelte';
 	import type { DateValue } from '@internationalized/date';
 	import { getDayOfWeek } from '@internationalized/date';
+
 	type datePickerProps = {
 		label?: string;
 		dows: number[];
-		onChange?: (date: DateValue | undefined) => void;
+		onChange?: (date?: DateValue) => void;
 	};
 	let { label, dows, onChange }: datePickerProps = $props();
 

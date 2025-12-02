@@ -5,6 +5,10 @@
 	import { enhance } from '$app/forms';
 	import CldImage from '$lib/components/image/CldImage.svelte';
 	import { dowMap } from './constants';
+	import Input from '$lib/components/form/Input.svelte';
+	import Select from '$lib/components/select/Select.svelte';
+	import Datepicker from '$lib/components/calendar/Datepicker.svelte';
+	import Button from '$lib/components/button/Button.svelte';
 
 	let { data }: PageProps = $props();
 	const View = new CreateRequestView(data.detail, data.payments);
@@ -80,4 +84,41 @@
 			<b class="mx-auto self-center text-[var(--tertiary-color)]">No schedules found</b>
 		{/if}
 	</div>
+	<h2 class="text-2xl font-bold text-[var(--tertiary-color)]">Create Request</h2>
+	<form
+		class="flex flex-col gap-4"
+		use:enhance={View.onCreateRequest}
+		action="?/createRequest"
+		method="POST"
+	>
+		<div class="grid grid-cols-2 gap-4">
+			<div>
+				<p class="font-bold text-[var(--tertiary-color)]">Participant</p>
+				<Input
+					bind:value={View.participant}
+					type="number"
+					min={1}
+					name="participant"
+					id="participant"
+				/>
+			</div>
+			<div>
+				<p class="font-bold text-[var(--tertiary-color)]">Payment Method</p>
+				<Select
+					bind:value={View.selectedPayment}
+					options={View.paymentOpts}
+					name="payment"
+					defaultLable="Please choose payment method"
+				/>
+			</div>
+		</div>
+		<div class="flex gap-4">
+			<Datepicker dows={data.dows} onChange={View.onCalendarValueChange} label="Pick a date" />
+			<div class="flex flex-col gap-4">
+				<Input type="time" bind:value={View.selectedStartTime} name="start_time" id="start_time" />
+				<Button type="button" disabled={View.disableAddSchedule}>Add</Button>
+			</div>
+		</div>
+		<Button disabled={View.disableSubmit} type="submit">Create Request</Button>
+	</form>
 </div>

@@ -35,3 +35,7 @@ export type MentorPaymentInfo = {
 	payment_method_name: string;
 	account_number: string;
 };
+
+export type DowRes = {
+	day_of_weeks: number[];
+};

@@ -1,5 +1,11 @@
 import type { Fetch, ServerResponse } from '$lib/types';
-import type { CourseDetail, MentorPaymentInfo, ScheduleSlot, MentorScheduleInfo } from './model';
+import type {
+	CourseDetail,
+	MentorPaymentInfo,
+	ScheduleSlot,
+	MentorScheduleInfo,
+	DowRes
+} from './model';
 import { FetchData } from '$lib/utils';
 
 class CreateRequestController {
@@ -18,7 +24,7 @@ class CreateRequestController {
 		if (!success) {
 			return { success, message, status };
 		}
-		const resBody: ServerResponse<number[]> = await res?.json();
+		const resBody: ServerResponse<DowRes> = await res?.json();
 		return { success, message, status, resBody };
 	}
 	async createRequest(fetch: Fetch, id: string, req: Request) {
