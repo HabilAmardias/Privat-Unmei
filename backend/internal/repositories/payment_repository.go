@@ -538,11 +538,11 @@ func (pr *PaymentRepositoryImpl) GetPaymentInfoByMentorAndMethodID(ctx context.C
 	query := `
 	SELECT
 		mp.payment_method_id,
-		p.name
+		p.name,
 		mp.mentor_id,
 		mp.account_number
 	FROM mentor_payments mp
-	JOIN ON payment_methods p ON p.id = mp.payment_method_id
+	JOIN payment_methods p ON p.id = mp.payment_method_id
 	WHERE mp.mentor_id = $1 AND mp.payment_method_id = $2 AND mp.deleted_at IS NULL AND p.deleted_at IS NULL
 	`
 	if err := driver.QueryRow(query, mentorID, paymentMethodID).Scan(

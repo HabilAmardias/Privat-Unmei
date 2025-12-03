@@ -147,7 +147,7 @@
 				</div>
 			</div>
 			{#if View.schedules.length >= 0}
-				<ScrollArea orientation="vertical" viewportClasses="max-h-[100px]">
+				<ScrollArea orientation="vertical" viewportClasses="h-[200px] max-h-[200px]">
 					<ul>
 						{#each View.schedules as sc (sc.date)}
 							<li class="flex items-center gap-2">
@@ -168,22 +168,38 @@
 				</ScrollArea>
 			{/if}
 		</div>
-		<div class="flex flex-col gap-4">
+		<div class="flex flex-col gap-2 rounded-lg bg-[var(--tertiary-color)] p-4">
 			<div class="flex items-center gap-2">
-				<p class="font-bold text-[var(--tertiary-color)]">Subtotal:</p>
-				<p class="text-[var(--tertiary-color)]">{View.subtotal}</p>
+				<p class="font-bold text-[var(--secondary-color)]">Subtotal:</p>
+				<p class="text-[var(--secondary-color)]">
+					{new Intl.NumberFormat('id-ID', { currency: 'IDR', style: 'currency' }).format(
+						View.subtotal
+					)}
+				</p>
 			</div>
 			<div class="flex items-center gap-2">
-				<p class="font-bold text-[var(--tertiary-color)]">Operational Cost:</p>
-				<p class="text-[var(--tertiary-color)]">{View.operational}</p>
+				<p class="font-bold text-[var(--secondary-color)]">Operational Cost:</p>
+				<p class="text-[var(--secondary-color)]">
+					{new Intl.NumberFormat('id-ID', { currency: 'IDR', style: 'currency' }).format(
+						View.operational
+					)}
+				</p>
 			</div>
 			<div class="flex items-center gap-2">
-				<p class="font-bold text-[var(--tertiary-color)]">Discount:</p>
-				<p class="text-[var(--tertiary-color)]">{View.discount}</p>
+				<p class="font-bold text-[var(--secondary-color)]">Discount:</p>
+				<p class="text-[var(--secondary-color)]">
+					{new Intl.NumberFormat('id-ID', { currency: 'IDR', style: 'currency' }).format(
+						View.discount
+					)}
+				</p>
 			</div>
 			<div class="flex items-center gap-2">
-				<p class="font-bold text-[var(--tertiary-color)]">Total:</p>
-				<p class="text-[var(--tertiary-color)]">{View.total}</p>
+				<p class="font-bold text-[var(--secondary-color)]">Total:</p>
+				<p class="text-[var(--secondary-color)]">
+					{new Intl.NumberFormat('id-ID', { currency: 'IDR', style: 'currency' }).format(
+						View.total
+					)}
+				</p>
 			</div>
 		</div>
 		<Button full disabled={View.disableSubmit} type="submit">Create Request</Button>

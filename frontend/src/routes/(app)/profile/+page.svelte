@@ -15,6 +15,7 @@
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import Loading from '$lib/components/loader/Loading.svelte';
 	import Image from '$lib/components/image/Image.svelte';
+	import Link from '$lib/components/button/Link.svelte';
 
 	let { data }: PageProps = $props();
 	const View = new profileView(data.profile, data.orders);
@@ -167,13 +168,27 @@
 					{:else}
 						<ScrollArea class="flex-1" orientation="horizontal" viewportClasses="max-h-full">
 							{#each View.orders as order (order.id)}
-								<div>
-									<p>{order.course_name}</p>
-									<p>{order.mentor_name}</p>
-									<p>{order.mentor_email}</p>
-									<p>{order.total_price}</p>
-									<p>{order.status}</p>
-								</div>
+								<Link href={`/requests/${order.id}`}>
+									<div
+										class="flex transform flex-col gap-2 rounded-lg bg-[var(--tertiary-color)] p-2 transition-all hover:-translate-y-0.5"
+									>
+										<div class="flex justify-between">
+											<p class="font-bold text-[var(--primary-color)]">{order.course_name}</p>
+											<p class="font-bold text-[var(--secondary-color)]">
+												{new Intl.NumberFormat('id-ID', {
+													currency: 'IDR',
+													style: 'currency'
+												}).format(order.total_price)}
+											</p>
+										</div>
+										<p class="text-[var(--secondary-color)]">Mentor: {order.mentor_name}</p>
+										<p class="text-[var(--secondary-color)]">{order.mentor_email}</p>
+
+										<p class="text-[var(--secondary-color)]">
+											Status: {View.capitalizeFirstLetter(order.status)}
+										</p>
+									</div>
+								</Link>
 							{/each}
 						</ScrollArea>
 					{/if}

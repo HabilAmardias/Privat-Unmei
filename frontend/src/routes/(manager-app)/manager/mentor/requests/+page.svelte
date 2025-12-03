@@ -60,7 +60,7 @@
 									{r.course_name}
 								</td>
 								<td class="text-center">
-									{r.status}
+									{View.capitalizeFirstLetter(r.status)}
 								</td>
 								<td class="text-center">
 									{r.name}

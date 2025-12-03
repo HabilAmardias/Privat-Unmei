@@ -40,12 +40,14 @@
 					action="?/rejectRequest"
 					bind:open={View.rejectDialogOpen}
 					title={rejectTitle}
+					enhancement={View.onReject}
 					{description}>Reject</AlertDialog
 				>
 				<AlertDialog
 					action="?/acceptRequest"
 					bind:open={View.acceptDialogOpen}
 					title={acceptTitle}
+					enhancement={View.onAccept}
 					{description}>Accept</AlertDialog
 				>
 			{:else if data.detail.status === 'pending payment'}
@@ -116,7 +118,7 @@
 				<ul class="flex flex-col gap-4">
 					{#each data.detail.schedules as sch (sch.date)}
 						<li class="rounded-lg bg-[var(--tertiary-color)] p-4 text-[var(--secondary-color)]">
-							<p class="font-bold text-[var(--primary-color)]">{sch.date}</p>
+							<p class="font-bold text-[var(--primary-color)]">{View.convertToDate(sch.date)}</p>
 							<p>{sch.start_time} - {sch.end_time}</p>
 						</li>
 					{/each}
