@@ -5,6 +5,7 @@ import type { CourseDetail, MentorPaymentInfo, ScheduleSlot, TimeOnly } from './
 import { debounce } from '$lib/utils/helper';
 
 export class CreateRequestView {
+	openCreateRequestDialog = $state<boolean>(false);
 	maxSession = $state<number>(0);
 	paymentOpts = $state<{ value: string; label: string }[]>([]);
 	schedules = $state<ScheduleSlot[]>([]);
@@ -20,7 +21,8 @@ export class CreateRequestView {
 	subtotal = $derived<number>(this.price * this.schedules.length);
 	operational = $derived<number>(this.cost * this.schedules.length);
 	discount = $state<number>(0);
-	total = $derived<number>(this.subtotal + this.operational - this.discount);
+	finalDiscount = $derived<number>(this.discount * this.schedules.length);
+	total = $derived<number>(this.subtotal + this.operational - this.finalDiscount);
 
 	getDiscountForm = $state<HTMLFormElement>();
 	#getDiscountSubmit = debounce(() => {
@@ -51,8 +53,11 @@ export class CreateRequestView {
 		const loadID = CreateToast('loading', 'creating....');
 		const scheduleInput = JSON.stringify(this.schedules);
 		args.formData.append('schedules', scheduleInput);
+		args.formData.append('payment', this.selectedPayment);
+		args.formData.append('participant', `${this.participant}`);
 
 		return async ({ result, update }: EnhancementReturn) => {
+			this.openCreateRequestDialog = false;
 			DismissToast(loadID);
 			if (result.type === 'redirect') {
 				CreateToast('success', 'successfully create request');

@@ -82,7 +82,9 @@
 									{c.title}
 								</td>
 								<td class="text-center">
-									{c.price}
+									{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(
+										c.price
+									)}
 								</td>
 								<td class="text-center">
 									{View.capitalizeFirstLetter(c.method)}

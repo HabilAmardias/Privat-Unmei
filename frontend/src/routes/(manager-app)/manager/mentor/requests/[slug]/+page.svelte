@@ -60,31 +60,27 @@
 			{/if}
 		</div>
 	</div>
-	<div class="grid grid-cols-2 gap-4 text-center md:flex md:justify-between">
-		<div>
-			<p class="font-bold text-[var(--tertiary-color)]">Course Name:</p>
-			<p>{data.detail.course_name}</p>
-		</div>
-		<div>
+	<div class="flex flex-col gap-2">
+		<div class="flex gap-2">
 			<p class="font-bold text-[var(--tertiary-color)]">Student Name:</p>
 			<p>{data.detail.student_name}</p>
 		</div>
-		<div>
+		<div class="flex gap-2">
 			<p class="font-bold text-[var(--tertiary-color)]">Participant:</p>
 			<p>{data.detail.number_of_participant}</p>
 		</div>
-		<div>
+		<div class="flex gap-2">
 			<p class="font-bold text-[var(--tertiary-color)]">Session:</p>
 			<p>{data.detail.number_of_sessions}</p>
 		</div>
-		<div>
+		<div class="flex gap-2">
 			<p class="font-bold text-[var(--tertiary-color)]">Status:</p>
-			<p>{data.detail.status}</p>
+			<p>{View.capitalizeFirstLetter(data.detail.status)}</p>
 		</div>
 		{#if data.detail.expired_at}
-			<div>
+			<div class="flex gap-2">
 				<p class="font-bold text-[var(--tertiary-color)]">Expired At:</p>
-				<p>{data.detail.expired_at}</p>
+				<p>{View.convertToDatetime(data.detail.expired_at)}</p>
 			</div>
 		{/if}
 	</div>
@@ -100,15 +96,27 @@
 		</div>
 		<div>
 			<p class="font-bold text-[var(--tertiary-color)]">Subtotal:</p>
-			<p>{data.detail.subtotal}</p>
+			<p>
+				{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(
+					data.detail.subtotal
+				)}
+			</p>
 		</div>
 		<div>
 			<p class="font-bold text-[var(--tertiary-color)]">Operational Cost:</p>
-			<p>{data.detail.operational_cost}</p>
+			<p>
+				{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(
+					data.detail.operational_cost
+				)}
+			</p>
 		</div>
 		<div>
 			<p class="font-bold text-[var(--tertiary-color)]">Total Price:</p>
-			<p>{data.detail.total_price}</p>
+			<p>
+				{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(
+					data.detail.total_price
+				)}
+			</p>
 		</div>
 	</div>
 	<div class="flex flex-col gap-4">

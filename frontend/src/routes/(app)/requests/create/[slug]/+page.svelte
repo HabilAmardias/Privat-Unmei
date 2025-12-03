@@ -9,6 +9,7 @@
 	import Select from '$lib/components/select/Select.svelte';
 	import Datepicker from '$lib/components/calendar/Datepicker.svelte';
 	import Button from '$lib/components/button/Button.svelte';
+	import AlertDialog from '$lib/components/dialog/AlertDialog.svelte';
 	import { X } from '@lucide/svelte';
 
 	let { data }: PageProps = $props();
@@ -25,6 +26,14 @@
 	<meta name="description" content="Profile - Privat Unmei" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </svelte:head>
+
+{#snippet description()}
+	Irreversible Action, do you want to proceed?
+{/snippet}
+
+{#snippet createRequestTitle()}
+	Create Request Confirmation
+{/snippet}
 
 <div class="flex flex-col gap-4 p-4">
 	<form
@@ -97,12 +106,7 @@
 		{/if}
 	</div>
 	<h2 class="text-2xl font-bold text-[var(--tertiary-color)]">Create Request</h2>
-	<form
-		class="flex flex-col gap-4"
-		use:enhance={View.onCreateRequest}
-		action="?/createRequest"
-		method="POST"
-	>
+	<div class="flex flex-col gap-4">
 		<div class="grid grid-cols-2 gap-4">
 			<div>
 				<p class="font-bold text-[var(--tertiary-color)]">Participant</p>
@@ -189,7 +193,7 @@
 				<p class="font-bold text-[var(--secondary-color)]">Discount:</p>
 				<p class="text-[var(--secondary-color)]">
 					{new Intl.NumberFormat('id-ID', { currency: 'IDR', style: 'currency' }).format(
-						View.discount
+						View.finalDiscount
 					)}
 				</p>
 			</div>
@@ -202,6 +206,13 @@
 				</p>
 			</div>
 		</div>
-		<Button full disabled={View.disableSubmit} type="submit">Create Request</Button>
-	</form>
+		<AlertDialog
+			action="?/createRequest"
+			bind:open={View.openCreateRequestDialog}
+			enhancement={View.onCreateRequest}
+			title={createRequestTitle}
+			full
+			{description}>Create</AlertDialog
+		>
+	</div>
 </div>

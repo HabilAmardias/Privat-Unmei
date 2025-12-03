@@ -69,7 +69,9 @@
 									{r.email}
 								</td>
 								<td class="text-center">
-									{r.total_price}
+									{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(
+										r.total_price
+									)}
 								</td>
 								<td>
 									<div class="flex items-center justify-center">

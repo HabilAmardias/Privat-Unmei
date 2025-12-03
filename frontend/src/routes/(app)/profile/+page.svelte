@@ -167,29 +167,31 @@
 						<b class="mx-auto self-center text-[var(--tertiary-color)]">No orders found</b>
 					{:else}
 						<ScrollArea class="flex-1" orientation="horizontal" viewportClasses="max-h-full">
-							{#each View.orders as order (order.id)}
-								<Link href={`/requests/${order.id}`}>
-									<div
-										class="flex transform flex-col gap-2 rounded-lg bg-[var(--tertiary-color)] p-2 transition-all hover:-translate-y-0.5"
-									>
-										<div class="flex justify-between">
-											<p class="font-bold text-[var(--primary-color)]">{order.course_name}</p>
-											<p class="font-bold text-[var(--secondary-color)]">
-												{new Intl.NumberFormat('id-ID', {
-													currency: 'IDR',
-													style: 'currency'
-												}).format(order.total_price)}
+							<div class="flex flex-col gap-2">
+								{#each View.orders as order (order.id)}
+									<Link href={`/requests/${order.id}`}>
+										<div
+											class="flex transform flex-col gap-2 rounded-lg bg-[var(--tertiary-color)] p-2 transition-all hover:-translate-y-0.5"
+										>
+											<div class="flex justify-between">
+												<p class="font-bold text-[var(--primary-color)]">{order.course_name}</p>
+												<p class="font-bold text-[var(--secondary-color)]">
+													{new Intl.NumberFormat('id-ID', {
+														currency: 'IDR',
+														style: 'currency'
+													}).format(order.total_price)}
+												</p>
+											</div>
+											<p class="text-[var(--secondary-color)]">Mentor: {order.mentor_name}</p>
+											<p class="text-[var(--secondary-color)]">{order.mentor_email}</p>
+
+											<p class="text-[var(--secondary-color)]">
+												Status: {View.capitalizeFirstLetter(order.status)}
 											</p>
 										</div>
-										<p class="text-[var(--secondary-color)]">Mentor: {order.mentor_name}</p>
-										<p class="text-[var(--secondary-color)]">{order.mentor_email}</p>
-
-										<p class="text-[var(--secondary-color)]">
-											Status: {View.capitalizeFirstLetter(order.status)}
-										</p>
-									</div>
-								</Link>
-							{/each}
+									</Link>
+								{/each}
+							</div>
 						</ScrollArea>
 					{/if}
 				</div>
