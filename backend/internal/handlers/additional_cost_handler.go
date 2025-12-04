@@ -20,6 +20,28 @@ func CreateAdditionalCostHandler(acs *services.AdditionalCostServiceImpl) *Addit
 	return &AdditionalCostHandlerImpl{acs}
 }
 
+func (ach *AdditionalCostHandlerImpl) GetOperationalCost(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.GetOperationalCostParam{
+		UserID: claim.Subject,
+	}
+	cost, err := ach.acs.GetOperationalCost(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.OperationalCostRes{
+			Cost: *cost,
+		},
+	})
+}
+
 func (ach *AdditionalCostHandlerImpl) GetAllAdditionalCost(ctx *gin.Context) {
 	var req dtos.GetAllAdditionalCostReq
 	if err := ctx.ShouldBind(&req); err != nil {

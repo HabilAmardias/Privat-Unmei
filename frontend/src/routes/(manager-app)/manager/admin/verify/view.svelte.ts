@@ -1,8 +1,18 @@
 export class VerifyAdminView {
 	email = $state<string>('');
-	emailError = $state<Error | undefined>();
+	emailError = $derived.by<Error | undefined>(() => {
+		if (this.email && !this.#validateEmail(this.email)) {
+			return new Error('please insert an valid email');
+		}
+		return undefined;
+	});
 	password = $state<string>('');
-	passwordError = $state<Error | undefined>();
+	passwordError = $derived.by<Error | undefined>(() => {
+		if (this.password && !this.#validatePassword(this.password)) {
+			return new Error('min 8 characters with !@#?');
+		}
+		return undefined;
+	});
 	isLoading = $state<boolean>(false);
 	verifyDisabled = $derived.by<boolean>(() => {
 		if (!this.email || this.emailError || this.passwordError || this.isLoading) {
@@ -10,21 +20,6 @@ export class VerifyAdminView {
 		}
 		return false;
 	});
-
-	passwordOnBlur() {
-		if (!this.#validatePassword(this.password)) {
-			this.passwordError = new Error('min 8 characters with !@#?');
-		} else {
-            this.passwordError = undefined;
-        }
-	}
-	emailOnBlur() {
-		if (!this.#validateEmail(this.email)) {
-			this.emailError = new Error('please insert an valid email');
-		} else {
-            this.emailError = undefined;
-        }
-	}
 	#validateEmail(email: string) {
 		const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		return pattern.test(email);

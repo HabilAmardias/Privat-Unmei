@@ -34,10 +34,10 @@ export class RequestManagementView {
 				CreateToast('error', result.data?.message);
 			}
 			if (result.type === 'success') {
-				this.requests = result.data?.entries;
-				this.page = result.data?.page_info.page;
-				this.limit = result.data?.page_info.limit;
-				this.totalRow = result.data?.page_info.total_row;
+				this.requests = result.data?.requests.entries;
+				this.page = result.data?.requests.page_info.page;
+				this.limit = result.data?.requests.page_info.limit;
+				this.totalRow = result.data?.requests.page_info.total_row;
 			}
 		};
 	};
@@ -52,11 +52,20 @@ export class RequestManagementView {
 				CreateToast('error', result.data?.message);
 			}
 			if (result.type === 'success') {
-				this.requests = result.data?.entries;
-				this.page = result.data?.page_info.page;
-				this.limit = result.data?.page_info.limit;
-				this.totalRow = result.data?.page_info.total_row;
+				this.requests = result.data?.requests.entries;
+				this.page = result.data?.requests.page_info.page;
+				this.limit = result.data?.requests.page_info.limit;
+				this.totalRow = result.data?.requests.page_info.total_row;
 			}
 		};
 	};
+	capitalizeFirstLetter(s: string) {
+		if (s.length === 0) {
+			return s;
+		}
+		if (s.length === 1) {
+			return s.toUpperCase();
+		}
+		return s.charAt(0).toUpperCase() + s.slice(1);
+	}
 }

@@ -7,6 +7,9 @@
 	import Loading from '$lib/components/loader/Loading.svelte';
 	import Link from '$lib/components/button/Link.svelte';
 	import CldImage from '$lib/components/image/CldImage.svelte';
+	import RatingGroup from '$lib/components/rating/RatingGroup.svelte';
+	import Textarea from '$lib/components/form/Textarea.svelte';
+	import Button from '$lib/components/button/Button.svelte';
 
 	let { data }: PageProps = $props();
 	const View = new CourseDetailView(data.reviews);
@@ -19,14 +22,16 @@
 </svelte:head>
 
 <div class="flex flex-col gap-4 p-4">
-	<div class="flex flex-col gap-2 md:flex-row md:justify-between">
+	<div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
 		<h1 class="text-2xl font-bold text-[var(--tertiary-color)]">{data.detail.title}</h1>
-		<div class="w-fit rounded-lg bg-[var(--tertiary-color)] p-2">
-			<p class="font-bold text-[var(--secondary-color)]">
-				{new Intl.NumberFormat('id-ID', { currency: 'IDR', style: 'currency' }).format(
-					data.detail.price
-				)} / session
-			</p>
+		<div class="flex flex-col gap-2 md:items-end">
+			<div class="w-fit rounded-lg bg-[var(--tertiary-color)] p-2">
+				<p class="font-bold text-[var(--secondary-color)]">
+					{new Intl.NumberFormat('id-ID', { currency: 'IDR', style: 'currency' }).format(
+						data.detail.price
+					)} / session
+				</p>
+			</div>
 		</div>
 	</div>
 	<ScrollArea orientation="horizontal" viewportClasses="max-w-[300px]">
@@ -38,25 +43,30 @@
 			{/each}
 		</ul>
 	</ScrollArea>
-	<div class="grid grid-cols-2">
-		<div class="flex flex-col gap-2">
-			<div class="flex gap-2">
-				<p class="font-bold text-[var(--tertiary-color)]">Method:</p>
-				<p>{View.capitalizeFirstLetter(data.detail.method)}</p>
-			</div>
-			<div class="flex gap-2">
-				<p class="font-bold text-[var(--tertiary-color)]">Domicile:</p>
-				<p>{data.detail.domicile}</p>
-			</div>
-			<div class="flex gap-2">
-				<p class="font-bold text-[var(--tertiary-color)]">Per Session Duration (minutes):</p>
-				<p>{data.detail.session_duration_minutes}</p>
-			</div>
+	<div class="flex flex-col gap-2">
+		<div class="flex gap-2">
+			<p class="font-bold text-[var(--tertiary-color)]">Method:</p>
+			<p>{View.capitalizeFirstLetter(data.detail.method)}</p>
+		</div>
+		<div class="flex gap-2">
+			<p class="font-bold text-[var(--tertiary-color)]">Domicile:</p>
+			<p>{data.detail.domicile}</p>
+		</div>
+		<div class="flex items-center gap-2">
+			<p class="font-bold text-[var(--tertiary-color)]">Per Session Duration (minutes):</p>
+			<p>{data.detail.session_duration_minutes}</p>
 		</div>
 	</div>
-	<div class="flex flex-col">
-		<p class="font-bold text-[var(--tertiary-color)]">Description</p>
-		<p>{data.detail.description}</p>
+	<div class="flex flex-col gap-2">
+		<div class="flex flex-col">
+			<p class="font-bold text-[var(--tertiary-color)]">Description</p>
+			<p>{data.detail.description}</p>
+		</div>
+		{#if data.profile}
+			<div class="w-fit rounded-lg bg-[var(--tertiary-color)] p-2">
+				<Link href={`/requests/create/${data.detail.id}`}>Buy Course</Link>
+			</div>
+		{/if}
 	</div>
 	<Link href={`/mentors/${data.detail.mentor_id}`}>
 		<p class="font-bold text-[var(--tertiary-color)]">Mentor</p>
@@ -95,6 +105,26 @@
 		</div>
 	</div>
 	<h2 class="text-xl font-bold text-[var(--tertiary-color)]">Reviews</h2>
+	{#if data.profile}
+		<form
+			use:enhance={View.onCreateReview}
+			class="flex flex-col gap-4"
+			action="?/createReview"
+			method="post"
+		>
+			<RatingGroup bind:value={View.star} name="rating" />
+			<Textarea
+				err={View.feedbackErr}
+				bind:value={View.feedback}
+				name="feedback"
+				id="feedback"
+				placeholder="please insert feedback"
+			>
+				<p class="font-bold text-[var(--tertiary-color)]">Feedback:</p>
+			</Textarea>
+			<Button full disabled={View.reviewDisabled} type="submit">Submit</Button>
+		</form>
+	{/if}
 	<div>
 		{#if View.isLoading}
 			<Loading />

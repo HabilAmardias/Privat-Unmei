@@ -84,10 +84,15 @@ type (
 		TotalPrice          float64             `json:"total_price"`
 		Subtotal            float64             `json:"subtotal"`
 		OperationalCost     float64             `json:"operational_cost"`
+		PaymentMethodName   string              `json:"payment_method"`
+		AccountNumber       string              `json:"account_number"`
 		NumberOfSessions    int                 `json:"number_of_sessions"`
 		Status              string              `json:"status"`
 		ExpiredAt           *time.Time          `json:"expired_at"`
 		NumberOfParticipant int                 `json:"number_of_participant"`
 		Schedules           []CourseScheduleRes `json:"schedules"`
+	}
+	OperationalCostRes struct {
+		Cost float64 `json:"operational_cost"`
 	}
 )

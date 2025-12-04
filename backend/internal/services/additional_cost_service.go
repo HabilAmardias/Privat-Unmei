@@ -25,6 +25,25 @@ func CreateAdditionalCostService(
 	return &AdditionalCostServiceImpl{acr, ur, ar, tmr}
 }
 
+func (acs *AdditionalCostServiceImpl) GetOperationalCost(ctx context.Context, param entity.GetOperationalCostParam) (*float64, error) {
+	operationalCost := new(float64)
+	user := new(entity.User)
+	if err := acs.ur.FindByID(ctx, param.UserID, user); err != nil {
+		return nil, err
+	}
+	if user.Status != "verified" {
+		return nil, customerrors.NewError(
+			"unverified",
+			errors.New("user is not verified"),
+			customerrors.Unauthenticate,
+		)
+	}
+	if err := acs.acr.GetOperationalCost(ctx, operationalCost); err != nil {
+		return nil, err
+	}
+	return operationalCost, nil
+}
+
 func (acs *AdditionalCostServiceImpl) GetAllAdditionalCost(ctx context.Context, param entity.GetAllAdditionalCostParam) (*[]entity.GetAdditionalCostQuery, *int64, error) {
 	admin := new(entity.Admin)
 	totalRow := new(int64)

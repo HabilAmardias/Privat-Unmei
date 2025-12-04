@@ -4,7 +4,7 @@ import "time"
 
 type (
 	CreateRatingReq struct {
-		Rating   int     `json:"rating" binding:"required,min=1,max=5"`
+		Rating   int     `json:"rating" binding:"required,gte=1,lte=5"`
 		Feedback *string `json:"feedback" binding:"omitempty,min=15"`
 	}
 	CreateRatingRes struct {

@@ -106,6 +106,8 @@ func (c *RouteConfig) SetupPublicRoute() {
 func (c *RouteConfig) SetupPrivateRoute() {
 	v1 := c.App.Group("/api/v1")
 	v1.Use(middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForLogin))
+	v1.GET("/discounts/final-discount/:participant", c.DiscountHandler.GetDiscount)
+	v1.GET("/additional-cost/operational", c.AdditionalCostHandler.GetOperationalCost)
 	v1.POST("/courses/:id/reviews", middlewares.AuthorizationMiddleware(
 		constants.CreatePermission,
 		constants.CourseRatingResource,

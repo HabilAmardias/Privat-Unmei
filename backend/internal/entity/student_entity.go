@@ -59,6 +59,7 @@ type (
 		ID string
 	}
 	StudentProfileQuery struct {
+		ID           string
 		Name         string
 		Email        string
 		Bio          string

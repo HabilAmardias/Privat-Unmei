@@ -2,7 +2,7 @@ import type { Fetch, ServerResponse } from '$lib/types';
 import type { RequestDetail } from './model';
 import { FetchData } from '$lib/utils';
 
-class CourseDetailController {
+class RequestDetailController {
 	async getRequestDetail(fetch: Fetch, id: string) {
 		const url = `http://localhost:8080/api/v1/mentors/me/course-requests/${id}`;
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
@@ -29,4 +29,4 @@ class CourseDetailController {
 	}
 }
 
-export const controller = new CourseDetailController();
+export const controller = new RequestDetailController();

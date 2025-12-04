@@ -32,3 +32,15 @@ export type CourseDetail = {
 	mentor_profile_image: string;
 	description: string;
 };
+
+export type CreateReview = {
+	id: number;
+};
+
+export type StudentProfile = {
+	id: string;
+	name: string;
+	bio: string;
+	profile_image: string;
+	email: string;
+};

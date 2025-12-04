@@ -117,6 +117,8 @@ type (
 		TotalPrice          float64
 		Subtotal            float64
 		OperationalCost     float64
+		PaymentMethodName   string
+		AccountNumber       string
 		NumberOfSessions    int
 		Status              string
 		NumberOfParticipant int

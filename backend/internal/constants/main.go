@@ -20,7 +20,7 @@ const (
 	AvatarFolder            = "Avatars/"
 	ResumeFolder            = "Resumes/"
 	MaxCourseCategories     = 5
-	ExpiredInterval         = 15 * time.Minute // 15 minute for development and testing
+	ExpiredInterval         = 24 * time.Hour
 	NoRating                = 0
 	MaxLimit                = 25
 )
@@ -93,8 +93,210 @@ const (
 	DeleteAllPermission
 )
 
+func PaymentInfoEmailBody(courseName string, mentorName string, mentorEmail string, method string, accountNumber string, totalPrice float64, eat string) string {
+	loginURL := fmt.Sprintf("%s/login", os.Getenv("CLIENT_DOMAIN"))
+	return fmt.Sprintf(`
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Detail</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%%" style="background-color: #f4f4f4;">
+        <tr>
+            <td style="padding: 20px 0;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="margin: 0 auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color: #2c3e50; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">Privat-Unmei</h1>
+                        </td>
+                    </tr>
+                    
+                    <!-- Security Warning -->
+                    <tr>
+                        <td style="padding: 0 30px;">
+                            <div style="margin: 20px 0 0 0; padding: 20px; background-color: #f8d7da; border: 2px solid #f5c6cb; border-radius: 5px;">
+                                <h3 style="color: #721c24; margin: 0 0 10px 0; font-size: 16px;">🔒 SECURITY NOTICE</h3>
+                                <p style="color: #721c24; font-size: 14px; margin: 0; line-height: 20px; font-weight: bold;">
+                                    This email contain sensitive information
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Main Content -->
+                    <tr>
+                        <td style="padding: 20px 30px 40px 30px;">
+                            <h2 style="color: #2c3e50; margin: 0 0 20px 0; font-size: 24px;">Order Detail</h2>
+                            
+                            <p style="color: #555555; font-size: 16px; line-height: 24px; margin: 0 0 30px 0;">
+                                Your request already accepted. Below are the detail informations about the payment
+                            </p>
+                            
+                            <!-- Credentials Box -->
+                            <div style="margin: 30px 0; padding: 25px; background-color: #f8f9fa; border: 2px solid #dee2e6; border-radius: 8px;">
+                                <h3 style="color: #2c3e50; margin: 0 0 15px 0; font-size: 18px;">Order Detail:</h3>
+                                
+                                <table style="width: 100%%; border-collapse: collapse;">
+                                    <tr>
+                                        <td style="padding: 10px 0; font-weight: bold; color: #2c3e50; width: 120px;">Course Name:</td>
+                                        <td style="padding: 10px 15px; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 16px; color: #2c3e50;">%s</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 10px 0; font-weight: bold; color: #2c3e50;">Mentor Name:</td>
+                                        <td style="padding: 10px 15px; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 16px; color: #2c3e50;">%s</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 10px 0; font-weight: bold; color: #2c3e50;">Mentor Email:</td>
+                                        <td style="padding: 10px 15px; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 16px; color: #2c3e50;">%s</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 10px 0; font-weight: bold; color: #2c3e50;">Payment Method:</td>
+                                        <td style="padding: 10px 15px; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 16px; color: #2c3e50;">%s - %s</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 10px 0; font-weight: bold; color: #2c3e50;">Total Price:</td>
+                                        <td style="padding: 10px 15px; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 16px; color: #2c3e50;">%.2f</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 10px 0; font-weight: bold; color: #2c3e50;">Expired At:</td>
+                                        <td style="padding: 10px 15px; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 16px; color: #2c3e50;">%v</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            
+                            <!-- Login Button -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 30px 0;">
+                                <tr>
+                                    <td style="text-align: center;">
+                                        <a href="%s" style="background-color: #27ae60; color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-size: 18px; font-weight: bold; display: inline-block; min-width: 200px;">
+                                            Login to Your Account
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p style="color: #555555; font-size: 14px; line-height: 20px; margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #27ae60; border-radius: 4px;">
+                                <strong>Direct Login Link:</strong><br>
+                                <a href="%s" style="color: #27ae60; word-break: break-all;">%s</a>
+                            </p>
+                        </td>
+                    </tr>
+                    
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+    `, courseName, mentorName, mentorEmail, method, accountNumber, totalPrice, eat, loginURL, loginURL, loginURL)
+}
+
+func RequestDetailEmailBody(courseName string, studentName string, studentEmail string, participant int, totalPrice float64) string {
+	loginURL := fmt.Sprintf("%s/manager/login", os.Getenv("CLIENT_DOMAIN"))
+	return fmt.Sprintf(`
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Detail</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%%" style="background-color: #f4f4f4;">
+        <tr>
+            <td style="padding: 20px 0;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="margin: 0 auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color: #2c3e50; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">Privat-Unmei</h1>
+                        </td>
+                    </tr>
+                    
+                    <!-- Security Warning -->
+                    <tr>
+                        <td style="padding: 0 30px;">
+                            <div style="margin: 20px 0 0 0; padding: 20px; background-color: #f8d7da; border: 2px solid #f5c6cb; border-radius: 5px;">
+                                <h3 style="color: #721c24; margin: 0 0 10px 0; font-size: 16px;">🔒 SECURITY NOTICE</h3>
+                                <p style="color: #721c24; font-size: 14px; margin: 0; line-height: 20px; font-weight: bold;">
+                                    This email contain sensitive information
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Main Content -->
+                    <tr>
+                        <td style="padding: 20px 30px 40px 30px;">
+                            <h2 style="color: #2c3e50; margin: 0 0 20px 0; font-size: 24px;">Order Detail</h2>
+                            
+                            <p style="color: #555555; font-size: 16px; line-height: 24px; margin: 0 0 30px 0;">
+                                An order has arrived. Below are the detail informations about the order
+                            </p>
+                            
+                            <!-- Credentials Box -->
+                            <div style="margin: 30px 0; padding: 25px; background-color: #f8f9fa; border: 2px solid #dee2e6; border-radius: 8px;">
+                                <h3 style="color: #2c3e50; margin: 0 0 15px 0; font-size: 18px;">Order Detail:</h3>
+                                
+                                <table style="width: 100%%; border-collapse: collapse;">
+                                    <tr>
+                                        <td style="padding: 10px 0; font-weight: bold; color: #2c3e50; width: 120px;">Course Name:</td>
+                                        <td style="padding: 10px 15px; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 16px; color: #2c3e50;">%s</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 10px 0; font-weight: bold; color: #2c3e50;">Student Name:</td>
+                                        <td style="padding: 10px 15px; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 16px; color: #2c3e50;">%s</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 10px 0; font-weight: bold; color: #2c3e50;">Student Email:</td>
+                                        <td style="padding: 10px 15px; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 16px; color: #2c3e50;">%s</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 10px 0; font-weight: bold; color: #2c3e50;">Number of Participant:</td>
+                                        <td style="padding: 10px 15px; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 16px; color: #2c3e50;">%d</td>
+                                    </tr>
+                                     <tr>
+                                        <td style="padding: 10px 0; font-weight: bold; color: #2c3e50;">Total Price:</td>
+                                        <td style="padding: 10px 15px; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 16px; color: #2c3e50;">%.2f</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            
+                            <!-- Login Button -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 30px 0;">
+                                <tr>
+                                    <td style="text-align: center;">
+                                        <a href="%s" style="background-color: #27ae60; color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-size: 18px; font-weight: bold; display: inline-block; min-width: 200px;">
+                                            Login to Your Account
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p style="color: #555555; font-size: 14px; line-height: 20px; margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #27ae60; border-radius: 4px;">
+                                <strong>Direct Login Link:</strong><br>
+                                <a href="%s" style="color: #27ae60; word-break: break-all;">%s</a>
+                            </p>
+                        </td>
+                    </tr>
+                    
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+    `, courseName, studentName, studentEmail, participant, totalPrice, loginURL, loginURL, loginURL)
+}
+
 func SendMentorAccEmailBody(email string, password string) string {
-	loginURL := fmt.Sprintf("%s/mentor/login", os.Getenv("CLIENT_DOMAIN"))
+	loginURL := fmt.Sprintf("%s/manager/login", os.Getenv("CLIENT_DOMAIN"))
 	return fmt.Sprintf(`
     <!DOCTYPE html>
 <html lang="en">

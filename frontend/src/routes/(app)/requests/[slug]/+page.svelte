@@ -2,7 +2,6 @@
 	import type { PageProps } from './$types';
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import { RequestDetailView } from './view.svelte';
-	import AlertDialog from '$lib/components/dialog/AlertDialog.svelte';
 
 	let { data }: PageProps = $props();
 	const View = new RequestDetailView();
@@ -14,59 +13,16 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </svelte:head>
 
-{#snippet description()}
-	Irreversible Action, do you want to proceed?
-{/snippet}
-
-{#snippet rejectTitle()}
-	Reject Request Confirmation
-{/snippet}
-
-{#snippet acceptTitle()}
-	Accept Request Confirmation
-{/snippet}
-
-{#snippet confirmTitle()}
-	Confirm Payment Confirmation
-{/snippet}
-
 <div class="flex flex-col gap-4 p-4">
-	<div class="flex items-center justify-between gap-4">
-		<h1 class="text-xl font-bold text-[var(--tertiary-color)]">{data.detail.course_name}</h1>
-		<div class="flex gap-4">
-			{#if data.detail.status === 'reserved'}
-				<AlertDialog
-					action="?/rejectRequest"
-					bind:open={View.rejectDialogOpen}
-					title={rejectTitle}
-					enhancement={View.onReject}
-					{description}>Reject</AlertDialog
-				>
-				<AlertDialog
-					action="?/acceptRequest"
-					bind:open={View.acceptDialogOpen}
-					title={acceptTitle}
-					enhancement={View.onAccept}
-					{description}>Accept</AlertDialog
-				>
-			{:else if data.detail.status === 'pending payment'}
-				<AlertDialog
-					action="?/confirmPayment"
-					bind:open={View.confirmDialogOpen}
-					title={confirmTitle}
-					{description}>Confirm Payment</AlertDialog
-				>
-			{/if}
-		</div>
-	</div>
+	<h1 class="text-xl font-bold text-[var(--tertiary-color)]">{data.detail.course_name}</h1>
 	<div class="flex flex-col gap-2">
 		<div class="flex gap-2">
-			<p class="font-bold text-[var(--tertiary-color)]">Student Name:</p>
-			<p>{data.detail.student_name}</p>
+			<p class="font-bold text-[var(--tertiary-color)]">Mentor Name:</p>
+			<p>{data.detail.mentor_name}</p>
 		</div>
 		<div class="flex gap-2">
-			<p class="font-bold text-[var(--tertiary-color)]">Student Email:</p>
-			<p>{data.detail.student_email}</p>
+			<p class="font-bold text-[var(--tertiary-color)]">Mentor Email:</p>
+			<p>{data.detail.mentor_email}</p>
 		</div>
 		<div class="flex gap-2">
 			<p class="font-bold text-[var(--tertiary-color)]">Participant:</p>

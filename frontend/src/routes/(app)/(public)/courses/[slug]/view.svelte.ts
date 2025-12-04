@@ -1,6 +1,7 @@
 import type { EnhancementArgs, EnhancementReturn, PaginatedResponse } from '$lib/types';
-import { CreateToast } from '$lib/utils/helper';
-import type { CourseReview } from './model';
+import { CreateToast, DismissToast } from '$lib/utils/helper';
+import { SvelteDate } from 'svelte/reactivity';
+import type { CourseReview, StudentProfile } from './model';
 
 export class CourseDetailView {
 	reviews = $state<CourseReview[]>([]);
@@ -9,12 +10,27 @@ export class CourseDetailView {
 	limit = $state<number>(15);
 	totalRow = $state<number>(15);
 	paginationForm = $state<HTMLFormElement>();
+	star = $state<number>(1);
+	feedback = $state<string>('');
+	profile = $state<StudentProfile>();
+	feedbackErr = $derived.by<Error | undefined>(() => {
+		if (this.feedback.length < 15) {
+			return new Error('Feedback must at least contain 15 characters');
+		}
+		return undefined;
+	});
+	reviewDisabled = $derived.by<boolean>(() => {
+		return this.feedbackErr ? true : false;
+	});
 
-	constructor(d: PaginatedResponse<CourseReview>) {
+	constructor(d: PaginatedResponse<CourseReview>, p?: StudentProfile) {
 		this.reviews = d.entries;
 		this.page = d.page_info.page;
 		this.limit = d.page_info.limit;
 		this.totalRow = d.page_info.total_row;
+		if (p) {
+			this.profile = p;
+		}
 	}
 	capitalizeFirstLetter(s: string) {
 		if (s.length === 0) {
@@ -41,6 +57,31 @@ export class CourseDetailView {
 				this.page = result.data?.reviews.page_info.page;
 				this.totalRow = result.data?.reviews.page_info.total_row;
 				this.reviews = result.data?.reviews.entries;
+			}
+		};
+	};
+	onCreateReview = () => {
+		const loadID = CreateToast('loading', 'loading....');
+		return async ({ result }: EnhancementReturn) => {
+			DismissToast(loadID);
+			if (result.type === 'success') {
+				CreateToast('success', 'successfully create review');
+				this.totalRow += 1;
+				const now = new SvelteDate().toDateString();
+				if (this.reviews.length < this.limit) {
+					this.reviews.push({
+						id: result.data?.id,
+						course_id: result.data?.course_id,
+						student_id: this.profile!.id,
+						name: this.profile!.name,
+						rating: this.star,
+						feedback: this.feedback,
+						created_at: now
+					});
+				}
+			}
+			if (result.type === 'failure') {
+				CreateToast('error', result.data?.message);
 			}
 		};
 	};

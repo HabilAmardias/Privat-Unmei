@@ -69,6 +69,7 @@ func (us *StudentServiceImpl) GetStudentProfile(ctx context.Context, param entit
 	if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
 		return nil, err
 	}
+	profile.ID = param.ID
 	profile.Name = user.Name
 	profile.Bio = user.Bio
 	profile.ProfileImage = user.ProfileImage

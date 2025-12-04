@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/repositories"
+	"privat-unmei/internal/utils"
 	"time"
 )
 
@@ -23,6 +25,7 @@ type CourseRequestServiceImpl struct {
 	dr  *repositories.DiscountRepositoryImpl
 	acr *repositories.AdditionalCostRepositoryImpl
 	tmr *repositories.TransactionManagerRepositories
+	gu  *utils.GomailUtil
 }
 
 func CreateCourseRequestService(
@@ -37,8 +40,9 @@ func CreateCourseRequestService(
 	dr *repositories.DiscountRepositoryImpl,
 	acr *repositories.AdditionalCostRepositoryImpl,
 	tmr *repositories.TransactionManagerRepositories,
+	gu *utils.GomailUtil,
 ) *CourseRequestServiceImpl {
-	return &CourseRequestServiceImpl{crr, cr, csr, mar, ur, sr, mr, pr, dr, acr, tmr}
+	return &CourseRequestServiceImpl{crr, cr, csr, mar, ur, sr, mr, pr, dr, acr, tmr, gu}
 }
 
 func (crs *CourseRequestServiceImpl) StudentCourseRequestDetail(ctx context.Context, param entity.StudentCourseRequestDetailParam) (*entity.StudentCourseRequestDetailQuery, error) {
@@ -112,6 +116,8 @@ func (crs *CourseRequestServiceImpl) StudentCourseRequestDetail(ctx context.Cont
 	res.Status = courseRequest.Status
 	res.ExpiredAt = courseRequest.ExpiredAt
 	res.Schedules = *schedules
+	res.AccountNumber = payment.AccountNumber
+	res.PaymentMethodName = payment.PaymentMethodName
 
 	return res, nil
 }
@@ -300,6 +306,7 @@ func (crs *CourseRequestServiceImpl) HandleCourseRequest(ctx context.Context, pa
 	courseRequest := new(entity.CourseRequest)
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
+	userStudent := new(entity.User)
 	schedules := new([]entity.CourseRequestSchedule)
 	updateCourse := new(entity.UpdateCourseQuery)
 	now := time.Now()
@@ -314,6 +321,9 @@ func (crs *CourseRequestServiceImpl) HandleCourseRequest(ctx context.Context, pa
 			return err
 		}
 		if err := crs.crr.FindByID(ctx, param.CourseRequestID, courseRequest); err != nil {
+			return err
+		}
+		if err := crs.ur.FindByID(ctx, courseRequest.StudentID, userStudent); err != nil {
 			return err
 		}
 		if err := crs.cr.FindByID(ctx, courseRequest.CourseID, course, true); err != nil {
@@ -374,6 +384,24 @@ func (crs *CourseRequestServiceImpl) HandleCourseRequest(ctx context.Context, pa
 			if err := crs.cr.UpdateCourse(ctx, course.ID, updateCourse); err != nil {
 				return err
 			}
+		} else {
+			payment := new(entity.Payment)
+			if err := crs.pr.FindPaymentByRequestID(ctx, param.CourseRequestID, payment); err != nil {
+				return err
+			}
+			layout := "02-01-06 15:04:05"
+			go func() {
+				param := entity.SendEmailParams{
+					Receiver:  userStudent.Email,
+					Subject:   "Payment Detail",
+					EmailBody: constants.PaymentInfoEmailBody(course.Title, user.Name, user.Email, payment.PaymentMethodName, payment.AccountNumber, payment.TotalPrice, courseRequest.ExpiredAt.Format(layout)),
+				}
+				if err := crs.gu.SendEmail(param); err != nil {
+					log.Println(err.Error())
+					return
+				}
+				log.Println("Send Email Success")
+			}()
 		}
 		return nil
 	}); err != nil {
@@ -391,6 +419,7 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 	updateCourse := new(entity.UpdateCourseQuery)
 	user := new(entity.User)
 	student := new(entity.Student)
+	userMentor := new(entity.User)
 	courseRequest := new(entity.CourseRequest)
 	availabilityRes := new(entity.AvailabilityResult)
 	conflictingScheds := new([]entity.ConflictingSchedule)
@@ -405,6 +434,10 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 		if err := crs.cr.FindByID(ctx, param.CourseID, course, true); err != nil {
 			return err
 		}
+		if err := crs.ur.FindByID(ctx, course.MentorID, userMentor); err != nil {
+			return err
+		}
+
 		if len(param.PreferredSlots) > course.MaxSession {
 			return customerrors.NewError(
 				fmt.Sprintf("cannot reserve more than %d slots", course.MaxSession),
@@ -523,6 +556,19 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 		if err := crs.cr.UpdateCourse(ctx, param.CourseID, updateCourse); err != nil {
 			return err
 		}
+
+		go func() {
+			param := entity.SendEmailParams{
+				Receiver:  userMentor.Email,
+				Subject:   "Request Detail",
+				EmailBody: constants.RequestDetailEmailBody(course.Title, user.Name, user.Email, param.NumberOfParticipant, totalPrice),
+			}
+			if err := crs.gu.SendEmail(param); err != nil {
+				log.Println(err.Error())
+				return
+			}
+			log.Println("Send Email Success")
+		}()
 
 		return nil
 	}); err != nil {

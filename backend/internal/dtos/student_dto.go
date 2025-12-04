@@ -37,6 +37,7 @@ type (
 		ID string `json:"id"`
 	}
 	StudentProfileRes struct {
+		ID           string `json:"id"`
 		Name         string `json:"name"`
 		Email        string `json:"email"`
 		Bio          string `json:"bio"`

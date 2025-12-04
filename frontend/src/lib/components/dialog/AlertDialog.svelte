@@ -13,6 +13,8 @@
 		children: Snippet;
 		description: Snippet;
 		title: Snippet;
+		buttonDisabled?: boolean;
+		full?: boolean;
 	};
 	let {
 		open = $bindable(),
@@ -21,18 +23,22 @@
 		description,
 		title,
 		onClick,
-		enhancement
+		enhancement,
+		buttonDisabled,
+		full = false
 	}: alertDialogProp = $props();
+
+	let buttonClass = $state<string>(`rounded-input bg-dark text-background shadow-mini
+    hover:bg-dark/95 inline-flex h-fit cursor-pointer select-none
+    items-center justify-center whitespace-nowrap rounded-lg
+	bg-[var(--tertiary-color)] p-2 font-semibold text-[var(--secondary-color)] transition-all hover:text-[var(--primary-color)]`);
+	if (full) {
+		buttonClass += ' w-full';
+	}
 </script>
 
 <AlertDialog.Root bind:open>
-	<AlertDialog.Trigger
-		class="rounded-input bg-dark text-background shadow-mini
-    hover:bg-dark/95 inline-flex h-fit cursor-pointer select-none
-    items-center justify-center whitespace-nowrap rounded-lg
-	bg-[var(--tertiary-color)] p-2 font-semibold text-[var(--secondary-color)] transition-all hover:text-[var(--primary-color)]"
-		onclick={onClick}
-	>
+	<AlertDialog.Trigger class={buttonClass} onclick={onClick} disabled={buttonDisabled}>
 		{@render children()}
 	</AlertDialog.Trigger>
 	<AlertDialog.Portal>
