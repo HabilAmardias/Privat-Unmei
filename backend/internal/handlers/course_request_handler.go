@@ -58,6 +58,8 @@ func (crh *CourseRequestHandlerImpl) StudentCourseRequestDetail(ctx *gin.Context
 		Status:              detail.Status,
 		ExpiredAt:           detail.ExpiredAt,
 		NumberOfParticipant: detail.NumberOfParticipant,
+		AccountNumber:       detail.AccountNumber,
+		PaymentMethodName:   detail.PaymentMethodName,
 		Schedules:           []dtos.CourseScheduleRes{},
 	}
 	for _, sc := range detail.Schedules {

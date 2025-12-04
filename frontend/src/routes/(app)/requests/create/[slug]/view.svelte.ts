@@ -92,7 +92,12 @@ export class CreateRequestView {
 		});
 	};
 	disableAddSchedule = $derived.by<boolean>(() => {
-		if (!this.selectedDate || !this.selectedStartTime || this.dateErr) {
+		if (
+			!this.selectedDate ||
+			!this.selectedStartTime ||
+			this.dateErr ||
+			this.schedules.length === this.maxSession
+		) {
 			return true;
 		}
 		return false;

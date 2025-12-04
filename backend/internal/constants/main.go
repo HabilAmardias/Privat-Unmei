@@ -20,7 +20,7 @@ const (
 	AvatarFolder            = "Avatars/"
 	ResumeFolder            = "Resumes/"
 	MaxCourseCategories     = 5
-	ExpiredInterval         = 24 * time.Hour // 15 minute for development and testing
+	ExpiredInterval         = 24 * time.Hour
 	NoRating                = 0
 	MaxLimit                = 25
 )

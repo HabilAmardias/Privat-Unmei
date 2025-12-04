@@ -55,7 +55,6 @@
 		>
 			<Input
 				err={View.emailError}
-				onBlur={() => View.emailOnBlur()}
 				bind:value={View.email}
 				type="email"
 				name="email"
@@ -64,7 +63,6 @@
 			/>
 			<InputSecret
 				err={View.passwordError}
-				onBlur={() => View.passwordOnBlur()}
 				id="password"
 				placeholder="Password"
 				name="password"

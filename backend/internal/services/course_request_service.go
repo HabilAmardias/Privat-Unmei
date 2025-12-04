@@ -112,6 +112,8 @@ func (crs *CourseRequestServiceImpl) StudentCourseRequestDetail(ctx context.Cont
 	res.Status = courseRequest.Status
 	res.ExpiredAt = courseRequest.ExpiredAt
 	res.Schedules = *schedules
+	res.AccountNumber = payment.AccountNumber
+	res.PaymentMethodName = payment.PaymentMethodName
 
 	return res, nil
 }

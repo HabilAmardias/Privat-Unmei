@@ -22,7 +22,7 @@
 </svelte:head>
 
 <div class="flex flex-col gap-4 p-4">
-	<div class="flex flex-col gap-2 md:flex-row md:justify-between">
+	<div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
 		<h1 class="text-2xl font-bold text-[var(--tertiary-color)]">{data.detail.title}</h1>
 		<div class="flex flex-col gap-2 md:items-end">
 			<div class="w-fit rounded-lg bg-[var(--tertiary-color)] p-2">
@@ -32,11 +32,6 @@
 					)} / session
 				</p>
 			</div>
-			{#if data.profile}
-				<div class="w-fit rounded-lg bg-[var(--tertiary-color)] p-2">
-					<Link href={`/requests/create/${data.detail.id}`}>Buy Course</Link>
-				</div>
-			{/if}
 		</div>
 	</div>
 	<ScrollArea orientation="horizontal" viewportClasses="max-w-[300px]">
@@ -48,25 +43,30 @@
 			{/each}
 		</ul>
 	</ScrollArea>
-	<div class="grid grid-cols-2">
-		<div class="flex flex-col gap-2">
-			<div class="flex gap-2">
-				<p class="font-bold text-[var(--tertiary-color)]">Method:</p>
-				<p>{View.capitalizeFirstLetter(data.detail.method)}</p>
-			</div>
-			<div class="flex gap-2">
-				<p class="font-bold text-[var(--tertiary-color)]">Domicile:</p>
-				<p>{data.detail.domicile}</p>
-			</div>
-			<div class="flex items-center gap-2">
-				<p class="font-bold text-[var(--tertiary-color)]">Per Session Duration (minutes):</p>
-				<p>{data.detail.session_duration_minutes}</p>
-			</div>
+	<div class="flex flex-col gap-2">
+		<div class="flex gap-2">
+			<p class="font-bold text-[var(--tertiary-color)]">Method:</p>
+			<p>{View.capitalizeFirstLetter(data.detail.method)}</p>
+		</div>
+		<div class="flex gap-2">
+			<p class="font-bold text-[var(--tertiary-color)]">Domicile:</p>
+			<p>{data.detail.domicile}</p>
+		</div>
+		<div class="flex items-center gap-2">
+			<p class="font-bold text-[var(--tertiary-color)]">Per Session Duration (minutes):</p>
+			<p>{data.detail.session_duration_minutes}</p>
 		</div>
 	</div>
-	<div class="flex flex-col">
-		<p class="font-bold text-[var(--tertiary-color)]">Description</p>
-		<p>{data.detail.description}</p>
+	<div class="flex flex-col gap-2">
+		<div class="flex flex-col">
+			<p class="font-bold text-[var(--tertiary-color)]">Description</p>
+			<p>{data.detail.description}</p>
+		</div>
+		{#if data.profile}
+			<div class="w-fit rounded-lg bg-[var(--tertiary-color)] p-2">
+				<Link href={`/requests/create/${data.detail.id}`}>Buy Course</Link>
+			</div>
+		{/if}
 	</div>
 	<Link href={`/mentors/${data.detail.mentor_id}`}>
 		<p class="font-bold text-[var(--tertiary-color)]">Mentor</p>

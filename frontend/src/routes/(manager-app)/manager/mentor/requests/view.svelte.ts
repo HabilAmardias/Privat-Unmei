@@ -34,10 +34,10 @@ export class RequestManagementView {
 				CreateToast('error', result.data?.message);
 			}
 			if (result.type === 'success') {
-				this.requests = result.data?.entries;
-				this.page = result.data?.page_info.page;
-				this.limit = result.data?.page_info.limit;
-				this.totalRow = result.data?.page_info.total_row;
+				this.requests = result.data?.requests.entries;
+				this.page = result.data?.requests.page_info.page;
+				this.limit = result.data?.requests.page_info.limit;
+				this.totalRow = result.data?.requests.page_info.total_row;
 			}
 		};
 	};
@@ -52,10 +52,10 @@ export class RequestManagementView {
 				CreateToast('error', result.data?.message);
 			}
 			if (result.type === 'success') {
-				this.requests = result.data?.entries;
-				this.page = result.data?.page_info.page;
-				this.limit = result.data?.page_info.limit;
-				this.totalRow = result.data?.page_info.total_row;
+				this.requests = result.data?.requests.entries;
+				this.page = result.data?.requests.page_info.page;
+				this.limit = result.data?.requests.page_info.limit;
+				this.totalRow = result.data?.requests.page_info.total_row;
 			}
 		};
 	};

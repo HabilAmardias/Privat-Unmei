@@ -18,6 +18,6 @@ export const actions = {
 		if (!success) {
 			return fail(status, { message });
 		}
-		return { courses: resBody.data };
+		return { requests: resBody.data };
 	}
 } satisfies Actions;

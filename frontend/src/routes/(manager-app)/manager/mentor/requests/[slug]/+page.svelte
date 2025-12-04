@@ -3,7 +3,6 @@
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import { RequestDetailView } from './view.svelte';
 	import AlertDialog from '$lib/components/dialog/AlertDialog.svelte';
-	import Dialog from '$lib/components/dialog/Dialog.svelte';
 
 	let { data }: PageProps = $props();
 	const View = new RequestDetailView();
@@ -11,7 +10,7 @@
 
 <svelte:head>
 	<title>Request Detail - Privat Unmei</title>
-	<meta name="description" content="Profile - Privat Unmei" />
+	<meta name="description" content="Request Detail - Privat Unmei" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </svelte:head>
 
@@ -64,6 +63,10 @@
 		<div class="flex gap-2">
 			<p class="font-bold text-[var(--tertiary-color)]">Student Name:</p>
 			<p>{data.detail.student_name}</p>
+		</div>
+		<div class="flex gap-2">
+			<p class="font-bold text-[var(--tertiary-color)]">Student Email:</p>
+			<p>{data.detail.student_email}</p>
 		</div>
 		<div class="flex gap-2">
 			<p class="font-bold text-[var(--tertiary-color)]">Participant:</p>
@@ -133,7 +136,7 @@
 				</ul>
 			</ScrollArea>
 		{:else}
-			<b class="text-[var(--tertiary-color)]">No topic found</b>
+			<b class="text-[var(--tertiary-color)]">No schedules found</b>
 		{/if}
 	</div>
 </div>
