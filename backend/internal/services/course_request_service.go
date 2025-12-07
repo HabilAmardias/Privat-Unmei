@@ -241,6 +241,13 @@ func (crs *CourseRequestServiceImpl) MentorConfirmPayment(ctx context.Context, p
 		if err := crs.ur.FindByID(ctx, param.MentorID, user); err != nil {
 			return err
 		}
+		if user.Status != constants.VerifiedStatus {
+			return customerrors.NewError(
+				"user is not verified",
+				errors.New("user is not verified"),
+				customerrors.Unauthenticate,
+			)
+		}
 		if err := crs.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
 			return err
 		}
@@ -316,6 +323,13 @@ func (crs *CourseRequestServiceImpl) HandleCourseRequest(ctx context.Context, pa
 	if err := crs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := crs.ur.FindByID(ctx, param.MentorID, user); err != nil {
 			return err
+		}
+		if user.Status != constants.VerifiedStatus {
+			return customerrors.NewError(
+				"user is not verified",
+				errors.New("user is not verified"),
+				customerrors.Unauthenticate,
+			)
 		}
 		if err := crs.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
 			return err

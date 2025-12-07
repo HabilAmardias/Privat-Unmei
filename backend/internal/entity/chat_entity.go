@@ -40,11 +40,12 @@ type (
 		UserEmail        string
 		UserProfileImage string
 	}
-	CreateChatroomParam struct {
-		StudentID string
-		MentorID  string
-	}
 	GetChatroomParam struct {
+		UserID       string
+		SecondUserID string
+		Role         int
+	}
+	GetChatroomInfoParam struct {
 		ChatroomID int
 		UserID     string
 		Role       int

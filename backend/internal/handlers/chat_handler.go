@@ -2,7 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
+	"os"
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/dtos"
@@ -26,6 +29,36 @@ func CreateChatHandler(chs *services.ChatServiceImpl, upg *websocket.Upgrader, h
 	return &ChatHandlerImpl{chs, upg, hub, lg}
 }
 
+func (chh *ChatHandlerImpl) GetChatroom(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	secondUserID := ctx.Param("id")
+	param := entity.GetChatroomParam{
+		UserID:       claim.Subject,
+		SecondUserID: secondUserID,
+		Role:         claim.Role,
+	}
+	chatroomID, err := chh.chs.GetChatroom(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	domain, exist := os.LookupEnv("CLIENT_DOMAIN")
+	if !exist {
+		ctx.Error(customerrors.NewError(
+			"something went wrong",
+			errors.New("client domain url is missing"),
+			customerrors.CommonErr,
+		))
+		return
+	}
+	url := fmt.Sprintf("%s/chats/%d", domain, chatroomID)
+	ctx.Redirect(http.StatusTemporaryRedirect, url)
+}
+
 func (chh *ChatHandlerImpl) ConnectChatChannel(ctx *gin.Context) {
 	claim, err := getAuthenticationPayload(ctx)
 	if err != nil {
@@ -41,12 +74,12 @@ func (chh *ChatHandlerImpl) ConnectChatChannel(ctx *gin.Context) {
 		))
 		return
 	}
-	param := entity.GetChatroomParam{
+	param := entity.GetChatroomInfoParam{
 		ChatroomID: chatroomID,
 		UserID:     claim.Subject,
 		Role:       claim.Role,
 	}
-	if _, err := chh.chs.GetChatroom(ctx, param); err != nil {
+	if _, err := chh.chs.GetChatroomInfo(ctx, param); err != nil {
 		ctx.Error(err)
 		return
 	}
@@ -74,35 +107,7 @@ func (chh *ChatHandlerImpl) ConnectChatChannel(ctx *gin.Context) {
 	go client.Write()
 }
 
-func (chh *ChatHandlerImpl) CreateChatroom(ctx *gin.Context) {
-	var req dtos.CreateChatroomReq
-	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
-		ctx.Error(err)
-		return
-	}
-	claim, err := getAuthenticationPayload(ctx)
-	if err != nil {
-		ctx.Error(err)
-		return
-	}
-	param := entity.CreateChatroomParam{
-		StudentID: claim.Subject,
-		MentorID:  req.MentorID,
-	}
-	id, err := chh.chs.CreateChatroom(ctx, param)
-	if err != nil {
-		ctx.Error(err)
-		return
-	}
-	ctx.JSON(http.StatusCreated, dtos.Response{
-		Success: true,
-		Data: dtos.CreateChatroomRes{
-			ID: id,
-		},
-	})
-}
-
-func (chh *ChatHandlerImpl) GetChatroom(ctx *gin.Context) {
+func (chh *ChatHandlerImpl) GetChatroomInfo(ctx *gin.Context) {
 	chatroomID, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		ctx.Error(customerrors.NewError(
@@ -117,12 +122,12 @@ func (chh *ChatHandlerImpl) GetChatroom(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	param := entity.GetChatroomParam{
+	param := entity.GetChatroomInfoParam{
 		ChatroomID: chatroomID,
 		UserID:     claim.Subject,
 		Role:       claim.Role,
 	}
-	chatroom, err := chh.chs.GetChatroom(ctx, param)
+	chatroom, err := chh.chs.GetChatroomInfo(ctx, param)
 	if err != nil {
 		ctx.Error(err)
 		return
