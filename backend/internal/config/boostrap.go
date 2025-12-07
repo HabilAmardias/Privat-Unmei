@@ -2,7 +2,6 @@ package config
 
 import (
 	"privat-unmei/internal/db"
-	"privat-unmei/internal/entity"
 	"privat-unmei/internal/handlers"
 	"privat-unmei/internal/logger"
 	"privat-unmei/internal/repositories"
@@ -16,7 +15,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func Bootstrap(db *db.CustomDB, rc *redis.Client, logger logger.CustomLogger, app *gin.Engine, upg *websocket.Upgrader, chatHub *entity.ChatHub) {
+func Bootstrap(db *db.CustomDB, rc *redis.Client, logger logger.CustomLogger, app *gin.Engine, upg *websocket.Upgrader) {
 	userRepo := repositories.CreateUserRepository(db)
 	studentRepo := repositories.CreateStudentRepository(db)
 	adminRepo := repositories.CreateAdminRepository(db)
@@ -61,7 +60,7 @@ func Bootstrap(db *db.CustomDB, rc *redis.Client, logger logger.CustomLogger, ap
 	courseHandler := handlers.CreateCourseHandler(courseService)
 	courseRatingHandler := handlers.CreateCourseRatingHandler(courseRatingService)
 	courseRequestHandler := handlers.CreateCourseRequestHandler(courseRequestService)
-	chatHandler := handlers.CreateChatHandler(chatService, upg, chatHub, logger)
+	chatHandler := handlers.CreateChatHandler(chatService, upg, rc, logger)
 	paymentHandler := handlers.CreatePaymentHandler(paymentService)
 	discountHandler := handlers.CreateDiscountHandler(discountService)
 	additionalCostHandler := handlers.CreateAdditionalCostHandler(additionalCostService)

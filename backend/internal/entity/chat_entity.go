@@ -1,10 +1,13 @@
 package entity
 
 import (
+	"context"
 	"privat-unmei/internal/logger"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/redis/go-redis/v9"
 )
 
 type (
@@ -68,103 +71,80 @@ type (
 		Role       int
 	}
 	ChatClient struct {
-		Conn       *websocket.Conn
-		Send       chan []byte
-		UserID     string
-		ChatroomID int
-		Logger     logger.CustomLogger
-	}
-	ChatHub struct {
-		Clients    map[*ChatClient]bool
-		Unregister chan *ChatClient
-		Register   chan *ChatClient
-		Broadcast  chan []byte
-		Chatrooms  map[int]map[*ChatClient]bool
+		cancelFunc context.CancelFunc
+		cancelCtx  context.Context
+		conn       *websocket.Conn
+		lg         logger.CustomLogger
+		sub        *redis.PubSub
+		once       sync.Once
 	}
 )
 
-func CreateChatHub() *ChatHub {
-	return &ChatHub{
-		Clients:    make(map[*ChatClient]bool),
-		Unregister: make(chan *ChatClient),
-		Register:   make(chan *ChatClient),
-		Broadcast:  make(chan []byte),
-		Chatrooms:  make(map[int]map[*ChatClient]bool),
+func CreateChatClient(conn *websocket.Conn, sub *redis.PubSub, lg logger.CustomLogger) *ChatClient {
+	conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+	conn.SetPongHandler(func(string) error {
+		conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+		return nil
+	})
+	wsCtx, cancel := context.WithCancel(context.Background())
+
+	return &ChatClient{
+		cancelFunc: cancel,
+		cancelCtx:  wsCtx,
+		conn:       conn,
+		lg:         lg,
+		sub:        sub,
 	}
 }
 
-func (c *ChatClient) Write() {
-	ticker := time.NewTicker(54 * time.Second)
+func (cc *ChatClient) CloseConn() {
+	cc.once.Do(func() {
+		cc.cancelFunc()
+		cc.sub.Close()
+		cc.conn.Close()
+	})
+}
+
+func (cc *ChatClient) Read(wg *sync.WaitGroup) {
 	defer func() {
+		wg.Done()
+		cc.CloseConn()
+	}()
+	for {
+		_, _, err := cc.conn.ReadMessage()
+		if err != nil {
+			cc.lg.Errorln(err.Error())
+			return
+		}
+	}
+}
+
+func (cc *ChatClient) Write(wg *sync.WaitGroup) {
+	ticker := time.NewTicker(54 * time.Second)
+	ch := cc.sub.Channel()
+	defer func() {
+		wg.Done()
 		ticker.Stop()
-		c.Conn.Close()
+		cc.CloseConn()
 	}()
 	for {
 		select {
-		case message, ok := <-c.Send:
+		case <-cc.cancelCtx.Done():
+			cc.conn.WriteMessage(websocket.CloseMessage, []byte{})
+			return
+		case message, ok := <-ch:
 			if !ok {
-				c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
+				cc.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
-
-			if err := c.Conn.WriteMessage(websocket.TextMessage, message); err != nil {
-				c.Logger.Warnln(err.Error())
+			if err := cc.conn.WriteMessage(websocket.TextMessage, []byte(message.Payload)); err != nil {
+				cc.lg.Errorln(err.Error())
+				return
 			}
 		case <-ticker.C:
-			if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-				c.Logger.Errorln(err.Error())
+			if err := cc.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				cc.lg.Errorln(err.Error())
 				return
-			}
-
-		}
-	}
-}
-
-func (c *ChatClient) Read(hub *ChatHub) {
-	defer func() {
-		hub.Unregister <- c
-		c.Conn.Close()
-	}()
-	for {
-		_, _, err := c.Conn.ReadMessage()
-		if err != nil {
-			c.Logger.Errorln(err.Error())
-			break
-		}
-	}
-}
-
-func (h *ChatHub) Run() {
-	for {
-		select {
-		case client := <-h.Register:
-			h.Clients[client] = true
-			if h.Chatrooms[client.ChatroomID] == nil {
-				h.Chatrooms[client.ChatroomID] = make(map[*ChatClient]bool)
-			}
-			h.Chatrooms[client.ChatroomID][client] = true
-		case client := <-h.Unregister:
-			if _, ok := h.Clients[client]; ok {
-				delete(h.Clients, client)
-				delete(h.Chatrooms[client.ChatroomID], client)
-				if len(h.Chatrooms[client.ChatroomID]) == 0 {
-					delete(h.Chatrooms, client.ChatroomID)
-				}
-				close(client.Send)
-			}
-		}
-	}
-}
-
-func (h *ChatHub) BroadcastMessage(message []byte, chatroomID int) {
-	if clients, exist := h.Chatrooms[chatroomID]; exist {
-		for client := range clients {
-			select {
-			case client.Send <- message:
-			default:
-				close(client.Send)
-				delete(h.Clients, client)
-				delete(clients, client)
 			}
 		}
 	}

@@ -423,5 +423,5 @@ func (c *RouteConfig) SetupPrivateRoute() {
 func (c *RouteConfig) SetupWebsocketRoute() {
 	r := c.App.Group("/ws/v1")
 	r.Use(middlewares.WSAuthenticationMiddleware(c.TokenUtil, constants.ForLogin))
-	r.GET("/chatrooms/:id/messages", c.ChatHandler.ConnectChatChannel)
+	r.GET(":token/chatrooms/:id/messages", c.ChatHandler.ConnectChatChannel)
 }

@@ -1,11 +1,10 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
-	"os"
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/dtos"
@@ -13,20 +12,22 @@ import (
 	"privat-unmei/internal/logger"
 	"privat-unmei/internal/services"
 	"strconv"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/redis/go-redis/v9"
 )
 
 type ChatHandlerImpl struct {
 	chs *services.ChatServiceImpl
 	upg *websocket.Upgrader
-	hub *entity.ChatHub
+	rc  *redis.Client
 	lg  logger.CustomLogger
 }
 
-func CreateChatHandler(chs *services.ChatServiceImpl, upg *websocket.Upgrader, hub *entity.ChatHub, lg logger.CustomLogger) *ChatHandlerImpl {
-	return &ChatHandlerImpl{chs, upg, hub, lg}
+func CreateChatHandler(chs *services.ChatServiceImpl, upg *websocket.Upgrader, rc *redis.Client, lg logger.CustomLogger) *ChatHandlerImpl {
+	return &ChatHandlerImpl{chs, upg, rc, lg}
 }
 
 func (chh *ChatHandlerImpl) GetChatroom(ctx *gin.Context) {
@@ -46,17 +47,13 @@ func (chh *ChatHandlerImpl) GetChatroom(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	domain, exist := os.LookupEnv("CLIENT_DOMAIN")
-	if !exist {
-		ctx.Error(customerrors.NewError(
-			"something went wrong",
-			errors.New("client domain url is missing"),
-			customerrors.CommonErr,
-		))
-		return
-	}
-	url := fmt.Sprintf("%s/chats/%d", domain, chatroomID)
-	ctx.Redirect(http.StatusTemporaryRedirect, url)
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.CreateChatroomRes{
+			ID: chatroomID,
+		},
+	})
+
 }
 
 func (chh *ChatHandlerImpl) ConnectChatChannel(ctx *gin.Context) {
@@ -83,7 +80,6 @@ func (chh *ChatHandlerImpl) ConnectChatChannel(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-
 	conn, err := chh.upg.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {
 		ctx.Error(customerrors.NewError(
@@ -93,18 +89,17 @@ func (chh *ChatHandlerImpl) ConnectChatChannel(ctx *gin.Context) {
 		))
 		return
 	}
-	client := &entity.ChatClient{
-		Conn:       conn,
-		Send:       make(chan []byte),
-		UserID:     claim.Subject,
-		ChatroomID: chatroomID,
-		Logger:     chh.lg,
-	}
-	chh.hub.Register <- client
-	go func() {
-		client.Read(chh.hub)
-	}()
-	go client.Write()
+	sub := chh.rc.Subscribe(context.Background(), fmt.Sprintf("chatroom:%d", chatroomID))
+
+	var wg sync.WaitGroup
+	cc := entity.CreateChatClient(conn, sub, chh.lg)
+	defer cc.CloseConn()
+
+	wg.Add(2)
+	go cc.Read(&wg)
+	go cc.Write(&wg)
+
+	wg.Wait()
 }
 
 func (chh *ChatHandlerImpl) GetChatroomInfo(ctx *gin.Context) {
@@ -198,6 +193,7 @@ func (chh *ChatHandlerImpl) SendMessage(ctx *gin.Context) {
 			err,
 			customerrors.InvalidAction,
 		))
+		return
 	}
 	claim, err := getAuthenticationPayload(ctx)
 	if err != nil {
@@ -225,7 +221,14 @@ func (chh *ChatHandlerImpl) SendMessage(ctx *gin.Context) {
 		))
 		return
 	}
-	chh.hub.BroadcastMessage(messagePayload, chatroomID)
+	if err := chh.rc.Publish(ctx, fmt.Sprintf("chatroom:%d", chatroomID), messagePayload).Err(); err != nil {
+		ctx.Error(customerrors.NewError(
+			"something went wrong",
+			err,
+			customerrors.CommonErr,
+		))
+		return
+	}
 	ctx.JSON(http.StatusCreated, dtos.Response{
 		Success: true,
 		Data:    res,

@@ -1,9 +1,9 @@
 package middlewares
 
 import (
+	"errors"
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
-	"privat-unmei/internal/dtos"
 	"privat-unmei/internal/utils"
 
 	"github.com/gin-gonic/gin"
@@ -60,13 +60,17 @@ func AuthenticationMiddleware(tokenUtil *utils.JWTUtil, usedFor int) gin.Handler
 
 func WSAuthenticationMiddleware(tokenUtil *utils.JWTUtil, usedFor int) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var req dtos.AuthenticationReq
-		if err := ctx.ShouldBind(&req); err != nil {
-			ctx.Error(err)
+		token := ctx.Param("token")
+		if len(token) == 0 {
+			ctx.Error(customerrors.NewError(
+				"unauthorized",
+				errors.New("no token found"),
+				customerrors.Unauthenticate,
+			))
 			ctx.Abort()
 			return
 		}
-		payload, err := tokenUtil.VerifyJWT(req.Token, usedFor)
+		payload, err := tokenUtil.VerifyJWT(token, usedFor)
 		if err != nil {
 			ctx.Error(err)
 			ctx.Abort()
@@ -74,7 +78,7 @@ func WSAuthenticationMiddleware(tokenUtil *utils.JWTUtil, usedFor int) gin.Handl
 		}
 
 		ctx.Set(constants.CTX_AUTH_PAYLOAD_KEY, payload)
-		ctx.Set(constants.CTX_AUTH_TOKEN_KEY, req.Token)
+		ctx.Set(constants.CTX_AUTH_TOKEN_KEY, token)
 		ctx.Next()
 	}
 }
