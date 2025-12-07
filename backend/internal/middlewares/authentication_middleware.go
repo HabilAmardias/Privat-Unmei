@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"errors"
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/utils"
@@ -58,27 +57,27 @@ func AuthenticationMiddleware(tokenUtil *utils.JWTUtil, usedFor int) gin.Handler
 	}
 }
 
-func WSAuthenticationMiddleware(tokenUtil *utils.JWTUtil, usedFor int) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		token := ctx.Param("token")
-		if len(token) == 0 {
-			ctx.Error(customerrors.NewError(
-				"unauthorized",
-				errors.New("no token found"),
-				customerrors.Unauthenticate,
-			))
-			ctx.Abort()
-			return
-		}
-		payload, err := tokenUtil.VerifyJWT(token, usedFor)
-		if err != nil {
-			ctx.Error(err)
-			ctx.Abort()
-			return
-		}
+// func WSAuthenticationMiddleware(tokenUtil *utils.JWTUtil, usedFor int) gin.HandlerFunc {
+// 	return func(ctx *gin.Context) {
+// 		token := ctx.Param("token")
+// 		if len(token) == 0 {
+// 			ctx.Error(customerrors.NewError(
+// 				"unauthorized",
+// 				errors.New("no token found"),
+// 				customerrors.Unauthenticate,
+// 			))
+// 			ctx.Abort()
+// 			return
+// 		}
+// 		payload, err := tokenUtil.VerifyJWT(token, usedFor)
+// 		if err != nil {
+// 			ctx.Error(err)
+// 			ctx.Abort()
+// 			return
+// 		}
 
-		ctx.Set(constants.CTX_AUTH_PAYLOAD_KEY, payload)
-		ctx.Set(constants.CTX_AUTH_TOKEN_KEY, token)
-		ctx.Next()
-	}
-}
+// 		ctx.Set(constants.CTX_AUTH_PAYLOAD_KEY, payload)
+// 		ctx.Set(constants.CTX_AUTH_TOKEN_KEY, token)
+// 		ctx.Next()
+// 	}
+// }

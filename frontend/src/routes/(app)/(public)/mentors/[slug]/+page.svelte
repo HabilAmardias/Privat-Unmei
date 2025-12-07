@@ -9,6 +9,7 @@
 	import { enhance } from '$app/forms';
 	import Pagination from '$lib/components/pagination/Pagination.svelte';
 	import Loading from '$lib/components/loader/Loading.svelte';
+	import Button from '$lib/components/button/Button.svelte';
 
 	let { data }: PageProps = $props();
 	const View = new MentorDetailView(data.courses);
@@ -42,6 +43,11 @@
 		<div class="flex flex-col gap-1">
 			<p class="font-bold text-[var(--tertiary-color)]">{data.profile.name}</p>
 			<p>{data.profile.email}</p>
+			{#if data.studentProfile}
+				<form method="POST" action="?/messageMentor" use:enhance={View.onMessageMentor}>
+					<Button type="submit">Message</Button>
+				</form>
+			{/if}
 		</div>
 	</div>
 	<div class="flex flex-col gap-4">

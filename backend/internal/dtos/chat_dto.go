@@ -8,7 +8,7 @@ type (
 		PaginatedReq
 	}
 	SendMessageReq struct {
-		Content string `json:"content" binding:"required,max=50"`
+		Content string `json:"content" binding:"required,max=180"`
 	}
 	GetMessagesReq struct {
 		SeekPaginatedReq

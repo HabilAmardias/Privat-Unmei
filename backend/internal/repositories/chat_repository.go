@@ -251,18 +251,22 @@ func (chr *ChatRepositoryImpl) GetMessages(ctx context.Context, chatroomID int, 
 		)
 	}
 	query := `
-	SELECT
-		m.id,
-		m.sender_id,
-		u.name,
-		u.email,
-		m.chatroom_id,
-		m.content
-	FROM messages m
-	JOIN users u ON u.id = m.sender_id
-	WHERE m.chatroom_id = $1 AND m.id < $2 AND m.deleted_at IS NULL AND u.deleted_at IS NULL
-	ORDER BY m.id DESC
-	LIMIT $3
+	with chats as (
+		SELECT
+			m.id as id,
+			m.sender_id as sender_id,
+			u.name as sender_name,
+			u.email as sender_email,
+			m.chatroom_id as chatroom_id,
+			m.content as content
+		FROM messages m
+		JOIN users u ON u.id = m.sender_id
+		WHERE m.chatroom_id = $1 AND m.id < $2 AND m.deleted_at IS NULL AND u.deleted_at IS NULL
+		ORDER BY m.id DESC
+		LIMIT $3
+	)
+	select * from chats
+	order by chats.id asc;
 	`
 	rows, err := driver.Query(query, chatroomID, lastID, limit)
 	if err != nil {
