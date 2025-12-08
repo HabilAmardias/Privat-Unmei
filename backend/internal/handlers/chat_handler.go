@@ -267,9 +267,6 @@ func (chh *ChatHandlerImpl) GetMessages(ctx *gin.Context) {
 	if param.Limit <= 0 || param.Limit > constants.MaxLimit {
 		param.Limit = constants.DefaultLimit
 	}
-	if param.LastID <= 0 {
-		param.LastID = constants.DefaultLastID
-	}
 	messages, totalRow, err := chh.chs.GetMessages(ctx, param)
 	if err != nil {
 		ctx.Error(err)
@@ -281,8 +278,7 @@ func (chh *ChatHandlerImpl) GetMessages(ctx *gin.Context) {
 	}
 	lastID := 0
 	if len(res) > 0 {
-		lastIndex := len(res) - 1
-		lastID = res[lastIndex].ID
+		lastID = res[0].ID
 	}
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,

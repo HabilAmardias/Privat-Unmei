@@ -9,6 +9,8 @@
 	import Input from '$lib/components/form/Input.svelte';
 	import Button from '$lib/components/button/Button.svelte';
 	import { Send } from '@lucide/svelte';
+	import SentinelContainer from '$lib/components/container/SentinelContainer.svelte';
+	import Loading from '$lib/components/loader/Loading.svelte';
 
 	const { data, params }: PageProps = $props();
 
@@ -23,8 +25,6 @@
 		socket.onmessage = (ev: MessageEvent<string>) => {
 			const msg: MessageInfo = JSON.parse(ev.data);
 			View.messages.push(msg);
-			View.limit += 1;
-			View.lastID = msg.id;
 		};
 		socket.onclose = () => {
 			console.log('connection closed');
@@ -38,6 +38,12 @@
 	});
 </script>
 
+<form
+	bind:this={View.getMessageForm}
+	use:enhance={View.onGetMessage}
+	action="?/getMessage"
+	method="POST"
+></form>
 <div class="flex flex-col gap-4 p-4">
 	<div class="flex w-full items-center gap-4 rounded-lg bg-[var(--tertiary-color)] p-2">
 		<CldImage src={data.chatroom.profile_image} width={70} height={70} className="rounded-full" />
@@ -46,7 +52,13 @@
 			<p class="text-[var(--secondary-color)]">{data.chatroom.email}</p>
 		</div>
 	</div>
-	<ScrollArea orientation="vertical" viewportClasses={`h-[550px] max-h-[550px]`}>
+	<ScrollArea orientation="vertical" viewportClasses="h-[550px] max-h-[550px]">
+		{#if View.isLoading}
+			<div>
+				<Loading />
+			</div>
+		{/if}
+		<SentinelContainer onIntersect={View.onIntersect} />
 		<ul class="flex h-full w-full flex-col justify-end gap-2">
 			{#each View.messages as msg (msg.id)}
 				<li

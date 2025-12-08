@@ -31,7 +31,7 @@ class ChatroomController {
 		return { success, message, status, resBody };
 	}
 	async getMessages(fetch: Fetch, id: string, req?: Request) {
-		let url = `http://localhost:8080/api/v1/chatrooms/${id}/messages`;
+		let url = `http://localhost:8080/api/v1/chatrooms/${id}/messages?`;
 		if (req) {
 			const formData = await req.formData();
 			const lastID = formData.get('last_id');

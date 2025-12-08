@@ -12,7 +12,7 @@
 	import Button from '$lib/components/button/Button.svelte';
 
 	let { data }: PageProps = $props();
-	const View = new CourseDetailView(data.reviews);
+	const View = new CourseDetailView(data.reviews, data.detail);
 </script>
 
 <svelte:head>
@@ -24,7 +24,7 @@
 <div class="flex flex-col gap-4 p-4">
 	<div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
 		<h1 class="text-2xl font-bold text-[var(--tertiary-color)]">{data.detail.title}</h1>
-		<div class="flex flex-col gap-2 md:items-end">
+		<div class="flex gap-2">
 			<div class="w-fit rounded-lg bg-[var(--tertiary-color)] p-2">
 				<p class="font-bold text-[var(--secondary-color)]">
 					{new Intl.NumberFormat('id-ID', { currency: 'IDR', style: 'currency' }).format(
@@ -32,6 +32,11 @@
 					)} / session
 				</p>
 			</div>
+			{#if data.profile}
+				<form method="POST" action="?/messageMentor" use:enhance={View.onMessageMentor}>
+					<Button type="submit">Message</Button>
+				</form>
+			{/if}
 		</div>
 	</div>
 	<ScrollArea orientation="horizontal" viewportClasses="max-w-[300px]">

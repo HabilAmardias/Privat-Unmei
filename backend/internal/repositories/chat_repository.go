@@ -231,7 +231,7 @@ func (chr *ChatRepositoryImpl) UpdateChatroom(ctx context.Context, chatroomID in
 	return nil
 }
 
-func (chr *ChatRepositoryImpl) GetMessages(ctx context.Context, chatroomID int, limit int, lastID int, totalRow *int64, messages *[]entity.MessageDetailQuery) error {
+func (chr *ChatRepositoryImpl) GetMessages(ctx context.Context, chatroomID int, limit int, lastID *int, totalRow *int64, messages *[]entity.MessageDetailQuery) error {
 	var driver RepoDriver
 	driver = chr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
@@ -261,7 +261,7 @@ func (chr *ChatRepositoryImpl) GetMessages(ctx context.Context, chatroomID int, 
 			m.content as content
 		FROM messages m
 		JOIN users u ON u.id = m.sender_id
-		WHERE m.chatroom_id = $1 AND m.id < $2 AND m.deleted_at IS NULL AND u.deleted_at IS NULL
+		WHERE m.chatroom_id = $1 AND m.id < COALESCE($2, 9223372036854775807) AND m.deleted_at IS NULL AND u.deleted_at IS NULL
 		ORDER BY m.id DESC
 		LIMIT $3
 	)
