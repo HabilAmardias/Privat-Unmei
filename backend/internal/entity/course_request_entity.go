@@ -76,6 +76,7 @@ type (
 	MentorCourseRequestDetailQuery struct {
 		CourseRequestID     int
 		CourseName          string
+		StudentID           string
 		StudentName         string
 		StudentEmail        string
 		NumberOfParticipant int

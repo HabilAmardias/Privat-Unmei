@@ -212,6 +212,7 @@ func (crs *CourseRequestServiceImpl) MentorCourseRequestDetail(ctx context.Conte
 	res.NumberOfParticipant = courseRequest.NumberOfParticipant
 	res.ExpiredAt = courseRequest.ExpiredAt
 	res.Schedules = *schedules
+	res.StudentID = courseRequest.StudentID
 
 	return res, nil
 }

@@ -1,12 +1,17 @@
-import type { EnhancementReturn } from '$lib/types';
-import { CreateToast } from '$lib/utils/helper';
+import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
+import { CreateToast, DismissToast } from '$lib/utils/helper';
 import { SvelteDate } from 'svelte/reactivity';
+import type { RequestDetail } from './model';
 
 export class RequestDetailView {
 	confirmDialogOpen = $state<boolean>(false);
 	acceptDialogOpen = $state<boolean>(false);
 	rejectDialogOpen = $state<boolean>(false);
 	paymentDetailDialogOpen = $state<boolean>(false);
+	studentID = $state<string>('');
+	constructor(d: RequestDetail) {
+		this.studentID = d.student_id;
+	}
 	onReject = () => {
 		return async ({ result, update }: EnhancementReturn) => {
 			this.rejectDialogOpen = false;
@@ -61,4 +66,17 @@ export class RequestDetailView {
 		}
 		return s.charAt(0).toUpperCase() + s.slice(1);
 	}
+	onMessageStudent = (args: EnhancementArgs) => {
+		const loadID = CreateToast('loading', 'loading....');
+		args.formData.append('id', this.studentID);
+		return async ({ result, update }: EnhancementReturn) => {
+			DismissToast(loadID);
+			if (result.type === 'redirect') {
+				await update();
+			}
+			if (result.type === 'failure') {
+				CreateToast('error', result.data?.message);
+			}
+		};
+	};
 }

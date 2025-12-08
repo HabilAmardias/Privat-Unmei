@@ -3,9 +3,11 @@
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import { RequestDetailView } from './view.svelte';
 	import AlertDialog from '$lib/components/dialog/AlertDialog.svelte';
+	import { enhance } from '$app/forms';
+	import Button from '$lib/components/button/Button.svelte';
 
 	let { data }: PageProps = $props();
-	const View = new RequestDetailView();
+	const View = new RequestDetailView(data.detail);
 </script>
 
 <svelte:head>
@@ -86,6 +88,9 @@
 				<p>{View.convertToDatetime(data.detail.expired_at)}</p>
 			</div>
 		{/if}
+		<form method="POST" action="?/messageStudent" use:enhance={View.onMessageStudent}>
+			<Button type="submit">Message</Button>
+		</form>
 	</div>
 	<h2 class="text-lg font-bold text-[var(--tertiary-color)]">Payment Info</h2>
 	<div class="grid grid-cols-2 gap-4 text-center md:flex md:justify-between">

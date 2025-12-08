@@ -46,7 +46,7 @@
 			<p class="text-[var(--secondary-color)]">{data.chatroom.email}</p>
 		</div>
 	</div>
-	<ScrollArea orientation="horizontal" viewportClasses={`h-[550px] max-h-[550px]`}>
+	<ScrollArea orientation="vertical" viewportClasses={`h-[550px] max-h-[550px]`}>
 		<ul class="flex h-full w-full flex-col justify-end gap-2">
 			{#each View.messages as msg (msg.id)}
 				<li
@@ -56,9 +56,16 @@
 				</li>
 			{/each}
 		</ul>
+		<div bind:this={View.endRef}></div>
 	</ScrollArea>
-	<form class="flex gap-2" use:enhance action="?/sendMessage" method="POST">
-		<Input type="text" name="message" id="message" placeholder="Write a message" />
-		<Button type="submit"><Send /></Button>
+	<form class="flex gap-2" use:enhance={View.onSendMessage} action="?/sendMessage" method="POST">
+		<Input
+			bind:value={View.messageContent}
+			type="text"
+			name="message"
+			id="message"
+			placeholder="Write a message"
+		/>
+		<Button disabled={View.disableSendMessage} type="submit"><Send /></Button>
 	</form>
 </div>
