@@ -166,7 +166,7 @@
 					{:else if !View.orders || View.orders.length === 0}
 						<b class="mx-auto self-center text-[var(--tertiary-color)]">No orders found</b>
 					{:else}
-						<ScrollArea class="flex-1" orientation="horizontal" viewportClasses="max-h-[400px]">
+						<ScrollArea class="flex-1" orientation="vertical" viewportClasses="max-h-[400px]">
 							<div class="flex flex-col gap-2">
 								{#each View.orders as order (order.id)}
 									<Link href={`/requests/${order.id}`}>

@@ -1,6 +1,12 @@
 import type { Fetch, ServerResponse, PaginatedResponse } from '$lib/types';
 import { FetchData } from '$lib/utils';
-import type { MentorProfile, MentorScheduleInfo, MentorCourse } from './model';
+import type {
+	MentorProfile,
+	StudentProfile,
+	MentorScheduleInfo,
+	MentorCourse,
+	ChatroomID
+} from './model';
 
 class MentorProfileController {
 	async getMentorProfile(fetch: Fetch, id: string) {
@@ -48,6 +54,24 @@ class MentorProfileController {
 		}
 		const resBody: ServerResponse<PaginatedResponse<MentorCourse>> = await res?.json();
 		return { success, message, status, resBody };
+	}
+	async messageMentor(fetch: Fetch, id: string) {
+		const url = `http://localhost:8080/api/v1/chatrooms/users/${id}`;
+		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
+		if (!success) {
+			return { success, message, status };
+		}
+		const resBody: ServerResponse<ChatroomID> = await res?.json();
+		return { resBody, status, success, message };
+	}
+	async getProfile(fetch: Fetch) {
+		const url = 'http://localhost:8080/api/v1/me';
+		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
+		if (!success) {
+			return { success, message, status };
+		}
+		const resBody: ServerResponse<StudentProfile> = await res?.json();
+		return { resBody, status, success, message };
 	}
 }
 

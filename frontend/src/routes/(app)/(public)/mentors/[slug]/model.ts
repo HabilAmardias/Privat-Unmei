@@ -16,6 +16,14 @@ export type MentorPaymentInfo = {
 	account_number: string;
 };
 
+export type StudentProfile = {
+	id: string;
+	name: string;
+	bio: string;
+	profile_image: string;
+	email: string;
+};
+
 export type MentorProfile = {
 	id: string;
 	profile_image: string;
@@ -36,4 +44,8 @@ export type MentorCourse = {
 	price: number;
 	session_duration_minutes: number;
 	max_total_session: number;
+};
+
+export type ChatroomID = {
+	id: number;
 };

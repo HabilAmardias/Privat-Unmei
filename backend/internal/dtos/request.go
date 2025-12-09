@@ -6,10 +6,7 @@ type (
 		Limit int `form:"limit" binding:"omitempty"`
 	}
 	SeekPaginatedReq struct {
-		Limit  int `form:"limit" binding:"omitempty"`
-		LastID int `form:"last_id" binding:"omitempty"`
-	}
-	AuthenticationReq struct {
-		Token string `form:"token" binding:"required"`
+		Limit  int  `form:"limit"`
+		LastID *int `form:"last_id"`
 	}
 )

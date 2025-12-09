@@ -44,3 +44,7 @@ export type StudentProfile = {
 	profile_image: string;
 	email: string;
 };
+
+export type ChatroomID = {
+	id: number;
+};

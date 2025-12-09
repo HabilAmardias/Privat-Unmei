@@ -48,6 +48,7 @@ type (
 	MentorCourseRequestDetailRes struct {
 		CourseRequestID     int                 `json:"course_request_id"`
 		CourseName          string              `json:"course_name"`
+		StudentID           string              `json:"student_id"`
 		StudentName         string              `json:"student_name"`
 		StudentEmail        string              `json:"student_email"`
 		TotalPrice          float64             `json:"total_price"`

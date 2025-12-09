@@ -305,15 +305,9 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		c.RBACCacheRepository,
 		c.Logger,
 	), c.CourseRequestHandler.StudentCourseRequestDetail)
-	v1.POST("/chatrooms", middlewares.AuthorizationMiddleware(
-		constants.CreatePermission,
-		constants.ChatroomResource,
-		c.RBACRepository,
-		c.RBACCacheRepository,
-		c.Logger,
-	), c.ChatHandler.CreateChatroom)
+	v1.GET("/chatrooms/users/:id", c.ChatHandler.GetChatroom)
 	v1.GET("/chatrooms/me", c.ChatHandler.GetUserChatrooms)
-	v1.GET("/chatrooms/:id", c.ChatHandler.GetChatroom)
+	v1.GET("/chatrooms/:id", c.ChatHandler.GetChatroomInfo)
 	v1.GET("/chatrooms/:id/messages", c.ChatHandler.GetMessages)
 	v1.POST("/chatrooms/:id/messages", c.ChatHandler.SendMessage)
 	v1.GET("/courses/:id/mentor-availability", c.MentorHandler.GetDOWAvailability)
@@ -428,6 +422,6 @@ func (c *RouteConfig) SetupPrivateRoute() {
 
 func (c *RouteConfig) SetupWebsocketRoute() {
 	r := c.App.Group("/ws/v1")
-	r.Use(middlewares.WSAuthenticationMiddleware(c.TokenUtil, constants.ForLogin))
+	r.Use(middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForLogin))
 	r.GET("/chatrooms/:id/messages", c.ChatHandler.ConnectChatChannel)
 }

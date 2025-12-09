@@ -1,4 +1,4 @@
-import { error, fail, type Actions } from '@sveltejs/kit';
+import { error, fail, type Actions, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { controller } from './controller';
 
@@ -64,5 +64,12 @@ export const actions = {
 			id: resBody.data.id,
 			course_id: parseInt(params.slug)
 		};
+	},
+	messageMentor: async ({ fetch, request }) => {
+		const { success, status, message, resBody } = await controller.messageMentor(fetch, request);
+		if (!success) {
+			return fail(status, { message });
+		}
+		throw redirect(303, `/chats/${resBody.data.id}`);
 	}
 } satisfies Actions;

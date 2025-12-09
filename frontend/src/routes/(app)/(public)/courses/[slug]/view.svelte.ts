@@ -1,7 +1,7 @@
 import type { EnhancementArgs, EnhancementReturn, PaginatedResponse } from '$lib/types';
 import { CreateToast, DismissToast } from '$lib/utils/helper';
 import { SvelteDate } from 'svelte/reactivity';
-import type { CourseReview, StudentProfile } from './model';
+import type { CourseDetail, CourseReview, StudentProfile } from './model';
 
 export class CourseDetailView {
 	reviews = $state<CourseReview[]>([]);
@@ -13,6 +13,7 @@ export class CourseDetailView {
 	star = $state<number>(1);
 	feedback = $state<string>('');
 	profile = $state<StudentProfile>();
+	mentorID = $state<string>('');
 	feedbackErr = $derived.by<Error | undefined>(() => {
 		if (this.feedback.length < 15) {
 			return new Error('Feedback must at least contain 15 characters');
@@ -23,7 +24,7 @@ export class CourseDetailView {
 		return this.feedbackErr ? true : false;
 	});
 
-	constructor(d: PaginatedResponse<CourseReview>, p?: StudentProfile) {
+	constructor(d: PaginatedResponse<CourseReview>, c: CourseDetail, p?: StudentProfile) {
 		this.reviews = d.entries;
 		this.page = d.page_info.page;
 		this.limit = d.page_info.limit;
@@ -31,6 +32,7 @@ export class CourseDetailView {
 		if (p) {
 			this.profile = p;
 		}
+		this.mentorID = c.mentor_id;
 	}
 	capitalizeFirstLetter(s: string) {
 		if (s.length === 0) {
@@ -79,6 +81,19 @@ export class CourseDetailView {
 						created_at: now
 					});
 				}
+			}
+			if (result.type === 'failure') {
+				CreateToast('error', result.data?.message);
+			}
+		};
+	};
+	onMessageMentor = (args: EnhancementArgs) => {
+		const loadID = CreateToast('loading', 'loading....');
+		args.formData.append('id', this.mentorID);
+		return async ({ result, update }: EnhancementReturn) => {
+			DismissToast(loadID);
+			if (result.type === 'redirect') {
+				await update();
 			}
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);

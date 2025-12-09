@@ -61,6 +61,18 @@ export class MentorDetailView {
 			}
 		};
 	};
+	onMessageMentor = () => {
+		const loadID = CreateToast('loading', 'loading....');
+		return async ({ result, update }: EnhancementReturn) => {
+			DismissToast(loadID);
+			if (result.type === 'redirect') {
+				await update();
+			}
+			if (result.type === 'failure') {
+				CreateToast('error', result.data?.message);
+			}
+		};
+	};
 	capitalizeFirstLetter(s: string) {
 		if (s.length === 0) {
 			return s;

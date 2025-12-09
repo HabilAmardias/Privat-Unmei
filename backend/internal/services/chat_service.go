@@ -21,54 +21,80 @@ func CreateChatService(chr *repositories.ChatRepositoryImpl, ur *repositories.Us
 	return &ChatServiceImpl{chr, ur, sr, mr, tmr}
 }
 
-func (chs *ChatServiceImpl) CreateChatroom(ctx context.Context, param entity.CreateChatroomParam) (int, error) {
+func (chs *ChatServiceImpl) GetChatroom(ctx context.Context, param entity.GetChatroomParam) (int, error) {
 	chatroom := new(entity.Chatroom)
 	user := new(entity.User)
-	student := new(entity.Student)
 	mentor := new(entity.Mentor)
+	student := new(entity.Student)
 
 	if err := chs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		if err := chs.ur.FindByID(ctx, param.StudentID, user); err != nil {
-			return err
-		}
-		if err := chs.sr.FindByID(ctx, param.StudentID, student); err != nil {
+		if err := chs.ur.FindByID(ctx, param.UserID, user); err != nil {
 			return err
 		}
 		if user.Status != constants.VerifiedStatus {
 			return customerrors.NewError(
-				"user is unverified",
-				errors.New("user is unverified"),
+				"user is not verified",
+				errors.New("user is not verified"),
 				customerrors.Unauthenticate,
 			)
 		}
-		if err := chs.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
-			return err
-		}
-		if err := chs.chr.GetChatroom(ctx, param.MentorID, param.StudentID, chatroom); err != nil {
-			var parsedErr *customerrors.CustomError
-			if errors.As(err, &parsedErr) {
-				if parsedErr.ErrCode != customerrors.ItemNotExist {
+		// case: logged in user is a mentor
+		if param.Role == constants.MentorRole {
+			secondUserStudent := new(entity.Student)
+			if err := chs.mr.FindByID(ctx, param.UserID, mentor, false); err != nil {
+				return err
+			}
+			if err := chs.sr.FindByID(ctx, param.SecondUserID, secondUserStudent); err != nil {
+				return err
+			}
+			if err := chs.chr.GetChatroom(ctx, param.UserID, param.SecondUserID, chatroom); err != nil {
+				var parsedErr *customerrors.CustomError
+				if errors.As(err, &parsedErr) {
+					if parsedErr.ErrCode != customerrors.ItemNotExist {
+						return err
+					}
+				}
+				if err := chs.chr.CreateChatroom(ctx, param.UserID, param.SecondUserID, chatroom); err != nil {
 					return err
 				}
 			}
-		} else {
-			return customerrors.NewError(
-				"chatroom already exist",
-				errors.New("chatroom already exist"),
-				customerrors.ItemAlreadyExist,
-			)
+			return nil
 		}
-		if err := chs.chr.CreateChatroom(ctx, param.MentorID, param.StudentID, chatroom); err != nil {
-			return err
+		// case: logged in user is a student
+		if param.Role == constants.StudentRole {
+			secondUserMentor := new(entity.Mentor)
+			if err := chs.sr.FindByID(ctx, param.UserID, student); err != nil {
+				return err
+			}
+			if err := chs.mr.FindByID(ctx, param.SecondUserID, secondUserMentor, false); err != nil {
+				return err
+			}
+			if err := chs.chr.GetChatroom(ctx, param.SecondUserID, param.UserID, chatroom); err != nil {
+				var parsedErr *customerrors.CustomError
+				if errors.As(err, &parsedErr) {
+					if parsedErr.ErrCode != customerrors.ItemNotExist {
+						return err
+					}
+				}
+				if err := chs.chr.CreateChatroom(ctx, param.SecondUserID, param.UserID, chatroom); err != nil {
+					return err
+				}
+			}
+			return nil
 		}
-		return nil
+		// default case: logged in user is neither a mentor nor a student
+		return customerrors.NewError(
+			"invalid user",
+			errors.New("role does not belong to student or mentor"),
+			customerrors.Unauthenticate,
+		)
 	}); err != nil {
 		return 0, err
 	}
 	return chatroom.ID, nil
 }
 
-func (chs *ChatServiceImpl) GetChatroom(ctx context.Context, param entity.GetChatroomParam) (*entity.ChatroomDetailQuery, error) {
+func (chs *ChatServiceImpl) GetChatroomInfo(ctx context.Context, param entity.GetChatroomInfoParam) (*entity.ChatroomDetailQuery, error) {
 	chatroom := new(entity.Chatroom)
 	user := new(entity.User)
 	secondUser := new(entity.User)
@@ -77,14 +103,12 @@ func (chs *ChatServiceImpl) GetChatroom(ctx context.Context, param entity.GetCha
 	if err := chs.ur.FindByID(ctx, param.UserID, user); err != nil {
 		return nil, err
 	}
-	if param.Role == constants.StudentRole {
-		if user.Status != constants.VerifiedStatus {
-			return nil, customerrors.NewError(
-				"user is not verified",
-				errors.New("user is not verified"),
-				customerrors.Unauthenticate,
-			)
-		}
+	if user.Status != constants.VerifiedStatus {
+		return nil, customerrors.NewError(
+			"user is not verified",
+			errors.New("user is not verified"),
+			customerrors.Unauthenticate,
+		)
 	}
 	if err := chs.chr.FindByID(ctx, param.ChatroomID, chatroom); err != nil {
 		return nil, err
@@ -120,14 +144,12 @@ func (chs *ChatServiceImpl) GetUserChatrooms(ctx context.Context, param entity.G
 	if err := chs.ur.FindByID(ctx, param.UserID, user); err != nil {
 		return nil, nil, err
 	}
-	if param.Role == constants.StudentRole {
-		if user.Status != constants.VerifiedStatus {
-			return nil, nil, customerrors.NewError(
-				"user is not verified",
-				errors.New("user is not verified"),
-				customerrors.Unauthenticate,
-			)
-		}
+	if user.Status != constants.VerifiedStatus {
+		return nil, nil, customerrors.NewError(
+			"user is not verified",
+			errors.New("user is not verified"),
+			customerrors.Unauthenticate,
+		)
 	}
 	if err := chs.chr.GetUserChatrooms(ctx, param.UserID, param.Role, param.Limit, param.Page, totalRow, chatrooms); err != nil {
 		return nil, nil, err
@@ -145,14 +167,12 @@ func (chs *ChatServiceImpl) SendMessage(ctx context.Context, param entity.SendMe
 		if err := chs.ur.FindByID(ctx, param.UserID, user); err != nil {
 			return err
 		}
-		if param.Role == constants.StudentRole {
-			if user.Status != constants.VerifiedStatus {
-				return customerrors.NewError(
-					"user is not verified",
-					errors.New("user is not verified"),
-					customerrors.Unauthenticate,
-				)
-			}
+		if user.Status != constants.VerifiedStatus {
+			return customerrors.NewError(
+				"user is not verified",
+				errors.New("user is not verified"),
+				customerrors.Unauthenticate,
+			)
 		}
 		if err := chs.chr.FindByID(ctx, param.ChatroomID, chatroom); err != nil {
 			return err
@@ -192,14 +212,12 @@ func (chs *ChatServiceImpl) GetMessages(ctx context.Context, param entity.GetMes
 	if err := chs.ur.FindByID(ctx, param.UserID, user); err != nil {
 		return nil, nil, err
 	}
-	if param.Role == constants.StudentRole {
-		if user.Status != constants.VerifiedStatus {
-			return nil, nil, customerrors.NewError(
-				"user is not verified",
-				errors.New("user is not verified"),
-				customerrors.Unauthenticate,
-			)
-		}
+	if user.Status != constants.VerifiedStatus {
+		return nil, nil, customerrors.NewError(
+			"user is not verified",
+			errors.New("user is not verified"),
+			customerrors.Unauthenticate,
+		)
 	}
 	if err := chs.chr.FindByID(ctx, param.ChatroomID, chatroom); err != nil {
 		return nil, nil, customerrors.NewError(

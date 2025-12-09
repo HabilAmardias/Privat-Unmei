@@ -7,6 +7,6 @@ type (
 	}
 	SeekPaginatedParam struct {
 		Limit  int
-		LastID int
+		LastID *int
 	}
 )

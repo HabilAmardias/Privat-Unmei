@@ -181,6 +181,7 @@ func (crh *CourseRequestHandlerImpl) MentorCourseRequestDetail(ctx *gin.Context)
 		PaymentMethod:       detail.PaymentMethod,
 		AccountNumber:       detail.AccountNumber,
 		NumberOfParticipant: detail.NumberOfParticipant,
+		StudentID:           detail.StudentID,
 		Schedules:           []dtos.CourseScheduleRes{},
 	}
 	for _, sc := range detail.Schedules {

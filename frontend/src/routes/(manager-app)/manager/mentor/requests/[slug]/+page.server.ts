@@ -45,5 +45,12 @@ export const actions = {
 			return fail(status, { message });
 		}
 		redirect(303, '/manager/mentor/requests');
+	},
+	messageStudent: async ({ fetch, request }) => {
+		const { success, status, message, resBody } = await controller.messageStudent(fetch, request);
+		if (!success) {
+			return fail(status, { message });
+		}
+		throw redirect(303, `/manager/mentor/messages/${resBody.data.id}`);
 	}
 } satisfies Actions;

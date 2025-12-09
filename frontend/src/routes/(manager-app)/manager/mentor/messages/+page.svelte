@@ -28,12 +28,12 @@
 	{:else}
 		<ScrollArea
 			orientation="vertical"
-			viewportClasses="h-[550px] max-h-[550px] md:h-[450px] md:max-h-[450px]"
+			viewportClasses="h-[550px] max-h-[550px] md:h-[500px] md:max-h-[500px]"
 		>
 			<ul class="flex gap-4">
 				{#each View.chats as ch (ch.id)}
 					<li class="w-full rounded-lg bg-[var(--tertiary-color)] p-2">
-						<Link href={`/chats/${ch.id}`}>
+						<Link href={`/manager/mentor/messages/${ch.id}`}>
 							<div class="flex items-center gap-4">
 								<CldImage src={ch.profile_image} width={70} height={70} className="rounded-full" />
 								<div>

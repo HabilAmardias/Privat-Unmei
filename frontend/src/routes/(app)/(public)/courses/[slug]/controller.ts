@@ -5,7 +5,8 @@ import type {
 	CourseReview,
 	CourseTopic,
 	CreateReview,
-	StudentProfile
+	StudentProfile,
+	ChatroomID
 } from './model';
 import { FetchData } from '$lib/utils';
 
@@ -78,6 +79,17 @@ class CourseDetailController {
 			return { success, message, status };
 		}
 		const resBody: ServerResponse<StudentProfile> = await res?.json();
+		return { resBody, status, success, message };
+	}
+	async messageMentor(fetch: Fetch, req: Request) {
+		const formData = await req.formData();
+		const id = formData.get('id');
+		const url = `http://localhost:8080/api/v1/chatrooms/users/${id}`;
+		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
+		if (!success) {
+			return { success, message, status };
+		}
+		const resBody: ServerResponse<ChatroomID> = await res?.json();
 		return { resBody, status, success, message };
 	}
 }
