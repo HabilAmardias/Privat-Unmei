@@ -17,6 +17,7 @@
 	const View = new ChatroomView(data.messages);
 
 	onMount(() => {
+		View.handleInitialScroll();
 		const url = `ws://localhost:8080/ws/v1/chatrooms/${params.slug}/messages`;
 		const socket = new WebSocket(url);
 		socket.onopen = () => {
@@ -52,7 +53,11 @@
 			<p class="text-[var(--secondary-color)]">{data.chatroom.email}</p>
 		</div>
 	</div>
-	<ScrollArea orientation="vertical" viewportClasses="h-[550px] max-h-[550px]">
+	<ScrollArea
+		bind:viewportRef={View.viewPortRef}
+		orientation="vertical"
+		viewportClasses="h-[550px] max-h-[550px] md:h-[500px] md:max-h-[500px]"
+	>
 		{#if View.isLoading}
 			<div>
 				<Loading />

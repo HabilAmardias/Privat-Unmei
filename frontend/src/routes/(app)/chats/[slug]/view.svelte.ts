@@ -16,6 +16,8 @@ export class ChatroomView {
 	getMessageForm = $state<HTMLFormElement>();
 	isInitialLoad = $state<boolean>(true);
 	isLoading = $state<boolean>(false);
+	viewPortRef = $state<HTMLDivElement | null>(null);
+	prevScrollHeight = $state<number>(0);
 
 	constructor(m: SeekPaginatedResponse<MessageInfo>) {
 		this.messages = m.entries;
@@ -45,8 +47,19 @@ export class ChatroomView {
 			}
 		};
 	};
+	restoreScrollPosition = () => {
+		if (this.viewPortRef && this.prevScrollHeight > 0) {
+			const newScrollHeight = this.viewPortRef.scrollHeight;
+			const heightDiff = newScrollHeight - this.prevScrollHeight;
+			this.viewPortRef.scrollTop += heightDiff;
+			this.prevScrollHeight = 0;
+		}
+	};
 	onIntersect = () => {
 		if (this.messages.length < this.totalRow) {
+			if (this.viewPortRef) {
+				this.prevScrollHeight = this.viewPortRef.scrollHeight;
+			}
 			this.getMessageForm?.requestSubmit();
 		}
 	};
@@ -61,6 +74,7 @@ export class ChatroomView {
 				this.lastID = result.data?.messages.page_info.last_id;
 				this.limit = result.data?.messages.page_info.limit;
 				this.totalRow = result.data?.messages.page_info.total_row;
+				this.restoreScrollPosition();
 			}
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);

@@ -4,10 +4,12 @@
 	type Props = WithoutChild<ScrollArea.RootProps> & {
 		orientation: 'vertical' | 'horizontal' | 'both';
 		viewportClasses?: string;
+		viewportRef?: HTMLDivElement | null;
 	};
 
 	let {
 		ref = $bindable(null),
+		viewportRef = $bindable(null),
 		orientation = 'vertical',
 		viewportClasses,
 		children,
@@ -22,7 +24,7 @@
 {/snippet}
 
 <ScrollArea.Root bind:ref {...restProps}>
-	<ScrollArea.Viewport class={viewportClasses}>
+	<ScrollArea.Viewport bind:ref={viewportRef} class={viewportClasses}>
 		{@render children?.()}
 	</ScrollArea.Viewport>
 	{#if orientation === 'vertical' || orientation === 'both'}

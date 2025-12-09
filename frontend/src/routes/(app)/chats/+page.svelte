@@ -26,7 +26,10 @@
 	{:else if View.chats.length === 0 || !View.chats}
 		<b class="font-bold text-[var(--tertiary-color)]">No Chats Found</b>
 	{:else}
-		<ScrollArea orientation="vertical" viewportClasses="h-[600px] max-h-[600px]">
+		<ScrollArea
+			orientation="vertical"
+			viewportClasses="h-[550px] max-h-[550px] md:h-[450px] md:max-h-[450px]"
+		>
 			<ul class="flex gap-4">
 				{#each View.chats as ch (ch.id)}
 					<li class="w-full rounded-lg bg-[var(--tertiary-color)] p-2">

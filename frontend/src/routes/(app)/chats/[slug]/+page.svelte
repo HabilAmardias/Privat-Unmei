@@ -53,7 +53,11 @@
 			<p class="text-[var(--secondary-color)]">{data.chatroom.email}</p>
 		</div>
 	</div>
-	<ScrollArea orientation="vertical" viewportClasses="h-[550px] max-h-[550px]">
+	<ScrollArea
+		bind:viewportRef={View.viewPortRef}
+		orientation="vertical"
+		viewportClasses="h-[550px] max-h-[550px] md:h-[400px] md:max-h-[400px]"
+	>
 		{#if View.isLoading}
 			<div>
 				<Loading />
