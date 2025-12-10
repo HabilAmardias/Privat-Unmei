@@ -20,15 +20,15 @@ type (
 		ID               int    `json:"id"`
 		UserID           string `json:"user_id"`
 		Username         string `json:"username"`
-		UserEmail        string `json:"email"`
+		UserPublicID     string `json:"public_id"`
 		UserProfileImage string `json:"profile_image"`
 	}
 	MessageRes struct {
-		ID          int    `json:"id"`
-		SenderID    string `json:"sender_id"`
-		SenderName  string `json:"sender_name"`
-		SenderEmail string `json:"sender_email"`
-		ChatroomID  int    `json:"chatroom_id"`
-		Content     string `json:"content"`
+		ID             int    `json:"id"`
+		SenderID       string `json:"sender_id"`
+		SenderName     string `json:"sender_name"`
+		SenderPublicID string `json:"sender_public_id"`
+		ChatroomID     int    `json:"chatroom_id"`
+		Content        string `json:"content"`
 	}
 )

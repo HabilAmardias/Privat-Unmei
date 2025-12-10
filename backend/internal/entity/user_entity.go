@@ -7,6 +7,7 @@ type (
 		ID           string
 		Name         string
 		Email        string
+		PublicID     string
 		Password     string
 		Bio          string
 		ProfileImage string

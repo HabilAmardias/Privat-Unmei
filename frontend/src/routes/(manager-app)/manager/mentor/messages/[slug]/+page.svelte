@@ -50,7 +50,7 @@
 		<CldImage src={data.chatroom.profile_image} width={70} height={70} className="rounded-full" />
 		<div>
 			<p class="text-[var(--primary-color)]">{data.chatroom.username}</p>
-			<p class="text-[var(--secondary-color)]">{data.chatroom.email}</p>
+			<p class="text-[var(--secondary-color)]">{data.chatroom.public_id}</p>
 		</div>
 	</div>
 	<ScrollArea

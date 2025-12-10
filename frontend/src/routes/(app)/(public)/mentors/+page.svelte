@@ -54,7 +54,7 @@
 									<CldImage src={m.profile_image} width={70} height={70} className="rounded-full" />
 									<div>
 										<p class="font-bold text-[var(--primary-color)]">{m.name}</p>
-										<p class="text-[var(--secondary-color)]">{m.email}</p>
+										<p class="text-[var(--secondary-color)]">{m.public_id}</p>
 									</div>
 								</div>
 							</Link>

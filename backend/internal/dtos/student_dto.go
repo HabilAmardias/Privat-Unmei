@@ -24,7 +24,7 @@ type (
 	ListStudentRes struct {
 		ID           string `json:"id"`
 		Name         string `json:"name"`
-		Email        string `json:"email"`
+		PublicID     string `json:"public_id"`
 		Bio          string `json:"bio"`
 		ProfileImage string `json:"profile_image"`
 		Status       string `json:"status"`
@@ -39,7 +39,7 @@ type (
 	StudentProfileRes struct {
 		ID           string `json:"id"`
 		Name         string `json:"name"`
-		Email        string `json:"email"`
+		PublicID     string `json:"public_id"`
 		Bio          string `json:"bio"`
 		ProfileImage string `json:"profile_image"`
 	}

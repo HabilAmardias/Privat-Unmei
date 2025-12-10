@@ -191,7 +191,7 @@ func (ch *CourseHandlerImpl) CourseDetail(ctx *gin.Context) {
 			},
 			MentorID:           res.MentorID,
 			MentorName:         res.MentorName,
-			MentorEmail:        res.MentorEmail,
+			MentorPublicID:     res.MentorPublicID,
 			MentorProfileImage: res.MentorProfileImage,
 		},
 		Description: res.Description,
@@ -240,9 +240,9 @@ func (ch *CourseHandlerImpl) ListCourse(ctx *gin.Context) {
 				SessionDuration: course.SessionDuration,
 				MaxSession:      course.MaxSession,
 			},
-			MentorID:    course.MentorID,
-			MentorName:  course.MentorName,
-			MentorEmail: course.MentorEmail,
+			MentorID:       course.MentorID,
+			MentorName:     course.MentorName,
+			MentorPublicID: course.MentorPublicID,
 		}
 		entries = append(entries, item)
 	}
@@ -300,9 +300,9 @@ func (ch *CourseHandlerImpl) MostBoughtCourses(ctx *gin.Context) {
 				SessionDuration: course.SessionDuration,
 				MaxSession:      course.MaxSession,
 			},
-			MentorID:    course.MentorID,
-			MentorName:  course.MentorName,
-			MentorEmail: course.MentorEmail,
+			MentorID:       course.MentorID,
+			MentorName:     course.MentorName,
+			MentorPublicID: course.MentorPublicID,
 		}
 		entries = append(entries, item)
 	}

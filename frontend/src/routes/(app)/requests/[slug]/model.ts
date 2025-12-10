@@ -8,7 +8,7 @@ export type RequestDetail = {
 	course_request_id: number;
 	course_name: string;
 	mentor_name: string;
-	mentor_email: string;
+	mentor_public_id: string;
 	total_price: number;
 	subtotal: number;
 	operational_cost: number;

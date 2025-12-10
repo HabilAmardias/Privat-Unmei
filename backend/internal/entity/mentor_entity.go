@@ -54,7 +54,7 @@ type (
 	MentorProfileQuery struct {
 		ID                string
 		Name              string
-		Email             string
+		PublicID          string
 		Bio               string
 		ProfileImage      string
 		YearsOfExperience int
@@ -101,7 +101,7 @@ type (
 	ListMentorQuery struct {
 		ID                string
 		Name              string
-		Email             string
+		PublicID          string
 		ProfileImage      string
 		YearsOfExperience int
 	}

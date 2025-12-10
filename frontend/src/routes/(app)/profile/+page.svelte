@@ -85,7 +85,7 @@
 			</FileInput>
 			<div class="flex flex-col gap-1">
 				<Input err={View.nameError} id="name" name="name" type="text" bind:value={View.name} />
-				<p class="text-md">{data.profile.email}</p>
+				<p class="text-md">{data.profile.public_id}</p>
 			</div>
 		</div>
 		<div class="flex flex-col gap-2">
@@ -124,7 +124,7 @@
 								<Pencil width={24} height={24} />
 							</Button>
 						</div>
-						<p class="text-md">{data.profile.email}</p>
+						<p class="text-md">{data.profile.public_id}</p>
 					</div>
 				</div>
 				<div class="flex flex-col gap-2">
@@ -183,7 +183,7 @@
 												</p>
 											</div>
 											<p class="text-[var(--secondary-color)]">Mentor: {order.mentor_name}</p>
-											<p class="text-[var(--secondary-color)]">{order.mentor_email}</p>
+											<p class="text-[var(--secondary-color)]">{order.mentor_public_id}</p>
 
 											<p class="text-[var(--secondary-color)]">
 												Status: {View.capitalizeFirstLetter(order.status)}

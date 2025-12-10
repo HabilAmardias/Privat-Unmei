@@ -107,7 +107,7 @@ func (crs *CourseRequestServiceImpl) StudentCourseRequestDetail(ctx context.Cont
 	res.CourseRequestID = courseRequest.ID
 	res.CourseName = course.Title
 	res.MentorName = userMentor.Name
-	res.MentorEmail = userMentor.Email
+	res.MentorPublicID = userMentor.PublicID
 	res.TotalPrice = payment.TotalPrice
 	res.Subtotal = payment.SubTotal
 	res.OperationalCost = payment.OperationalCost
@@ -201,7 +201,7 @@ func (crs *CourseRequestServiceImpl) MentorCourseRequestDetail(ctx context.Conte
 	res.CourseRequestID = courseRequest.ID
 	res.CourseName = course.Title
 	res.StudentName = userStudent.Name
-	res.StudentEmail = userStudent.Email
+	res.StudentPublicID = userStudent.PublicID
 	res.TotalPrice = payment.TotalPrice
 	res.Subtotal = payment.SubTotal
 	res.OperationalCost = payment.OperationalCost

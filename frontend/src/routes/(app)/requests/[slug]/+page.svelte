@@ -21,8 +21,8 @@
 			<p>{data.detail.mentor_name}</p>
 		</div>
 		<div class="flex gap-2">
-			<p class="font-bold text-[var(--tertiary-color)]">Mentor Email:</p>
-			<p>{data.detail.mentor_email}</p>
+			<p class="font-bold text-[var(--tertiary-color)]">Mentor Public ID:</p>
+			<p>{data.detail.mentor_public_id}</p>
 		</div>
 		<div class="flex gap-2">
 			<p class="font-bold text-[var(--tertiary-color)]">Participant:</p>

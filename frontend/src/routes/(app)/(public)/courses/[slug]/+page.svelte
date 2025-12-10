@@ -86,7 +86,7 @@
 			/>
 			<div>
 				<p class="font-bold text-[var(--primary-color)]">{data.detail.mentor_name}</p>
-				<p class="text-[var(--secondary-color)]">{data.detail.mentor_email}</p>
+				<p class="text-[var(--secondary-color)]">{data.detail.mentor_public_id}</p>
 			</div>
 		</div>
 	</Link>

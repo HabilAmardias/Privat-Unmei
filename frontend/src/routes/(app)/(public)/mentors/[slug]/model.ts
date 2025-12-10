@@ -21,7 +21,7 @@ export type StudentProfile = {
 	name: string;
 	bio: string;
 	profile_image: string;
-	email: string;
+	public_id: string;
 };
 
 export type MentorProfile = {
@@ -33,7 +33,7 @@ export type MentorProfile = {
 	degree: string;
 	major: string;
 	campus: string;
-	email: string;
+	public_id: string;
 };
 
 export type MentorCourse = {

@@ -132,7 +132,7 @@ func (ms *MentorServiceImpl) GetMentorProfile(ctx context.Context, param entity.
 	}
 	res.ID = user.ID
 	res.Name = user.Name
-	res.Email = user.Email
+	res.PublicID = user.PublicID
 	res.Bio = user.Bio
 	res.Campus = mentor.Campus
 	res.Degree = mentor.Degree

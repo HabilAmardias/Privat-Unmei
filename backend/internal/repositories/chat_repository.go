@@ -124,7 +124,7 @@ func (chr *ChatRepositoryImpl) GetUserChatrooms(ctx context.Context, userID stri
 		ch.id,
 		ch.mentor_id,
 		u.name,
-		u.email,
+		u.public_id,
 		u.profile_image
 	FROM chatrooms ch
 	JOIN users u ON u.id = ch.mentor_id
@@ -139,7 +139,7 @@ func (chr *ChatRepositoryImpl) GetUserChatrooms(ctx context.Context, userID stri
 			ch.id,
 			ch.student_id,
 			u.name,
-			u.email,
+			u.public_id,
 			u.profile_image
 		FROM chatrooms ch
 		JOIN users u ON u.id = ch.student_id
@@ -164,7 +164,7 @@ func (chr *ChatRepositoryImpl) GetUserChatrooms(ctx context.Context, userID stri
 			&item.ID,
 			&item.UserID,
 			&item.Username,
-			&item.UserEmail,
+			&item.UserPublicID,
 			&item.UserProfileImage,
 		); err != nil {
 			return customerrors.NewError(
@@ -256,7 +256,7 @@ func (chr *ChatRepositoryImpl) GetMessages(ctx context.Context, chatroomID int, 
 			m.id as id,
 			m.sender_id as sender_id,
 			u.name as sender_name,
-			u.email as sender_email,
+			u.public_id as sender_public_id,
 			m.chatroom_id as chatroom_id,
 			m.content as content
 		FROM messages m
@@ -283,7 +283,7 @@ func (chr *ChatRepositoryImpl) GetMessages(ctx context.Context, chatroomID int, 
 			&item.ID,
 			&item.SenderID,
 			&item.SenderName,
-			&item.SenderEmail,
+			&item.SenderPublicID,
 			&item.ChatroomID,
 			&item.Content,
 		); err != nil {

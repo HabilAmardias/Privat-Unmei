@@ -140,7 +140,7 @@ func (ur *UserRepositoryImpl) FindByID(ctx context.Context, id string, user *ent
 		driver = tx
 	}
 	query := `
-	SELECT id, name, email, password_hash, bio, profile_image, status, created_at, updated_at, deleted_at FROM users
+	SELECT id, name, email, public_id, password_hash, bio, profile_image, status, created_at, updated_at, deleted_at FROM users
 	WHERE id = $1 AND deleted_at IS NULL
 	`
 	row := driver.QueryRow(query, id)
@@ -148,6 +148,7 @@ func (ur *UserRepositoryImpl) FindByID(ctx context.Context, id string, user *ent
 		&user.ID,
 		&user.Name,
 		&user.Email,
+		&user.PublicID,
 		&user.Password,
 		&user.Bio,
 		&user.ProfileImage,
@@ -179,7 +180,7 @@ func (ur *UserRepositoryImpl) FindByEmail(ctx context.Context, email string, use
 		driver = tx
 	}
 	query := `
-	SELECT id, name, email, password_hash, bio, profile_image, status, created_at, updated_at, deleted_at FROM users
+	SELECT id, name, email, public_id, password_hash, bio, profile_image, status, created_at, updated_at, deleted_at FROM users
 	WHERE email = $1 AND deleted_at IS NULL
 	`
 	row := driver.QueryRow(query, email)
@@ -187,6 +188,7 @@ func (ur *UserRepositoryImpl) FindByEmail(ctx context.Context, email string, use
 		&user.ID,
 		&user.Name,
 		&user.Email,
+		&user.PublicID,
 		&user.Password,
 		&user.Bio,
 		&user.ProfileImage,

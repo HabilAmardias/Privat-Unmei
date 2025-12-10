@@ -49,7 +49,7 @@
 							<th class="text-[var(--tertiary-color)]">Title</th>
 							<th class="text-[var(--tertiary-color)]">Status</th>
 							<th class="text-[var(--tertiary-color)]">Student Name</th>
-							<th class="text-[var(--tertiary-color)]">Student Email</th>
+							<th class="text-[var(--tertiary-color)]">Student Public ID</th>
 							<th class="text-[var(--tertiary-color)]">Total Price</th>
 						</tr>
 					</thead>
@@ -66,7 +66,7 @@
 									{r.name}
 								</td>
 								<td class="text-center">
-									{r.email}
+									{r.public_id}
 								</td>
 								<td class="text-center">
 									{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(

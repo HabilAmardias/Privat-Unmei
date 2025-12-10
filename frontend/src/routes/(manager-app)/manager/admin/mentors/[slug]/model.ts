@@ -33,5 +33,5 @@ export type MentorProfile = {
 	degree: string;
 	major: string;
 	campus: string;
-	email: string;
+	public_id: string;
 };

@@ -73,7 +73,7 @@ func (us *StudentServiceImpl) GetStudentProfile(ctx context.Context, param entit
 	profile.Name = user.Name
 	profile.Bio = user.Bio
 	profile.ProfileImage = user.ProfileImage
-	profile.Email = user.Email
+	profile.PublicID = user.PublicID
 
 	return profile, nil
 }

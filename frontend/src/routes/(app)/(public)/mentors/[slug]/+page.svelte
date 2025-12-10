@@ -42,7 +42,7 @@
 		/>
 		<div class="flex flex-col gap-1">
 			<p class="font-bold text-[var(--tertiary-color)]">{data.profile.name}</p>
-			<p>{data.profile.email}</p>
+			<p>{data.profile.public_id}</p>
 			{#if data.studentProfile}
 				<form method="POST" action="?/messageMentor" use:enhance={View.onMessageMentor}>
 					<Button type="submit">Message</Button>

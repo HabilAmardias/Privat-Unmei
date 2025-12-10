@@ -56,7 +56,7 @@
 			<div class="flex w-full items-center justify-between">
 				<div class="flex flex-col gap-1">
 					<p class="font-bold text-[var(--tertiary-color)]">{data.profile.name}</p>
-					<p>{data.profile.email}</p>
+					<p>{data.profile.public_id}</p>
 					<Button type="button" onClick={() => (View.openChangePassword = true)}
 						>Change Password</Button
 					>

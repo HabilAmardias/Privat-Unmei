@@ -38,7 +38,7 @@
 								<CldImage src={ch.profile_image} width={70} height={70} className="rounded-full" />
 								<div>
 									<p class="text-[var(--primary-color)]">{ch.username}</p>
-									<p class="text-[var(--secondary-color)]">{ch.email}</p>
+									<p class="text-[var(--secondary-color)]">{ch.public_id}</p>
 								</div>
 							</div>
 						</Link>

@@ -29,18 +29,18 @@ type (
 		DeletedAt  *time.Time
 	}
 	MessageDetailQuery struct {
-		ID          int
-		SenderID    string
-		SenderName  string
-		SenderEmail string
-		ChatroomID  int
-		Content     string
+		ID             int
+		SenderID       string
+		SenderName     string
+		SenderPublicID string
+		ChatroomID     int
+		Content        string
 	}
 	ChatroomDetailQuery struct {
 		ID               int
 		UserID           string
 		Username         string
-		UserEmail        string
+		UserPublicID     string
 		UserProfileImage string
 	}
 	GetChatroomParam struct {

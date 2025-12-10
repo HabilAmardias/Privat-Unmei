@@ -131,7 +131,7 @@ func (chs *ChatServiceImpl) GetChatroomInfo(ctx context.Context, param entity.Ge
 	query.ID = chatroom.ID
 	query.UserID = secondUser.ID
 	query.Username = secondUser.Name
-	query.UserEmail = secondUser.Email
+	query.UserPublicID = secondUser.PublicID
 	query.UserProfileImage = secondUser.ProfileImage
 
 	return query, nil
@@ -196,7 +196,7 @@ func (chs *ChatServiceImpl) SendMessage(ctx context.Context, param entity.SendMe
 	}
 	messageDetail.ID = message.ID
 	messageDetail.ChatroomID = message.ChatroomID
-	messageDetail.SenderEmail = user.Email
+	messageDetail.SenderPublicID = user.PublicID
 	messageDetail.SenderID = user.ID
 	messageDetail.SenderName = user.Name
 	messageDetail.Content = message.Content

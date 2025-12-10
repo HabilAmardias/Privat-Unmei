@@ -33,7 +33,7 @@ func (sr *StudentRepositoryImpl) GetStudentList(ctx context.Context, totalRow *i
 	SELECT
 		s.id, 
 		u.name, 
-		u.email, 
+		u.public_id, 
 		u.bio, 
 		u.profile_image, 
 		u.status
@@ -78,7 +78,7 @@ func (sr *StudentRepositoryImpl) GetStudentList(ctx context.Context, totalRow *i
 		if err := rows.Scan(
 			&student.ID,
 			&student.Name,
-			&student.Email,
+			&student.PublicID,
 			&student.Bio,
 			&student.ProfileImage,
 			&student.Status,
