@@ -358,7 +358,7 @@ func (cr *CourseRequestRepositoryImpl) CancelExpiredRequest(ctx context.Context,
 	return nil
 }
 
-func (cr *CourseRequestRepositoryImpl) ChangeRequestStatus(ctx context.Context, id int, newStatus string, eat *time.Time) error {
+func (cr *CourseRequestRepositoryImpl) ChangeRequestStatus(ctx context.Context, id string, newStatus string, eat *time.Time) error {
 	var driver RepoDriver = cr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
@@ -382,7 +382,7 @@ func (cr *CourseRequestRepositoryImpl) ChangeRequestStatus(ctx context.Context, 
 	return nil
 }
 
-func (cr *CourseRequestRepositoryImpl) FindByID(ctx context.Context, id int, courseRequest *entity.CourseRequest) error {
+func (cr *CourseRequestRepositoryImpl) FindByID(ctx context.Context, id string, courseRequest *entity.CourseRequest) error {
 	var driver RepoDriver = cr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx

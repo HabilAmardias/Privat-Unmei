@@ -14,10 +14,10 @@ type (
 		SeekPaginatedReq
 	}
 	CreateChatroomRes struct {
-		ID int `json:"id"`
+		ID string `json:"id"`
 	}
 	ChatroomRes struct {
-		ID               int    `json:"id"`
+		ID               string `json:"id"`
 		UserID           string `json:"user_id"`
 		Username         string `json:"username"`
 		UserPublicID     string `json:"public_id"`
@@ -28,7 +28,7 @@ type (
 		SenderID       string `json:"sender_id"`
 		SenderName     string `json:"sender_name"`
 		SenderPublicID string `json:"sender_public_id"`
-		ChatroomID     int    `json:"chatroom_id"`
+		ChatroomID     string `json:"chatroom_id"`
 		Content        string `json:"content"`
 	}
 )

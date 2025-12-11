@@ -1,5 +1,5 @@
 export type CourseRequest = {
-	id: number;
+	id: string;
 	student_id: string;
 	course_id: number;
 	total_price: number;

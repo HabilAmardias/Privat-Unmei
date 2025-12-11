@@ -11,7 +11,6 @@ import (
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/logger"
 	"privat-unmei/internal/services"
-	"strconv"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -62,15 +61,7 @@ func (chh *ChatHandlerImpl) ConnectChatChannel(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	chatroomID, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		ctx.Error(customerrors.NewError(
-			"invalid chatroom",
-			err,
-			customerrors.InvalidAction,
-		))
-		return
-	}
+	chatroomID := ctx.Param("id")
 	param := entity.GetChatroomInfoParam{
 		ChatroomID: chatroomID,
 		UserID:     claim.Subject,
@@ -89,7 +80,7 @@ func (chh *ChatHandlerImpl) ConnectChatChannel(ctx *gin.Context) {
 		))
 		return
 	}
-	sub := chh.rc.Subscribe(context.Background(), fmt.Sprintf("chatroom:%d", chatroomID))
+	sub := chh.rc.Subscribe(context.Background(), fmt.Sprintf("chatroom:%s", chatroomID))
 
 	var wg sync.WaitGroup
 	cc := entity.CreateChatClient(conn, sub, chh.lg)
@@ -103,15 +94,7 @@ func (chh *ChatHandlerImpl) ConnectChatChannel(ctx *gin.Context) {
 }
 
 func (chh *ChatHandlerImpl) GetChatroomInfo(ctx *gin.Context) {
-	chatroomID, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		ctx.Error(customerrors.NewError(
-			"invalid chatroom",
-			err,
-			customerrors.InvalidAction,
-		))
-		return
-	}
+	chatroomID := ctx.Param("id")
 	claim, err := getAuthenticationPayload(ctx)
 	if err != nil {
 		ctx.Error(err)
@@ -186,15 +169,7 @@ func (chh *ChatHandlerImpl) SendMessage(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	chatroomID, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		ctx.Error(customerrors.NewError(
-			"invalid chatroom",
-			err,
-			customerrors.InvalidAction,
-		))
-		return
-	}
+	chatroomID := ctx.Param("id")
 	claim, err := getAuthenticationPayload(ctx)
 	if err != nil {
 		ctx.Error(err)
@@ -221,7 +196,7 @@ func (chh *ChatHandlerImpl) SendMessage(ctx *gin.Context) {
 		))
 		return
 	}
-	if err := chh.rc.Publish(ctx, fmt.Sprintf("chatroom:%d", chatroomID), messagePayload).Err(); err != nil {
+	if err := chh.rc.Publish(ctx, fmt.Sprintf("chatroom:%s", chatroomID), messagePayload).Err(); err != nil {
 		ctx.Error(customerrors.NewError(
 			"something went wrong",
 			err,
@@ -246,15 +221,7 @@ func (chh *ChatHandlerImpl) GetMessages(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	chatroomID, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		ctx.Error(customerrors.NewError(
-			"invalid chatroom",
-			err,
-			customerrors.InvalidAction,
-		))
-		return
-	}
+	chatroomID := ctx.Param("id")
 	param := entity.GetMessagesParam{
 		SeekPaginatedParam: entity.SeekPaginatedParam{
 			Limit:  req.Limit,

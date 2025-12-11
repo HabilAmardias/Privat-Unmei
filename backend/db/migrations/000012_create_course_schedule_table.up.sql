@@ -2,7 +2,7 @@
 -- scheduled session
 CREATE TABLE course_schedule (
     id BIGSERIAL PRIMARY KEY,
-    course_request_id BIGINT REFERENCES course_requests(id),
+    course_request_id UUID REFERENCES course_requests(id),
     scheduled_date DATE NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,

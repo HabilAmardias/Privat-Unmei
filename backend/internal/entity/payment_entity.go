@@ -5,7 +5,7 @@ import "time"
 type (
 	Payment struct {
 		ID                int
-		CourseRequestID   int
+		CourseRequestID   string
 		SubTotal          float64
 		OperationalCost   float64
 		TotalPrice        float64

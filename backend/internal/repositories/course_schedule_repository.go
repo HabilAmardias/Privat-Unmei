@@ -20,7 +20,7 @@ func CreateCourseScheduleRepository(db *db.CustomDB) *CourseScheduleRepositoryIm
 	return &CourseScheduleRepositoryImpl{db}
 }
 
-func (csr *CourseScheduleRepositoryImpl) FindScheduleByCourseRequestID(ctx context.Context, courseRequestID int, schedules *[]entity.CourseRequestSchedule) error {
+func (csr *CourseScheduleRepositoryImpl) FindScheduleByCourseRequestID(ctx context.Context, courseRequestID string, schedules *[]entity.CourseRequestSchedule) error {
 	var driver RepoDriver
 	driver = csr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
@@ -116,7 +116,7 @@ func (csr *CourseScheduleRepositoryImpl) CancelExpiredSchedule(ctx context.Conte
 	return err
 }
 
-func (csr *CourseScheduleRepositoryImpl) UpdateScheduleStatusByCourseRequestID(ctx context.Context, courseRequestID int, newStatus string) error {
+func (csr *CourseScheduleRepositoryImpl) UpdateScheduleStatusByCourseRequestID(ctx context.Context, courseRequestID string, newStatus string) error {
 	var driver RepoDriver
 	driver = csr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
@@ -140,7 +140,7 @@ func (csr *CourseScheduleRepositoryImpl) UpdateScheduleStatusByCourseRequestID(c
 	return nil
 }
 
-func (csr *CourseScheduleRepositoryImpl) FindReservedScheduleByCourseRequestID(ctx context.Context, courseRequestID int, schedules *[]entity.CourseRequestSchedule) error {
+func (csr *CourseScheduleRepositoryImpl) FindReservedScheduleByCourseRequestID(ctx context.Context, courseRequestID string, schedules *[]entity.CourseRequestSchedule) error {
 	var driver RepoDriver
 	driver = csr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
@@ -193,7 +193,7 @@ func (csr *CourseScheduleRepositoryImpl) FindReservedScheduleByCourseRequestID(c
 	return nil
 }
 
-func (csr *CourseScheduleRepositoryImpl) CreateSchedule(ctx context.Context, courseRequestID int, slots *[]entity.CreateRequestSchedule) error {
+func (csr *CourseScheduleRepositoryImpl) CreateSchedule(ctx context.Context, courseRequestID string, slots *[]entity.CreateRequestSchedule) error {
 	var driver RepoDriver
 	driver = csr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {

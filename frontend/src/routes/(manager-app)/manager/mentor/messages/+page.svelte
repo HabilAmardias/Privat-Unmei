@@ -22,9 +22,15 @@
 <div class="flex h-full w-full flex-col gap-4 p-4">
 	<h1 class="text-2xl font-bold text-[var(--tertiary-color)]">Chats</h1>
 	{#if View.isLoading}
-		<Loading />
+		<div class="h-[550px] max-h-[550px] md:h-[500px] md:max-h-[500px]">
+			<Loading />
+		</div>
 	{:else if View.chats.length === 0 || !View.chats}
-		<b class="font-bold text-[var(--tertiary-color)]">No Chats Found</b>
+		<div
+			class="flex h-[550px] max-h-[550px] items-center justify-center md:h-[500px] md:max-h-[500px]"
+		>
+			<b class="font-bold text-[var(--tertiary-color)]">No Chats Found</b>
+		</div>
 	{:else}
 		<ScrollArea
 			orientation="vertical"

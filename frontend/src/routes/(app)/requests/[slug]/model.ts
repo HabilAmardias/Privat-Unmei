@@ -5,9 +5,10 @@ export type RequestSchedule = {
 };
 
 export type RequestDetail = {
-	course_request_id: number;
+	course_request_id: string;
 	course_name: string;
 	mentor_name: string;
+	mentor_id: string;
 	mentor_public_id: string;
 	total_price: number;
 	subtotal: number;
@@ -19,4 +20,8 @@ export type RequestDetail = {
 	account_number: string;
 	number_of_participant: number;
 	schedules: RequestSchedule[];
+};
+
+export type ChatroomID = {
+	id: number;
 };

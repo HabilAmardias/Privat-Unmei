@@ -12,7 +12,7 @@ import (
 
 type (
 	Chatroom struct {
-		ID        int
+		ID        string
 		StudentID string
 		MentorID  string
 		CreatedAt time.Time
@@ -22,7 +22,7 @@ type (
 	Message struct {
 		ID         int
 		SenderID   string
-		ChatroomID int
+		ChatroomID string
 		Content    string
 		CreatedAt  time.Time
 		UpdatedAt  time.Time
@@ -33,11 +33,11 @@ type (
 		SenderID       string
 		SenderName     string
 		SenderPublicID string
-		ChatroomID     int
+		ChatroomID     string
 		Content        string
 	}
 	ChatroomDetailQuery struct {
-		ID               int
+		ID               string
 		UserID           string
 		Username         string
 		UserPublicID     string
@@ -49,7 +49,7 @@ type (
 		Role         int
 	}
 	GetChatroomInfoParam struct {
-		ChatroomID int
+		ChatroomID string
 		UserID     string
 		Role       int
 	}
@@ -59,7 +59,7 @@ type (
 		Role   int
 	}
 	SendMessageParam struct {
-		ChatroomID int
+		ChatroomID string
 		UserID     string
 		Content    string
 		Role       int
@@ -67,7 +67,7 @@ type (
 	GetMessagesParam struct {
 		SeekPaginatedParam
 		UserID     string
-		ChatroomID int
+		ChatroomID string
 		Role       int
 	}
 	ChatClient struct {

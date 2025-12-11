@@ -2,9 +2,11 @@
 	import type { PageProps } from './$types';
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 	import { RequestDetailView } from './view.svelte';
+	import { enhance } from '$app/forms';
+	import Button from '$lib/components/button/Button.svelte';
 
 	let { data }: PageProps = $props();
-	const View = new RequestDetailView();
+	const View = new RequestDetailView(data.detail);
 </script>
 
 <svelte:head>
@@ -14,7 +16,12 @@
 </svelte:head>
 
 <div class="flex flex-col gap-4 p-4">
-	<h1 class="text-xl font-bold text-[var(--tertiary-color)]">{data.detail.course_name}</h1>
+	<div class="flex justify-between">
+		<h1 class="text-xl font-bold text-[var(--tertiary-color)]">{data.detail.course_name}</h1>
+		<form method="POST" action="?/messageMentor" use:enhance={View.onMessageMentor}>
+			<Button type="submit">Message</Button>
+		</form>
+	</div>
 	<div class="flex flex-col gap-2">
 		<div class="flex gap-2">
 			<p class="font-bold text-[var(--tertiary-color)]">Mentor Name:</p>
@@ -78,10 +85,11 @@
 			</p>
 		</div>
 	</div>
+
 	<div class="flex flex-col gap-4">
 		<p class="font-bold text-[var(--tertiary-color)]">Schedules:</p>
 		{#if data.detail.schedules}
-			<ScrollArea orientation="vertical" viewportClasses="max-h-[300px]">
+			<ScrollArea orientation="vertical" viewportClasses="h-[500px] max-h-[500px]">
 				<ul class="flex flex-col gap-4">
 					{#each data.detail.schedules as sch (sch.date)}
 						<li class="rounded-lg bg-[var(--tertiary-color)] p-4 text-[var(--secondary-color)]">

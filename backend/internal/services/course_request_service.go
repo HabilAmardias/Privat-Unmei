@@ -116,6 +116,7 @@ func (crs *CourseRequestServiceImpl) StudentCourseRequestDetail(ctx context.Cont
 	res.Status = courseRequest.Status
 	res.ExpiredAt = courseRequest.ExpiredAt
 	res.Schedules = *schedules
+	res.MentorID = userMentor.ID
 	res.AccountNumber = payment.AccountNumber
 	res.PaymentMethodName = payment.PaymentMethodName
 
@@ -425,7 +426,7 @@ func (crs *CourseRequestServiceImpl) HandleCourseRequest(ctx context.Context, pa
 	return nil
 }
 
-func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, param entity.CreateCourseRequestParam) (int, error) {
+func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, param entity.CreateCourseRequestParam) (string, error) {
 	ongoingOrderCount := new(int64)
 	maxParticipant := new(int)
 	operationalCost := new(float64)
@@ -587,7 +588,7 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 
 		return nil
 	}); err != nil {
-		return 0, err
+		return "", err
 	}
 	return courseRequest.ID, nil
 }

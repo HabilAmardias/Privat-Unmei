@@ -5,7 +5,7 @@ import "time"
 type (
 	CourseRequestSchedule struct {
 		ID              int
-		CourseRequestID int
+		CourseRequestID string
 		ScheduledDate   time.Time
 		StartTime       string
 		EndTime         string

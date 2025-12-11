@@ -59,7 +59,11 @@
 		</div>
 		<div>
 			<p class="font-bold text-[var(--tertiary-color)]">Price:</p>
-			<p>{data.detail.price}</p>
+			<p>
+				{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(
+					data.detail.price
+				)}
+			</p>
 		</div>
 	</div>
 	<div class="flex flex-col">

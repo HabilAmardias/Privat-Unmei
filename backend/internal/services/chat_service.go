@@ -21,7 +21,7 @@ func CreateChatService(chr *repositories.ChatRepositoryImpl, ur *repositories.Us
 	return &ChatServiceImpl{chr, ur, sr, mr, tmr}
 }
 
-func (chs *ChatServiceImpl) GetChatroom(ctx context.Context, param entity.GetChatroomParam) (int, error) {
+func (chs *ChatServiceImpl) GetChatroom(ctx context.Context, param entity.GetChatroomParam) (string, error) {
 	chatroom := new(entity.Chatroom)
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
@@ -89,7 +89,7 @@ func (chs *ChatServiceImpl) GetChatroom(ctx context.Context, param entity.GetCha
 			customerrors.Unauthenticate,
 		)
 	}); err != nil {
-		return 0, err
+		return "", err
 	}
 	return chatroom.ID, nil
 }

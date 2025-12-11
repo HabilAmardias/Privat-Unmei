@@ -1,5 +1,5 @@
 export type ChatroomInfo = {
-	id: number;
+	id: string;
 	user_id: string;
 	username: string;
 	public_id: string;
@@ -11,7 +11,7 @@ export type MessageInfo = {
 	sender_id: string;
 	sender_name: string;
 	sender_public_id: string;
-	chatroom_id: number;
+	chatroom_id: string;
 	content: string;
 };
 

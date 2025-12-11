@@ -18,7 +18,7 @@ func CreatePaymentRepository(db *db.CustomDB) *PaymentRepositoryImpl {
 	return &PaymentRepositoryImpl{db}
 }
 
-func (pr *PaymentRepositoryImpl) CreatePaymentDetail(ctx context.Context, id int, subtotal float64, operationalCost float64, totalPrice float64, methodName string, accountNumber string) error {
+func (pr *PaymentRepositoryImpl) CreatePaymentDetail(ctx context.Context, id string, subtotal float64, operationalCost float64, totalPrice float64, methodName string, accountNumber string) error {
 	var driver RepoDriver = pr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
@@ -46,7 +46,7 @@ func (pr *PaymentRepositoryImpl) CreatePaymentDetail(ctx context.Context, id int
 	return nil
 }
 
-func (pr *PaymentRepositoryImpl) FindPaymentByRequestID(ctx context.Context, id int, payment *entity.Payment) error {
+func (pr *PaymentRepositoryImpl) FindPaymentByRequestID(ctx context.Context, id string, payment *entity.Payment) error {
 	var driver RepoDriver = pr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx

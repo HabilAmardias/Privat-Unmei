@@ -23,15 +23,7 @@ func CreateCourseRequestHandler(cos *services.CourseRequestServiceImpl) *CourseR
 }
 
 func (crh *CourseRequestHandlerImpl) StudentCourseRequestDetail(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		ctx.Error(customerrors.NewError(
-			"invalid course request credential",
-			err,
-			customerrors.InvalidAction,
-		))
-		return
-	}
+	id := ctx.Param("id")
 	claim, err := getAuthenticationPayload(ctx)
 	if err != nil {
 		ctx.Error(err)
@@ -50,6 +42,7 @@ func (crh *CourseRequestHandlerImpl) StudentCourseRequestDetail(ctx *gin.Context
 		CourseRequestID:     param.CourseRequestID,
 		CourseName:          detail.CourseName,
 		MentorName:          detail.MentorName,
+		MentorID:            detail.MentorID,
 		MentorPublicID:      detail.MentorPublicID,
 		TotalPrice:          detail.TotalPrice,
 		Subtotal:            detail.Subtotal,
@@ -144,15 +137,7 @@ func (crh *CourseRequestHandlerImpl) StudentCourseRequestList(ctx *gin.Context) 
 }
 
 func (crh *CourseRequestHandlerImpl) MentorCourseRequestDetail(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		ctx.Error(customerrors.NewError(
-			"invalid course request credential",
-			err,
-			customerrors.InvalidAction,
-		))
-		return
-	}
+	id := ctx.Param("id")
 	claim, err := getAuthenticationPayload(ctx)
 	if err != nil {
 		ctx.Error(err)
@@ -264,15 +249,7 @@ func (crh *CourseRequestHandlerImpl) ConfirmPayment(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	courseRequestID, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		ctx.Error(customerrors.NewError(
-			"invalid course request",
-			err,
-			customerrors.InvalidAction,
-		))
-		return
-	}
+	courseRequestID := ctx.Param("id")
 	param := entity.ConfirmPaymentParam{
 		MentorID:        claim.Subject,
 		CourseRequestID: courseRequestID,
@@ -295,15 +272,7 @@ func (crh *CourseRequestHandlerImpl) RejectCourseRequest(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	courseRequestID, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		ctx.Error(customerrors.NewError(
-			"invalid course request",
-			err,
-			customerrors.InvalidAction,
-		))
-		return
-	}
+	courseRequestID := ctx.Param("id")
 	param := entity.HandleCourseRequestParam{
 		MentorID:        claim.Subject,
 		CourseRequestID: courseRequestID,
@@ -327,15 +296,7 @@ func (crh *CourseRequestHandlerImpl) AcceptCourseRequest(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	courseRequestID, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		ctx.Error(customerrors.NewError(
-			"invalid course request",
-			err,
-			customerrors.InvalidAction,
-		))
-		return
-	}
+	courseRequestID := ctx.Param("id")
 	param := entity.HandleCourseRequestParam{
 		MentorID:        claim.Subject,
 		CourseRequestID: courseRequestID,
