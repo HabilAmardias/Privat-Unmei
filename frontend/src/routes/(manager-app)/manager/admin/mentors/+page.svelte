@@ -88,7 +88,7 @@
 				<table class="w-full border-separate border-spacing-4">
 					<thead>
 						<tr>
-							<th class="text-[var(--tertiary-color)]">Email</th>
+							<th class="text-[var(--tertiary-color)]">Public ID</th>
 							<th class="text-[var(--tertiary-color)]">Name</th>
 							<th class="text-[var(--tertiary-color)]">YoE</th>
 						</tr>
@@ -96,7 +96,7 @@
 					<tbody>
 						{#each View.mentors as mentor, i (mentor.id)}
 							<tr>
-								<td class="overflow-x-auto text-center">{mentor.email}</td>
+								<td class="overflow-x-auto text-center">{mentor.public_id}</td>
 								<td class="overflow-x-auto text-center">{mentor.name}</td>
 								<td class="overflow-x-auto text-center">{mentor.years_of_experience}</td>
 								<td class="text-center">

@@ -61,7 +61,7 @@ type (
 		TotalPrice float64
 		Status     string
 		Name       string
-		Email      string
+		PublicID   string
 		CourseName string
 	}
 	MentorCourseRequestListParam struct {
@@ -78,7 +78,7 @@ type (
 		CourseName          string
 		StudentID           string
 		StudentName         string
-		StudentEmail        string
+		StudentPublicID     string
 		NumberOfParticipant int
 		TotalPrice          float64
 		Subtotal            float64
@@ -91,14 +91,14 @@ type (
 		Schedules           []CourseRequestSchedule
 	}
 	StudentCourseRequestQuery struct {
-		ID          int
-		StudentID   string
-		CourseID    int
-		TotalPrice  float64
-		Status      string
-		MentorName  string
-		MentorEmail string
-		CourseName  string
+		ID             int
+		StudentID      string
+		CourseID       int
+		TotalPrice     float64
+		Status         string
+		MentorName     string
+		MentorPublicID string
+		CourseName     string
 	}
 	StudentCourseRequestListParam struct {
 		PaginatedParam
@@ -114,7 +114,7 @@ type (
 		CourseRequestID     int
 		CourseName          string
 		MentorName          string
-		MentorEmail         string
+		MentorPublicID      string
 		TotalPrice          float64
 		Subtotal            float64
 		OperationalCost     float64

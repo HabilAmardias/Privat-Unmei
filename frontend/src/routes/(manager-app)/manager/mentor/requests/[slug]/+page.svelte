@@ -67,8 +67,8 @@
 			<p>{data.detail.student_name}</p>
 		</div>
 		<div class="flex gap-2">
-			<p class="font-bold text-[var(--tertiary-color)]">Student Email:</p>
-			<p>{data.detail.student_email}</p>
+			<p class="font-bold text-[var(--tertiary-color)]">Student Public ID:</p>
+			<p>{data.detail.student_public_id}</p>
 		</div>
 		<div class="flex gap-2">
 			<p class="font-bold text-[var(--tertiary-color)]">Participant:</p>

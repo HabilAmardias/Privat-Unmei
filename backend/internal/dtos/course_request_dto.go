@@ -42,7 +42,7 @@ type (
 		TotalPrice float64 `json:"total_price"`
 		Status     string  `json:"status"`
 		Name       string  `json:"name"`
-		Email      string  `json:"email"`
+		PublicID   string  `json:"public_id"`
 		CourseName string  `json:"course_name"`
 	}
 	MentorCourseRequestDetailRes struct {
@@ -50,7 +50,7 @@ type (
 		CourseName          string              `json:"course_name"`
 		StudentID           string              `json:"student_id"`
 		StudentName         string              `json:"student_name"`
-		StudentEmail        string              `json:"student_email"`
+		StudentPublicID     string              `json:"student_public_id"`
 		TotalPrice          float64             `json:"total_price"`
 		Subtotal            float64             `json:"subtotal"`
 		OperationalCost     float64             `json:"operational_cost"`
@@ -68,20 +68,20 @@ type (
 		Search *string `form:"search"`
 	}
 	StudentCourseRequestRes struct {
-		ID          int     `json:"id"`
-		StudentID   string  `json:"student_id"`
-		CourseID    int     `json:"course_id"`
-		TotalPrice  float64 `json:"total_price"`
-		Status      string  `json:"status"`
-		MentorName  string  `json:"mentor_name"`
-		MentorEmail string  `json:"mentor_email"`
-		CourseName  string  `json:"course_name"`
+		ID             int     `json:"id"`
+		StudentID      string  `json:"student_id"`
+		CourseID       int     `json:"course_id"`
+		TotalPrice     float64 `json:"total_price"`
+		Status         string  `json:"status"`
+		MentorName     string  `json:"mentor_name"`
+		MentorPublicID string  `json:"mentor_public_id"`
+		CourseName     string  `json:"course_name"`
 	}
 	StudentCourseRequestDetailRes struct {
 		CourseRequestID     int                 `json:"course_request_id"`
 		CourseName          string              `json:"course_name"`
 		MentorName          string              `json:"mentor_name"`
-		MentorEmail         string              `json:"mentor_email"`
+		MentorPublicID      string              `json:"mentor_public_id"`
 		TotalPrice          float64             `json:"total_price"`
 		Subtotal            float64             `json:"subtotal"`
 		OperationalCost     float64             `json:"operational_cost"`

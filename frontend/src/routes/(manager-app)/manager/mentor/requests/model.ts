@@ -5,6 +5,6 @@ export type CourseRequest = {
 	total_price: number;
 	status: string;
 	name: string;
-	email: string;
+	public_id: string;
 	course_name: string;
 };

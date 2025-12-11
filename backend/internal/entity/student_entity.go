@@ -36,7 +36,7 @@ type (
 	ListStudentQuery struct {
 		ID           string
 		Name         string
-		Email        string
+		PublicID     string
 		Bio          string
 		ProfileImage string
 		Status       string
@@ -61,7 +61,7 @@ type (
 	StudentProfileQuery struct {
 		ID           string
 		Name         string
-		Email        string
+		PublicID     string
 		Bio          string
 		ProfileImage string
 	}

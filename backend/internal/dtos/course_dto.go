@@ -54,7 +54,7 @@ type (
 		MentorListCourseRes
 		MentorID           string `json:"mentor_id"`
 		MentorName         string `json:"mentor_name"`
-		MentorEmail        string `json:"mentor_email"`
+		MentorPublicID     string `json:"mentor_public_id"`
 		MentorProfileImage string `json:"mentor_profile_image"`
 	}
 	CourseDetailRes struct {

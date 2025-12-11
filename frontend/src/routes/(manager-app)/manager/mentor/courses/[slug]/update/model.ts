@@ -23,6 +23,6 @@ export type CourseDetail = {
 	max_total_session: number;
 	mentor_id: string;
 	mentor_name: string;
-	mentor_email: string;
+	mentor_public_id: string;
 	description: string;
 };

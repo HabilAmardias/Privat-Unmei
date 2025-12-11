@@ -44,7 +44,7 @@ func (mr *MentorRepositoryImpl) GetMentorList(ctx context.Context, mentors *[]en
 	SELECT
 		m.id,
 		u.name,
-		u.email,
+		u.public_id,
 		u.profile_image,
 		m.years_of_experience
 	FROM users u
@@ -65,8 +65,8 @@ func (mr *MentorRepositoryImpl) GetMentorList(ctx context.Context, mentors *[]en
 	if param.Search != nil {
 		query += " AND "
 		countQuery += " AND "
-		query += fmt.Sprintf("(u.name ILIKE $1 OR u.email ILIKE $%d)", len(args)+1)
-		countQuery += fmt.Sprintf("(u.name ILIKE $1 OR u.email ILIKE $%d)", len(countArgs)+1)
+		query += fmt.Sprintf("(u.name ILIKE $1 OR u.public_id ILIKE $%d)", len(args)+1)
+		countQuery += fmt.Sprintf("(u.name ILIKE $1 OR u.public_id ILIKE $%d)", len(countArgs)+1)
 		args = append(args, "%"+*param.Search+"%")
 		countArgs = append(countArgs, "%"+*param.Search+"%")
 	}
@@ -114,7 +114,7 @@ func (mr *MentorRepositoryImpl) GetMentorList(ctx context.Context, mentors *[]en
 		if err := rows.Scan(
 			&mentor.ID,
 			&mentor.Name,
-			&mentor.Email,
+			&mentor.PublicID,
 			&mentor.ProfileImage,
 			&mentor.YearsOfExperience,
 		); err != nil {

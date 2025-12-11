@@ -93,7 +93,7 @@ func (cr *CourseRequestRepositoryImpl) StudentCourseRequestList(
 		py.total_price,
 		cr.status,
 		u.name,
-		u.email,
+		u.public_id,
 		c.title
 	FROM course_requests cr
 	JOIN courses c on cr.course_id = c.id
@@ -175,7 +175,7 @@ func (cr *CourseRequestRepositoryImpl) StudentCourseRequestList(
 			&item.TotalPrice,
 			&item.Status,
 			&item.MentorName,
-			&item.MentorEmail,
+			&item.MentorPublicID,
 			&item.CourseName,
 		); err != nil {
 			return customerrors.NewError(
@@ -212,7 +212,7 @@ func (cr *CourseRequestRepositoryImpl) MentorCourseRequestList(
 		p.total_price,
 		cr.status,
 		u.name,
-		u.email,
+		u.public_id,
 		c.title
 	FROM course_requests cr
 	JOIN courses c on cr.course_id = c.id
@@ -286,7 +286,7 @@ func (cr *CourseRequestRepositoryImpl) MentorCourseRequestList(
 			&item.TotalPrice,
 			&item.Status,
 			&item.Name,
-			&item.Email,
+			&item.PublicID,
 			&item.CourseName,
 		); err != nil {
 			return customerrors.NewError(

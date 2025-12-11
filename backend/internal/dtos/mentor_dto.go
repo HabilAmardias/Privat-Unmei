@@ -61,7 +61,7 @@ type (
 	ListMentorRes struct {
 		ID                string `json:"id"`
 		Name              string `json:"name"`
-		Email             string `json:"email"`
+		PublicID          string `json:"public_id"`
 		ProfileImage      string `json:"profile_image"`
 		YearsOfExperience int    `json:"years_of_experience"`
 	}
@@ -78,7 +78,7 @@ type (
 	MentorProfileRes struct {
 		ID                string `json:"id"`
 		Name              string `json:"name"`
-		Email             string `json:"email"`
+		PublicID          string `json:"public_id"`
 		Bio               string `json:"bio"`
 		ProfileImage      string `json:"profile_image"`
 		YearsOfExperience int    `json:"years_of_experience"`

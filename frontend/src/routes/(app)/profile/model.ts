@@ -2,7 +2,7 @@ export type StudentProfile = {
 	name: string;
 	bio: string;
 	profile_image: string;
-	email: string;
+	public_id: string;
 };
 
 export type StudentOrders = {
@@ -12,6 +12,6 @@ export type StudentOrders = {
 	total_price: number;
 	status: string;
 	mentor_name: string;
-	mentor_email: string;
+	mentor_public_id: string;
 	course_name: string;
 };
