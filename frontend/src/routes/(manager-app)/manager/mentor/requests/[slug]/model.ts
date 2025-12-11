@@ -5,7 +5,7 @@ export type RequestSchedule = {
 };
 
 export type RequestDetail = {
-	course_request_id: number;
+	course_request_id: string;
 	course_name: string;
 	student_id: string;
 	student_name: string;
@@ -23,5 +23,5 @@ export type RequestDetail = {
 };
 
 export type ChatroomID = {
-	id: number;
+	id: string;
 };

@@ -1,6 +1,6 @@
 -- request by user (student)
 CREATE TABLE course_requests (
-    id BIGSERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
     student_id UUID REFERENCES students(id),
     course_id BIGINT REFERENCES courses(id),
     status VARCHAR DEFAULT 'reserved' CHECK(status IN ('reserved','pending payment', 'scheduled', 'completed', 'cancelled')),

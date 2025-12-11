@@ -6,7 +6,7 @@ import (
 
 type (
 	CourseRequest struct {
-		ID                  int
+		ID                  string
 		StudentID           string
 		CourseID            int
 		Status              string
@@ -30,19 +30,19 @@ type (
 	}
 	HandleCourseRequestParam struct {
 		MentorID        string
-		CourseRequestID int
+		CourseRequestID string
 		Accept          bool
 	}
 	ConfirmPaymentParam struct {
 		MentorID        string
-		CourseRequestID int
+		CourseRequestID string
 	}
 	GetPaymentDetailParam struct {
 		UserID          string
-		CourseRequestID int
+		CourseRequestID string
 	}
 	PaymentDetailQuery struct {
-		CourseRequestID int
+		CourseRequestID string
 		StudentName     string
 		MentorName      string
 		CourseID        int
@@ -55,7 +55,7 @@ type (
 		ExpiredAt       *time.Time
 	}
 	MentorCourseRequestQuery struct {
-		ID         int
+		ID         string
 		StudentID  string
 		CourseID   int
 		TotalPrice float64
@@ -70,11 +70,11 @@ type (
 		Status   *string
 	}
 	MentorCourseRequestDetailParam struct {
-		CourseRequestID int
+		CourseRequestID string
 		MentorID        string
 	}
 	MentorCourseRequestDetailQuery struct {
-		CourseRequestID     int
+		CourseRequestID     string
 		CourseName          string
 		StudentID           string
 		StudentName         string
@@ -91,7 +91,7 @@ type (
 		Schedules           []CourseRequestSchedule
 	}
 	StudentCourseRequestQuery struct {
-		ID             int
+		ID             string
 		StudentID      string
 		CourseID       int
 		TotalPrice     float64
@@ -107,13 +107,14 @@ type (
 		Search    *string
 	}
 	StudentCourseRequestDetailParam struct {
-		CourseRequestID int
+		CourseRequestID string
 		StudentID       string
 	}
 	StudentCourseRequestDetailQuery struct {
-		CourseRequestID     int
+		CourseRequestID     string
 		CourseName          string
 		MentorName          string
+		MentorID            string
 		MentorPublicID      string
 		TotalPrice          float64
 		Subtotal            float64

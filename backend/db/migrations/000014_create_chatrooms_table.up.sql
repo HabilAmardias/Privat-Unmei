@@ -1,5 +1,5 @@
 create table chatrooms (
-	id BIGSERIAL primary key,
+	id UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
 	student_id UUID references students(id),
 	mentor_id UUID references mentors(id),
 	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,

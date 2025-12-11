@@ -1,6 +1,6 @@
 CREATE TABLE payments (
     id BIGSERIAL PRIMARY KEY,
-    course_request_id BIGINT UNIQUE REFERENCES course_requests(id),
+    course_request_id UUID UNIQUE REFERENCES course_requests(id),
     subtotal NUMERIC NOT NULL,
     operational_cost NUMERIC NOT NULL,
     total_price NUMERIC NOT NULL,

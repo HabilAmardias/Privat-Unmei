@@ -130,7 +130,7 @@
 	<div class="flex flex-col gap-4">
 		<p class="font-bold text-[var(--tertiary-color)]">Schedules:</p>
 		{#if data.detail.schedules}
-			<ScrollArea orientation="vertical" viewportClasses="max-h-[300px]">
+			<ScrollArea orientation="vertical" viewportClasses="h-[500px] max-h-[500px]">
 				<ul class="flex flex-col gap-4">
 					{#each data.detail.schedules as sch (sch.date)}
 						<li class="rounded-lg bg-[var(--tertiary-color)] p-4 text-[var(--secondary-color)]">

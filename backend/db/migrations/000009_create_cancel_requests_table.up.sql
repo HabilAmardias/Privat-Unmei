@@ -1,6 +1,6 @@
 CREATE TABLE cancel_requests (
     id BIGSERIAL PRIMARY KEY,
-    course_request_id BIGINT REFERENCES course_requests(id),
+    course_request_id UUID REFERENCES course_requests(id),
     reason TEXT,
     attachment TEXT,
     status TEXT CHECK (status IN ('pending', 'approved', 'rejected')) DEFAULT 'pending',

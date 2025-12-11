@@ -178,7 +178,7 @@ func (chr *ChatRepositoryImpl) GetUserChatrooms(ctx context.Context, userID stri
 	return nil
 }
 
-func (chr *ChatRepositoryImpl) SendMessage(ctx context.Context, senderID string, chatroomID int, content string, message *entity.Message) error {
+func (chr *ChatRepositoryImpl) SendMessage(ctx context.Context, senderID string, chatroomID string, content string, message *entity.Message) error {
 	var driver RepoDriver
 	driver = chr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
@@ -209,7 +209,7 @@ func (chr *ChatRepositoryImpl) SendMessage(ctx context.Context, senderID string,
 	return nil
 }
 
-func (chr *ChatRepositoryImpl) UpdateChatroom(ctx context.Context, chatroomID int) error {
+func (chr *ChatRepositoryImpl) UpdateChatroom(ctx context.Context, chatroomID string) error {
 	var driver RepoDriver
 	driver = chr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
@@ -231,7 +231,7 @@ func (chr *ChatRepositoryImpl) UpdateChatroom(ctx context.Context, chatroomID in
 	return nil
 }
 
-func (chr *ChatRepositoryImpl) GetMessages(ctx context.Context, chatroomID int, limit int, lastID *int, totalRow *int64, messages *[]entity.MessageDetailQuery) error {
+func (chr *ChatRepositoryImpl) GetMessages(ctx context.Context, chatroomID string, limit int, lastID *int, totalRow *int64, messages *[]entity.MessageDetailQuery) error {
 	var driver RepoDriver
 	driver = chr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
@@ -298,7 +298,7 @@ func (chr *ChatRepositoryImpl) GetMessages(ctx context.Context, chatroomID int, 
 	return nil
 }
 
-func (chr *ChatRepositoryImpl) FindByID(ctx context.Context, chatroomID int, chatroom *entity.Chatroom) error {
+func (chr *ChatRepositoryImpl) FindByID(ctx context.Context, chatroomID string, chatroom *entity.Chatroom) error {
 	var driver RepoDriver
 	driver = chr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {

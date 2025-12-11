@@ -13,7 +13,7 @@ type (
 		NumberOfParticipant int             `json:"number_of_participant" binding:"required,gte=1"`
 	}
 	CreateCourseRequestRes struct {
-		CourseRequestID int `json:"id"`
+		CourseRequestID string `json:"id"`
 	}
 	HandleCourseRequestReq struct {
 		Accept *bool `json:"accept" binding:"required"`
@@ -36,7 +36,7 @@ type (
 		Status *string `form:"status"`
 	}
 	MentorCourseRequestRes struct {
-		ID         int     `json:"id"`
+		ID         string  `json:"id"`
 		StudentID  string  `json:"student_id"`
 		CourseID   int     `json:"course_id"`
 		TotalPrice float64 `json:"total_price"`
@@ -46,7 +46,7 @@ type (
 		CourseName string  `json:"course_name"`
 	}
 	MentorCourseRequestDetailRes struct {
-		CourseRequestID     int                 `json:"course_request_id"`
+		CourseRequestID     string              `json:"course_request_id"`
 		CourseName          string              `json:"course_name"`
 		StudentID           string              `json:"student_id"`
 		StudentName         string              `json:"student_name"`
@@ -68,7 +68,7 @@ type (
 		Search *string `form:"search"`
 	}
 	StudentCourseRequestRes struct {
-		ID             int     `json:"id"`
+		ID             string  `json:"id"`
 		StudentID      string  `json:"student_id"`
 		CourseID       int     `json:"course_id"`
 		TotalPrice     float64 `json:"total_price"`
@@ -78,8 +78,9 @@ type (
 		CourseName     string  `json:"course_name"`
 	}
 	StudentCourseRequestDetailRes struct {
-		CourseRequestID     int                 `json:"course_request_id"`
+		CourseRequestID     string              `json:"course_request_id"`
 		CourseName          string              `json:"course_name"`
+		MentorID            string              `json:"mentor_id"`
 		MentorName          string              `json:"mentor_name"`
 		MentorPublicID      string              `json:"mentor_public_id"`
 		TotalPrice          float64             `json:"total_price"`
