@@ -53,3 +53,4 @@ CREATE TRIGGER trigger_set_user_public_id
 CREATE INDEX idx_userpublicid_gin ON users USING GIN (public_id gin_trgm_ops) WHERE deleted_at IS NULL;
 CREATE INDEX idx_username_gin ON users USING GIN (name gin_trgm_ops) WHERE deleted_at IS NULL;
 CREATE INDEX idx_users_active ON users (id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_users_email_active ON users(email) WHERE deleted_at IS NULL;
