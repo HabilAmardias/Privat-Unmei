@@ -34,6 +34,7 @@ export type MentorProfile = {
 	major: string;
 	campus: string;
 	public_id: string;
+	rating: number;
 };
 
 export type MentorCourse = {

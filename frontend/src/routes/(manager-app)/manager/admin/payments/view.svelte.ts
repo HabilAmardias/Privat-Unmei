@@ -93,6 +93,10 @@ export class PaymentManagementView {
 		}
 		return async ({ result }: EnhancementReturn) => {
 			this.setIsLoading(false);
+			const deletedIndex = this.payments.findIndex(
+				(m) => m.payment_method_id === this.paymentToUpdate!
+			);
+			this.deleteDialogOpen[deletedIndex] = false;
 			if (result.type === 'success') {
 				if (this.paymentToDelete) {
 					this.filterPayments(this.paymentToDelete);
@@ -115,6 +119,10 @@ export class PaymentManagementView {
 		}
 		return async ({ result }: EnhancementReturn) => {
 			this.setIsLoading(false);
+			const updatedIndex = this.payments.findIndex(
+				(m) => m.payment_method_id === this.paymentToUpdate!
+			);
+			this.updateDialogOpen[updatedIndex] = false;
 			if (result.type === 'success') {
 				if (this.paymentToUpdate) {
 					this.payments = this.payments.map((m) => {

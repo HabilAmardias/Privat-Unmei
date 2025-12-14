@@ -9,6 +9,8 @@ import (
 	"privat-unmei/internal/logger"
 	"privat-unmei/internal/repositories"
 	"privat-unmei/internal/utils"
+
+	"golang.org/x/sync/errgroup"
 )
 
 type MentorServiceImpl struct {
@@ -53,13 +55,18 @@ func (ms *MentorServiceImpl) GetMyPaymentMethod(ctx context.Context, param entit
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
 	methods := new([]entity.GetMentorPaymentMethodQuery)
-	if err := ms.ur.FindByID(ctx, param.MentorID, user); err != nil {
-		return nil, err
-	}
-	if err := ms.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
-		return nil, err
-	}
-	if err := ms.pr.GetMentorPaymentMethod(ctx, param.MentorID, methods); err != nil {
+
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		return ms.ur.FindByID(ctx, param.MentorID, user)
+	})
+	g.Go(func() error {
+		return ms.mr.FindByID(ctx, param.MentorID, mentor, false)
+	})
+	g.Go(func() error {
+		return ms.pr.GetMentorPaymentMethod(ctx, param.MentorID, methods)
+	})
+	if err := g.Wait(); err != nil {
 		return nil, err
 	}
 	if len(*methods) == 0 {
@@ -76,13 +83,19 @@ func (ms *MentorServiceImpl) GetMentorAvailability(ctx context.Context, param en
 	scheds := new([]entity.MentorAvailability)
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
-	if err := ms.ur.FindByID(ctx, param.MentorID, user); err != nil {
-		return nil, err
-	}
-	if err := ms.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
-		return nil, err
-	}
-	if err := ms.car.GetAvailabilityByMentorID(ctx, param.MentorID, scheds); err != nil {
+
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		return ms.ur.FindByID(ctx, param.MentorID, user)
+	})
+	g.Go(func() error {
+		return ms.mr.FindByID(ctx, param.MentorID, mentor, false)
+	})
+	g.Go(func() error {
+		return ms.car.GetAvailabilityByMentorID(ctx, param.MentorID, scheds)
+	})
+	if err := g.Wait(); err != nil {
 		return nil, err
 	}
 	return scheds, nil
@@ -92,22 +105,30 @@ func (ms *MentorServiceImpl) GetDOWAvailability(ctx context.Context, param entit
 	dows := new([]int)
 	user := new(entity.User)
 	course := new(entity.Course)
-	if err := ms.ur.FindByID(ctx, param.UserID, user); err != nil {
-		return nil, err
-	}
-	if param.Role == constants.StudentRole {
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		if err := ms.ur.FindByID(ctx, param.UserID, user); err != nil {
+			return err
+		}
 		if user.Status != constants.VerifiedStatus {
-			return nil, customerrors.NewError(
+			return customerrors.NewError(
 				"unverified",
 				errors.New("user unverified"),
 				customerrors.Unauthenticate,
 			)
 		}
-	}
-	if err := ms.cr.FindByID(ctx, param.CourseID, course, false); err != nil {
-		return nil, err
-	}
-	if err := ms.car.GetDOWAvailability(ctx, course.MentorID, dows); err != nil {
+		return nil
+	})
+	g.Go(func() error {
+		if err := ms.cr.FindByID(ctx, param.CourseID, course, false); err != nil {
+			return err
+		}
+		if err := ms.car.GetDOWAvailability(ctx, course.MentorID, dows); err != nil {
+			return err
+		}
+		return nil
+	})
+	if err := g.Wait(); err != nil {
 		return nil, err
 	}
 	if len(*dows) == 0 {
@@ -124,12 +145,20 @@ func (ms *MentorServiceImpl) GetMentorProfile(ctx context.Context, param entity.
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
 	res := new(entity.MentorProfileQuery)
-	if err := ms.ur.FindByID(ctx, param.ID, user); err != nil {
+
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		return ms.ur.FindByID(ctx, param.ID, user)
+	})
+	g.Go(func() error {
+		return ms.mr.FindByID(ctx, param.ID, mentor, false)
+	})
+
+	if err := g.Wait(); err != nil {
 		return nil, err
 	}
-	if err := ms.mr.FindByID(ctx, param.ID, mentor, false); err != nil {
-		return nil, err
-	}
+
 	res.ID = user.ID
 	res.Name = user.Name
 	res.PublicID = user.PublicID
@@ -139,6 +168,9 @@ func (ms *MentorServiceImpl) GetMentorProfile(ctx context.Context, param entity.
 	res.Major = mentor.Major
 	res.ProfileImage = user.ProfileImage
 	res.YearsOfExperience = mentor.YearsOfExperience
+	if mentor.RatingCount > 0 {
+		res.AverageRating = float64(mentor.TotalRating) / float64(mentor.RatingCount)
+	}
 
 	return res, nil
 }
@@ -147,24 +179,29 @@ func (ms *MentorServiceImpl) ChangePassword(ctx context.Context, param entity.Me
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
 
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		return ms.ur.FindByID(ctx, param.ID, user)
+	})
+	g.Go(func() error {
+		return ms.mr.FindByID(ctx, param.ID, mentor, false)
+	})
+	if err := g.Wait(); err != nil {
+		return err
+	}
+	if match := ms.bu.ComparePassword(param.NewPassword, user.Password); match {
+		return customerrors.NewError(
+			"cannot change into same password",
+			errors.New("new password same as previous password"),
+			customerrors.InvalidAction,
+		)
+	}
+	hashedPass, err := ms.bu.HashPassword(param.NewPassword)
+	if err != nil {
+		return err
+	}
 	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		if err := ms.ur.FindByID(ctx, param.ID, user); err != nil {
-			return err
-		}
-		if err := ms.mr.FindByID(ctx, param.ID, mentor, false); err != nil {
-			return err
-		}
-		if match := ms.bu.ComparePassword(param.NewPassword, user.Password); match {
-			return customerrors.NewError(
-				"cannot change into same password",
-				errors.New("new password same as previous password"),
-				customerrors.InvalidAction,
-			)
-		}
-		hashedPass, err := ms.bu.HashPassword(param.NewPassword)
-		if err != nil {
-			return err
-		}
 		if err := ms.ur.UpdateUserPassword(ctx, hashedPass, param.ID); err != nil {
 			return err
 		}
@@ -186,16 +223,21 @@ func (ms *MentorServiceImpl) Login(ctx context.Context, param entity.LoginMentor
 	if err := ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := ms.ur.FindByEmail(ctx, param.Email, user); err != nil {
 			var parsedErr *customerrors.CustomError
-			if errors.As(err, &parsedErr) {
-				if parsedErr.ErrCode == customerrors.ItemNotExist {
-					return customerrors.NewError(
-						"invalid email or password",
-						errors.New("invalid email or password"),
-						customerrors.InvalidAction,
-					)
-				}
-				return err
+			if !errors.As(err, &parsedErr) {
+				return customerrors.NewError(
+					"something went wrong",
+					errors.New("cannot parse error"),
+					customerrors.CommonErr,
+				)
 			}
+			if parsedErr.ErrCode == customerrors.ItemNotExist {
+				return customerrors.NewError(
+					"invalid email or password",
+					errors.New("invalid email or password"),
+					customerrors.InvalidAction,
+				)
+			}
+			return err
 		}
 		if err := ms.mr.FindByID(ctx, user.ID, mentor, false); err != nil {
 			return err
@@ -217,6 +259,7 @@ func (ms *MentorServiceImpl) Login(ctx context.Context, param entity.LoginMentor
 		}
 		*authToken = loginToken
 		*refreshToken = rtoken
+
 		return nil
 	}); err != nil {
 		return "", "", "", err
@@ -241,7 +284,9 @@ func (ms *MentorServiceImpl) DeleteMentor(ctx context.Context, param entity.Dele
 	maxTransactionCount := new(int64)
 	courseIDs := new([]int)
 
-	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
 		if err := ms.ur.FindByID(ctx, param.AdminID, userAdmin); err != nil {
 			return err
 		}
@@ -252,26 +297,33 @@ func (ms *MentorServiceImpl) DeleteMentor(ctx context.Context, param entity.Dele
 				customerrors.Unauthenticate,
 			)
 		}
-		if err := ms.ar.FindByID(ctx, param.AdminID, admin); err != nil {
-			return err
-		}
-		if err := ms.ur.FindByID(ctx, param.ID, user); err != nil {
-			return err
-		}
-		if err := ms.mr.FindByID(ctx, user.ID, mentor, false); err != nil {
-			return err
-		}
+		return nil
+	})
+	g.Go(func() error {
+		return ms.ar.FindByID(ctx, param.AdminID, admin)
+	})
+	g.Go(func() error {
+		return ms.ur.FindByID(ctx, param.ID, user)
+	})
+	g.Go(func() error {
+		return ms.mr.FindByID(ctx, param.ID, mentor, false)
+	})
+	g.Go(func() error {
+		return ms.cr.GetMaximumTransactionCount(ctx, maxTransactionCount, param.ID)
+	})
+	g.Go(func() error {
+		return ms.cr.FindByMentorID(ctx, param.ID, courseIDs)
+	})
 
-		if err := ms.cr.GetMaximumTransactionCount(ctx, maxTransactionCount, param.ID); err != nil {
-			return err
-		}
+	if err := g.Wait(); err != nil {
+		return err
+	}
+
+	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if *maxTransactionCount > 0 {
 			if err := ms.crr.DeleteAllMentorOrders(ctx, mentor.ID); err != nil {
 				return err
 			}
-		}
-		if err := ms.cr.FindByMentorID(ctx, param.ID, courseIDs); err != nil {
-			return err
 		}
 		if len(*courseIDs) > 0 {
 			if err := ms.tr.DeleteTopicsMultipleCourse(ctx, *courseIDs); err != nil {
@@ -306,24 +358,30 @@ func (ms *MentorServiceImpl) UpdateMentorProfile(ctx context.Context, param enti
 	mentorQuery := new(entity.UpdateMentorQuery)
 	userQuery := new(entity.UpdateUserQuery)
 
-	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		if err := ms.ur.FindByID(ctx, param.ID, user); err != nil {
-			return err
-		}
-		if err := ms.mr.FindByID(ctx, user.ID, mentor, false); err != nil {
-			return err
-		}
-		userQuery.Name = param.Name
-		userQuery.Bio = param.Bio
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		return ms.ur.FindByID(ctx, param.ID, user)
+	})
+	g.Go(func() error {
+		return ms.mr.FindByID(ctx, param.ID, mentor, false)
+	})
+	userQuery.Name = param.Name
+	userQuery.Bio = param.Bio
 
-		if param.ProfileImage != nil {
-			filename := mentor.ID
-			res, err := ms.cu.UploadFile(ctx, param.ProfileImage, filename, constants.AvatarFolder)
-			if err != nil {
-				return err
-			}
-			userQuery.ProfileImage = &res.SecureURL
+	if param.ProfileImage != nil {
+		filename := param.ID
+		res, err := ms.cu.UploadFile(ctx, param.ProfileImage, filename, constants.AvatarFolder)
+		if err != nil {
+			return err
 		}
+		userQuery.ProfileImage = &res.SecureURL
+	}
+
+	if err := g.Wait(); err != nil {
+		return err
+	}
+
+	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if len(param.MentorSchedules) > 0 {
 			if err := ms.car.DeleteAvailability(ctx, param.ID); err != nil {
 				return err
@@ -350,17 +408,6 @@ func (ms *MentorServiceImpl) UpdateMentorProfile(ctx context.Context, param enti
 			return err
 		}
 		if len(param.MentorPayments) > 0 {
-			orderCount := new(int64)
-			if err := ms.crr.FindOngoingOrderByMentorID(ctx, param.ID, orderCount); err != nil {
-				return err
-			}
-			if *orderCount > 0 {
-				return customerrors.NewError(
-					"there is an ongoing order, cannot update payment method",
-					errors.New("there is an ongoing order, cannot update payment method"),
-					customerrors.InvalidAction,
-				)
-			}
 			if err := ms.pr.UnassignPaymentMethodFromMentor(ctx, param.ID); err != nil {
 				return err
 			}
@@ -380,19 +427,21 @@ func (ms *MentorServiceImpl) UpdateMentorForAdmin(ctx context.Context, param ent
 	mentor := new(entity.Mentor)
 	query := new(entity.UpdateMentorQuery)
 
-	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		if err := ms.ur.FindByID(ctx, param.ID, user); err != nil {
-			return err
-		}
-		if err := ms.mr.FindByID(ctx, user.ID, mentor, false); err != nil {
-			return err
-		}
-		query.YearsOfExperience = param.YearsOfExperience
-		if err := ms.mr.UpdateMentor(ctx, mentor.ID, query); err != nil {
-			return err
-		}
-		return nil
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		return ms.ur.FindByID(ctx, param.ID, user)
 	})
+	g.Go(func() error {
+		return ms.mr.FindByID(ctx, param.ID, mentor, false)
+	})
+	if err := g.Wait(); err != nil {
+		return err
+	}
+	query.YearsOfExperience = param.YearsOfExperience
+	if err := ms.mr.UpdateMentor(ctx, mentor.ID, query); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddNewMentorParam) error {
@@ -401,7 +450,9 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 	mentor := new(entity.Mentor)
 	admin := new(entity.Admin)
 
-	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
 		if err := ms.ur.FindByID(ctx, param.AdminID, userAdmin); err != nil {
 			return err
 		}
@@ -412,15 +463,23 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 				customerrors.Unauthenticate,
 			)
 		}
-		if err := ms.ar.FindByID(ctx, param.AdminID, admin); err != nil {
-			return err
-		}
+		return nil
+	})
+	g.Go(func() error {
+		return ms.ar.FindByID(ctx, param.AdminID, admin)
+	})
+	g.Go(func() error {
 		if err := ms.ur.FindByEmail(ctx, param.Email, user); err != nil {
 			var parsedErr *customerrors.CustomError
-			if errors.As(err, &parsedErr) {
-				if parsedErr.ErrCode != customerrors.ItemNotExist {
-					return err
-				}
+			if !errors.As(err, &parsedErr) {
+				return customerrors.NewError(
+					"something went wrong",
+					errors.New("cannot parse error"),
+					customerrors.CommonErr,
+				)
+			}
+			if parsedErr.ErrCode != customerrors.ItemNotExist {
+				return err
 			}
 		} else {
 			return customerrors.NewError(
@@ -429,30 +488,33 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 				customerrors.ItemAlreadyExist,
 			)
 		}
+		return nil
+	})
+	if err := g.Wait(); err != nil {
+		return err
+	}
 
-		user.Email = param.Email
-		user.Name = param.Name
-		user.ProfileImage = constants.DefaultAvatar
+	user.Email = param.Email
+	user.Name = param.Name
+	user.ProfileImage = constants.DefaultAvatar
+	hashedPass, err := ms.bu.HashPassword(param.Password)
+	if err != nil {
+		return err
+	}
+	user.Password = hashedPass
+	// Will be changed to verified after mentor change their password for the first time
+	user.Status = constants.UnverifiedStatus
 
-		hashedPass, err := ms.bu.HashPassword(param.Password)
-		if err != nil {
-			return err
-		}
-		user.Password = hashedPass
+	mentor.Campus = param.Campus
+	mentor.Degree = param.Degree
+	mentor.Major = param.Major
+	mentor.YearsOfExperience = param.YearsOfExperience
 
-		// Will be changed to verified after mentor change their password for the first time
-		user.Status = constants.UnverifiedStatus
-
+	if err := ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := ms.ur.AddNewUser(ctx, user); err != nil {
 			return err
 		}
-
 		mentor.ID = user.ID
-		mentor.Campus = param.Campus
-		mentor.Degree = param.Degree
-		mentor.Major = param.Major
-		mentor.YearsOfExperience = param.YearsOfExperience
-
 		if err := ms.mr.AddNewMentor(ctx, mentor); err != nil {
 			return err
 		}
@@ -472,35 +534,39 @@ func (ms *MentorServiceImpl) AddNewMentor(ctx context.Context, param entity.AddN
 		if err := ms.pr.AssignPaymentMethodToMentor(ctx, mentor.ID, param.MentorPayments); err != nil {
 			return err
 		}
-		go func() {
-			emailParam := entity.SendEmailParams{
-				Receiver:  param.Email,
-				Subject:   "Login Credentials - Privat Unmei",
-				EmailBody: constants.SendMentorAccEmailBody(param.Email, param.Password),
-			}
-			if err := ms.gu.SendEmail(emailParam); err != nil {
-				ms.lg.Errorln(err.Error())
-				newCtx := context.Background()
-				if tErr := ms.tmr.WithTransaction(newCtx, func(ctx context.Context) error {
-					if err := ms.pr.HardDeleteMentorPayment(ctx, mentor.ID); err != nil {
-						return err
-					}
-					if err := ms.car.HardDeleteAvailability(ctx, mentor.ID); err != nil {
-						return err
-					}
-					if err := ms.mr.HardDeleteMentor(ctx, mentor.ID); err != nil {
-						return err
-					}
-					if err := ms.ur.HardDeleteUser(ctx, user.ID); err != nil {
-						return err
-					}
-					return nil
-				}); tErr != nil {
-					ms.lg.Errorln(tErr.Error())
-				}
-			}
-		}()
 
 		return nil
-	})
+	}); err != nil {
+		return err
+	}
+
+	go func() {
+		emailParam := entity.SendEmailParams{
+			Receiver:  param.Email,
+			Subject:   "Login Credentials - Privat Unmei",
+			EmailBody: constants.SendMentorAccEmailBody(param.Email, param.Password),
+		}
+		if err := ms.gu.SendEmail(emailParam); err != nil {
+			ms.lg.Errorln(err.Error())
+			if tErr := ms.tmr.WithTransaction(context.Background(), func(ctx context.Context) error {
+				if err := ms.pr.HardDeleteMentorPayment(ctx, mentor.ID); err != nil {
+					return err
+				}
+				if err := ms.car.HardDeleteAvailability(ctx, mentor.ID); err != nil {
+					return err
+				}
+				if err := ms.mr.HardDeleteMentor(ctx, mentor.ID); err != nil {
+					return err
+				}
+				if err := ms.ur.HardDeleteUser(ctx, user.ID); err != nil {
+					return err
+				}
+				return nil
+			}); tErr != nil {
+				ms.lg.Errorln(tErr.Error())
+			}
+		}
+	}()
+
+	return nil
 }

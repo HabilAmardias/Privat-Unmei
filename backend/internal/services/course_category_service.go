@@ -7,6 +7,8 @@ import (
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/repositories"
+
+	"golang.org/x/sync/errgroup"
 )
 
 type CourseCategoryServiceImpl struct {
@@ -21,11 +23,12 @@ func CreateCourseCategoryService(ur *repositories.UserRepositoryImpl, ar *reposi
 }
 
 func (ccs *CourseCategoryServiceImpl) DeleteCategory(ctx context.Context, param entity.DeleteCategoryParam) error {
+	g, ctx := errgroup.WithContext(ctx)
 	admin := new(entity.Admin)
 	user := new(entity.User)
 	category := new(entity.CourseCategory)
 	count := new(int)
-	return ccs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+	g.Go(func() error {
 		if err := ccs.ur.FindByID(ctx, param.AdminID, user); err != nil {
 			return err
 		}
@@ -36,24 +39,31 @@ func (ccs *CourseCategoryServiceImpl) DeleteCategory(ctx context.Context, param 
 				customerrors.Unauthenticate,
 			)
 		}
-		if err := ccs.ar.FindByID(ctx, param.AdminID, admin); err != nil {
-			return err
-		}
-		if err := ccs.ccr.FindByID(ctx, param.ID, category); err != nil {
-			return err
-		}
+		return nil
+	})
+	g.Go(func() error {
+		return ccs.ar.FindByID(ctx, param.AdminID, admin)
+	})
+	g.Go(func() error {
+		return ccs.ccr.FindByID(ctx, param.ID, category)
+	})
+	g.Go(func() error {
 		if err := ccs.ccr.GetLeastCategoryCount(ctx, param.ID, count); err != nil {
 			return err
 		}
-		if count != nil {
-			if *count <= 1 {
-				return customerrors.NewError(
-					"there is a course with only one category",
-					errors.New("there is a course with only one category"),
-					customerrors.InvalidAction,
-				)
-			}
+		if *count == 1 {
+			return customerrors.NewError(
+				"there is a course with only one category",
+				errors.New("there is a course with only one category"),
+				customerrors.InvalidAction,
+			)
 		}
+		return nil
+	})
+	if err := g.Wait(); err != nil {
+		return err
+	}
+	return ccs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := ccs.ccr.UnassignCategoriesByCategoryID(ctx, param.ID); err != nil {
 			return err
 		}
@@ -74,12 +84,13 @@ func (ccs *CourseCategoryServiceImpl) GetCategoriesList(ctx context.Context, par
 }
 
 func (ccs *CourseCategoryServiceImpl) CreateCategory(ctx context.Context, param entity.CreateCategoryParam) (*entity.CreateCategoryQuery, error) {
+	g, ctx := errgroup.WithContext(ctx)
 	category := new(entity.CourseCategory)
 	newCategory := new(entity.CreateCategoryQuery)
 	admin := new(entity.Admin)
 	user := new(entity.User)
 
-	if err := ccs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+	g.Go(func() error {
 		if err := ccs.ur.FindByID(ctx, param.AdminID, user); err != nil {
 			return err
 		}
@@ -90,12 +101,21 @@ func (ccs *CourseCategoryServiceImpl) CreateCategory(ctx context.Context, param 
 				customerrors.Unauthenticate,
 			)
 		}
-		if err := ccs.ar.FindByID(ctx, param.AdminID, admin); err != nil {
-			return err
-		}
+		return nil
+	})
+	g.Go(func() error {
+		return ccs.ar.FindByID(ctx, param.AdminID, admin)
+	})
+	g.Go(func() error {
 		if err := ccs.ccr.FindByName(ctx, param.Name, category); err != nil {
 			var parsedErr *customerrors.CustomError
-			errors.As(err, &parsedErr)
+			if !errors.As(err, &parsedErr) {
+				return customerrors.NewError(
+					"something went wrong",
+					errors.New("cannot parse error"),
+					customerrors.CommonErr,
+				)
+			}
 			if parsedErr.ErrCode != customerrors.ItemNotExist {
 				return err
 			}
@@ -106,25 +126,28 @@ func (ccs *CourseCategoryServiceImpl) CreateCategory(ctx context.Context, param 
 				customerrors.ItemAlreadyExist,
 			)
 		}
-		newCategory.Name = param.Name
-		if err := ccs.ccr.CreateCategory(ctx, newCategory); err != nil {
-			return err
-		}
 		return nil
-	}); err != nil {
+	})
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
+	newCategory.Name = param.Name
+	if err := ccs.ccr.CreateCategory(ctx, newCategory); err != nil {
 		return nil, err
 	}
 	return newCategory, nil
 }
 
 func (ccs *CourseCategoryServiceImpl) UpdateCategory(ctx context.Context, param entity.UpdateCategoryParam) error {
-	category := new(entity.CourseCategory)
-	admin := new(entity.Admin)
-	user := new(entity.User)
 	if param.Name == nil {
 		return nil
 	}
-	return ccs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+	g, ctx := errgroup.WithContext(ctx)
+	category := new(entity.CourseCategory)
+	admin := new(entity.Admin)
+	user := new(entity.User)
+
+	g.Go(func() error {
 		if err := ccs.ur.FindByID(ctx, param.AdminID, user); err != nil {
 			return err
 		}
@@ -135,15 +158,24 @@ func (ccs *CourseCategoryServiceImpl) UpdateCategory(ctx context.Context, param 
 				customerrors.Unauthenticate,
 			)
 		}
-		if err := ccs.ar.FindByID(ctx, param.AdminID, admin); err != nil {
-			return err
-		}
-		if err := ccs.ccr.FindByID(ctx, param.ID, category); err != nil {
-			return err
-		}
+		return nil
+	})
+	g.Go(func() error {
+		return ccs.ar.FindByID(ctx, param.AdminID, admin)
+	})
+	g.Go(func() error {
+		return ccs.ccr.FindByID(ctx, param.ID, category)
+	})
+	g.Go(func() error {
 		if err := ccs.ccr.FindByName(ctx, *param.Name, category); err != nil {
 			var parsedErr *customerrors.CustomError
-			errors.As(err, &parsedErr)
+			if !errors.As(err, &parsedErr) {
+				return customerrors.NewError(
+					"something went wrong",
+					errors.New("cannot parse error"),
+					customerrors.CommonErr,
+				)
+			}
 			if parsedErr.ErrCode != customerrors.ItemNotExist {
 				return err
 			}
@@ -154,9 +186,13 @@ func (ccs *CourseCategoryServiceImpl) UpdateCategory(ctx context.Context, param 
 				customerrors.ItemAlreadyExist,
 			)
 		}
-		if err := ccs.ccr.UpdateCategory(ctx, param); err != nil {
-			return err
-		}
 		return nil
 	})
+	if err := g.Wait(); err != nil {
+		return err
+	}
+	if err := ccs.ccr.UpdateCategory(ctx, param); err != nil {
+		return err
+	}
+	return nil
 }

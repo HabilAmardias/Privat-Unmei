@@ -13,6 +13,8 @@ import (
 	"privat-unmei/internal/repositories"
 	"privat-unmei/internal/utils"
 	"strings"
+
+	"golang.org/x/sync/errgroup"
 )
 
 type StudentServiceImpl struct {
@@ -60,15 +62,22 @@ func (us *StudentServiceImpl) RefreshToken(ctx context.Context, param entity.Ref
 }
 
 func (us *StudentServiceImpl) GetStudentProfile(ctx context.Context, param entity.StudentProfileParam) (*entity.StudentProfileQuery, error) {
+
 	user := new(entity.User)
 	student := new(entity.Student)
 	profile := new(entity.StudentProfileQuery)
-	if err := us.ur.FindByID(ctx, param.ID, user); err != nil {
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		return us.ur.FindByID(ctx, param.ID, user)
+	})
+	g.Go(func() error {
+		return us.sr.FindByID(ctx, param.ID, student)
+	})
+	if err := g.Wait(); err != nil {
 		return nil, err
 	}
-	if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
-		return nil, err
-	}
+
 	profile.ID = param.ID
 	profile.Name = user.Name
 	profile.Bio = user.Bio
@@ -79,35 +88,49 @@ func (us *StudentServiceImpl) GetStudentProfile(ctx context.Context, param entit
 }
 
 func (us *StudentServiceImpl) ChangePassword(ctx context.Context, param entity.StudentChangePasswordParam) error {
+	g, ctx := errgroup.WithContext(ctx)
 	user := new(entity.User)
 	student := new(entity.Student)
 
-	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		if err := us.ur.FindByID(ctx, param.ID, user); err != nil {
-			return err
-		}
-		if err := us.sr.FindByID(ctx, param.ID, student); err != nil {
-			return err
-		}
-		if match := us.bu.ComparePassword(param.NewPassword, user.Password); match {
-			return customerrors.NewError(
-				"cannot change into same password",
-				errors.New("new password same as previous password"),
-				customerrors.InvalidAction,
-			)
-		}
-		hashedPass, err := us.bu.HashPassword(param.NewPassword)
-		if err != nil {
-			return err
-		}
-		if err := us.ur.UpdateUserPassword(ctx, hashedPass, param.ID); err != nil {
-			return err
-		}
-		return nil
+	g.Go(func() error {
+		return us.ur.FindByID(ctx, param.ID, user)
 	})
+	g.Go(func() error {
+		return us.sr.FindByID(ctx, param.ID, student)
+	})
+	if err := g.Wait(); err != nil {
+		return err
+	}
+	if match := us.bu.ComparePassword(param.NewPassword, user.Password); match {
+		return customerrors.NewError(
+			"cannot change into same password",
+			errors.New("new password same as previous password"),
+			customerrors.InvalidAction,
+		)
+	}
+	hashedPass, err := us.bu.HashPassword(param.NewPassword)
+	if err != nil {
+		return err
+	}
+	if err := us.ur.UpdateUserPassword(ctx, hashedPass, param.ID); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code string) (string, string, string, error) {
+	generateAuthAndRefreshToken := func(userID string) (string, string, error) {
+		authToken, err := us.ju.GenerateJWT(userID, constants.StudentRole, constants.ForLogin, constants.VerifiedStatus, constants.AUTH_AGE)
+		if err != nil {
+			return "", "", err
+		}
+		refreshToken, err := us.ju.GenerateJWT(userID, constants.StudentRole, constants.ForRefresh, constants.VerifiedStatus, constants.REFRESH_AGE)
+		if err != nil {
+			return "", "", err
+		}
+		return authToken, refreshToken, nil
+	}
+
 	oauthToken, err := us.goauth.Config.Exchange(context.Background(), code)
 	if err != nil {
 		return "", "", "", customerrors.NewError(
@@ -155,7 +178,13 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 	student := new(entity.Student)
 	if err := us.ur.FindByEmail(ctx, email, user); err != nil {
 		var parsedErr *customerrors.CustomError
-		errors.As(err, &parsedErr)
+		if !errors.As(err, &parsedErr) {
+			return "", "", "", customerrors.NewError(
+				"something went wrong",
+				errors.New("fail to parse error"),
+				customerrors.CommonErr,
+			)
+		}
 		if parsedErr.ErrCode == customerrors.ItemNotExist {
 			pass, err := generateRandomPassword()
 			if err != nil {
@@ -176,7 +205,6 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 				Password:     hashed,
 				ProfileImage: constants.DefaultAvatar,
 			}
-			log.Println(newUser.Name)
 			if err := us.ur.AddNewUser(ctx, newUser); err != nil {
 				return "", "", "", err
 			}
@@ -186,11 +214,7 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 			if err := us.sr.AddNewStudent(ctx, newStudent); err != nil {
 				return "", "", "", err
 			}
-			authToken, err := us.ju.GenerateJWT(newUser.ID, constants.StudentRole, constants.ForLogin, constants.VerifiedStatus, constants.AUTH_AGE)
-			if err != nil {
-				return "", "", "", err
-			}
-			refreshToken, err := us.ju.GenerateJWT(newStudent.ID, constants.StudentRole, constants.ForRefresh, constants.VerifiedStatus, constants.REFRESH_AGE)
+			authToken, refreshToken, err := generateAuthAndRefreshToken(newUser.ID)
 			if err != nil {
 				return "", "", "", err
 			}
@@ -201,11 +225,7 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 	if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
 		return "", "", "", err
 	}
-	authToken, err := us.ju.GenerateJWT(student.ID, constants.StudentRole, constants.ForLogin, constants.VerifiedStatus, constants.AUTH_AGE)
-	if err != nil {
-		return "", "", "", err
-	}
-	refreshToken, err := us.ju.GenerateJWT(student.ID, constants.StudentRole, constants.ForRefresh, constants.VerifiedStatus, constants.REFRESH_AGE)
+	authToken, refreshToken, err := generateAuthAndRefreshToken(user.ID)
 	if err != nil {
 		return "", "", "", err
 	}
@@ -213,68 +233,79 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 }
 
 func (us *StudentServiceImpl) UpdateStudentProfile(ctx context.Context, param entity.UpdateStudentParam) error {
+	g, ctx := errgroup.WithContext(ctx)
 	user := new(entity.User)
 	student := new(entity.Student)
 	updateQuery := new(entity.UpdateUserQuery)
-
-	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		if err := us.ur.FindByID(ctx, param.ID, user); err != nil {
-			return err
-		}
-		if err := us.sr.FindByID(ctx, param.ID, student); err != nil {
-			return err
-		}
-
-		updateQuery.Name = param.Name
-		updateQuery.Bio = param.Bio
-
-		if param.ProfileImage != nil {
-			filename := param.ID
-			res, err := us.cu.UploadFile(ctx, param.ProfileImage, filename, constants.AvatarFolder)
-			if err != nil {
-				return err
-			}
-			updateQuery.ProfileImage = &res.SecureURL
-		}
-		if err := us.ur.UpdateUserProfile(ctx, updateQuery, param.ID); err != nil {
-			return err
-		}
-		return nil
+	g.Go(func() error {
+		return us.ur.FindByID(ctx, param.ID, user)
 	})
+	g.Go(func() error {
+		return us.sr.FindByID(ctx, param.ID, student)
+	})
+	if err := g.Wait(); err != nil {
+		return err
+	}
+	if param.ProfileImage != nil {
+		filename := param.ID
+		res, err := us.cu.UploadFile(ctx, param.ProfileImage, filename, constants.AvatarFolder)
+		if err != nil {
+			return err
+		}
+		imageURL := res.SecureURL
+		updateQuery.ProfileImage = &imageURL
+	}
+
+	updateQuery.Name = param.Name
+	updateQuery.Bio = param.Bio
+
+	if err := us.ur.UpdateUserProfile(ctx, updateQuery, param.ID); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (us *StudentServiceImpl) GetStudentList(ctx context.Context, param entity.ListStudentParam) (*[]entity.ListStudentQuery, *int64, error) {
+	g, ctx := errgroup.WithContext(ctx)
+
 	students := new([]entity.ListStudentQuery)
 	totalRow := new(int64)
 	user := new(entity.User)
 	admin := new(entity.Admin)
-	if err := us.ur.FindByID(ctx, param.AdminID, user); err != nil {
-		return nil, nil, err
-	}
-	if user.Status == constants.UnverifiedStatus {
-		return nil, nil, customerrors.NewError(
-			"unauthorized",
-			errors.New("admin is not verified"),
-			customerrors.Unauthenticate,
-		)
-	}
-	if err := us.ar.FindByID(ctx, param.AdminID, admin); err != nil {
-		return nil, nil, err
-	}
-	if err := us.sr.GetStudentList(ctx, totalRow, param.Limit, param.Page, students); err != nil {
+
+	g.Go(func() error {
+		if err := us.ur.FindByID(ctx, param.AdminID, user); err != nil {
+			return err
+		}
+		if user.Status == constants.UnverifiedStatus {
+			return customerrors.NewError(
+				"unauthorized",
+				errors.New("admin is not verified"),
+				customerrors.Unauthenticate,
+			)
+		}
+		return nil
+	})
+	g.Go(func() error {
+		return us.ar.FindByID(ctx, param.AdminID, admin)
+	})
+	g.Go(func() error {
+		return us.sr.GetStudentList(ctx, totalRow, param.Limit, param.Page, students)
+	})
+	if err := g.Wait(); err != nil {
 		return nil, nil, err
 	}
 	return students, totalRow, nil
 }
 
 func (us *StudentServiceImpl) SendVerificationEmail(ctx context.Context, id string) error {
+	g, ctx := errgroup.WithContext(ctx)
+
 	user := new(entity.User)
 	student := new(entity.Student)
-	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+
+	g.Go(func() error {
 		if err := us.ur.FindByID(ctx, id, user); err != nil {
-			return err
-		}
-		if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
 			return err
 		}
 		if user.Status == constants.VerifiedStatus {
@@ -284,10 +315,19 @@ func (us *StudentServiceImpl) SendVerificationEmail(ctx context.Context, id stri
 				customerrors.InvalidAction,
 			)
 		}
-		jwt, err := us.ju.GenerateJWT(student.ID, constants.StudentRole, constants.ForVerification, user.Status, constants.AUTH_AGE)
-		if err != nil {
-			return err
-		}
+		return nil
+	})
+	g.Go(func() error {
+		return us.sr.FindByID(ctx, id, student)
+	})
+	if err := g.Wait(); err != nil {
+		return err
+	}
+	jwt, err := us.ju.GenerateJWT(id, constants.StudentRole, constants.ForVerification, constants.UnverifiedStatus, constants.AUTH_AGE)
+	if err != nil {
+		return err
+	}
+	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := us.sr.UpdateVerifyToken(ctx, student.ID, &jwt); err != nil {
 			return err
 		}
@@ -299,36 +339,38 @@ func (us *StudentServiceImpl) SendVerificationEmail(ctx context.Context, id stri
 		if err := us.gu.SendEmail(emailParam); err != nil {
 			return err
 		}
-		log.Println(jwt)
 		return nil
 	})
 }
 
 func (us *StudentServiceImpl) ResetPassword(ctx context.Context, param entity.ResetPasswordParam) error {
+	g, ctx := errgroup.WithContext(ctx)
 	user := new(entity.User)
 	student := new(entity.Student)
-
+	g.Go(func() error {
+		return us.ur.FindByID(ctx, param.ID, user)
+	})
+	g.Go(func() error {
+		return us.sr.FindByID(ctx, user.ID, student)
+	})
+	if err := g.Wait(); err != nil {
+		return err
+	}
+	if us.bu.ComparePassword(param.NewPassword, user.Password) {
+		return customerrors.NewError(
+			"cannot update to same password",
+			errors.New("old password and new password is the same"),
+			customerrors.InvalidAction,
+		)
+	}
+	if student.ResetToken == nil || *student.ResetToken != param.Token {
+		return customerrors.NewError("wrong credentials", errors.New("reset token does not match"), customerrors.Unauthenticate)
+	}
+	newHashedPass, err := us.bu.HashPassword(param.NewPassword)
+	if err != nil {
+		return err
+	}
 	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		if err := us.ur.FindByID(ctx, param.ID, user); err != nil {
-			return err
-		}
-		if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
-			return err
-		}
-		if us.bu.ComparePassword(param.NewPassword, user.Password) {
-			return customerrors.NewError(
-				"cannot update to same password",
-				errors.New("old password and new password is the same"),
-				customerrors.InvalidAction,
-			)
-		}
-		if student.ResetToken == nil || *student.ResetToken != param.Token {
-			return customerrors.NewError("wrong credentials", errors.New("reset token does not match"), customerrors.Unauthenticate)
-		}
-		newHashedPass, err := us.bu.HashPassword(param.NewPassword)
-		if err != nil {
-			return err
-		}
 		if err := us.ur.UpdateUserPassword(ctx, newHashedPass, user.ID); err != nil {
 			return err
 		}
@@ -354,12 +396,9 @@ func (us *StudentServiceImpl) SendResetTokenEmail(ctx context.Context, email str
 		if err != nil {
 			return err
 		}
-		// keep it to test reset password feature
-		log.Println(resetToken)
 		if err := us.sr.UpdateResetToken(ctx, student.ID, &resetToken); err != nil {
 			return err
 		}
-
 		param := entity.SendEmailParams{
 			Receiver:  user.Email,
 			Subject:   "Reset Password",
@@ -373,26 +412,28 @@ func (us *StudentServiceImpl) SendResetTokenEmail(ctx context.Context, email str
 }
 
 func (us *StudentServiceImpl) Verify(ctx context.Context, param entity.VerifyStudentParam) error {
+	g, ctx := errgroup.WithContext(ctx)
+
 	user := new(entity.User)
 	student := new(entity.Student)
+
+	g.Go(func() error {
+		return us.ur.FindByID(ctx, param.ID, user)
+	})
+	g.Go(func() error {
+		return us.sr.FindByID(ctx, user.ID, student)
+	})
+	if err := g.Wait(); err != nil {
+		return err
+	}
+	if student.VerifyToken == nil || param.Token != *student.VerifyToken {
+		return customerrors.NewError(
+			"invalid credential",
+			errors.New("invalid verify token"),
+			customerrors.Unauthenticate,
+		)
+	}
 	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		if err := us.ur.FindByID(ctx, param.ID, user); err != nil {
-			return err
-		}
-		if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
-			return err
-		}
-		if student.VerifyToken == nil || param.Token != *student.VerifyToken {
-			if student.VerifyToken != nil {
-				log.Println("stored token: ", *student.VerifyToken)
-			}
-			log.Println("sent token: ", param.Token)
-			return customerrors.NewError(
-				"invalid credential",
-				errors.New("invalid verify token"),
-				customerrors.Unauthenticate,
-			)
-		}
 		if err := us.ur.UpdateUserStatus(ctx, constants.VerifiedStatus, user.ID); err != nil {
 			return err
 		}
@@ -413,14 +454,19 @@ func (us *StudentServiceImpl) Login(ctx context.Context, param entity.StudentLog
 	if err := us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := us.ur.FindByEmail(ctx, param.Email, user); err != nil {
 			var parsedErr *customerrors.CustomError
-			if errors.As(err, &parsedErr) {
-				if parsedErr.ErrCode == customerrors.ItemNotExist {
-					return customerrors.NewError(
-						"invalid email or password",
-						parsedErr.ErrLog,
-						customerrors.InvalidAction,
-					)
-				}
+			if !errors.As(err, &parsedErr) {
+				return customerrors.NewError(
+					"something went wrong",
+					errors.New("cannot parse error"),
+					customerrors.CommonErr,
+				)
+			}
+			if parsedErr.ErrCode == customerrors.ItemNotExist {
+				return customerrors.NewError(
+					"invalid email or password",
+					parsedErr.ErrLog,
+					customerrors.InvalidAction,
+				)
 			}
 			return err
 		}
@@ -457,10 +503,15 @@ func (us *StudentServiceImpl) Register(ctx context.Context, param entity.Student
 	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := us.ur.FindByEmail(ctx, param.Email, user); err != nil {
 			var parsedErr *customerrors.CustomError
-			if errors.As(err, &parsedErr) {
-				if parsedErr.ErrCode != customerrors.ItemNotExist {
-					return err
-				}
+			if !errors.As(err, &parsedErr) {
+				return customerrors.NewError(
+					"something went wrong",
+					errors.New("cannot parse error"),
+					customerrors.CommonErr,
+				)
+			}
+			if parsedErr.ErrCode != customerrors.ItemNotExist {
+				return err
 			}
 		} else {
 			return customerrors.NewError(
@@ -487,8 +538,6 @@ func (us *StudentServiceImpl) Register(ctx context.Context, param entity.Student
 		if err != nil {
 			return err
 		}
-		// keep it for testing verify functionality
-		log.Println(token)
 
 		student.ID = user.ID
 		student.VerifyToken = &token

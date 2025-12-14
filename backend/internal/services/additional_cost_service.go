@@ -7,6 +7,8 @@ import (
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/repositories"
+
+	"golang.org/x/sync/errgroup"
 )
 
 type AdditionalCostServiceImpl struct {
@@ -26,66 +28,87 @@ func CreateAdditionalCostService(
 }
 
 func (acs *AdditionalCostServiceImpl) GetOperationalCost(ctx context.Context, param entity.GetOperationalCostParam) (*float64, error) {
+	g, ctx := errgroup.WithContext(ctx)
 	operationalCost := new(float64)
 	user := new(entity.User)
-	if err := acs.ur.FindByID(ctx, param.UserID, user); err != nil {
-		return nil, err
-	}
-	if user.Status != "verified" {
-		return nil, customerrors.NewError(
-			"unverified",
-			errors.New("user is not verified"),
-			customerrors.Unauthenticate,
-		)
-	}
-	if err := acs.acr.GetOperationalCost(ctx, operationalCost); err != nil {
+	g.Go(func() error {
+		if err := acs.ur.FindByID(ctx, param.UserID, user); err != nil {
+			return err
+		}
+		if user.Status != constants.VerifiedStatus {
+			return customerrors.NewError(
+				"unverified",
+				errors.New("user is not verified"),
+				customerrors.Unauthenticate,
+			)
+		}
+		return nil
+	})
+	g.Go(func() error {
+		return acs.acr.GetOperationalCost(ctx, operationalCost)
+	})
+	if err := g.Wait(); err != nil {
 		return nil, err
 	}
 	return operationalCost, nil
 }
 
 func (acs *AdditionalCostServiceImpl) GetAllAdditionalCost(ctx context.Context, param entity.GetAllAdditionalCostParam) (*[]entity.GetAdditionalCostQuery, *int64, error) {
+	g, ctx := errgroup.WithContext(ctx)
 	admin := new(entity.Admin)
 	totalRow := new(int64)
 	costs := new([]entity.GetAdditionalCostQuery)
 	user := new(entity.User)
-	if err := acs.ur.FindByID(ctx, param.AdminID, user); err != nil {
-		return nil, nil, err
-	}
-	if user.Status == constants.UnverifiedStatus {
-		return nil, nil, customerrors.NewError(
-			"unauthorized",
-			errors.New("admin is not verified"),
-			customerrors.Unauthenticate,
-		)
-	}
-	if err := acs.ar.FindByID(ctx, param.AdminID, admin); err != nil {
-		return nil, nil, err
-	}
-	if err := acs.acr.GetAllAdditionalCost(ctx, param.Limit, param.Page, totalRow, costs); err != nil {
+	g.Go(func() error {
+		if err := acs.ur.FindByID(ctx, param.AdminID, user); err != nil {
+			return err
+		}
+		if user.Status == constants.UnverifiedStatus {
+			return customerrors.NewError(
+				"unauthorized",
+				errors.New("admin is not verified"),
+				customerrors.Unauthenticate,
+			)
+		}
+		return nil
+	})
+	g.Go(func() error {
+		return acs.ar.FindByID(ctx, param.AdminID, admin)
+	})
+	g.Go(func() error {
+		return acs.acr.GetAllAdditionalCost(ctx, param.Limit, param.Page, totalRow, costs)
+	})
+	if err := g.Wait(); err != nil {
 		return nil, nil, err
 	}
 	return costs, totalRow, nil
 }
 
 func (acs *AdditionalCostServiceImpl) DeleteCost(ctx context.Context, param entity.DeleteAdditionalCostParam) error {
+	g, ctx := errgroup.WithContext(ctx)
 	admin := new(entity.Admin)
 	cost := new(entity.AdditionalCost)
 	user := new(entity.User)
-	if err := acs.ur.FindByID(ctx, param.AdminID, user); err != nil {
-		return err
-	}
-	if user.Status == constants.UnverifiedStatus {
-		return customerrors.NewError(
-			"unauthorized",
-			errors.New("admin is not verified"),
-			customerrors.Unauthenticate,
-		)
-	}
-	if err := acs.ar.FindByID(ctx, param.AdminID, admin); err != nil {
-		return err
-	}
-	if err := acs.acr.FindByID(ctx, param.CostID, cost); err != nil {
+	g.Go(func() error {
+		if err := acs.ur.FindByID(ctx, param.AdminID, user); err != nil {
+			return err
+		}
+		if user.Status == constants.UnverifiedStatus {
+			return customerrors.NewError(
+				"unauthorized",
+				errors.New("admin is not verified"),
+				customerrors.Unauthenticate,
+			)
+		}
+		return nil
+	})
+	g.Go(func() error {
+		return acs.ar.FindByID(ctx, param.AdminID, admin)
+	})
+	g.Go(func() error {
+		return acs.acr.FindByID(ctx, param.CostID, cost)
+	})
+	if err := g.Wait(); err != nil {
 		return err
 	}
 	if err := acs.acr.DeleteCost(ctx, param.CostID); err != nil {
@@ -95,33 +118,43 @@ func (acs *AdditionalCostServiceImpl) DeleteCost(ctx context.Context, param enti
 }
 
 func (acs *AdditionalCostServiceImpl) CreateNewAdditionalCost(ctx context.Context, param entity.CreateAdditionalCostParam) (int, error) {
+	g, ctx := errgroup.WithContext(ctx)
 	admin := new(entity.Admin)
 	id := new(int)
 	count := new(int64)
 	user := new(entity.User)
 
-	if err := acs.ur.FindByID(ctx, param.AdminID, user); err != nil {
+	g.Go(func() error {
+		if err := acs.ur.FindByID(ctx, param.AdminID, user); err != nil {
+			return err
+		}
+		if user.Status == constants.UnverifiedStatus {
+			return customerrors.NewError(
+				"unauthorized",
+				errors.New("admin is not verified"),
+				customerrors.Unauthenticate,
+			)
+		}
+		return nil
+	})
+	g.Go(func() error {
+		return acs.ar.FindByID(ctx, param.AdminID, admin)
+	})
+	g.Go(func() error {
+		if err := acs.acr.FindByName(ctx, param.Name, count); err != nil {
+			return err
+		}
+		if *count > 0 {
+			return customerrors.NewError(
+				"operational cost already exist",
+				errors.New("operational cost already exist"),
+				customerrors.ItemAlreadyExist,
+			)
+		}
+		return nil
+	})
+	if err := g.Wait(); err != nil {
 		return 0, err
-	}
-	if user.Status == constants.UnverifiedStatus {
-		return 0, customerrors.NewError(
-			"unauthorized",
-			errors.New("admin is not verified"),
-			customerrors.Unauthenticate,
-		)
-	}
-	if err := acs.ar.FindByID(ctx, param.AdminID, admin); err != nil {
-		return 0, err
-	}
-	if err := acs.acr.FindByName(ctx, param.Name, count); err != nil {
-		return 0, err
-	}
-	if *count > 0 {
-		return 0, customerrors.NewError(
-			"operational cost already exist",
-			errors.New("operational cost already exist"),
-			customerrors.ItemAlreadyExist,
-		)
 	}
 	if err := acs.acr.CreateOperationalCost(ctx, param.Name, param.Amount, id); err != nil {
 		return 0, err
@@ -129,24 +162,31 @@ func (acs *AdditionalCostServiceImpl) CreateNewAdditionalCost(ctx context.Contex
 	return *id, nil
 }
 func (acs *AdditionalCostServiceImpl) UpdateCostAmount(ctx context.Context, param entity.UpdateAdditonalCostParam) error {
+	g, ctx := errgroup.WithContext(ctx)
 	admin := new(entity.Admin)
 	cost := new(entity.AdditionalCost)
 	user := new(entity.User)
 
-	if err := acs.ur.FindByID(ctx, param.AdminID, user); err != nil {
-		return err
-	}
-	if user.Status == constants.UnverifiedStatus {
-		return customerrors.NewError(
-			"unauthorized",
-			errors.New("admin is not verified"),
-			customerrors.Unauthenticate,
-		)
-	}
-	if err := acs.ar.FindByID(ctx, param.AdminID, admin); err != nil {
-		return err
-	}
-	if err := acs.acr.FindByID(ctx, param.CostID, cost); err != nil {
+	g.Go(func() error {
+		if err := acs.ur.FindByID(ctx, param.AdminID, user); err != nil {
+			return err
+		}
+		if user.Status == constants.UnverifiedStatus {
+			return customerrors.NewError(
+				"unauthorized",
+				errors.New("admin is not verified"),
+				customerrors.Unauthenticate,
+			)
+		}
+		return nil
+	})
+	g.Go(func() error {
+		return acs.ar.FindByID(ctx, param.AdminID, admin)
+	})
+	g.Go(func() error {
+		return acs.acr.FindByID(ctx, param.CostID, cost)
+	})
+	if err := g.Wait(); err != nil {
 		return err
 	}
 	if err := acs.acr.UpdateCostAmount(ctx, param.CostID, param.Amount); err != nil {

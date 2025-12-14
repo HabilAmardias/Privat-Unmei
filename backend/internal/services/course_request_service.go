@@ -11,6 +11,8 @@ import (
 	"privat-unmei/internal/repositories"
 	"privat-unmei/internal/utils"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 )
 
 type CourseRequestServiceImpl struct {
@@ -46,6 +48,7 @@ func CreateCourseRequestService(
 }
 
 func (crs *CourseRequestServiceImpl) StudentCourseRequestDetail(ctx context.Context, param entity.StudentCourseRequestDetailParam) (*entity.StudentCourseRequestDetailQuery, error) {
+	g1, ctx := errgroup.WithContext(ctx)
 	courseRequest := new(entity.CourseRequest)
 	course := new(entity.Course)
 	userMentor := new(entity.User)
@@ -53,72 +56,87 @@ func (crs *CourseRequestServiceImpl) StudentCourseRequestDetail(ctx context.Cont
 	userStudent := new(entity.User)
 	student := new(entity.Student)
 	schedules := new([]entity.CourseRequestSchedule)
-	res := new(entity.StudentCourseRequestDetailQuery)
 	payment := new(entity.Payment)
 
-	if err := crs.crr.FindByID(ctx, param.CourseRequestID, courseRequest); err != nil {
+	g1.Go(func() error {
+		if err := crs.crr.FindByID(ctx, param.CourseRequestID, courseRequest); err != nil {
+			return err
+		}
+		if courseRequest.StudentID != param.StudentID {
+			return customerrors.NewError(
+				"the course does not belong to the student",
+				errors.New("student id does not match"),
+				customerrors.InvalidAction,
+			)
+		}
+		return crs.cr.FindByID(ctx, courseRequest.CourseID, course, false)
+	})
+	g1.Go(func() error {
+		if err := crs.ur.FindByID(ctx, param.StudentID, userStudent); err != nil {
+			return err
+		}
+		if userStudent.Status != constants.VerifiedStatus {
+			return customerrors.NewError(
+				"unauthorized user",
+				errors.New("user is not verified"),
+				customerrors.Unauthenticate,
+			)
+		}
+		return nil
+	})
+	g1.Go(func() error {
+		return crs.sr.FindByID(ctx, param.StudentID, student)
+	})
+
+	if err := g1.Wait(); err != nil {
 		return nil, err
 	}
-	if err := crs.cr.FindByID(ctx, courseRequest.CourseID, course, false); err != nil {
-		return nil, err
-	}
-	if err := crs.ur.FindByID(ctx, param.StudentID, userStudent); err != nil {
-		return nil, err
-	}
-	if err := crs.sr.FindByID(ctx, userStudent.ID, student); err != nil {
-		return nil, err
-	}
-	if courseRequest.StudentID != param.StudentID {
-		return nil, customerrors.NewError(
-			"the course does not belong to the student",
-			errors.New("student id does not match"),
-			customerrors.InvalidAction,
-		)
-	}
-	if userStudent.Status != constants.VerifiedStatus {
-		return nil, customerrors.NewError(
-			"unauthorized user",
-			errors.New("user is not verified"),
-			customerrors.Unauthenticate,
-		)
-	}
-	if err := crs.ur.FindByID(ctx, course.MentorID, userMentor); err != nil {
-		return nil, err
-	}
-	if err := crs.mr.FindByID(ctx, userMentor.ID, mentor, false); err != nil {
-		return nil, err
-	}
-	if err := crs.csr.FindScheduleByCourseRequestID(ctx, param.CourseRequestID, schedules); err != nil {
+	g2, ctx := errgroup.WithContext(ctx)
+	g2.Go(func() error {
+		if err := crs.ur.FindByID(ctx, course.MentorID, userMentor); err != nil {
+			return err
+		}
+		return crs.mr.FindByID(ctx, userMentor.ID, mentor, false)
+	})
+	g2.Go(func() error {
+		if err := crs.csr.FindScheduleByCourseRequestID(ctx, param.CourseRequestID, schedules); err != nil {
+			return err
+		}
+		if len(*schedules) != courseRequest.NumberOfSessions {
+			return customerrors.NewError(
+				"something went wrong",
+				errors.New("course schedule and number of session does not match, integrity breached"),
+				customerrors.CommonErr,
+			)
+		}
+		return nil
+	})
+
+	g2.Go(func() error {
+		return crs.pr.FindPaymentByRequestID(ctx, param.CourseRequestID, payment)
+	})
+
+	if err := g2.Wait(); err != nil {
 		return nil, err
 	}
 
-	if len(*schedules) != courseRequest.NumberOfSessions {
-		return nil, customerrors.NewError(
-			"something went wrong",
-			errors.New("course schedule and number of session does not match, integrity breached"),
-			customerrors.CommonErr,
-		)
+	res := &entity.StudentCourseRequestDetailQuery{
+		CourseRequestID:     courseRequest.ID,
+		CourseName:          course.Title,
+		MentorName:          userMentor.Name,
+		MentorPublicID:      userMentor.PublicID,
+		TotalPrice:          payment.TotalPrice,
+		Subtotal:            payment.SubTotal,
+		OperationalCost:     payment.OperationalCost,
+		NumberOfSessions:    courseRequest.NumberOfSessions,
+		NumberOfParticipant: courseRequest.NumberOfParticipant,
+		Status:              courseRequest.Status,
+		ExpiredAt:           courseRequest.ExpiredAt,
+		Schedules:           *schedules,
+		MentorID:            userMentor.ID,
+		AccountNumber:       payment.AccountNumber,
+		PaymentMethodName:   payment.PaymentMethodName,
 	}
-
-	if err := crs.pr.FindPaymentByRequestID(ctx, courseRequest.ID, payment); err != nil {
-		return nil, err
-	}
-
-	res.CourseRequestID = courseRequest.ID
-	res.CourseName = course.Title
-	res.MentorName = userMentor.Name
-	res.MentorPublicID = userMentor.PublicID
-	res.TotalPrice = payment.TotalPrice
-	res.Subtotal = payment.SubTotal
-	res.OperationalCost = payment.OperationalCost
-	res.NumberOfSessions = courseRequest.NumberOfSessions
-	res.NumberOfParticipant = courseRequest.NumberOfParticipant
-	res.Status = courseRequest.Status
-	res.ExpiredAt = courseRequest.ExpiredAt
-	res.Schedules = *schedules
-	res.MentorID = userMentor.ID
-	res.AccountNumber = payment.AccountNumber
-	res.PaymentMethodName = payment.PaymentMethodName
 
 	return res, nil
 }
@@ -128,92 +146,115 @@ func (crs *CourseRequestServiceImpl) StudentCourseRequestList(ctx context.Contex
 	totalRow := new(int64)
 	user := new(entity.User)
 	student := new(entity.Student)
-	if err := crs.ur.FindByID(ctx, param.StudentID, user); err != nil {
-		return nil, nil, err
-	}
-	if err := crs.sr.FindByID(ctx, user.ID, student); err != nil {
-		return nil, nil, err
-	}
-	if user.Status != constants.VerifiedStatus {
-		return nil, nil, customerrors.NewError(
-			"unauthorized access",
-			errors.New("user status is not verified"),
-			customerrors.Unauthenticate,
-		)
-	}
-	if err := crs.crr.StudentCourseRequestList(ctx, param.StudentID, param.Status, param.Search, param.Page, param.Limit, totalRow, requests); err != nil {
+
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		if err := crs.ur.FindByID(ctx, param.StudentID, user); err != nil {
+			return err
+		}
+		if user.Status != constants.VerifiedStatus {
+			return customerrors.NewError(
+				"unauthorized access",
+				errors.New("user status is not verified"),
+				customerrors.Unauthenticate,
+			)
+		}
+		return nil
+	})
+	g.Go(func() error {
+		return crs.sr.FindByID(ctx, param.StudentID, student)
+	})
+	g.Go(func() error {
+		return crs.crr.StudentCourseRequestList(ctx, param.StudentID, param.Status, param.Search, param.Page, param.Limit, totalRow, requests)
+	})
+	if err := g.Wait(); err != nil {
 		return nil, nil, err
 	}
 	return requests, totalRow, nil
 }
 
 func (crs *CourseRequestServiceImpl) MentorCourseRequestDetail(ctx context.Context, param entity.MentorCourseRequestDetailParam) (*entity.MentorCourseRequestDetailQuery, error) {
+	g1, ctx := errgroup.WithContext(ctx)
 	courseRequest := new(entity.CourseRequest)
 	course := new(entity.Course)
 	userMentor := new(entity.User)
 	mentor := new(entity.Mentor)
 	userStudent := new(entity.User)
 	student := new(entity.Student)
+
+	g1.Go(func() error {
+		if err := crs.crr.FindByID(ctx, param.CourseRequestID, courseRequest); err != nil {
+			return err
+		}
+		if err := crs.cr.FindByID(ctx, courseRequest.CourseID, course, false); err != nil {
+			return err
+		}
+		if course.MentorID != param.MentorID {
+			return customerrors.NewError(
+				"the course does not belong to the mentor",
+				errors.New("mentor id does not match"),
+				customerrors.InvalidAction,
+			)
+		}
+		if err := crs.ur.FindByID(ctx, courseRequest.StudentID, userStudent); err != nil {
+			return err
+		}
+		return crs.sr.FindByID(ctx, courseRequest.StudentID, student)
+	})
+	g1.Go(func() error {
+		return crs.ur.FindByID(ctx, param.MentorID, userMentor)
+	})
+	g1.Go(func() error {
+		return crs.mr.FindByID(ctx, param.MentorID, mentor, false)
+	})
+
+	if err := g1.Wait(); err != nil {
+		return nil, err
+	}
+
+	g2, ctx := errgroup.WithContext(ctx)
 	schedules := new([]entity.CourseRequestSchedule)
-	res := new(entity.MentorCourseRequestDetailQuery)
 	payment := new(entity.Payment)
 
-	if err := crs.crr.FindByID(ctx, param.CourseRequestID, courseRequest); err != nil {
-		return nil, err
-	}
-	if err := crs.cr.FindByID(ctx, courseRequest.CourseID, course, false); err != nil {
-		return nil, err
-	}
-	if err := crs.ur.FindByID(ctx, param.MentorID, userMentor); err != nil {
-		return nil, err
-	}
-	if err := crs.mr.FindByID(ctx, userMentor.ID, mentor, false); err != nil {
-		return nil, err
-	}
-	if course.MentorID != param.MentorID {
-		return nil, customerrors.NewError(
-			"the course does not belong to the mentor",
-			errors.New("mentor id does not match"),
-			customerrors.InvalidAction,
-		)
-	}
-	if err := crs.ur.FindByID(ctx, courseRequest.StudentID, userStudent); err != nil {
-		return nil, err
-	}
-	if err := crs.sr.FindByID(ctx, userStudent.ID, student); err != nil {
-		return nil, err
-	}
-	if err := crs.csr.FindScheduleByCourseRequestID(ctx, param.CourseRequestID, schedules); err != nil {
+	g2.Go(func() error {
+		if err := crs.csr.FindScheduleByCourseRequestID(ctx, param.CourseRequestID, schedules); err != nil {
+			return err
+		}
+		if len(*schedules) != courseRequest.NumberOfSessions {
+			return customerrors.NewError(
+				"something went wrong",
+				errors.New("course schedule and number of session does not match, integrity breached"),
+				customerrors.CommonErr,
+			)
+		}
+		return nil
+	})
+	g2.Go(func() error {
+		return crs.pr.FindPaymentByRequestID(ctx, param.CourseRequestID, payment)
+	})
+
+	if err := g2.Wait(); err != nil {
 		return nil, err
 	}
 
-	if len(*schedules) != courseRequest.NumberOfSessions {
-		return nil, customerrors.NewError(
-			"something went wrong",
-			errors.New("course schedule and number of session does not match, integrity breached"),
-			customerrors.CommonErr,
-		)
+	res := &entity.MentorCourseRequestDetailQuery{
+		CourseRequestID:     courseRequest.ID,
+		CourseName:          course.Title,
+		StudentName:         userStudent.Name,
+		StudentPublicID:     userStudent.PublicID,
+		TotalPrice:          payment.TotalPrice,
+		Subtotal:            payment.SubTotal,
+		OperationalCost:     payment.OperationalCost,
+		NumberOfSessions:    courseRequest.NumberOfSessions,
+		PaymentMethod:       payment.PaymentMethodName,
+		AccountNumber:       payment.AccountNumber,
+		Status:              courseRequest.Status,
+		NumberOfParticipant: courseRequest.NumberOfParticipant,
+		ExpiredAt:           courseRequest.ExpiredAt,
+		Schedules:           *schedules,
+		StudentID:           courseRequest.StudentID,
 	}
-
-	if err := crs.pr.FindPaymentByRequestID(ctx, param.CourseRequestID, payment); err != nil {
-		return nil, err
-	}
-
-	res.CourseRequestID = courseRequest.ID
-	res.CourseName = course.Title
-	res.StudentName = userStudent.Name
-	res.StudentPublicID = userStudent.PublicID
-	res.TotalPrice = payment.TotalPrice
-	res.Subtotal = payment.SubTotal
-	res.OperationalCost = payment.OperationalCost
-	res.NumberOfSessions = courseRequest.NumberOfSessions
-	res.PaymentMethod = payment.PaymentMethodName
-	res.AccountNumber = payment.AccountNumber
-	res.Status = courseRequest.Status
-	res.NumberOfParticipant = courseRequest.NumberOfParticipant
-	res.ExpiredAt = courseRequest.ExpiredAt
-	res.Schedules = *schedules
-	res.StudentID = courseRequest.StudentID
 
 	return res, nil
 }
@@ -221,11 +262,30 @@ func (crs *CourseRequestServiceImpl) MentorCourseRequestDetail(ctx context.Conte
 func (crs *CourseRequestServiceImpl) MentorCourseRequestList(ctx context.Context, param entity.MentorCourseRequestListParam) (*[]entity.MentorCourseRequestQuery, *int64, error) {
 	requests := new([]entity.MentorCourseRequestQuery)
 	totalRow := new(int64)
+	user := new(entity.User)
 	mentor := new(entity.Mentor)
-	if err := crs.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
-		return nil, nil, err
-	}
-	if err := crs.crr.MentorCourseRequestList(ctx, param.MentorID, param.Status, param.Page, param.Limit, totalRow, requests); err != nil {
+
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		if err := crs.ur.FindByID(ctx, param.MentorID, user); err != nil {
+			return err
+		}
+		if user.Status != constants.VerifiedStatus {
+			return customerrors.NewError(
+				"unverified user",
+				errors.New("unverified user"),
+				customerrors.Unauthenticate,
+			)
+		}
+		return nil
+	})
+	g.Go(func() error {
+		return crs.mr.FindByID(ctx, param.MentorID, mentor, false)
+	})
+	g.Go(func() error {
+		return crs.crr.MentorCourseRequestList(ctx, param.MentorID, param.Status, param.Page, param.Limit, totalRow, requests)
+	})
+	if err := g.Wait(); err != nil {
 		return nil, nil, err
 	}
 	return requests, totalRow, nil
@@ -239,7 +299,9 @@ func (crs *CourseRequestServiceImpl) MentorConfirmPayment(ctx context.Context, p
 	schedules := new([]entity.CourseRequestSchedule)
 	now := time.Now()
 
-	if err := crs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
 		if err := crs.ur.FindByID(ctx, param.MentorID, user); err != nil {
 			return err
 		}
@@ -250,16 +312,16 @@ func (crs *CourseRequestServiceImpl) MentorConfirmPayment(ctx context.Context, p
 				customerrors.Unauthenticate,
 			)
 		}
-		if err := crs.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
-			return err
-		}
+		return nil
+	})
+	g.Go(func() error {
+		return crs.mr.FindByID(ctx, param.MentorID, mentor, false)
+	})
+	g.Go(func() error {
 		if err := crs.crr.FindByID(ctx, param.CourseRequestID, courseRequest); err != nil {
 			return err
 		}
 		if err := crs.cr.FindByID(ctx, courseRequest.CourseID, course, false); err != nil {
-			return err
-		}
-		if err := crs.csr.FindReservedScheduleByCourseRequestID(ctx, param.CourseRequestID, schedules); err != nil {
 			return err
 		}
 		if course.MentorID != param.MentorID {
@@ -272,7 +334,7 @@ func (crs *CourseRequestServiceImpl) MentorConfirmPayment(ctx context.Context, p
 		if courseRequest.Status != constants.PendingPaymentStatus {
 			return customerrors.NewError(
 				"invalid course request",
-				errors.New("course request is not on reserved status"),
+				errors.New("course request is not on pending payment status"),
 				customerrors.InvalidAction,
 			)
 		}
@@ -290,13 +352,23 @@ func (crs *CourseRequestServiceImpl) MentorConfirmPayment(ctx context.Context, p
 				customerrors.InvalidAction,
 			)
 		}
+		if err := crs.csr.FindReservedScheduleByCourseRequestID(ctx, param.CourseRequestID, schedules); err != nil {
+			return err
+		}
+
 		if len(*schedules) != courseRequest.NumberOfSessions {
 			return customerrors.NewError(
-				"requested number of session and number of schedules does not match",
+				"something went wrong",
 				errors.New("requested number of session and number of schedules does not match"),
-				customerrors.InvalidAction,
+				customerrors.CommonErr,
 			)
 		}
+		return nil
+	})
+	if err := g.Wait(); err != nil {
+		return err
+	}
+	return crs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := crs.crr.ChangeRequestStatus(ctx, param.CourseRequestID, constants.ScheduledStatus, nil); err != nil {
 			return err
 		}
@@ -304,10 +376,7 @@ func (crs *CourseRequestServiceImpl) MentorConfirmPayment(ctx context.Context, p
 			return err
 		}
 		return nil
-	}); err != nil {
-		return err
-	}
-	return nil
+	})
 }
 
 func (crs *CourseRequestServiceImpl) HandleCourseRequest(ctx context.Context, param entity.HandleCourseRequestParam) error {
@@ -322,7 +391,8 @@ func (crs *CourseRequestServiceImpl) HandleCourseRequest(ctx context.Context, pa
 	temp := now.Add(constants.ExpiredInterval)
 	eat := &temp
 
-	if err := crs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+	g1, ctx := errgroup.WithContext(ctx)
+	g1.Go(func() error {
 		if err := crs.ur.FindByID(ctx, param.MentorID, user); err != nil {
 			return err
 		}
@@ -333,27 +403,14 @@ func (crs *CourseRequestServiceImpl) HandleCourseRequest(ctx context.Context, pa
 				customerrors.Unauthenticate,
 			)
 		}
-		if err := crs.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
-			return err
-		}
+		return nil
+	})
+	g1.Go(func() error {
+		return crs.mr.FindByID(ctx, param.MentorID, mentor, false)
+	})
+	g1.Go(func() error {
 		if err := crs.crr.FindByID(ctx, param.CourseRequestID, courseRequest); err != nil {
 			return err
-		}
-		if err := crs.ur.FindByID(ctx, courseRequest.StudentID, userStudent); err != nil {
-			return err
-		}
-		if err := crs.cr.FindByID(ctx, courseRequest.CourseID, course, true); err != nil {
-			return err
-		}
-		if err := crs.csr.FindReservedScheduleByCourseRequestID(ctx, param.CourseRequestID, schedules); err != nil {
-			return err
-		}
-		if course.MentorID != param.MentorID {
-			return customerrors.NewError(
-				"unauthorized access",
-				errors.New("unauthorized access"),
-				customerrors.Unauthenticate,
-			)
 		}
 		if courseRequest.Status != constants.ReservedStatus {
 			return customerrors.NewError(
@@ -376,11 +433,40 @@ func (crs *CourseRequestServiceImpl) HandleCourseRequest(ctx context.Context, pa
 				customerrors.InvalidAction,
 			)
 		}
+		return nil
+	})
+	if err := g1.Wait(); err != nil {
+		return err
+	}
+	g2, ctx := errgroup.WithContext(ctx)
+	g2.Go(func() error {
+		return crs.ur.FindByID(ctx, courseRequest.StudentID, userStudent)
+	})
+	g2.Go(func() error {
+		if err := crs.csr.FindReservedScheduleByCourseRequestID(ctx, param.CourseRequestID, schedules); err != nil {
+			return err
+		}
 		if len(*schedules) != courseRequest.NumberOfSessions {
 			return customerrors.NewError(
-				"requested number of session and number of schedules does not match",
+				"something went wrong",
 				errors.New("requested number of session and number of schedules does not match"),
-				customerrors.InvalidAction,
+				customerrors.CommonErr,
+			)
+		}
+		return nil
+	})
+	if err := g2.Wait(); err != nil {
+		return err
+	}
+	return crs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := crs.cr.FindByID(ctx, courseRequest.CourseID, course, true); err != nil {
+			return err
+		}
+		if course.MentorID != param.MentorID {
+			return customerrors.NewError(
+				"unauthorized access",
+				errors.New("unauthorized access"),
+				customerrors.Unauthenticate,
 			)
 		}
 		status := constants.PendingPaymentStatus
@@ -407,12 +493,12 @@ func (crs *CourseRequestServiceImpl) HandleCourseRequest(ctx context.Context, pa
 			}
 			layout := "02-01-06 15:04:05"
 			go func() {
-				param := entity.SendEmailParams{
+				emailParam := entity.SendEmailParams{
 					Receiver:  userStudent.Email,
 					Subject:   "Payment Detail",
-					EmailBody: constants.PaymentInfoEmailBody(course.Title, user.Name, user.Email, payment.PaymentMethodName, payment.AccountNumber, payment.TotalPrice, courseRequest.ExpiredAt.Format(layout)),
+					EmailBody: constants.PaymentInfoEmailBody(course.Title, user.Name, user.PublicID, payment.PaymentMethodName, payment.AccountNumber, payment.TotalPrice, courseRequest.ExpiredAt.Format(layout)),
 				}
-				if err := crs.gu.SendEmail(param); err != nil {
+				if err := crs.gu.SendEmail(emailParam); err != nil {
 					log.Println(err.Error())
 					return
 				}
@@ -420,10 +506,7 @@ func (crs *CourseRequestServiceImpl) HandleCourseRequest(ctx context.Context, pa
 			}()
 		}
 		return nil
-	}); err != nil {
-		return err
-	}
-	return nil
+	})
 }
 
 func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, param entity.CreateCourseRequestParam) (string, error) {
@@ -446,14 +529,14 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 	endTimes := make([]string, 0, len(param.PreferredSlots))
 	now := time.Now()
 
-	if err := crs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+	g1, ctx := errgroup.WithContext(ctx)
+	g1.Go(func() error {
 		if err := crs.cr.FindByID(ctx, param.CourseID, course, true); err != nil {
 			return err
 		}
 		if err := crs.ur.FindByID(ctx, course.MentorID, userMentor); err != nil {
 			return err
 		}
-
 		if len(param.PreferredSlots) > course.MaxSession {
 			return customerrors.NewError(
 				fmt.Sprintf("cannot reserve more than %d slots", course.MaxSession),
@@ -461,6 +544,9 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 				customerrors.InvalidAction,
 			)
 		}
+		return nil
+	})
+	g1.Go(func() error {
 		if err := crs.ur.FindByID(ctx, param.StudentID, user); err != nil {
 			return err
 		}
@@ -474,6 +560,9 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 				customerrors.Unauthenticate,
 			)
 		}
+		return nil
+	})
+	g1.Go(func() error {
 		if err := crs.crr.FindOngoingByCourseIDAndStudentID(ctx, param.CourseID, param.StudentID, ongoingOrderCount); err != nil {
 			return err
 		}
@@ -484,6 +573,13 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 				customerrors.InvalidAction,
 			)
 		}
+		return nil
+	})
+	if err := g1.Wait(); err != nil {
+		return "", err
+	}
+	g2, ctx := errgroup.WithContext(ctx)
+	g2.Go(func() error {
 		for _, slot := range param.PreferredSlots {
 			endTime, err := CalculateEndTime(slot.StartTime.ToString(), course.SessionDuration)
 			if err != nil {
@@ -518,10 +614,12 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 				customerrors.InvalidAction,
 			)
 		}
-
-		if err := crs.pr.GetPaymentInfoByMentorAndMethodID(ctx, course.MentorID, param.PaymentMethodID, paymentInfo); err != nil {
-			return err
-		}
+		return nil
+	})
+	g2.Go(func() error {
+		return crs.pr.GetPaymentInfoByMentorAndMethodID(ctx, course.MentorID, param.PaymentMethodID, paymentInfo)
+	})
+	g2.Go(func() error {
 		if err := crs.dr.GetMaxParticipant(ctx, maxParticipant); err != nil {
 			return err
 		}
@@ -531,16 +629,26 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 		}
 		if err := crs.dr.GetDiscountByNumberOfParticipant(ctx, participant, discount); err != nil {
 			var parsedErr *customerrors.CustomError
-			if errors.As(err, &parsedErr) {
-				if parsedErr.ErrCode != customerrors.ItemNotExist {
-					return err
-				}
+			if !errors.As(err, &parsedErr) {
+				return customerrors.NewError(
+					"something went wrong",
+					errors.New("cannot parse error"),
+					customerrors.CommonErr,
+				)
+			}
+			if parsedErr.ErrCode != customerrors.ItemNotExist {
+				return err
 			}
 		}
-		if err := crs.acr.GetOperationalCost(ctx, operationalCost); err != nil {
-			return err
-		}
-
+		return nil
+	})
+	g2.Go(func() error {
+		return crs.acr.GetOperationalCost(ctx, operationalCost)
+	})
+	if err := g2.Wait(); err != nil {
+		return "", err
+	}
+	if err := crs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		pricePerSession := course.Price - discount.Amount
 		if course.Price <= discount.Amount {
 			pricePerSession = course.Price
@@ -574,12 +682,12 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 		}
 
 		go func() {
-			param := entity.SendEmailParams{
+			emailParam := entity.SendEmailParams{
 				Receiver:  userMentor.Email,
 				Subject:   "Request Detail",
-				EmailBody: constants.RequestDetailEmailBody(course.Title, user.Name, user.Email, param.NumberOfParticipant, totalPrice),
+				EmailBody: constants.RequestDetailEmailBody(course.Title, user.Name, user.PublicID, param.NumberOfParticipant, totalPrice),
 			}
-			if err := crs.gu.SendEmail(param); err != nil {
+			if err := crs.gu.SendEmail(emailParam); err != nil {
 				log.Println(err.Error())
 				return
 			}

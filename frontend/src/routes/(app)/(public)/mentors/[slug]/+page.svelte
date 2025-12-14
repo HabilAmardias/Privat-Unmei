@@ -10,6 +10,7 @@
 	import Pagination from '$lib/components/pagination/Pagination.svelte';
 	import Loading from '$lib/components/loader/Loading.svelte';
 	import Button from '$lib/components/button/Button.svelte';
+	import { Star } from '@lucide/svelte';
 
 	let { data }: PageProps = $props();
 	const View = new MentorDetailView(data.courses);
@@ -49,6 +50,13 @@
 				</form>
 			{/if}
 		</div>
+
+		{#if data.profile.rating > 0}
+			<div class="ml-auto flex h-full flex-col items-center">
+				<p class="text-2xl font-bold text-[var(--tertiary-color)]">{data.profile.rating}</p>
+				<Star class="text-[var(--tertiary-color)]" />
+			</div>
+		{/if}
 	</div>
 	<div class="flex flex-col gap-4">
 		<div>
@@ -90,7 +98,7 @@
 	</div>
 
 	<h3 class="font-bold text-[var(--tertiary-color)]">Courses:</h3>
-	<ScrollArea orientation="vertical" viewportClasses="h-[300px] max-h-[300px]">
+	<ScrollArea orientation="vertical" viewportClasses="h-[500px] max-h-[500px]">
 		{#if View.isLoading}
 			<Loading />
 		{:else if View.courses.length === 0}

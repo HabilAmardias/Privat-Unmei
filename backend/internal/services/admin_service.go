@@ -8,6 +8,8 @@ import (
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/repositories"
 	"privat-unmei/internal/utils"
+
+	"golang.org/x/sync/errgroup"
 )
 
 type AdminServiceImpl struct {
@@ -37,13 +39,17 @@ func CreateAdminService(
 }
 
 func (as *AdminServiceImpl) AdminProfile(ctx context.Context, param entity.AdminProfileParam) (*entity.AdminProfileQuery, error) {
+	g, ctx := errgroup.WithContext(ctx)
 	user := new(entity.User)
 	admin := new(entity.Admin)
 	query := new(entity.AdminProfileQuery)
-	if err := as.ur.FindByID(ctx, param.AdminID, user); err != nil {
-		return nil, err
-	}
-	if err := as.ar.FindByID(ctx, param.AdminID, admin); err != nil {
+	g.Go(func() error {
+		return as.ur.FindByID(ctx, param.AdminID, user)
+	})
+	g.Go(func() error {
+		return as.ar.FindByID(ctx, param.AdminID, admin)
+	})
+	if err := g.Wait(); err != nil {
 		return nil, err
 	}
 	query.Name = user.Name
@@ -56,19 +62,26 @@ func (as *AdminServiceImpl) AdminProfile(ctx context.Context, param entity.Admin
 }
 
 func (as *AdminServiceImpl) UpdatePassword(ctx context.Context, param entity.AdminUpdatePasswordParam) error {
+	g, ctx := errgroup.WithContext(ctx)
 	user := new(entity.User)
 	admin := new(entity.Admin)
-	if err := as.ur.FindByID(ctx, param.AdminID, user); err != nil {
-		return err
-	}
-	if user.Status != constants.VerifiedStatus {
-		return customerrors.NewError(
-			"admin is unverified",
-			errors.New("admin is unverified"),
-			customerrors.Unauthenticate,
-		)
-	}
-	if err := as.ar.FindByID(ctx, param.AdminID, admin); err != nil {
+	g.Go(func() error {
+		if err := as.ur.FindByID(ctx, param.AdminID, user); err != nil {
+			return err
+		}
+		if user.Status != constants.VerifiedStatus {
+			return customerrors.NewError(
+				"admin is unverified",
+				errors.New("admin is unverified"),
+				customerrors.Unauthenticate,
+			)
+		}
+		return nil
+	})
+	g.Go(func() error {
+		return as.ar.FindByID(ctx, param.AdminID, admin)
+	})
+	if err := g.Wait(); err != nil {
 		return err
 	}
 	if match := as.bu.ComparePassword(param.Password, user.Password); match {
@@ -97,19 +110,26 @@ func (as *AdminServiceImpl) GenerateRandomPassword() (string, error) {
 }
 
 func (as *AdminServiceImpl) VerifyAdmin(ctx context.Context, param entity.AdminVerificationParam) error {
+	g, ctx := errgroup.WithContext(ctx)
 	user := new(entity.User)
 	admin := new(entity.Admin)
-	if err := as.ur.FindByID(ctx, param.AdminID, user); err != nil {
-		return err
-	}
-	if user.Status == constants.VerifiedStatus {
-		return customerrors.NewError(
-			"admin is already verified",
-			errors.New("admin is already verified"),
-			customerrors.InvalidAction,
-		)
-	}
-	if err := as.ar.FindByID(ctx, param.AdminID, admin); err != nil {
+	g.Go(func() error {
+		if err := as.ur.FindByID(ctx, param.AdminID, user); err != nil {
+			return err
+		}
+		if user.Status == constants.VerifiedStatus {
+			return customerrors.NewError(
+				"admin is already verified",
+				errors.New("admin is already verified"),
+				customerrors.InvalidAction,
+			)
+		}
+		return nil
+	})
+	g.Go(func() error {
+		return as.ar.FindByID(ctx, param.AdminID, admin)
+	})
+	if err := g.Wait(); err != nil {
 		return err
 	}
 	if match := as.bu.ComparePassword(param.Password, user.Password); match {
@@ -139,14 +159,19 @@ func (as *AdminServiceImpl) Login(ctx context.Context, param entity.AdminLoginPa
 	if err := as.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := as.ur.FindByEmail(ctx, param.Email, user); err != nil {
 			var parsedErr *customerrors.CustomError
-			if errors.As(err, &parsedErr) {
-				if parsedErr.ErrCode == customerrors.ItemNotExist {
-					return customerrors.NewError(
-						"invalid email or password",
-						parsedErr.ErrLog,
-						customerrors.InvalidAction,
-					)
-				}
+			if !errors.As(err, &parsedErr) {
+				return customerrors.NewError(
+					"something went wrong",
+					errors.New("cannot parse error"),
+					customerrors.CommonErr,
+				)
+			}
+			if parsedErr.ErrCode == customerrors.ItemNotExist {
+				return customerrors.NewError(
+					"invalid email or password",
+					parsedErr.ErrLog,
+					customerrors.InvalidAction,
+				)
 			}
 			return err
 		}
