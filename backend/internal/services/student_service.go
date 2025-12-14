@@ -248,7 +248,7 @@ func (us *StudentServiceImpl) UpdateStudentProfile(ctx context.Context, param en
 	}
 	if param.ProfileImage != nil {
 		filename := param.ID
-		res, err := us.cu.UploadFile(ctx, param.ProfileImage, filename, constants.AvatarFolder)
+		res, err := us.cu.UploadFile(context.Background(), param.ProfileImage, filename, constants.AvatarFolder)
 		if err != nil {
 			return err
 		}

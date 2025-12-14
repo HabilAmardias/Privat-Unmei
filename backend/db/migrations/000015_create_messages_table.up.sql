@@ -7,3 +7,4 @@ CREATE TABLE messages (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMPTZ
 );
+CREATE INDEX idx_messages_chatroom ON messages (chatroom_id) WHERE deleted_at IS NULL;

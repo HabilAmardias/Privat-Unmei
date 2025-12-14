@@ -368,17 +368,17 @@ func (ms *MentorServiceImpl) UpdateMentorProfile(ctx context.Context, param enti
 	userQuery.Name = param.Name
 	userQuery.Bio = param.Bio
 
+	if err := g.Wait(); err != nil {
+		return err
+	}
+
 	if param.ProfileImage != nil {
 		filename := param.ID
-		res, err := ms.cu.UploadFile(ctx, param.ProfileImage, filename, constants.AvatarFolder)
+		res, err := ms.cu.UploadFile(context.Background(), param.ProfileImage, filename, constants.AvatarFolder)
 		if err != nil {
 			return err
 		}
 		userQuery.ProfileImage = &res.SecureURL
-	}
-
-	if err := g.Wait(); err != nil {
-		return err
 	}
 
 	return ms.tmr.WithTransaction(ctx, func(ctx context.Context) error {

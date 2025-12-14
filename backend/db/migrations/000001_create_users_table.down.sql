@@ -1,6 +1,6 @@
 DROP INDEX IF EXISTS idx_username_gin;
-DROP INDEX IF EXISTS idx_useremail_gin;
 DROP INDEX IF EXISTS idx_userpublicid_gin;
+DROP INDEX IF EXISTS idx_users_active;
 DROP TRIGGER IF EXISTS trigger_set_user_public_id ON users;
 DROP FUNCTION IF EXISTS set_user_public_id();
 DROP FUNCTION IF EXISTS generate_short_id(INT);
