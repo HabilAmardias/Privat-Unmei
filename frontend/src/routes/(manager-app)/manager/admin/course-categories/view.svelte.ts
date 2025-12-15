@@ -66,6 +66,8 @@ export class CourseCategoryManagementView {
 			args.formData.append('id', `${this.categoryToDelete}`);
 		}
 		return async ({ result }: EnhancementReturn) => {
+			const deletedIndex = this.categories.findIndex((m) => m.id === this.categoryToDelete);
+			this.deleteDialogOpen[deletedIndex] = false;
 			this.isLoading = false;
 			if (result.type === 'success') {
 				if (this.categoryToDelete) {
@@ -89,6 +91,8 @@ export class CourseCategoryManagementView {
 		}
 		return async ({ result }: EnhancementReturn) => {
 			this.isLoading = false;
+			const updatedIndex = this.categories.findIndex((m) => m.id === this.categoryToUpdate);
+			this.updateDialogOpen[updatedIndex] = false;
 			if (result.type === 'success') {
 				if (this.categoryToUpdate) {
 					this.categories = this.categories.map((m) => {

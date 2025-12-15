@@ -7,6 +7,8 @@ import (
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/repositories"
+
+	"golang.org/x/sync/errgroup"
 )
 
 type ChatServiceImpl struct {
@@ -26,8 +28,19 @@ func (chs *ChatServiceImpl) GetChatroom(ctx context.Context, param entity.GetCha
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
 	student := new(entity.Student)
+	secondUser := new(entity.User)
 
-	if err := chs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+	if param.Role != constants.MentorRole && param.Role != constants.StudentRole {
+		return "", customerrors.NewError(
+			"invalid user",
+			errors.New("role does not belong to student or mentor"),
+			customerrors.Unauthenticate,
+		)
+	}
+
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
 		if err := chs.ur.FindByID(ctx, param.UserID, user); err != nil {
 			return err
 		}
@@ -38,57 +51,79 @@ func (chs *ChatServiceImpl) GetChatroom(ctx context.Context, param entity.GetCha
 				customerrors.Unauthenticate,
 			)
 		}
-		// case: logged in user is a mentor
-		if param.Role == constants.MentorRole {
-			secondUserStudent := new(entity.Student)
-			if err := chs.mr.FindByID(ctx, param.UserID, mentor, false); err != nil {
-				return err
-			}
-			if err := chs.sr.FindByID(ctx, param.SecondUserID, secondUserStudent); err != nil {
-				return err
-			}
+		return nil
+	})
+
+	g.Go(func() error {
+		if err := chs.ur.FindByID(ctx, param.SecondUserID, secondUser); err != nil {
+			return err
+		}
+		if secondUser.Status != constants.VerifiedStatus {
+			return customerrors.NewError(
+				"user is not verified",
+				errors.New("user is not verified"),
+				customerrors.Unauthenticate,
+			)
+		}
+		return nil
+	})
+
+	if param.Role == constants.MentorRole {
+		secondUserStudent := new(entity.Student)
+		g.Go(func() error {
+			return chs.mr.FindByID(ctx, param.UserID, mentor, false)
+		})
+		g.Go(func() error {
+			return chs.sr.FindByID(ctx, param.SecondUserID, secondUserStudent)
+		})
+		g.Go(func() error {
 			if err := chs.chr.GetChatroom(ctx, param.UserID, param.SecondUserID, chatroom); err != nil {
 				var parsedErr *customerrors.CustomError
-				if errors.As(err, &parsedErr) {
-					if parsedErr.ErrCode != customerrors.ItemNotExist {
-						return err
-					}
+				if !errors.As(err, &parsedErr) {
+					return customerrors.NewError(
+						"something went wrong",
+						errors.New("cannot parse error"),
+						customerrors.CommonErr,
+					)
+				}
+				if parsedErr.ErrCode != customerrors.ItemNotExist {
+					return err
 				}
 				if err := chs.chr.CreateChatroom(ctx, param.UserID, param.SecondUserID, chatroom); err != nil {
 					return err
 				}
 			}
 			return nil
-		}
-		// case: logged in user is a student
-		if param.Role == constants.StudentRole {
-			secondUserMentor := new(entity.Mentor)
-			if err := chs.sr.FindByID(ctx, param.UserID, student); err != nil {
-				return err
-			}
-			if err := chs.mr.FindByID(ctx, param.SecondUserID, secondUserMentor, false); err != nil {
-				return err
-			}
+		})
+	} else {
+		secondUserMentor := new(entity.Mentor)
+		g.Go(func() error {
+			return chs.sr.FindByID(ctx, param.UserID, student)
+		})
+		g.Go(func() error {
+			return chs.mr.FindByID(ctx, param.SecondUserID, secondUserMentor, false)
+		})
+		g.Go(func() error {
 			if err := chs.chr.GetChatroom(ctx, param.SecondUserID, param.UserID, chatroom); err != nil {
 				var parsedErr *customerrors.CustomError
-				if errors.As(err, &parsedErr) {
-					if parsedErr.ErrCode != customerrors.ItemNotExist {
-						return err
-					}
+				if !errors.As(err, &parsedErr) {
+					return customerrors.NewError(
+						"something went wrong",
+						errors.New("cannot parse error"),
+						customerrors.CommonErr,
+					)
+				}
+				if parsedErr.ErrCode != customerrors.ItemNotExist {
+					return err
 				}
 				if err := chs.chr.CreateChatroom(ctx, param.SecondUserID, param.UserID, chatroom); err != nil {
 					return err
 				}
 			}
 			return nil
-		}
-		// default case: logged in user is neither a mentor nor a student
-		return customerrors.NewError(
-			"invalid user",
-			errors.New("role does not belong to student or mentor"),
-			customerrors.Unauthenticate,
-		)
-	}); err != nil {
+		})
+	}
+	if err := g.Wait(); err != nil {
 		return "", err
 	}
 	return chatroom.ID, nil
@@ -100,25 +135,36 @@ func (chs *ChatServiceImpl) GetChatroomInfo(ctx context.Context, param entity.Ge
 	secondUser := new(entity.User)
 	query := new(entity.ChatroomDetailQuery)
 
-	if err := chs.ur.FindByID(ctx, param.UserID, user); err != nil {
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		if err := chs.ur.FindByID(ctx, param.UserID, user); err != nil {
+			return err
+		}
+		if user.Status != constants.VerifiedStatus {
+			return customerrors.NewError(
+				"user is not verified",
+				errors.New("user is not verified"),
+				customerrors.Unauthenticate,
+			)
+		}
+		return nil
+	})
+	g.Go(func() error {
+		if err := chs.chr.FindByID(ctx, param.ChatroomID, chatroom); err != nil {
+			return err
+		}
+		if chatroom.MentorID != param.UserID && chatroom.StudentID != param.UserID {
+			return customerrors.NewError(
+				"unauthorized",
+				errors.New("chatroom does not belong to the user"),
+				customerrors.Unauthenticate,
+			)
+		}
+		return nil
+	})
+	if err := g.Wait(); err != nil {
 		return nil, err
-	}
-	if user.Status != constants.VerifiedStatus {
-		return nil, customerrors.NewError(
-			"user is not verified",
-			errors.New("user is not verified"),
-			customerrors.Unauthenticate,
-		)
-	}
-	if err := chs.chr.FindByID(ctx, param.ChatroomID, chatroom); err != nil {
-		return nil, err
-	}
-	if chatroom.MentorID != param.UserID && chatroom.StudentID != param.UserID {
-		return nil, customerrors.NewError(
-			"unauthorized",
-			errors.New("chatroom does not belong to the user"),
-			customerrors.Unauthenticate,
-		)
 	}
 	secondUserID := chatroom.MentorID
 	if param.Role == constants.MentorRole {
@@ -141,17 +187,26 @@ func (chs *ChatServiceImpl) GetUserChatrooms(ctx context.Context, param entity.G
 	chatrooms := new([]entity.ChatroomDetailQuery)
 	user := new(entity.User)
 	totalRow := new(int64)
-	if err := chs.ur.FindByID(ctx, param.UserID, user); err != nil {
-		return nil, nil, err
-	}
-	if user.Status != constants.VerifiedStatus {
-		return nil, nil, customerrors.NewError(
-			"user is not verified",
-			errors.New("user is not verified"),
-			customerrors.Unauthenticate,
-		)
-	}
-	if err := chs.chr.GetUserChatrooms(ctx, param.UserID, param.Role, param.Limit, param.Page, totalRow, chatrooms); err != nil {
+
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		if err := chs.ur.FindByID(ctx, param.UserID, user); err != nil {
+			return err
+		}
+		if user.Status != constants.VerifiedStatus {
+			return customerrors.NewError(
+				"user is not verified",
+				errors.New("user is not verified"),
+				customerrors.Unauthenticate,
+			)
+		}
+		return nil
+	})
+	g.Go(func() error {
+		return chs.chr.GetUserChatrooms(ctx, param.UserID, param.Role, param.Limit, param.Page, totalRow, chatrooms)
+	})
+	if err := g.Wait(); err != nil {
 		return nil, nil, err
 	}
 	return chatrooms, totalRow, nil
@@ -163,7 +218,9 @@ func (chs *ChatServiceImpl) SendMessage(ctx context.Context, param entity.SendMe
 	chatroom := new(entity.Chatroom)
 	messageDetail := new(entity.MessageDetailQuery)
 
-	if err := chs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
 		if err := chs.ur.FindByID(ctx, param.UserID, user); err != nil {
 			return err
 		}
@@ -174,6 +231,9 @@ func (chs *ChatServiceImpl) SendMessage(ctx context.Context, param entity.SendMe
 				customerrors.Unauthenticate,
 			)
 		}
+		return nil
+	})
+	g.Go(func() error {
 		if err := chs.chr.FindByID(ctx, param.ChatroomID, chatroom); err != nil {
 			return err
 		}
@@ -184,6 +244,14 @@ func (chs *ChatServiceImpl) SendMessage(ctx context.Context, param entity.SendMe
 				customerrors.Unauthenticate,
 			)
 		}
+		return nil
+	})
+
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
+
+	if err := chs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := chs.chr.SendMessage(ctx, param.UserID, param.ChatroomID, param.Content, message); err != nil {
 			return err
 		}
@@ -209,32 +277,43 @@ func (chs *ChatServiceImpl) GetMessages(ctx context.Context, param entity.GetMes
 	messages := new([]entity.MessageDetailQuery)
 	chatroom := new(entity.Chatroom)
 	totalRow := new(int64)
-	if err := chs.ur.FindByID(ctx, param.UserID, user); err != nil {
-		return nil, nil, err
-	}
-	if user.Status != constants.VerifiedStatus {
-		return nil, nil, customerrors.NewError(
-			"user is not verified",
-			errors.New("user is not verified"),
-			customerrors.Unauthenticate,
-		)
-	}
-	if err := chs.chr.FindByID(ctx, param.ChatroomID, chatroom); err != nil {
-		return nil, nil, customerrors.NewError(
-			"unauthorized",
-			errors.New("chatroom does not belong to the user"),
-			customerrors.Unauthenticate,
-		)
-	}
-	if chatroom.StudentID != param.UserID && chatroom.MentorID != param.UserID {
-		return nil, nil, customerrors.NewError(
-			"unauthorized",
-			errors.New("chatroom does not belong to the user"),
-			customerrors.Unauthenticate,
-		)
-	}
 
-	if err := chs.chr.GetMessages(ctx, param.ChatroomID, param.Limit, param.LastID, totalRow, messages); err != nil {
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		if err := chs.ur.FindByID(ctx, param.UserID, user); err != nil {
+			return err
+		}
+		if user.Status != constants.VerifiedStatus {
+			return customerrors.NewError(
+				"user is not verified",
+				errors.New("user is not verified"),
+				customerrors.Unauthenticate,
+			)
+		}
+		return nil
+	})
+	g.Go(func() error {
+		if err := chs.chr.FindByID(ctx, param.ChatroomID, chatroom); err != nil {
+			return customerrors.NewError(
+				"unauthorized",
+				errors.New("chatroom does not belong to the user"),
+				customerrors.Unauthenticate,
+			)
+		}
+		if chatroom.StudentID != param.UserID && chatroom.MentorID != param.UserID {
+			return customerrors.NewError(
+				"unauthorized",
+				errors.New("chatroom does not belong to the user"),
+				customerrors.Unauthenticate,
+			)
+		}
+		return nil
+	})
+	g.Go(func() error {
+		return chs.chr.GetMessages(ctx, param.ChatroomID, param.Limit, param.LastID, totalRow, messages)
+	})
+	if err := g.Wait(); err != nil {
 		return nil, nil, err
 	}
 	return messages, totalRow, nil

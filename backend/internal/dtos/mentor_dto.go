@@ -76,15 +76,16 @@ type (
 		NewPassword string `json:"password" binding:"required,containsany=!@#?,min=8"`
 	}
 	MentorProfileRes struct {
-		ID                string `json:"id"`
-		Name              string `json:"name"`
-		PublicID          string `json:"public_id"`
-		Bio               string `json:"bio"`
-		ProfileImage      string `json:"profile_image"`
-		YearsOfExperience int    `json:"years_of_experience"`
-		Degree            string `json:"degree"`
-		Major             string `json:"major"`
-		Campus            string `json:"campus"`
+		ID                string  `json:"id"`
+		Name              string  `json:"name"`
+		PublicID          string  `json:"public_id"`
+		Bio               string  `json:"bio"`
+		ProfileImage      string  `json:"profile_image"`
+		YearsOfExperience int     `json:"years_of_experience"`
+		Degree            string  `json:"degree"`
+		Major             string  `json:"major"`
+		Campus            string  `json:"campus"`
+		AverageRating     float64 `json:"rating"`
 	}
 	GetDOWAvailabilityRes struct {
 		DayOfWeeks []int `json:"day_of_weeks"`

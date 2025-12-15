@@ -6,4 +6,5 @@ CREATE TABLE course_categories (
     deleted_at TIMESTAMPTZ
 );
 
-CREATE INDEX idx_categories_gin ON course_categories USING GIN (name gin_trgm_ops);
+CREATE INDEX idx_categories_gin ON course_categories USING GIN (name gin_trgm_ops) WHERE deleted_at IS NULL;
+CREATE INDEX idx_course_categories_active ON course_categories (id) WHERE deleted_at IS NULL;

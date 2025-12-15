@@ -87,6 +87,8 @@ export class CostManagementView {
 		}
 		return async ({ result }: EnhancementReturn) => {
 			this.isLoading = false;
+			const deletedIndex = this.costs.findIndex((m) => (m.id = this.costToDelete!));
+			this.deleteCostDialogOpen[deletedIndex] = false;
 			if (result.type === 'success') {
 				if (this.costToDelete) {
 					this.costs = this.costs.filter((c) => c.id !== this.costToDelete);
@@ -109,6 +111,8 @@ export class CostManagementView {
 		}
 		return async ({ result }: EnhancementReturn) => {
 			this.isLoading = false;
+			const updatedIndex = this.costs.findIndex((m) => (m.id = this.costToUpdate!));
+			this.updateCostDialogOpen[updatedIndex] = false;
 			if (result.type === 'success') {
 				if (this.costToUpdate) {
 					this.costs = this.costs.map((m) => {
@@ -179,6 +183,8 @@ export class CostManagementView {
 		}
 		return async ({ result }: EnhancementReturn) => {
 			this.isLoading = false;
+			const deletedIndex = this.discounts.findIndex((m) => (m.id = this.discountToDelete!));
+			this.deleteDiscountDialogOpen[deletedIndex] = false;
 			if (result.type === 'success') {
 				if (this.discountToDelete) {
 					this.discounts = this.discounts.filter((c) => c.id !== this.discountToDelete);
@@ -201,6 +207,8 @@ export class CostManagementView {
 		}
 		return async ({ result }: EnhancementReturn) => {
 			this.isLoading = false;
+			const updatedIndex = this.discounts.findIndex((m) => (m.id = this.discountToUpdate!));
+			this.updateDiscountDialogOpen[updatedIndex] = false;
 			if (result.type === 'success') {
 				if (this.discountToUpdate) {
 					this.discounts = this.discounts.map((m) => {

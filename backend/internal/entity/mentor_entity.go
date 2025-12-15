@@ -61,6 +61,7 @@ type (
 		Degree            string
 		Major             string
 		Campus            string
+		AverageRating     float64
 	}
 	AddNewMentorParam struct {
 		AdminID           string

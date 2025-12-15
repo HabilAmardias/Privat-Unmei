@@ -36,7 +36,7 @@ func (ccr *CourseCategoryRepositoryImpl) GetLeastCategoryCount(ctx context.Conte
 		) and cca.deleted_at is null
 		group by cca.course_id
 	)
-	select min(c.category_count) from counts c;
+	select coalesce(min(c.category_count), 0) from counts c;
 	`
 	if err := driver.QueryRow(query, id).Scan(count); err != nil {
 		return customerrors.NewError(

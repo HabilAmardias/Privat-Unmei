@@ -9,4 +9,4 @@ CREATE TABLE course_ratings (
     deleted_at TIMESTAMPTZ
 );
 
-CREATE INDEX idx_course_ratings ON course_ratings (student_id,course_id);
+CREATE INDEX idx_course_ratings ON course_ratings (student_id,course_id) WHERE deleted_at IS NULL;

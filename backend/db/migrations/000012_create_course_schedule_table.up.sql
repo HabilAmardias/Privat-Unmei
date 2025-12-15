@@ -1,5 +1,3 @@
-
--- scheduled session
 CREATE TABLE course_schedule (
     id BIGSERIAL PRIMARY KEY,
     course_request_id UUID REFERENCES course_requests(id),

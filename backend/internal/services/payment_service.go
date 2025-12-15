@@ -7,6 +7,8 @@ import (
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/repositories"
+
+	"golang.org/x/sync/errgroup"
 )
 
 type PaymentServiceImpl struct {
@@ -31,13 +33,18 @@ func (ps *PaymentServiceImpl) GetMentorPaymentMethod(ctx context.Context, param 
 	user := new(entity.User)
 	mentor := new(entity.Mentor)
 	methods := new([]entity.GetMentorPaymentMethodQuery)
-	if err := ps.ur.FindByID(ctx, param.UserID, user); err != nil {
-		return nil, err
-	}
-	if err := ps.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
-		return nil, err
-	}
-	if err := ps.pr.GetMentorPaymentMethod(ctx, param.MentorID, methods); err != nil {
+
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		return ps.ur.FindByID(ctx, param.UserID, user)
+	})
+	g.Go(func() error {
+		return ps.mr.FindByID(ctx, param.MentorID, mentor, false)
+	})
+	g.Go(func() error {
+		return ps.pr.GetMentorPaymentMethod(ctx, param.MentorID, methods)
+	})
+	if err := g.Wait(); err != nil {
 		return nil, err
 	}
 	if len(*methods) == 0 {
@@ -63,31 +70,42 @@ func (ps *PaymentServiceImpl) UpdatePaymentMethod(ctx context.Context, param ent
 	if param.MethodNewName == nil {
 		return nil
 	}
+	g, ctx := errgroup.WithContext(ctx)
 	admin := new(entity.Admin)
 	count := new(int64)
 	user := new(entity.User)
-	if err := ps.ur.FindByID(ctx, param.AdminID, user); err != nil {
+
+	g.Go(func() error {
+		if err := ps.ur.FindByID(ctx, param.AdminID, user); err != nil {
+			return err
+		}
+		if user.Status == constants.UnverifiedStatus {
+			return customerrors.NewError(
+				"unauthenticate",
+				errors.New("admin is not verified"),
+				customerrors.Unauthenticate,
+			)
+		}
+		return nil
+	})
+	g.Go(func() error {
+		return ps.ar.FindByID(ctx, param.AdminID, admin)
+	})
+	g.Go(func() error {
+		if err := ps.pr.FindPaymentMethodByName(ctx, *param.MethodNewName, count); err != nil {
+			return err
+		}
+		if *count > 0 {
+			return customerrors.NewError(
+				"payment method with same name already exist",
+				errors.New("payment method with same name already exist"),
+				customerrors.InvalidAction,
+			)
+		}
+		return nil
+	})
+	if err := g.Wait(); err != nil {
 		return err
-	}
-	if user.Status == constants.UnverifiedStatus {
-		return customerrors.NewError(
-			"unauthenticate",
-			errors.New("admin is not verified"),
-			customerrors.Unauthenticate,
-		)
-	}
-	if err := ps.ar.FindByID(ctx, param.AdminID, admin); err != nil {
-		return err
-	}
-	if err := ps.pr.FindPaymentMethodByName(ctx, *param.MethodNewName, count); err != nil {
-		return err
-	}
-	if *count > 0 {
-		return customerrors.NewError(
-			"payment method with same name already exist",
-			errors.New("payment method with same name already exist"),
-			customerrors.InvalidAction,
-		)
 	}
 	if err := ps.pr.UpdatePaymentMethod(ctx, param.MethodNewName, param.MethodID); err != nil {
 		return err
@@ -100,7 +118,9 @@ func (ps *PaymentServiceImpl) DeletePaymentMethod(ctx context.Context, param ent
 	method := new(entity.PaymentMethod)
 	user := new(entity.User)
 	count := new(int)
-	return ps.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
 		if err := ps.ur.FindByID(ctx, param.AdminID, user); err != nil {
 			return err
 		}
@@ -111,24 +131,31 @@ func (ps *PaymentServiceImpl) DeletePaymentMethod(ctx context.Context, param ent
 				customerrors.Unauthenticate,
 			)
 		}
-		if err := ps.ar.FindByID(ctx, param.AdminID, admin); err != nil {
-			return err
-		}
-		if err := ps.pr.FindPaymentMethodByID(ctx, param.MethodID, method); err != nil {
-			return err
-		}
+		return nil
+	})
+	g.Go(func() error {
+		return ps.ar.FindByID(ctx, param.AdminID, admin)
+	})
+	g.Go(func() error {
+		return ps.pr.FindPaymentMethodByID(ctx, param.MethodID, method)
+	})
+	g.Go(func() error {
 		if err := ps.pr.GetLeastPaymentMethodCount(ctx, param.MethodID, count); err != nil {
 			return err
 		}
-		if count != nil {
-			if *count == 1 {
-				return customerrors.NewError(
-					"there is a mentor with only one method",
-					errors.New("there is a mentor with only one method"),
-					customerrors.InvalidAction,
-				)
-			}
+		if *count == 1 {
+			return customerrors.NewError(
+				"there is a mentor with only one method",
+				errors.New("there is a mentor with only one method"),
+				customerrors.InvalidAction,
+			)
 		}
+		return nil
+	})
+	if err := g.Wait(); err != nil {
+		return err
+	}
+	return ps.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := ps.pr.UnassignPaymentMethodFromAllMentor(ctx, param.MethodID); err != nil {
 			return err
 		}
@@ -140,32 +167,44 @@ func (ps *PaymentServiceImpl) DeletePaymentMethod(ctx context.Context, param ent
 }
 
 func (ps *PaymentServiceImpl) CreatePaymentMethod(ctx context.Context, param entity.CreatePaymentMethodParam) (*int, error) {
+	g, ctx := errgroup.WithContext(ctx)
+
 	admin := new(entity.Admin)
 	paymentMethod := new(entity.PaymentMethod)
 	count := new(int64)
 	user := new(entity.User)
-	if err := ps.ur.FindByID(ctx, param.AdminID, user); err != nil {
+
+	g.Go(func() error {
+		if err := ps.ur.FindByID(ctx, param.AdminID, user); err != nil {
+			return err
+		}
+		if user.Status == constants.UnverifiedStatus {
+			return customerrors.NewError(
+				"unauthenticate",
+				errors.New("admin is not verified"),
+				customerrors.Unauthenticate,
+			)
+		}
+		return nil
+	})
+	g.Go(func() error {
+		return ps.ar.FindByID(ctx, param.AdminID, admin)
+	})
+	g.Go(func() error {
+		if err := ps.pr.FindPaymentMethodByName(ctx, param.MethodName, count); err != nil {
+			return err
+		}
+		if *count > 0 {
+			return customerrors.NewError(
+				"payment method already exist",
+				errors.New("payment method already exist"),
+				customerrors.ItemAlreadyExist,
+			)
+		}
+		return nil
+	})
+	if err := g.Wait(); err != nil {
 		return nil, err
-	}
-	if user.Status == constants.UnverifiedStatus {
-		return nil, customerrors.NewError(
-			"unauthenticate",
-			errors.New("admin is not verified"),
-			customerrors.Unauthenticate,
-		)
-	}
-	if err := ps.ar.FindByID(ctx, param.AdminID, admin); err != nil {
-		return nil, err
-	}
-	if err := ps.pr.FindPaymentMethodByName(ctx, param.MethodName, count); err != nil {
-		return nil, err
-	}
-	if *count > 0 {
-		return nil, customerrors.NewError(
-			"payment method already exist",
-			errors.New("payment method already exist"),
-			customerrors.ItemAlreadyExist,
-		)
 	}
 	if err := ps.pr.CreatePaymentMethod(ctx, param.MethodName, paymentMethod); err != nil {
 		return nil, err

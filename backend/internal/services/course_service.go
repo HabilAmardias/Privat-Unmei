@@ -3,15 +3,19 @@ package services
 import (
 	"context"
 	"errors"
+	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/repositories"
+
+	"golang.org/x/sync/errgroup"
 )
 
 type CourseServiceImpl struct {
 	cr  *repositories.CourseRepositoryImpl
 	ccr *repositories.CourseCategoryRepositoryImpl
 	tr  *repositories.TopicRepositoryImpl
+	ur  *repositories.UserRepositoryImpl
 	mr  *repositories.MentorRepositoryImpl
 	tmr *repositories.TransactionManagerRepositories
 	cor *repositories.CourseRequestRepositoryImpl
@@ -21,11 +25,12 @@ func CreateCourseService(
 	cr *repositories.CourseRepositoryImpl,
 	ccr *repositories.CourseCategoryRepositoryImpl,
 	tr *repositories.TopicRepositoryImpl,
+	ur *repositories.UserRepositoryImpl,
 	mr *repositories.MentorRepositoryImpl,
 	tmr *repositories.TransactionManagerRepositories,
 	cor *repositories.CourseRequestRepositoryImpl,
 ) *CourseServiceImpl {
-	return &CourseServiceImpl{cr, ccr, tr, mr, tmr, cor}
+	return &CourseServiceImpl{cr, ccr, tr, ur, mr, tmr, cor}
 }
 
 func (cs *CourseServiceImpl) UpdateCourse(ctx context.Context, param entity.UpdateCourseParam) error {
@@ -34,20 +39,26 @@ func (cs *CourseServiceImpl) UpdateCourse(ctx context.Context, param entity.Upda
 	count := new(int)
 	categories := new([]entity.CourseCategory)
 	mentor := new(entity.Mentor)
-	return cs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		if err := cs.cr.FindByID(ctx, param.CourseID, course, true); err != nil {
+	user := new(entity.User)
+
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		if err := cs.ur.FindByID(ctx, param.MentorID, user); err != nil {
 			return err
 		}
-		if err := cs.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
-			return err
-		}
-		if course.MentorID != param.MentorID {
+		if user.Status != constants.VerifiedStatus {
 			return customerrors.NewError(
-				"unauthorized access",
-				errors.New("different mentor"),
-				customerrors.InvalidAction,
+				"please verify your account",
+				errors.New("unverified account"),
+				customerrors.Unauthenticate,
 			)
 		}
+		return nil
+	})
+	g.Go(func() error {
+		return cs.mr.FindByID(ctx, param.MentorID, mentor, false)
+	})
+	g.Go(func() error {
 		if err := cs.cor.FindOngoingByCourseID(ctx, param.CourseID, count); err != nil {
 			return err
 		}
@@ -58,6 +69,23 @@ func (cs *CourseServiceImpl) UpdateCourse(ctx context.Context, param entity.Upda
 				customerrors.InvalidAction,
 			)
 		}
+		return nil
+	})
+	if err := g.Wait(); err != nil {
+		return err
+	}
+	return cs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := cs.cr.FindByID(ctx, param.CourseID, course, true); err != nil {
+			return err
+		}
+		if course.MentorID != param.MentorID {
+			return customerrors.NewError(
+				"unauthorized access",
+				errors.New("different mentor"),
+				customerrors.InvalidAction,
+			)
+		}
+
 		if len(param.CourseTopic) > 0 {
 			if err := cs.tr.DeleteTopics(ctx, param.CourseID); err != nil {
 				return err
@@ -168,10 +196,29 @@ func (cs *CourseServiceImpl) MentorListCourse(ctx context.Context, param entity.
 	query := new([]entity.MentorListCourseQuery)
 	totalRow := new(int64)
 	mentor := new(entity.Mentor)
-	if err := cs.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
-		return nil, nil, err
-	}
-	if err := cs.cr.MentorListCourse(ctx, query, totalRow, param.Limit, param.Page, param.MentorID, param.Search, param.CourseCategory); err != nil {
+	user := new(entity.User)
+
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		if err := cs.ur.FindByID(ctx, param.MentorID, user); err != nil {
+			return err
+		}
+		if user.Status != constants.VerifiedStatus {
+			return customerrors.NewError(
+				"please verify your account",
+				errors.New("unverified account"),
+				customerrors.Unauthenticate,
+			)
+		}
+		return nil
+	})
+	g.Go(func() error {
+		return cs.mr.FindByID(ctx, param.MentorID, mentor, false)
+	})
+	g.Go(func() error {
+		return cs.cr.MentorListCourse(ctx, query, totalRow, param.Limit, param.Page, param.MentorID, param.Search, param.CourseCategory)
+	})
+	if err := g.Wait(); err != nil {
 		return nil, nil, err
 	}
 	return query, totalRow, nil
@@ -180,11 +227,27 @@ func (cs *CourseServiceImpl) MentorListCourse(ctx context.Context, param entity.
 func (cs *CourseServiceImpl) DeleteCourse(ctx context.Context, param entity.DeleteCourseParam) error {
 	course := new(entity.Course)
 	mentor := new(entity.Mentor)
-	return cs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		if err := cs.cr.FindByID(ctx, param.CourseID, course, false); err != nil {
+	user := new(entity.User)
+
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		if err := cs.ur.FindByID(ctx, param.MentorID, user); err != nil {
 			return err
 		}
-		if err := cs.mr.FindByID(ctx, param.MentorID, mentor, false); err != nil {
+		if user.Status != constants.VerifiedStatus {
+			return customerrors.NewError(
+				"please verify your account",
+				errors.New("unverified account"),
+				customerrors.Unauthenticate,
+			)
+		}
+		return nil
+	})
+	g.Go(func() error {
+		return cs.mr.FindByID(ctx, param.MentorID, mentor, false)
+	})
+	g.Go(func() error {
+		if err := cs.cr.FindByID(ctx, param.CourseID, course, false); err != nil {
 			return err
 		}
 		if param.MentorID != course.MentorID {
@@ -201,6 +264,13 @@ func (cs *CourseServiceImpl) DeleteCourse(ctx context.Context, param entity.Dele
 				customerrors.InvalidAction,
 			)
 		}
+		return nil
+	})
+	if err := g.Wait(); err != nil {
+		return err
+	}
+	return cs.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+
 		if err := cs.ccr.UnassignCategories(ctx, course.ID); err != nil {
 			return err
 		}

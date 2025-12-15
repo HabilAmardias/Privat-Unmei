@@ -93,7 +93,7 @@ const (
 	DeleteAllPermission
 )
 
-func PaymentInfoEmailBody(courseName string, mentorName string, mentorEmail string, method string, accountNumber string, totalPrice float64, eat string) string {
+func PaymentInfoEmailBody(courseName string, mentorName string, mentorPublicID string, method string, accountNumber string, totalPrice float64, eat string) string {
 	loginURL := fmt.Sprintf("%s/login", os.Getenv("CLIENT_DOMAIN"))
 	return fmt.Sprintf(`
     <!DOCTYPE html>
@@ -151,7 +151,7 @@ func PaymentInfoEmailBody(courseName string, mentorName string, mentorEmail stri
                                         <td style="padding: 10px 15px; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 16px; color: #2c3e50;">%s</td>
                                     </tr>
                                     <tr>
-                                        <td style="padding: 10px 0; font-weight: bold; color: #2c3e50;">Mentor Email:</td>
+                                        <td style="padding: 10px 0; font-weight: bold; color: #2c3e50;">Mentor Public ID:</td>
                                         <td style="padding: 10px 15px; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 16px; color: #2c3e50;">%s</td>
                                     </tr>
                                     <tr>
@@ -193,10 +193,10 @@ func PaymentInfoEmailBody(courseName string, mentorName string, mentorEmail stri
     </table>
 </body>
 </html>
-    `, courseName, mentorName, mentorEmail, method, accountNumber, totalPrice, eat, loginURL, loginURL, loginURL)
+    `, courseName, mentorName, mentorPublicID, method, accountNumber, totalPrice, eat, loginURL, loginURL, loginURL)
 }
 
-func RequestDetailEmailBody(courseName string, studentName string, studentEmail string, participant int, totalPrice float64) string {
+func RequestDetailEmailBody(courseName string, studentName string, studentPublicID string, participant int, totalPrice float64) string {
 	loginURL := fmt.Sprintf("%s/manager/login", os.Getenv("CLIENT_DOMAIN"))
 	return fmt.Sprintf(`
     <!DOCTYPE html>
@@ -254,7 +254,7 @@ func RequestDetailEmailBody(courseName string, studentName string, studentEmail 
                                         <td style="padding: 10px 15px; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 16px; color: #2c3e50;">%s</td>
                                     </tr>
                                     <tr>
-                                        <td style="padding: 10px 0; font-weight: bold; color: #2c3e50;">Student Email:</td>
+                                        <td style="padding: 10px 0; font-weight: bold; color: #2c3e50;">Student Public ID:</td>
                                         <td style="padding: 10px 15px; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 16px; color: #2c3e50;">%s</td>
                                     </tr>
                                     <tr>
@@ -292,7 +292,7 @@ func RequestDetailEmailBody(courseName string, studentName string, studentEmail 
     </table>
 </body>
 </html>
-    `, courseName, studentName, studentEmail, participant, totalPrice, loginURL, loginURL, loginURL)
+    `, courseName, studentName, studentPublicID, participant, totalPrice, loginURL, loginURL, loginURL)
 }
 
 func SendMentorAccEmailBody(email string, password string) string {

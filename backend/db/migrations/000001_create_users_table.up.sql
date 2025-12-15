@@ -4,7 +4,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE TABLE users (
     id UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
-    email TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
     public_id VARCHAR(12) NOT NULL,
     password_hash TEXT NOT NULL,
     bio TEXT NOT NULL DEFAULT 'Add bio',
@@ -50,6 +50,7 @@ CREATE TRIGGER trigger_set_user_public_id
     FOR EACH ROW
     EXECUTE FUNCTION set_user_public_id();
 
-CREATE INDEX idx_userpublicid_gin ON users USING GIN (public_id gin_trgm_ops);
-CREATE INDEX idx_username_gin ON users USING GIN (name gin_trgm_ops);
-CREATE INDEX idx_useremail_gin ON users USING GIN (email gin_trgm_ops);
+CREATE INDEX idx_userpublicid_gin ON users USING GIN (public_id gin_trgm_ops) WHERE deleted_at IS NULL;
+CREATE INDEX idx_username_gin ON users USING GIN (name gin_trgm_ops) WHERE deleted_at IS NULL;
+CREATE INDEX idx_users_active ON users (id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_users_email_active ON users (email) WHERE deleted_at IS NULL;
