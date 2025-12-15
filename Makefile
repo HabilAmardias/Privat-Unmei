@@ -1,7 +1,7 @@
 build:
 	docker compose up --build -d
 start:
-	docker compose up database redis backend cron proxy postgres-exporter loki promtail prometheus grafana -d
+	docker compose up database redis backend frontend cron proxy postgres-exporter loki promtail prometheus grafana -d
 down:
 	docker compose down
 datadown:
