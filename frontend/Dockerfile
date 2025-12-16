@@ -24,8 +24,8 @@ COPY --from=builder /app/build build/
 COPY --from=builder /app/node_modules node_modules/
 COPY --from=builder /app/package.json .
 
-EXPOSE 4000
+EXPOSE 4173
 ENV NODE_ENV=production
-ENV PORT=4000
+ENV PORT=4173
 
 CMD ["node", "build"]
