@@ -4,7 +4,7 @@ import type { MentorList } from './model';
 
 class MentorsController {
 	async getMentors(fetch: Fetch, req?: Request) {
-		let url = 'http://localhost:8080/api/v1/mentors?';
+		let url = '/api/v1/mentors?';
 		const queries: string[] = [];
 		if (req) {
 			const formData = await req.formData();
