@@ -1,22 +1,10 @@
-FROM golang:1.24 AS build-stage
-
-WORKDIR /app
-
-COPY ./backend/go.mod ./backend/go.sum ./
-ENV GOPROXY=https://goproxy.io,direct
-RUN go mod download
-
-COPY ./backend .
-
-RUN CGO_ENABLED=0 GOOS=linux go build -o privat-unmei-cron cmd/cron/main.go
-
-FROM alpine:latest AS release-stage
+FROM alpine:latest
 
 WORKDIR /
 
-COPY --from=build-stage /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=golang:1.24 /usr/share/zoneinfo /usr/share/zoneinfo
 
-COPY --from=build-stage /app/privat-unmei-cron privat-unmei-cron
-COPY --from=build-stage /app/.env .env
+COPY privat-unmei-cron /privat-unmei-cron
+COPY .env /.env
 
 ENTRYPOINT [ "/bin/sh", "-c", "/privat-unmei-cron"]

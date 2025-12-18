@@ -25,7 +25,8 @@ services:
       - app-network
   migrate:
     build:
-      dockerfile: ./backend/Dockerfile.migrate
+      context: ./backend
+      dockerfile: Dockerfile.migrate
     env_file:
       - backend/.env
     restart: "no"
@@ -36,7 +37,8 @@ services:
       - app-network
   backend:
     build:
-      dockerfile: ./backend/Dockerfile.web
+      context: ./backend
+      dockerfile: Dockerfile.web
     depends_on:
       database:
         condition: service_healthy
@@ -49,7 +51,8 @@ services:
       - app-network
   cron:
     build:
-      dockerfile: ./backend/Dockerfile.cron
+      context: ./backend
+      dockerfile: Dockerfile.cron
     env_file:
       - backend/.env
     restart: unless-stopped
