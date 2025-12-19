@@ -4,7 +4,7 @@ import type { CourseList, CourseCategory } from './model';
 
 class CoursesController {
 	async getCourses(fetch: Fetch, req?: Request) {
-		let url = '/api/v1/courses?';
+		let url = 'http://localhost:8080/api/v1/courses?';
 		if (req) {
 			const args: string[] = [];
 			const formData = await req.formData();
@@ -36,7 +36,7 @@ class CoursesController {
 		return { success, resBody, status, message };
 	}
 	async getCourseCategories(fetch: Fetch, req?: Request) {
-		let url = '/api/v1/course-categories?';
+		let url = 'http://localhost:8080/api/v1/course-categories?';
 		if (req) {
 			const formData = await req.formData();
 			const limit = formData.get('limit');

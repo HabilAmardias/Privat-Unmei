@@ -5,7 +5,7 @@ import { FetchData } from '$lib/utils';
 
 class AuthController {
 	async googleLogin(fetch: Fetch) {
-		const url = '/api/v1/auth/google';
+		const url = 'http://localhost:8080/api/v1/auth/google';
 		const { success, status, message, res } = await FetchData(fetch, url, 'GET');
 		const cookiesData = this.#getCookies(res!);
 		return { success, status, message, res, cookiesData };
@@ -42,7 +42,7 @@ class AuthController {
 		if (!name) {
 			return { success: false, message: 'please insert a name', status: 400 };
 		}
-		const url = '/api/v1/register';
+		const url = 'http://localhost:8080/api/v1/register';
 		const body = JSON.stringify({
 			name: name,
 			email: email,
@@ -93,7 +93,7 @@ class AuthController {
 				status: 400
 			};
 		}
-		const url = '/api/v1/login';
+		const url = 'http://localhost:8080/api/v1/login';
 		const body = JSON.stringify({
 			email: email,
 			password: password
