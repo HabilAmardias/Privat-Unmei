@@ -12,7 +12,7 @@ COPY . .
 
 ENV NODE_OPTIONS="--max-old-space-size=1536"
 
-RUN pnpm build --no-parallel
+RUN pnpm build
 
 RUN CI=true pnpm prune --prod
 
