@@ -9,12 +9,12 @@ class MentorManagerController {
 		if (!mentorID) {
 			return { success: false, message: 'no mentor selected', status: 400 };
 		}
-		const url = `http://backend:8080/api/v1/mentors/${mentorID}`;
+		const url = `http://habilog.xyz/api/v1/mentors/${mentorID}`;
 		const { success, message, status } = await FetchData(fetch, url, 'DELETE');
 		return { success, message, status };
 	}
 	async getMentors(fetch: Fetch, req?: Request) {
-		let url = 'http://backend:8080/api/v1/mentors?';
+		let url = 'http://habilog.xyz/api/v1/mentors?';
 		const queries: string[] = [];
 		if (req) {
 			const formData = await req.formData();
@@ -40,7 +40,7 @@ class MentorManagerController {
 		return { success, message, status, resBody };
 	}
 	async getProfile(fetch: Fetch) {
-		const url = 'http://backend:8080/api/v1/admins/me';
+		const url = 'http://habilog.xyz/api/v1/admins/me';
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
