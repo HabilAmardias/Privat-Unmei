@@ -4,7 +4,7 @@ import type { Chatroom } from './model';
 
 class ChatController {
 	getChatrooms = async (fetch: Fetch, req?: Request) => {
-		let url = 'http://habilog.xyz/api/v1/chatrooms/me?';
+		let url = '/api/v1/chatrooms/me?';
 		if (req) {
 			const formData = await req.formData();
 			const page = formData.get('page');
