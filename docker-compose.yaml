@@ -66,10 +66,7 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - cron
-    networks:
-      - app-network
-    ports:
-      - 4173:4173
+    network_mode: host
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter
     container_name: postgres-exporter
