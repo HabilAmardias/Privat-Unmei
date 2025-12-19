@@ -8,7 +8,7 @@ class CookieController {
 		message: string;
 		status: number;
 	}> {
-		const url = '/api/v1/refresh';
+		const url = 'http://habilog.xyz/api/v1/refresh';
 		const { success, res, status, message } = await FetchData(fetch, url);
 		if (!success) {
 			return {

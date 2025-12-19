@@ -3,7 +3,7 @@ import { FetchData } from '$lib/utils';
 
 class VerifyController {
 	async verify(fetch: Fetch) {
-		const url = '/api/v1/verify';
+		const url = 'http://habilog.xyz/api/v1/verify';
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
