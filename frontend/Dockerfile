@@ -10,7 +10,9 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-RUN pnpm build
+ENV NODE_OPTIONS="--max-old-space-size=1536"
+
+RUN pnpm build --no-parallel
 
 RUN CI=true pnpm prune --prod
 
