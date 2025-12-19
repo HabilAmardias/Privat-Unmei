@@ -4,7 +4,7 @@ import type { ChatroomInfo, MessageInfo, MentorProfile } from './model';
 
 class ChatroomController {
 	async sendMessage(fetch: Fetch, id: string, req: Request) {
-		const url = `http://localhost/api/v1/chatrooms/${id}/messages`;
+		const url = `http://localhost:8080/api/v1/chatrooms/${id}/messages`;
 		const formData = await req.formData();
 		const content = formData.get('message');
 		if (!content) {
@@ -20,7 +20,7 @@ class ChatroomController {
 		return { success, message, status };
 	}
 	async getInfo(fetch: Fetch, id: string) {
-		const url = `http://localhost/api/v1/chatrooms/${id}`;
+		const url = `http://localhost:8080/api/v1/chatrooms/${id}`;
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
@@ -31,7 +31,7 @@ class ChatroomController {
 		return { success, message, status, resBody };
 	}
 	async getMessages(fetch: Fetch, id: string, req?: Request) {
-		let url = `http://localhost/api/v1/chatrooms/${id}/messages?`;
+		let url = `http://localhost:8080/api/v1/chatrooms/${id}/messages?`;
 		if (req) {
 			const formData = await req.formData();
 			const lastID = formData.get('last_id');
@@ -47,7 +47,7 @@ class ChatroomController {
 		return { success, message, status, resBody };
 	}
 	async getProfile(fetch: Fetch) {
-		const url = 'http://localhost/api/v1/mentors/me';
+		const url = 'http://localhost:8080/api/v1/mentors/me';
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };

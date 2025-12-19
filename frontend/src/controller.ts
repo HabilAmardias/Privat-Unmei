@@ -8,7 +8,7 @@ class CookieController {
 		message: string;
 		status: number;
 	}> {
-		const url = 'http://localhost/api/v1/refresh';
+		const url = 'http://localhost:8080/api/v1/refresh';
 		const { success, res, status, message } = await FetchData(fetch, url);
 		if (!success) {
 			return {

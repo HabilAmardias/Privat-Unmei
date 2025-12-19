@@ -4,7 +4,7 @@ import type { adminProfile } from './model';
 
 class AdminPageController {
 	async getProfile(fetch: Fetch) {
-		const url = 'http://localhost/api/v1/admins/me';
+		const url = 'http://localhost:8080/api/v1/admins/me';
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
@@ -13,7 +13,7 @@ class AdminPageController {
 		return { success, message, status, resBody };
 	}
 	async changePassword(fetch: Fetch, req: Request) {
-		const url = 'http://localhost/api/v1/admins/me/change-password';
+		const url = 'http://localhost:8080/api/v1/admins/me/change-password';
 		const formData = await req.formData();
 		const password = formData.get('password');
 		const repeatPassword = formData.get('repeat-password');
