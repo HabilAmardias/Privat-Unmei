@@ -4,7 +4,7 @@ import type { AdditionalCost, adminProfile, Discount, newCost, newDiscount } fro
 
 class CostManagementController {
 	getDiscounts = async (fetch: Fetch, req?: Request) => {
-		let url = 'http://localhost:8080/api/v1/discounts?';
+		let url = 'http://localhost/api/v1/discounts?';
 		if (req) {
 			const formData = await req.formData();
 			const page = formData.get('page');
@@ -29,13 +29,13 @@ class CostManagementController {
 		const reqBody = JSON.stringify({
 			amount: amount ? parseFloat(amount as string) : null
 		});
-		const url = `http://localhost:8080/api/v1/discounts/${id}`;
+		const url = `http://localhost/api/v1/discounts/${id}`;
 
 		const { success, message, status } = await FetchData(fetch, url, 'PATCH', reqBody);
 		return { success, message, status };
 	};
 	getCosts = async (fetch: Fetch, req?: Request) => {
-		let url = 'http://localhost:8080/api/v1/additional-costs?';
+		let url = 'http://localhost/api/v1/additional-costs?';
 		if (req) {
 			const formData = await req.formData();
 			const page = formData.get('page');
@@ -56,7 +56,7 @@ class CostManagementController {
 		if (!id) {
 			return { success: false, message: 'no discount selected', status: 400 };
 		}
-		const url = `http://localhost:8080/api/v1/discounts/${id}`;
+		const url = `http://localhost/api/v1/discounts/${id}`;
 		const { success, message, status } = await FetchData(fetch, url, 'DELETE');
 		return { success, message, status };
 	};
@@ -74,7 +74,7 @@ class CostManagementController {
 			number_of_participant: parseInt(number_of_participant as string),
 			amount: parseFloat(amount as string)
 		});
-		const url = 'http://localhost:8080/api/v1/discounts';
+		const url = 'http://localhost/api/v1/discounts';
 		const { success, message, status, res } = await FetchData(fetch, url, 'POST', reqBody);
 		if (!success) {
 			return { success, message, status };
@@ -92,7 +92,7 @@ class CostManagementController {
 		const reqBody = JSON.stringify({
 			amount: amount ? parseFloat(amount as string) : null
 		});
-		const url = `http://localhost:8080/api/v1/additional-costs/${id}`;
+		const url = `http://localhost/api/v1/additional-costs/${id}`;
 
 		const { success, message, status } = await FetchData(fetch, url, 'PATCH', reqBody);
 		return { success, message, status };
@@ -103,7 +103,7 @@ class CostManagementController {
 		if (!id) {
 			return { success: false, message: 'no costs selected', status: 400 };
 		}
-		const url = `http://localhost:8080/api/v1/additional-costs/${id}`;
+		const url = `http://localhost/api/v1/additional-costs/${id}`;
 		const { success, message, status } = await FetchData(fetch, url, 'DELETE');
 		return { success, message, status };
 	};
@@ -121,7 +121,7 @@ class CostManagementController {
 			name,
 			amount: parseFloat(amount as string)
 		});
-		const url = 'http://localhost:8080/api/v1/additional-costs';
+		const url = 'http://localhost/api/v1/additional-costs';
 		const { success, message, status, res } = await FetchData(fetch, url, 'POST', reqBody);
 		if (!success) {
 			return { success, message, status };
@@ -130,7 +130,7 @@ class CostManagementController {
 		return { success, message, status, resBody };
 	};
 	getProfile = async (fetch: Fetch) => {
-		const url = 'http://localhost:8080/api/v1/admins/me';
+		const url = 'http://localhost/api/v1/admins/me';
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };

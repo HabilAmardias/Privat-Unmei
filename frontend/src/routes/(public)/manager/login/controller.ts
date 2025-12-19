@@ -44,7 +44,7 @@ class ManagerAuthController {
 				status: 400
 			};
 		}
-		const url = 'http://localhost:8080/api/v1/mentor/login';
+		const url = 'http://localhost/api/v1/mentor/login';
 		const body = JSON.stringify({
 			email: email,
 			password: password
@@ -106,7 +106,7 @@ class ManagerAuthController {
 				status: 400
 			};
 		}
-		const url = 'http://localhost:8080/api/v1/admin/login';
+		const url = 'http://localhost/api/v1/admin/login';
 		const body = JSON.stringify({
 			email: email,
 			password: password

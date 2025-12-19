@@ -12,7 +12,7 @@ import { FetchData } from '$lib/utils';
 
 class CourseDetailController {
 	async getCourseDetail(fetch: Fetch, id: string) {
-		const url = `http://localhost:8080/api/v1/courses/${id}`;
+		const url = `http://localhost/api/v1/courses/${id}`;
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
@@ -21,7 +21,7 @@ class CourseDetailController {
 		return { success, message, status, resBody };
 	}
 	async getCourseTopics(fetch: Fetch, id: string) {
-		const url = `http://localhost:8080/api/v1/courses/${id}/topics`;
+		const url = `http://localhost/api/v1/courses/${id}/topics`;
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
@@ -30,7 +30,7 @@ class CourseDetailController {
 		return { success, message, status, resBody };
 	}
 	async getCourseDetailCategories(fetch: Fetch, id: string) {
-		const url = `http://localhost:8080/api/v1/courses/${id}/categories`;
+		const url = `http://localhost/api/v1/courses/${id}/categories`;
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
@@ -39,7 +39,7 @@ class CourseDetailController {
 		return { success, message, status, resBody };
 	}
 	async getCourseReviews(fetch: Fetch, id: string, req?: Request) {
-		let url = `http://localhost:8080/api/v1/courses/${id}/reviews?`;
+		let url = `http://localhost/api/v1/courses/${id}/reviews?`;
 		if (req) {
 			const formData = await req.formData();
 			const page = formData.get('page');
@@ -55,7 +55,7 @@ class CourseDetailController {
 		return { success, message, status, resBody };
 	}
 	async createReview(fetch: Fetch, req: Request, id: string) {
-		const url = `http://localhost:8080/api/v1/courses/${id}/reviews`;
+		const url = `http://localhost/api/v1/courses/${id}/reviews`;
 		const formData = await req.formData();
 		const rating = formData.get('rating');
 		const feedback = formData.get('feedback');
@@ -73,7 +73,7 @@ class CourseDetailController {
 		return { success, status, message, resBody };
 	}
 	async getProfile(fetch: Fetch) {
-		const url = 'http://localhost:8080/api/v1/me';
+		const url = 'http://localhost/api/v1/me';
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
@@ -84,7 +84,7 @@ class CourseDetailController {
 	async messageMentor(fetch: Fetch, req: Request) {
 		const formData = await req.formData();
 		const id = formData.get('id');
-		const url = `http://localhost:8080/api/v1/chatrooms/users/${id}`;
+		const url = `http://localhost/api/v1/chatrooms/users/${id}`;
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };

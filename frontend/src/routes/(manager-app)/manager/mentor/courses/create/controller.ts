@@ -4,7 +4,7 @@ import { FetchData } from '$lib/utils';
 
 class CreateCourseController {
 	async getCourseCategories(fetch: Fetch, req?: Request) {
-		let url = 'http://localhost:8080/api/v1/course-categories?';
+		let url = 'http://localhost/api/v1/course-categories?';
 		if (req) {
 			const formData = await req.formData();
 			const limit = formData.get('limit');
@@ -26,7 +26,7 @@ class CreateCourseController {
 		return { success, message, status, resBody };
 	}
 	async createCourse(fetch: Fetch, req: Request) {
-		const url = 'http://localhost:8080/api/v1/courses';
+		const url = 'http://localhost/api/v1/courses';
 		const formData = await req.formData();
 		const title = formData.get('title');
 		const description = formData.get('description');
