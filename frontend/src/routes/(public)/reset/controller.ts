@@ -3,7 +3,7 @@ import { FetchData } from '$lib/utils';
 
 class ResetController {
 	async sendEmail(req: Request, fetch: Fetch) {
-		const url = 'http://160.19.167.63/api/v1/reset-password/send';
+		const url = 'http://backend:8080/api/v1/reset-password/send';
 		const formData = await req.formData();
 		const email = formData.get('email');
 		if (!email) {
@@ -19,7 +19,7 @@ class ResetController {
 		return { success, status, message };
 	}
 	async resetPassword(req: Request, fetch: Fetch) {
-		const url = 'http://160.19.167.63/api/v1/reset-password/reset';
+		const url = 'http://backend:8080/api/v1/reset-password/reset';
 		const formData = await req.formData();
 		const password = formData.get('password');
 		const repeatPassword = formData.get('repeat-password');

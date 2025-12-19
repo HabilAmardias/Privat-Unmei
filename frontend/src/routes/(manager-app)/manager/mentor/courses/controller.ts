@@ -4,7 +4,7 @@ import type { CourseCategory, MentorCourse } from './model';
 
 class CourseManagementController {
 	async getMyCourses(fetch: Fetch, req?: Request) {
-		let url = 'http://160.19.167.63/api/v1/mentors/me/courses?';
+		let url = 'http://backend:8080/api/v1/mentors/me/courses?';
 		if (req) {
 			const args: string[] = [];
 			const formData = await req.formData();
@@ -37,12 +37,12 @@ class CourseManagementController {
 		if (!id) {
 			return { success: false, message: 'no course selected', status: 400 };
 		}
-		const url = `http://160.19.167.63/api/v1/courses/${id}`;
+		const url = `http://backend:8080/api/v1/courses/${id}`;
 		const { success, message, status } = await FetchData(fetch, url, 'DELETE');
 		return { success, message, status };
 	}
 	async getCourseCategories(fetch: Fetch, req?: Request) {
-		let url = 'http://160.19.167.63/api/v1/course-categories?';
+		let url = 'http://backend:8080/api/v1/course-categories?';
 		if (req) {
 			const formData = await req.formData();
 			const limit = formData.get('limit');

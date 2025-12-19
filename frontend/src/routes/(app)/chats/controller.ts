@@ -4,7 +4,7 @@ import type { Chatroom } from './model';
 
 class ChatController {
 	getChatrooms = async (fetch: Fetch, req?: Request) => {
-		let url = 'http://160.19.167.63/api/v1/chatrooms/me?';
+		let url = 'http://backend:8080/api/v1/chatrooms/me?';
 		if (req) {
 			const formData = await req.formData();
 			const page = formData.get('page');

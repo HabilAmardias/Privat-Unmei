@@ -4,7 +4,7 @@ import type { CourseRequest } from './model';
 
 class RequestManagementController {
 	async getMyRequests(fetch: Fetch, req?: Request) {
-		let url = 'http://160.19.167.63/api/v1/mentors/me/course-requests?';
+		let url = 'http://backend:8080/api/v1/mentors/me/course-requests?';
 		if (req) {
 			const args: string[] = [];
 			const formData = await req.formData();
