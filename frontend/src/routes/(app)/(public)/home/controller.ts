@@ -4,7 +4,7 @@ import type { CourseList, MentorList } from './model';
 
 class HomeController {
 	async getCourses(fetch: Fetch, req?: Request) {
-		let url = '/api/v1/courses?';
+		let url = 'http://160.19.167.63/api/v1/courses?';
 		if (req) {
 			const args: string[] = [];
 			const formData = await req.formData();
@@ -36,7 +36,7 @@ class HomeController {
 		return { success, resBody, status, message };
 	}
 	async getMentors(fetch: Fetch) {
-		const url = '/api/v1/mentors';
+		const url = 'http://160.19.167.63/api/v1/mentors';
 		const { success, res, status, message } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
@@ -45,7 +45,7 @@ class HomeController {
 		return { success, message, status, resBody };
 	}
 	async getMostBought(fetch: Fetch) {
-		const url = '/api/v1/courses/most-bought';
+		const url = 'http://160.19.167.63/api/v1/courses/most-bought';
 		const { success, res, status, message } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, status, message };

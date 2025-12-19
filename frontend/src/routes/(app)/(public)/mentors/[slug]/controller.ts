@@ -10,7 +10,7 @@ import type {
 
 class MentorProfileController {
 	async getMentorProfile(fetch: Fetch, id: string) {
-		const url = `/api/v1/mentors/${id}`;
+		const url = `http://160.19.167.63/api/v1/mentors/${id}`;
 		const { success, res, status, message } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, status, message };
@@ -19,7 +19,7 @@ class MentorProfileController {
 		return { success, status, message, resBody };
 	}
 	async getMentorSchedules(fetch: Fetch, id: string) {
-		const url = `/api/v1/mentors/${id}/availability`;
+		const url = `http://160.19.167.63/api/v1/mentors/${id}/availability`;
 		const { success, res, status, message } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, status, message };
@@ -28,7 +28,7 @@ class MentorProfileController {
 		return { success, status, message, resBody };
 	}
 	async getMentorCourses(fetch: Fetch, id: string, req?: Request) {
-		let url = `/api/v1/mentors/${id}/courses?`;
+		let url = `http://160.19.167.63/api/v1/mentors/${id}/courses?`;
 		if (req) {
 			const args: string[] = [];
 			const formData = await req.formData();
@@ -56,7 +56,7 @@ class MentorProfileController {
 		return { success, message, status, resBody };
 	}
 	async messageMentor(fetch: Fetch, id: string) {
-		const url = `/api/v1/chatrooms/users/${id}`;
+		const url = `http://160.19.167.63/api/v1/chatrooms/users/${id}`;
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
@@ -65,7 +65,7 @@ class MentorProfileController {
 		return { resBody, status, success, message };
 	}
 	async getProfile(fetch: Fetch) {
-		const url = '/api/v1/me';
+		const url = 'http://160.19.167.63/api/v1/me';
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };

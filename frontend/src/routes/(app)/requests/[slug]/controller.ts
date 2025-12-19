@@ -4,7 +4,7 @@ import { FetchData } from '$lib/utils';
 
 class RequestDetailController {
 	async getRequestDetail(fetch: Fetch, id: string) {
-		const url = `/api/v1/me/course-requests/${id}`;
+		const url = `http://160.19.167.63/api/v1/me/course-requests/${id}`;
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
@@ -15,7 +15,7 @@ class RequestDetailController {
 	async messageMentor(fetch: Fetch, req: Request) {
 		const formData = await req.formData();
 		const id = formData.get('id');
-		const url = `/api/v1/chatrooms/users/${id}`;
+		const url = `http://160.19.167.63/api/v1/chatrooms/users/${id}`;
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
