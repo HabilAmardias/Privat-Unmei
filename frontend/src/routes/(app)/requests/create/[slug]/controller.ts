@@ -12,7 +12,7 @@ import { FetchData } from '$lib/utils';
 
 class CreateRequestController {
 	async getCourseDetail(fetch: Fetch, id: string) {
-		const url = `http://localhost:80/api/v1/courses/${id}`;
+		const url = `/api/v1/courses/${id}`;
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
@@ -21,7 +21,7 @@ class CreateRequestController {
 		return { success, message, status, resBody };
 	}
 	async getAvailableDayOfWeek(fetch: Fetch, id: string) {
-		const url = `http://localhost:80/api/v1/courses/${id}/mentor-availability`;
+		const url = `/api/v1/courses/${id}/mentor-availability`;
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
@@ -30,7 +30,7 @@ class CreateRequestController {
 		return { success, message, status, resBody };
 	}
 	async getAdditionalCost(fetch: Fetch) {
-		const url = 'http://localhost:80/api/v1/additional-cost/operational';
+		const url = '/api/v1/additional-cost/operational';
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
@@ -47,7 +47,7 @@ class CreateRequestController {
 				participant = parseInt(participantInput as string);
 			}
 		}
-		const url = `http://localhost:80/api/v1/discounts/final-discount/${participant}`;
+		const url = `/api/v1/discounts/final-discount/${participant}`;
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
@@ -56,7 +56,7 @@ class CreateRequestController {
 		return { success, message, status, resBody };
 	}
 	async createRequest(fetch: Fetch, id: string, req: Request) {
-		const url = `http://localhost:80/api/v1/courses/${id}/course-requests`;
+		const url = `/api/v1/courses/${id}/course-requests`;
 		const formData = await req.formData();
 		const schedules = formData.get('schedules');
 		if (!schedules) {
@@ -85,7 +85,7 @@ class CreateRequestController {
 		return { success, message, status, resBody };
 	}
 	async getMentorPayments(fetch: Fetch, id: string) {
-		const url = `http://localhost:80/api/v1/mentors/${id}/payment-methods`;
+		const url = `/api/v1/mentors/${id}/payment-methods`;
 		const { success, res, status, message } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, status, message };
@@ -94,7 +94,7 @@ class CreateRequestController {
 		return { success, status, message, resBody };
 	}
 	async getMentorSchedules(fetch: Fetch, id: string) {
-		const url = `http://localhost:80/api/v1/mentors/${id}/availability`;
+		const url = `/api/v1/mentors/${id}/availability`;
 		const { success, res, status, message } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, status, message };

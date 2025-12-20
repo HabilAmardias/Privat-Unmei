@@ -4,13 +4,13 @@ import type { MentorScheduleInfo, paymentMethod, MentorPaymentInfo, MentorProfil
 
 class UpdateMentorController {
 	async updateProfile(fetch: Fetch, req: Request) {
-		const url = 'http://localhost:80/api/v1/mentors/me';
+		const url = '/api/v1/mentors/me';
 		const formData = await req.formData();
 		const { success, message, status } = await FetchData(fetch, url, 'PATCH', formData);
 		return { success, message, status };
 	}
 	async getMentorProfile(fetch: Fetch) {
-		const url = `http://localhost:80/api/v1/mentors/me`;
+		const url = `/api/v1/mentors/me`;
 		const { success, res, status, message } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, status, message };
@@ -19,7 +19,7 @@ class UpdateMentorController {
 		return { success, status, message, resBody };
 	}
 	async getMentorSchedules(fetch: Fetch) {
-		const url = `http://localhost:80/api/v1/mentors/me/availability`;
+		const url = `/api/v1/mentors/me/availability`;
 		const { success, res, status, message } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, status, message };
@@ -28,7 +28,7 @@ class UpdateMentorController {
 		return { success, status, message, resBody };
 	}
 	async getMentorPayments(fetch: Fetch) {
-		const url = `http://localhost:80/api/v1/mentors/me/payment-methods`;
+		const url = `/api/v1/mentors/me/payment-methods`;
 		const { success, res, status, message } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, status, message };
@@ -37,7 +37,7 @@ class UpdateMentorController {
 		return { success, status, message, resBody };
 	}
 	async getPaymentMethods(fetch: Fetch, req?: Request) {
-		let url = 'http://localhost:80/api/v1/payment-methods?limit=5';
+		let url = '/api/v1/payment-methods?limit=5';
 		if (req) {
 			const formData = await req.formData();
 			const search = formData.get('search');

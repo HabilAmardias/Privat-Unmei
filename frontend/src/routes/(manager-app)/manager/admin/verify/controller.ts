@@ -22,7 +22,7 @@ class AdminVerifyController {
 			email: newEmail,
 			password: newPassword
 		});
-		const url = 'http://localhost:80/api/v1/admins/me/verify';
+		const url = '/api/v1/admins/me/verify';
 		const { success, message, status } = await FetchData(fetch, url, 'POST', reqBody);
 		return { success, message, status };
 	}
