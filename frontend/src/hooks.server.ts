@@ -6,10 +6,7 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 	const authToken = event.cookies.get('auth_token');
 	const refreshToken = event.cookies.get('refresh_token');
 	if (!IsTokenExpired(refreshToken) && IsTokenExpired(authToken)) {
-		const { success, cookiesData, message, status } = await controller.refresh(
-			fetch,
-			event.request.headers
-		);
+		const { success, cookiesData, message, status } = await controller.refresh(fetch);
 		if (!success) {
 			if (!event.route.id?.includes('/(public)')) {
 				throw error(status, { message });
@@ -31,7 +28,7 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 			throw error(401, { message: 'unauthorized' });
 		}
 	}
-	request = new Request(request, { headers: event.request.headers });
+
 	return fetch(request);
 };
 

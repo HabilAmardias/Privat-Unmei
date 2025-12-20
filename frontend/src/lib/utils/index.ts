@@ -4,15 +4,13 @@ export async function FetchData(
 	fetch: Fetch,
 	url: string | URL,
 	method?: HTTPMethod,
-	body?: BodyInit,
-	headers?: Headers
+	body?: BodyInit
 ) {
 	const res = await fetch(url, {
 		method,
 		body,
 		credentials: 'include',
-		redirect: 'manual',
-		headers
+		redirect: 'manual'
 	});
 	if (!res.ok && res.status !== 307) {
 		const resBody = await res.json();

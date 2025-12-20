@@ -2,23 +2,14 @@ import type { Fetch, CookiesData, SameSite } from '$lib/types';
 import { FetchData } from '$lib/utils';
 
 class CookieController {
-	async refresh(
-		fetch: Fetch,
-		headers?: Headers
-	): Promise<{
+	async refresh(fetch: Fetch): Promise<{
 		success: boolean;
 		cookiesData?: CookiesData[];
 		message: string;
 		status: number;
 	}> {
 		const url = 'http://localhost:8080/api/v1/refresh';
-		const { success, res, status, message } = await FetchData(
-			fetch,
-			url,
-			'GET',
-			undefined,
-			headers
-		);
+		const { success, res, status, message } = await FetchData(fetch, url);
 		if (!success) {
 			return {
 				success,
