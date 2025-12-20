@@ -2,8 +2,7 @@ import { error } from '@sveltejs/kit';
 import { controller } from './controller';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ fetch, cookies }) => {
-	console.log(cookies.getAll());
+export const load: PageServerLoad = async ({ fetch }) => {
 	const [courseRes, mentorRes, mostBoughtRes] = await Promise.all([
 		controller.getCourses(fetch),
 		controller.getMentors(fetch),
