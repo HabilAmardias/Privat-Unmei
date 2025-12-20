@@ -15,10 +15,10 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 			cookiesData?.forEach((val) => {
 				event.cookies.set(val.key, val.value, {
 					path: val.path,
-					domain: val.domain,
 					httpOnly: val.httpOnly,
 					maxAge: val.maxAge,
-					sameSite: val.sameSite
+					sameSite: val.sameSite,
+					secure: false
 				});
 			});
 		}
