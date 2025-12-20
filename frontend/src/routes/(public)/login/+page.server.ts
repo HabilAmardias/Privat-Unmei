@@ -23,7 +23,8 @@ export const actions = {
 				domain: c.domain,
 				httpOnly: c.httpOnly,
 				maxAge: c.maxAge,
-				sameSite: c.sameSite
+				sameSite: c.sameSite,
+				secure: false
 			});
 		});
 		return { success, userStatus };
