@@ -4,7 +4,7 @@ import type { MentorPaymentInfo, MentorProfile, MentorScheduleInfo } from './mod
 
 class MentorPageController {
 	async getMentorProfile(fetch: Fetch) {
-		const url = `http://localhost:8080/api/v1/mentors/me`;
+		const url = `http://localhost:80/api/v1/mentors/me`;
 		const { success, res, status, message } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, status, message };
@@ -13,7 +13,7 @@ class MentorPageController {
 		return { success, status, message, resBody };
 	}
 	async getMentorSchedules(fetch: Fetch) {
-		const url = `http://localhost:8080/api/v1/mentors/me/availability`;
+		const url = `http://localhost:80/api/v1/mentors/me/availability`;
 		const { success, res, status, message } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, status, message };
@@ -22,7 +22,7 @@ class MentorPageController {
 		return { success, status, message, resBody };
 	}
 	async getMentorPayments(fetch: Fetch) {
-		const url = `http://localhost:8080/api/v1/mentors/me/payment-methods`;
+		const url = `http://localhost:80/api/v1/mentors/me/payment-methods`;
 		const { success, res, status, message } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, status, message };
@@ -42,7 +42,7 @@ class MentorPageController {
 		const reqBody = JSON.stringify({
 			password: newPassword
 		});
-		const url = 'http://localhost:8080/api/v1/mentors/me/change-password';
+		const url = 'http://localhost:80/api/v1/mentors/me/change-password';
 		const { success, message, status } = await FetchData(fetch, url, 'POST', reqBody);
 		return { success, message, status };
 	}

@@ -9,7 +9,7 @@ class CourseCategoryManagementController {
 		if (!id) {
 			return { success: false, status: 400, message: 'no course category selected' };
 		}
-		const url = `http://localhost:8080/api/v1/course-categories/${id}`;
+		const url = `http://localhost:80/api/v1/course-categories/${id}`;
 		const { success, message, status } = await FetchData(fetch, url, 'DELETE');
 		return { success, message, status };
 	}
@@ -25,7 +25,7 @@ class CourseCategoryManagementController {
 			name
 		});
 
-		const url = `http://localhost:8080/api/v1/course-categories/${id}`;
+		const url = `http://localhost:80/api/v1/course-categories/${id}`;
 
 		const { success, message, status } = await FetchData(fetch, url, 'PATCH', reqBody);
 		return { success, message, status };
@@ -39,7 +39,7 @@ class CourseCategoryManagementController {
 		const reqBody = JSON.stringify({
 			name
 		});
-		const url = 'http://localhost:8080/api/v1/course-categories';
+		const url = 'http://localhost:80/api/v1/course-categories';
 		const { success, message, status, res } = await FetchData(fetch, url, 'POST', reqBody);
 		if (!success) {
 			return { success, message, status };
@@ -48,7 +48,7 @@ class CourseCategoryManagementController {
 		return { success, message, status, resBody };
 	}
 	async getCategories(fetch: Fetch, req?: Request) {
-		let url = 'http://localhost:8080/api/v1/course-categories?';
+		let url = 'http://localhost:80/api/v1/course-categories?';
 		if (req) {
 			const args: string[] = [];
 			const formData = await req.formData();
@@ -70,7 +70,7 @@ class CourseCategoryManagementController {
 		return { success, message, status, resBody };
 	}
 	async getProfile(fetch: Fetch) {
-		const url = 'http://localhost:8080/api/v1/admins/me';
+		const url = 'http://localhost:80/api/v1/admins/me';
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
