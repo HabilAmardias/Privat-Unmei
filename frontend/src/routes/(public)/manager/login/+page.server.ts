@@ -37,10 +37,10 @@ export const actions = {
 		cookiesData?.forEach((c) => {
 			cookies.set(c.key, c.value, {
 				path: c.path,
-				domain: c.domain,
 				httpOnly: c.httpOnly,
 				maxAge: c.maxAge,
-				sameSite: c.sameSite
+				sameSite: c.sameSite,
+				secure: false
 			});
 		});
 		return { success, userStatus };
