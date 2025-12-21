@@ -28,7 +28,7 @@
 			View.setIsLoading(false);
 			if (result.type === 'success') {
 				loadingStore.setLogOutLoadID(loadID);
-				await goto('/manager/login', { replaceState: true });
+				await goto('/manager/logout', { replaceState: true });
 			}
 			if (result.type === 'failure') {
 				DismissToast(loadID);

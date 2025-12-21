@@ -6,6 +6,6 @@ export const actions = {
 		cookies.delete('refresh_token', { path: '/', secure: false });
 		cookies.delete('status', { path: '/', secure: false });
 		cookies.delete('role', { path: '/', secure: false });
-		throw redirect(303, '/login');
+		throw redirect(303, '/manager/login');
 	}
 } satisfies Actions;
