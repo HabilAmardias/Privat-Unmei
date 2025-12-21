@@ -6,7 +6,7 @@
 
 <div class="flex h-dvh w-full items-center justify-center">
 	<div class="flex flex-col items-center">
-		<CldImage src={ErrorLogo} />
+		<CldImage src={ErrorLogo} width={512} height={341} />
 		<h1 class="font-bold text-[var(--tertiary-color)]">{page.status}</h1>
 		<p class="text-[var(--tertiary-color)]">{page.error?.message}</p>
 	</div>
