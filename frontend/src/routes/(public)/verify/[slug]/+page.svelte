@@ -13,15 +13,13 @@
 	onMount(() => {
 		if (data.success) {
 			View.setOpenDialog(true);
-		} else {
-			goto('/login', { replaceState: true });
 		}
 		return () => {
 			View.setOpenDialog(false);
 		};
 	});
 	function navigateToLogin() {
-		goto('/login', { replaceState: true });
+		goto('/logout', { replaceState: true });
 	}
 </script>
 
@@ -32,8 +30,10 @@
 {#snippet dialogContent()}{/snippet}
 
 <Dialog buttonText="" bind:open={View.openDialog} title={dialogTitle} description={dialogContent}>
-	<CircleCheck size={128} />
-	<p>Your account is now successfully verified</p>
-	<p>You can now login with your account</p>
-	<Button full={true} onClick={() => navigateToLogin()}>Login</Button>
+	<div class="flex w-full flex-col items-center gap-2">
+		<CircleCheck size={128} class="text-[var(--tertiary-color)]" />
+		<p>Your account is now successfully verified</p>
+		<p>You can now login with your account</p>
+		<Button full={true} onClick={() => navigateToLogin()}>Login</Button>
+	</div>
 </Dialog>

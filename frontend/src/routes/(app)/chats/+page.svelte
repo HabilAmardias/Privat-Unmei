@@ -24,7 +24,9 @@
 	{#if View.isLoading}
 		<Loading />
 	{:else if View.chats.length === 0 || !View.chats}
-		<b class="font-bold text-[var(--tertiary-color)]">No Chats Found</b>
+		<div class="flex h-[550px] max-h-[550px] items-center justify-center">
+			<b class="font-bold text-[var(--tertiary-color)]">No Chats Found</b>
+		</div>
 	{:else}
 		<ScrollArea
 			orientation="vertical"
