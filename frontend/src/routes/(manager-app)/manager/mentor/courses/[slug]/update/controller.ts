@@ -4,7 +4,7 @@ import { FetchData } from '$lib/utils';
 
 class UpdateCourseController {
 	async getCourseCategories(fetch: Fetch, req?: Request) {
-		let url = '/api/v1/course-categories?';
+		let url = 'http://localhost:80/api/v1/course-categories?';
 		if (req) {
 			const formData = await req.formData();
 			const limit = formData.get('limit');
@@ -27,7 +27,7 @@ class UpdateCourseController {
 	}
 	async updateCourse(fetch: Fetch, req: Request, id: string) {
 		const formData = await req.formData();
-		const url = `/api/v1/courses/${id}`;
+		const url = `http://localhost:80/api/v1/courses/${id}`;
 		const title = formData.get('title');
 		const description = formData.get('description');
 		const domicile = formData.get('domicile');
@@ -54,7 +54,7 @@ class UpdateCourseController {
 		return { success, message, status };
 	}
 	async getCourseDetail(fetch: Fetch, id: string) {
-		const url = `/api/v1/courses/${id}`;
+		const url = `http://localhost:80/api/v1/courses/${id}`;
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
@@ -63,7 +63,7 @@ class UpdateCourseController {
 		return { success, message, status, resBody };
 	}
 	async getCourseTopics(fetch: Fetch, id: string) {
-		const url = `/api/v1/courses/${id}/topics`;
+		const url = `http://localhost:80/api/v1/courses/${id}/topics`;
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
@@ -72,7 +72,7 @@ class UpdateCourseController {
 		return { success, message, status, resBody };
 	}
 	async getCourseDetailCategories(fetch: Fetch, id: string) {
-		const url = `/api/v1/courses/${id}/categories`;
+		const url = `http://localhost:80/api/v1/courses/${id}/categories`;
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };

@@ -4,13 +4,13 @@ import type { generatedPassword, paymentMethod, adminProfile } from './model';
 
 class CreateMentorController {
 	async CreateNewMentor(fetch: Fetch, req: Request) {
-		const url = '/api/v1/mentors';
+		const url = 'http://localhost:80/api/v1/mentors';
 		const formData = await req.formData();
 		const { success, message, status } = await FetchData(fetch, url, 'POST', formData);
 		return { success, message, status };
 	}
 	async getPaymentMethods(fetch: Fetch, req?: Request) {
-		let url = '/api/v1/payment-methods?limit=5';
+		let url = 'http://localhost:80/api/v1/payment-methods?limit=5';
 		if (req) {
 			const formData = await req.formData();
 			const search = formData.get('search');
@@ -26,7 +26,7 @@ class CreateMentorController {
 		return { success, message, status, resBody };
 	}
 	async getRandomizedPassword(fetch: Fetch) {
-		const url = '/api/v1/mentors/password';
+		const url = 'http://localhost:80/api/v1/mentors/password';
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
@@ -35,7 +35,7 @@ class CreateMentorController {
 		return { success, message, status, resBody };
 	}
 	async getAdminProfile(fetch: Fetch) {
-		const url = '/api/v1/admins/me';
+		const url = 'http://localhost:80/api/v1/admins/me';
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
