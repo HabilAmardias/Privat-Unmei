@@ -1,4 +1,5 @@
 import type { Fetch, HTTPMethod } from '$lib/types';
+import { PUBLIC_BASE_URL } from '$env/static/public';
 
 export async function FetchData(
 	fetch: Fetch,
@@ -6,7 +7,7 @@ export async function FetchData(
 	method?: HTTPMethod,
 	body?: BodyInit
 ) {
-	const fullURL = `${process.env.BASE_URL ? process.env.BASE_URL : ''}${url}`;
+	const fullURL = `${PUBLIC_BASE_URL}${url}`;
 	console.log(fullURL);
 	const res = await fetch(fullURL, {
 		method,
