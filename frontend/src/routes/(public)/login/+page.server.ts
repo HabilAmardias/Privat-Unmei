@@ -3,8 +3,8 @@ import { controller } from './controller';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ cookies }) => {
-	if (cookies.get('auth_token')) {
-		redirect(303, '/courses');
+	if (cookies.get('auth_token') || cookies.get('refresh_token')) {
+		throw redirect(303, '/courses');
 	}
 };
 
