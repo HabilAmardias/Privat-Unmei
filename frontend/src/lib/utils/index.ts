@@ -6,7 +6,8 @@ export async function FetchData(
 	method?: HTTPMethod,
 	body?: BodyInit
 ) {
-	const res = await fetch(url, {
+	const fullURL = `${process.env.BASE_URL ? process.env.BASE_URL : ''}${url}`;
+	const res = await fetch(fullURL, {
 		method,
 		body,
 		credentials: 'include',
