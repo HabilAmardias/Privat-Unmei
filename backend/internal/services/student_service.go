@@ -351,7 +351,7 @@ func (us *StudentServiceImpl) ResetPassword(ctx context.Context, param entity.Re
 		return us.ur.FindByID(ctx, param.ID, user)
 	})
 	g.Go(func() error {
-		return us.sr.FindByID(ctx, user.ID, student)
+		return us.sr.FindByID(ctx, param.ID, student)
 	})
 	if err := g.Wait(); err != nil {
 		return err
@@ -421,7 +421,7 @@ func (us *StudentServiceImpl) Verify(ctx context.Context, param entity.VerifyStu
 		return us.ur.FindByID(ctx, param.ID, user)
 	})
 	g.Go(func() error {
-		return us.sr.FindByID(ctx, user.ID, student)
+		return us.sr.FindByID(ctx, param.ID, student)
 	})
 	if err := g.Wait(); err != nil {
 		return err
