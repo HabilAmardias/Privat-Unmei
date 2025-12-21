@@ -12,13 +12,5 @@ export default defineConfig({
 			}
 		}
 	},
-	plugins: [tailwindcss(), sveltekit()],
-	server: {
-		proxy: {
-			'/api/v1': {
-				target: 'http://localhost:80',
-				changeOrigin: true
-			}
-		}
-	}
+	plugins: [tailwindcss(), sveltekit()]
 });

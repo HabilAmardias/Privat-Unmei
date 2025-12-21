@@ -11,9 +11,7 @@ export async function FetchData(
 	console.log(fullURL);
 	const res = await fetch(fullURL, {
 		method,
-		body,
-		credentials: 'include',
-		redirect: 'manual'
+		body
 	});
 	if (!res.ok && res.status !== 307) {
 		const resBody = await res.json();
