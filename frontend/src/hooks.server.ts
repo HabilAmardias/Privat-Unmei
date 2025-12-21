@@ -47,7 +47,8 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 			},
 			body: request.body,
 			credentials: 'include',
-			redirect: 'manual'
+			redirect: 'manual',
+			duplex: 'half'
 		});
 		return fetch(newReq);
 	}
