@@ -14,7 +14,7 @@ class AdminVerifyController {
 		const reqBody = JSON.stringify({
 			password: newPassword
 		});
-		const url = 'http://localhost:80/api/v1/mentors/me/change-password';
+		const url = '/api/v1/mentors/me/change-password';
 		const { success, message, status } = await FetchData(fetch, url, 'POST', reqBody);
 		return { success, message, status };
 	}

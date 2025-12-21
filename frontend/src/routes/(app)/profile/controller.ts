@@ -6,7 +6,7 @@ import type { StudentOrders, StudentProfile } from './model';
 
 class profileController {
 	async updateProfile(fetch: Fetch, req: Request) {
-		const url = 'http://localhost:80/api/v1/students/me';
+		const url = '/api/v1/students/me';
 		const body = await req.formData();
 		const profileImage = body.get('file') as File | null;
 		const name = body.get('name') as string | null;
@@ -33,12 +33,12 @@ class profileController {
 		return { success, message, status };
 	}
 	async sendVerificationLink(fetch: Fetch) {
-		const url = 'http://localhost:80/api/v1/verify/send';
+		const url = '/api/v1/verify/send';
 		const { success, message, status } = await FetchData(fetch, url);
 		return { success, message, status };
 	}
 	async getProfile(fetch: Fetch) {
-		const url = 'http://localhost:80/api/v1/me';
+		const url = '/api/v1/me';
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');
 		if (!success) {
 			return { success, message, status };
@@ -47,7 +47,7 @@ class profileController {
 		return { resBody, status, success, message };
 	}
 	async getOrders(fetch: Fetch, req?: Request) {
-		let url = `http://localhost:80/api/v1/me/course-requests?`;
+		let url = `/api/v1/me/course-requests?`;
 		if (req) {
 			const queries: string[] = [];
 			const formData = await req.formData();
