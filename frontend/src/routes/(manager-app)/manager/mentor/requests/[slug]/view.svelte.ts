@@ -50,7 +50,7 @@ export class RequestDetailView {
 	};
 	convertToDate = (datetime: string) => {
 		const date = new SvelteDate(datetime);
-		return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+		return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 	};
 	convertToDatetime = (input: string) => {
 		const [date, tz] = input.split('T');
