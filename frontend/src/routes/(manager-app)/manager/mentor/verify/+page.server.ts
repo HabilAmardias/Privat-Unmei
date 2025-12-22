@@ -13,10 +13,10 @@ export const actions = {
 		if (!success) {
 			return fail(status, { message });
 		}
-		cookies.delete('auth_token', { path: '/' });
-		cookies.delete('refresh_token', { path: '/' });
-		cookies.delete('status', { path: '/' });
-		cookies.delete('role', { path: '/' });
+		cookies.delete('auth_token', { path: '/', secure: false });
+		cookies.delete('refresh_token', { path: '/', secure: false });
+		cookies.delete('status', { path: '/', secure: false });
+		cookies.delete('role', { path: '/', secure: false });
 		return { status, message };
 	}
 } satisfies Actions;
