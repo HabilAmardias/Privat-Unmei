@@ -8,7 +8,6 @@ export async function FetchData(
 	body?: BodyInit
 ) {
 	const fullURL = `${PUBLIC_BASE_URL}${url}`;
-	console.log(fullURL);
 	const res = await fetch(fullURL, {
 		method,
 		body
