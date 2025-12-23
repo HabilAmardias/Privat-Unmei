@@ -129,7 +129,6 @@
 					bind:value={View.email}
 				/>
 				<InputSecret
-					err={View.passwordError}
 					id="password"
 					placeholder="Password"
 					name="password"
@@ -156,7 +155,6 @@
 					bind:value={View.email}
 				/>
 				<InputSecret
-					err={View.passwordError}
 					id="password"
 					placeholder="Password"
 					name="password"

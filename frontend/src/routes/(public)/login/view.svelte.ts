@@ -1,3 +1,5 @@
+import { IsAlphaOnly } from '$lib/utils/helper';
+
 export class AuthView {
 	login = $state<boolean>(true);
 	email = $state<string>('');
@@ -26,6 +28,12 @@ export class AuthView {
 		if (!this.name) {
 			return new Error('please insert name');
 		}
+		if (this.name.replaceAll(' ', '').length === 0) {
+			return new Error('please insert a valid name');
+		}
+		if (!IsAlphaOnly(this.name)) {
+			return new Error('name can only consist of alphabet');
+		}
 		return undefined;
 	});
 	isLoading = $state<boolean>(false);
@@ -33,7 +41,7 @@ export class AuthView {
 	isDesktop = $state<boolean>(false);
 
 	loginDisabled = $derived.by<boolean>(() => {
-		if (!this.email || !this.password || this.emailError || this.passwordError || this.isLoading) {
+		if (!this.email || !this.password || this.emailError || this.isLoading) {
 			return true;
 		}
 		return false;
