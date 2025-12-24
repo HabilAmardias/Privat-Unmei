@@ -26,7 +26,7 @@
 </script>
 
 <Dialog.Root bind:open {...restProps}>
-	<Dialog.Trigger onclick={buttonOnClick} class={restProps.buttonClass}>
+	<Dialog.Trigger type="button" onclick={buttonOnClick} class={restProps.buttonClass}>
 		{buttonText}
 	</Dialog.Trigger>
 	<Dialog.Portal>

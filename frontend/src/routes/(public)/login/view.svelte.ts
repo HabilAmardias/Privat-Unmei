@@ -2,6 +2,8 @@ import { IsAlphaOnly } from '$lib/utils/helper';
 
 export class AuthView {
 	login = $state<boolean>(true);
+	openDialog = $state<boolean>(false);
+	agreed = $state<boolean>(false);
 	email = $state<string>('');
 	emailError = $derived.by<Error | undefined>(() => {
 		if (this.email && !this.#validateEmail(this.email)) {
@@ -57,7 +59,8 @@ export class AuthView {
 			this.nameError ||
 			this.emailError ||
 			this.passwordError ||
-			this.isLoading
+			this.isLoading ||
+			!this.agreed
 		) {
 			return true;
 		}
