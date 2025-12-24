@@ -24,6 +24,8 @@ export class CourseDetailView {
 		return this.feedbackErr ? true : false;
 	});
 
+	detailState = $state<'description' | 'detail'>('description');
+
 	constructor(d: PaginatedResponse<CourseReview>, c: CourseDetail, p?: StudentProfile) {
 		this.reviews = d.entries;
 		this.page = d.page_info.page;
