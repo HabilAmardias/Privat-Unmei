@@ -14,7 +14,11 @@ func RateLimiterMiddleware(limiter *redis_rate.Limiter) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		res, err := limiter.Allow(context.Background(), ctx.ClientIP(), redis_rate.PerMinute(requestRate))
 		if err != nil {
-			ctx.Error(err)
+			ctx.Error(customerrors.NewError(
+				"something went wrong",
+				err,
+				customerrors.CommonErr,
+			))
 			ctx.Abort()
 			return
 		}
