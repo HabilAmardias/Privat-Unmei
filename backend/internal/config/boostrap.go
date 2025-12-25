@@ -11,6 +11,7 @@ import (
 	"privat-unmei/internal/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis_rate/v10"
 	"github.com/gorilla/websocket"
 	"github.com/redis/go-redis/v9"
 )
@@ -34,6 +35,7 @@ func Bootstrap(db *db.CustomDB, rc *redis.Client, logger logger.CustomLogger, ap
 	discountRepo := repositories.CreateDiscountRepository(db)
 	additionalCostRepo := repositories.CreateAdditionalCostRepository(db)
 	rbaccache := cache.CreateRBACCache(rc)
+	limiter := redis_rate.NewLimiter(rc)
 
 	bcryptUtil := utils.CreateBcryptUtil()
 	gomailUtil := utils.CreateGomailUtil()
@@ -82,6 +84,7 @@ func Bootstrap(db *db.CustomDB, rc *redis.Client, logger logger.CustomLogger, ap
 		RBACCacheRepository:   rbaccache,
 		TokenUtil:             jwtUtil,
 		Logger:                logger,
+		Limiter:               limiter,
 	}
 	cfg.Setup()
 }

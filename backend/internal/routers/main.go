@@ -13,6 +13,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis_rate/v10"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -34,6 +35,7 @@ type RouteConfig struct {
 	RBACCacheRepository   *cache.RBACCacheRepository
 	TokenUtil             *utils.JWTUtil
 	Logger                logger.CustomLogger
+	Limiter               *redis_rate.Limiter
 }
 
 func (c *RouteConfig) Setup() {
@@ -74,6 +76,7 @@ func (c *RouteConfig) Setup() {
 
 func (c *RouteConfig) SetupPublicRoute() {
 	v1 := c.App.Group("/api/v1")
+	v1.Use(middlewares.RateLimiterMiddleware(c.Limiter))
 	v1.GET("/healthcheck", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, dtos.Response{
 			Success: true,
@@ -105,6 +108,7 @@ func (c *RouteConfig) SetupPublicRoute() {
 
 func (c *RouteConfig) SetupPrivateRoute() {
 	v1 := c.App.Group("/api/v1")
+	v1.Use(middlewares.RateLimiterMiddleware(c.Limiter))
 	v1.Use(middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForLogin))
 	v1.GET("/discounts/final-discount/:participant", c.DiscountHandler.GetDiscount)
 	v1.GET("/additional-cost/operational", c.AdditionalCostHandler.GetOperationalCost)
