@@ -210,6 +210,7 @@
 			action="?/createRequest"
 			bind:open={View.openCreateRequestDialog}
 			enhancement={View.onCreateRequest}
+			buttonDisabled={View.bookDisabled}
 			title={createRequestTitle}
 			full
 			{description}>Create</AlertDialog

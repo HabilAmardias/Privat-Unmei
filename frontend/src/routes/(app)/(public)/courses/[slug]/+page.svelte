@@ -69,8 +69,10 @@
 					<p class="text-[var(--secondary-color)]">{data.detail.domicile}</p>
 				</div>
 				<div class="flex items-center gap-2">
-					<p class="font-bold text-[var(--primary-color)]">Per Session Duration (minutes):</p>
-					<p class="text-[var(--secondary-color)]">{data.detail.session_duration_minutes}</p>
+					<p class="font-bold text-[var(--primary-color)]">Per Session Duration:</p>
+					<p class="text-[var(--secondary-color)]">
+						{data.detail.session_duration_minutes} Minutes
+					</p>
 				</div>
 
 				<div class="flex gap-2">

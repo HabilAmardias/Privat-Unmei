@@ -6,10 +6,6 @@ import type { RequestDetail } from './model';
 import { Banknote, BookMarked, CalendarCheck, Check, X } from '@lucide/svelte';
 
 export class RequestDetailView {
-	confirmDialogOpen = $state<boolean>(false);
-	acceptDialogOpen = $state<boolean>(false);
-	rejectDialogOpen = $state<boolean>(false);
-	paymentDetailDialogOpen = $state<boolean>(false);
 	mentorID = $state<string>('');
 	detailState = $state<'detail' | 'payment'>('detail');
 	status = $state<string>('');
@@ -35,42 +31,6 @@ export class RequestDetailView {
 		this.status = d.status;
 		this.expiredAt = d.expired_at;
 	}
-	onReject = () => {
-		return async ({ result, update }: EnhancementReturn) => {
-			this.rejectDialogOpen = false;
-			if (result.type === 'redirect') {
-				CreateToast('success', 'successfully reject request');
-				await update();
-			}
-			if (result.type === 'failure') {
-				CreateToast('error', result.data?.message);
-			}
-		};
-	};
-	onAccept = () => {
-		return async ({ result, update }: EnhancementReturn) => {
-			this.acceptDialogOpen = false;
-			if (result.type === 'redirect') {
-				CreateToast('success', 'successfully accept request');
-				await update();
-			}
-			if (result.type === 'failure') {
-				CreateToast('error', result.data?.message);
-			}
-		};
-	};
-	onConfirm = () => {
-		return async ({ result, update }: EnhancementReturn) => {
-			this.confirmDialogOpen = false;
-			if (result.type === 'redirect') {
-				CreateToast('success', 'successfully confirm payment');
-				await update();
-			}
-			if (result.type === 'failure') {
-				CreateToast('error', result.data?.message);
-			}
-		};
-	};
 	convertToDate = (datetime: string) => {
 		const date = new SvelteDate(datetime);
 		return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
