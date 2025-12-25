@@ -2,11 +2,11 @@ package config
 
 import (
 	"context"
-	"flag"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"privat-unmei/internal/constants"
 	"privat-unmei/internal/db"
 	"privat-unmei/internal/logger"
 	"privat-unmei/internal/redis"
@@ -21,9 +21,7 @@ import (
 
 func Run() {
 	// add production environment option
-	var isProd bool
-	flag.BoolVar(&isProd, "release", false, "Run production environemnt")
-	flag.Parse()
+	var isProd bool = os.Getenv("ENVIRONMENT_OPTION") == constants.Production
 	if isProd {
 		gin.SetMode(gin.ReleaseMode)
 	}
