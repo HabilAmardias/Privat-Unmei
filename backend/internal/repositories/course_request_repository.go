@@ -334,6 +334,7 @@ func (cr *CourseRequestRepositoryImpl) CancelExpiredRequest(ctx context.Context,
 	UPDATE course_requests
 	SET
 		status = 'cancelled',
+		expired_at = NULL,
 		updated_at = NOW()
 	WHERE NOW() >= expired_at 
 	AND deleted_at IS NULL
