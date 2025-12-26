@@ -101,7 +101,7 @@ func (sh *StudentHandlerImpl) GoogleLogin(ctx *gin.Context) {
 	b := make([]byte, 16)
 	rand.Read(b)
 	state := base64.RawURLEncoding.EncodeToString(b)
-	ctx.SetCookie("oauthstate", state, int(30*time.Minute), "/", domain, true, false)
+	ctx.SetCookie("oauthstate", state, int(30*time.Minute), "/", domain, false, true)
 	url := sh.ss.GoogleLogin(state)
 
 	ctx.Redirect(http.StatusTemporaryRedirect, url)
