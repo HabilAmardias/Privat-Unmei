@@ -2,6 +2,8 @@ import type { Actions } from '@sveltejs/kit';
 import { fail } from '@sveltejs/kit';
 import { controller } from './controller';
 import type { PageServerLoad } from './$types';
+import { Production } from '$lib/utils/constants';
+import { PUBLIC_ENVIRONMENT_OPTION } from '$env/static/public';
 
 export const load: PageServerLoad = async ({ cookies }) => {
 	const authToken = cookies.get('auth_token');
@@ -21,7 +23,7 @@ export const actions = {
 				httpOnly: c.httpOnly,
 				maxAge: c.maxAge,
 				sameSite: c.sameSite,
-				secure: false
+				secure: PUBLIC_ENVIRONMENT_OPTION === Production
 			});
 		});
 		return { success };
@@ -40,7 +42,7 @@ export const actions = {
 				httpOnly: c.httpOnly,
 				maxAge: c.maxAge,
 				sameSite: c.sameSite,
-				secure: false
+				secure: PUBLIC_ENVIRONMENT_OPTION === Production
 			});
 		});
 		return { success, userStatus };

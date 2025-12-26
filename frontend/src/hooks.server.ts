@@ -1,7 +1,8 @@
 import { error, type Handle, type HandleFetch } from '@sveltejs/kit';
 import { IsTokenExpired } from '$lib/utils/helper';
-import { PUBLIC_BASE_URL } from '$env/static/public';
+import { PUBLIC_BASE_URL, PUBLIC_ENVIRONMENT_OPTION } from '$env/static/public';
 import { controller } from './controller';
+import { Production } from '$lib/utils/constants';
 
 export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 	if (request.url.startsWith(PUBLIC_BASE_URL)) {
@@ -27,7 +28,7 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 						httpOnly: val.httpOnly,
 						maxAge: val.maxAge,
 						sameSite: val.sameSite,
-						secure: false
+						secure: PUBLIC_ENVIRONMENT_OPTION === Production
 					});
 				});
 			}
@@ -74,7 +75,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 					httpOnly: val.httpOnly,
 					maxAge: val.maxAge,
 					sameSite: val.sameSite,
-					secure: false
+					secure: PUBLIC_ENVIRONMENT_OPTION === Production
 				});
 			});
 		}

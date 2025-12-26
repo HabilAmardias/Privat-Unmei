@@ -1,6 +1,8 @@
 import { fail, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { controller } from './controller';
+import { Production } from '$lib/utils/constants';
+import { PUBLIC_ENVIRONMENT_OPTION } from '$env/static/public';
 
 export const load: PageServerLoad = async ({ cookies }) => {
 	const status = cookies.get('status');
@@ -13,10 +15,13 @@ export const actions = {
 		if (!success) {
 			return fail(status, { message });
 		}
-		cookies.delete('auth_token', { path: '/', secure: false });
-		cookies.delete('refresh_token', { path: '/', secure: false });
-		cookies.delete('status', { path: '/', secure: false });
-		cookies.delete('role', { path: '/', secure: false });
+		cookies.delete('auth_token', { path: '/', secure: PUBLIC_ENVIRONMENT_OPTION === Production });
+		cookies.delete('refresh_token', {
+			path: '/',
+			secure: PUBLIC_ENVIRONMENT_OPTION === Production
+		});
+		cookies.delete('status', { path: '/', secure: PUBLIC_ENVIRONMENT_OPTION === Production });
+		cookies.delete('role', { path: '/', secure: PUBLIC_ENVIRONMENT_OPTION === Production });
 		return { status, message };
 	}
 } satisfies Actions;
