@@ -15,13 +15,26 @@ export const actions = {
 		if (!success) {
 			return fail(status, { message });
 		}
-		cookies.delete('auth_token', { path: '/', secure: PUBLIC_ENVIRONMENT_OPTION === Production });
+		cookies.delete('auth_token', {
+			path: '/',
+			secure: PUBLIC_ENVIRONMENT_OPTION === Production,
+			httpOnly: true
+		});
 		cookies.delete('refresh_token', {
 			path: '/',
-			secure: PUBLIC_ENVIRONMENT_OPTION === Production
+			secure: PUBLIC_ENVIRONMENT_OPTION === Production,
+			httpOnly: true
 		});
-		cookies.delete('status', { path: '/', secure: PUBLIC_ENVIRONMENT_OPTION === Production });
-		cookies.delete('role', { path: '/', secure: PUBLIC_ENVIRONMENT_OPTION === Production });
+		cookies.delete('status', {
+			path: '/',
+			secure: PUBLIC_ENVIRONMENT_OPTION === Production,
+			httpOnly: true
+		});
+		cookies.delete('role', {
+			path: '/',
+			secure: PUBLIC_ENVIRONMENT_OPTION === Production,
+			httpOnly: true
+		});
 		return { status, message };
 	}
 } satisfies Actions;

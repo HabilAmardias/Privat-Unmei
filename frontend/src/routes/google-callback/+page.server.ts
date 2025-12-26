@@ -10,6 +10,10 @@ export const load: PageServerLoad = async ({ cookies }) => {
 	if (!authToken || !refreshToken || !status) {
 		throw error(401, { message: 'Google login failed' });
 	}
-	cookies.delete('oauthstate', { path: '/', secure: PUBLIC_ENVIRONMENT_OPTION === Production });
+	cookies.delete('oauthstate', {
+		path: '/',
+		secure: PUBLIC_ENVIRONMENT_OPTION === Production,
+		httpOnly: true
+	});
 	return { success: true, status };
 };
