@@ -95,7 +95,7 @@ func (csr *CourseScheduleRepositoryImpl) CompleteSchedule(ctx context.Context) e
 	return err
 }
 
-func (csr *CourseScheduleRepositoryImpl) CancelExpiredSchedule(ctx context.Context, ids []int) error {
+func (csr *CourseScheduleRepositoryImpl) CancelExpiredSchedule(ctx context.Context, ids []string) error {
 	var driver RepoDriver
 	driver = csr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {

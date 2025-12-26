@@ -325,7 +325,7 @@ func (cr *CourseRequestRepositoryImpl) CompleteRequest(ctx context.Context) erro
 	return err
 }
 
-func (cr *CourseRequestRepositoryImpl) CancelExpiredRequest(ctx context.Context, courseRequestIDs *[]int) error {
+func (cr *CourseRequestRepositoryImpl) CancelExpiredRequest(ctx context.Context, courseRequestIDs *[]string) error {
 	var driver RepoDriver = cr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
@@ -348,7 +348,7 @@ func (cr *CourseRequestRepositoryImpl) CancelExpiredRequest(ctx context.Context,
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var item int
+		var item string
 		if err := rows.Scan(&item); err != nil {
 			// not wrapping it on customerror because its just for cron
 			return err

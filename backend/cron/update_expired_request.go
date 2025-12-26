@@ -25,7 +25,7 @@ func NewCourseRequestCron(db *db.CustomDB, logger logger.CustomLogger) *CourseRe
 
 func (crc *CourseRequestCron) UpdateExpiredRequest() {
 	ctx := context.Background()
-	ids := new([]int)
+	ids := new([]string)
 	if err := crc.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := crc.cr.UpdateCourseTransactionCount(ctx); err != nil {
 			return err
