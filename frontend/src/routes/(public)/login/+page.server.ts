@@ -24,6 +24,7 @@ export const actions = {
 				path: c.path,
 				httpOnly: c.httpOnly,
 				maxAge: c.maxAge,
+				domain: c.domain,
 				sameSite: c.sameSite,
 				secure: PUBLIC_ENVIRONMENT_OPTION === Production
 			});
@@ -49,6 +50,7 @@ export const actions = {
 					path: val.path,
 					httpOnly: val.httpOnly,
 					maxAge: val.maxAge,
+					domain: val.domain,
 					sameSite: val.sameSite,
 					secure: PUBLIC_ENVIRONMENT_OPTION === Production
 				});

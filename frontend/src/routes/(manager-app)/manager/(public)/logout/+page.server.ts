@@ -1,28 +1,19 @@
 import { redirect, type Actions } from '@sveltejs/kit';
 import { Production } from '$lib/utils/constants';
-import { PUBLIC_ENVIRONMENT_OPTION } from '$env/static/public';
+import { PUBLIC_ENVIRONMENT_OPTION, PUBLIC_COOKIE_DOMAIN } from '$env/static/public';
 
 export const actions = {
 	default: async ({ cookies }) => {
-		cookies.delete('auth_token', {
+		const cookiesOption = {
 			path: '/',
 			secure: PUBLIC_ENVIRONMENT_OPTION === Production,
-			httpOnly: true
-		});
-		cookies.delete('refresh_token', {
-			path: '/',
-			secure: PUBLIC_ENVIRONMENT_OPTION === Production
-		});
-		cookies.delete('status', {
-			path: '/',
-			secure: PUBLIC_ENVIRONMENT_OPTION === Production,
-			httpOnly: true
-		});
-		cookies.delete('role', {
-			path: '/',
-			secure: PUBLIC_ENVIRONMENT_OPTION === Production,
-			httpOnly: true
-		});
+			httpOnly: true,
+			domain: PUBLIC_COOKIE_DOMAIN
+		};
+		cookies.delete('auth_token', cookiesOption);
+		cookies.delete('refresh_token', cookiesOption);
+		cookies.delete('status', cookiesOption);
+		cookies.delete('role', cookiesOption);
 		throw redirect(303, '/manager/login');
 	}
 } satisfies Actions;

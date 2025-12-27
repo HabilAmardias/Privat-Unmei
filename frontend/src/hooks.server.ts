@@ -26,6 +26,7 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 					event.cookies.set(val.key, val.value, {
 						path: val.path,
 						httpOnly: val.httpOnly,
+						domain: val.domain,
 						maxAge: val.maxAge,
 						sameSite: val.sameSite,
 						secure: PUBLIC_ENVIRONMENT_OPTION === Production
@@ -74,6 +75,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 					path: val.path,
 					httpOnly: val.httpOnly,
 					maxAge: val.maxAge,
+					domain: val.domain,
 					sameSite: val.sameSite,
 					secure: PUBLIC_ENVIRONMENT_OPTION === Production
 				});
