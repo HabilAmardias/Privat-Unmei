@@ -19,7 +19,7 @@
 
 	onMount(() => {
 		View.handleInitialScroll();
-		const url = `ws://localhost:8080/ws/v1/chatrooms/${params.slug}/messages`;
+		const url = `/ws/v1/chatrooms/${params.slug}/messages`;
 		const socket = new WebSocket(url);
 		socket.onopen = () => {
 			console.log('Connection estabilished');
