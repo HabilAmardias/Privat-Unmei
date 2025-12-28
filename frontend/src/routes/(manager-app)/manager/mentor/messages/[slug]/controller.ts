@@ -19,6 +19,11 @@ class ChatroomController {
 		const { success, message, status } = await FetchData(fetch, url, 'POST', reqBody);
 		return { success, message, status };
 	}
+	async updateLastRead(fetch: Fetch, id: string) {
+		const url = `/api/v1/chatrooms/me/${id}/last-read`;
+		const { success, message, status } = await FetchData(fetch, url, 'GET');
+		return { success, message, status };
+	}
 	async getInfo(fetch: Fetch, id: string) {
 		const url = `/api/v1/chatrooms/${id}`;
 		const { success, message, status, res } = await FetchData(fetch, url, 'GET');

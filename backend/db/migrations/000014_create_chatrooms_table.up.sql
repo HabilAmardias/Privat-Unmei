@@ -5,5 +5,7 @@ create table chatrooms (
 	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMPTZ,
+	last_read_by_mentor TIMESTAMPTZ,
+	last_read_by_student TIMESTAMPTZ,
 	UNIQUE(student_id, mentor_id)
 );

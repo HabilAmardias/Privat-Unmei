@@ -1,10 +1,7 @@
-<script lang="ts">
-	import { onMount } from 'svelte';
-	import { enhance } from '$app/forms';
-
-	onMount(() => {
-		document.querySelector('form')?.requestSubmit();
-	});
+<script>
+	import Loading from '$lib/components/loader/Loading.svelte';
 </script>
 
-<form method="POST" use:enhance></form>
+<div class="h-dvh w-full">
+	<Loading />
+</div>

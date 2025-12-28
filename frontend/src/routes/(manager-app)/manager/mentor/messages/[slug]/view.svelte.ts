@@ -1,6 +1,9 @@
 import type { EnhancementArgs, EnhancementReturn, SeekPaginatedResponse } from '$lib/types';
 import { CreateToast } from '$lib/utils/helper';
 import type { MessageInfo } from './model';
+import { type BeforeNavigate } from '@sveltejs/kit';
+import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
 
 export class ChatroomView {
 	messages = $state<MessageInfo[]>([]);
@@ -8,9 +11,11 @@ export class ChatroomView {
 	limit = $state<number>(15);
 	totalRow = $state<number>(15);
 	messageContent = $state<string>('');
+	isNavigatingAfterSubmit = $state<boolean>(false);
 	disableSendMessage = $derived<boolean>(
 		this.messageContent.length > 180 || this.messageContent.length === 0
 	);
+	updateLastReadForm = $state<HTMLFormElement>();
 	endRef = $state<HTMLDivElement>();
 	getMessageForm = $state<HTMLFormElement>();
 	isInitialLoad = $state<boolean>(true);
@@ -24,6 +29,19 @@ export class ChatroomView {
 		this.limit = m.page_info.limit;
 		this.totalRow = m.page_info.total_row;
 	}
+	onNavigate = (n: BeforeNavigate) => {
+		if (this.isNavigatingAfterSubmit) {
+			this.isNavigatingAfterSubmit = false;
+			return;
+		}
+		if (n.to?.route.id === '/(manager-app)/manager/mentor/messages') {
+			n.cancel();
+			this.updateLastReadForm?.requestSubmit();
+			return;
+		}
+		const formData = new FormData();
+		navigator.sendBeacon('?/updateLastRead', formData);
+	};
 	scrollToBottom = (smooth: boolean = true) => {
 		if (this.endRef) {
 			this.endRef.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
@@ -34,6 +52,13 @@ export class ChatroomView {
 			this.scrollToBottom(false);
 			this.isInitialLoad = false;
 		}
+	};
+	onUpdateLastRead = () => {
+		return async ({ update }: EnhancementReturn) => {
+			await update({ reset: false });
+			this.isNavigatingAfterSubmit = true;
+			goto(resolve('/(manager-app)/manager/mentor/messages'));
+		};
 	};
 	onSendMessage = () => {
 		return async ({ result }: EnhancementReturn) => {

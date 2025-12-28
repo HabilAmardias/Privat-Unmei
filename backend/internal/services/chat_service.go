@@ -23,6 +23,52 @@ func CreateChatService(chr *repositories.ChatRepositoryImpl, ur *repositories.Us
 	return &ChatServiceImpl{chr, ur, sr, mr, tmr}
 }
 
+func (chs *ChatServiceImpl) UpdateLastRead(ctx context.Context, param entity.UpdateLastReadParam) error {
+	chatroom := new(entity.Chatroom)
+	user := new(entity.User)
+
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		return chs.ur.FindByID(ctx, param.UserID, user)
+	})
+	if param.Role == constants.StudentRole {
+		student := new(entity.Student)
+		g.Go(func() error {
+			return chs.sr.FindByID(ctx, param.UserID, student)
+		})
+	}
+	if param.Role == constants.MentorRole {
+		mentor := new(entity.Mentor)
+		g.Go(func() error {
+			return chs.mr.FindByID(ctx, param.UserID, mentor, false)
+		})
+	}
+	g.Go(func() error {
+		if err := chs.chr.FindByID(ctx, param.ChatroomID, chatroom); err != nil {
+			return err
+		}
+		if chatroom.MentorID != param.UserID && chatroom.StudentID != param.UserID {
+			return customerrors.NewError(
+				"unauthorized",
+				errors.New("chatroom does not belong to the user"),
+				customerrors.Unauthenticate,
+			)
+		}
+		return nil
+	})
+	if err := g.Wait(); err != nil {
+		return err
+	}
+	if param.Role == constants.StudentRole {
+		return chs.chr.UpdateStudentLastRead(ctx, param.ChatroomID)
+	}
+	if param.Role == constants.MentorRole {
+		return chs.chr.UpdateMentorLastRead(ctx, param.ChatroomID)
+	}
+	return nil
+}
+
 func (chs *ChatServiceImpl) GetChatroom(ctx context.Context, param entity.GetChatroomParam) (string, error) {
 	chatroom := new(entity.Chatroom)
 	user := new(entity.User)

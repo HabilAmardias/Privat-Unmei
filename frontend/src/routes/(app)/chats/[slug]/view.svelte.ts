@@ -2,6 +2,9 @@ import type { EnhancementArgs, SeekPaginatedResponse } from '$lib/types';
 import type { MessageInfo } from './model';
 import type { EnhancementReturn } from '$lib/types';
 import { CreateToast } from '$lib/utils/helper';
+import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
+import { type BeforeNavigate } from '@sveltejs/kit';
 
 export class ChatroomView {
 	messages = $state<MessageInfo[]>([]);
@@ -12,6 +15,8 @@ export class ChatroomView {
 	disableSendMessage = $derived<boolean>(
 		this.messageContent.length > 180 || this.messageContent.length === 0
 	);
+	updateLastReadForm = $state<HTMLFormElement>();
+	isNavigatingAfterSubmit = $state<boolean>(false);
 	endRef = $state<HTMLDivElement>();
 	getMessageForm = $state<HTMLFormElement>();
 	isInitialLoad = $state<boolean>(true);
@@ -35,6 +40,26 @@ export class ChatroomView {
 			this.scrollToBottom(false);
 			this.isInitialLoad = false;
 		}
+	};
+	onNavigate = (n: BeforeNavigate) => {
+		if (this.isNavigatingAfterSubmit) {
+			this.isNavigatingAfterSubmit = false;
+			return;
+		}
+		if (n.to?.route.id === '/(app)/chats') {
+			n.cancel();
+			this.updateLastReadForm?.requestSubmit();
+			return;
+		}
+		const formData = new FormData();
+		navigator.sendBeacon('?/updateLastRead', formData);
+	};
+	onUpdateLastRead = () => {
+		return async ({ update }: EnhancementReturn) => {
+			await update({ reset: false });
+			this.isNavigatingAfterSubmit = true;
+			goto(resolve('/(app)/chats'));
+		};
 	};
 	onSendMessage = () => {
 		return async ({ result }: EnhancementReturn) => {

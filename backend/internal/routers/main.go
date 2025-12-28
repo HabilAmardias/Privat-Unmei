@@ -309,6 +309,7 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		c.RBACCacheRepository,
 		c.Logger,
 	), c.CourseRequestHandler.StudentCourseRequestDetail)
+	v1.GET("/chatrooms/me/:id/last-read", c.ChatHandler.UpdateLastRead)
 	v1.GET("/chatrooms/users/:id", c.ChatHandler.GetChatroom)
 	v1.GET("/chatrooms/me", c.ChatHandler.GetUserChatrooms)
 	v1.GET("/chatrooms/:id", c.ChatHandler.GetChatroomInfo)

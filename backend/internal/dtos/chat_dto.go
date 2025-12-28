@@ -22,6 +22,7 @@ type (
 		Username         string `json:"username"`
 		UserPublicID     string `json:"public_id"`
 		UserProfileImage string `json:"profile_image"`
+		UnreadCount      int    `json:"unread_count"`
 	}
 	MessageRes struct {
 		ID             int    `json:"id"`
