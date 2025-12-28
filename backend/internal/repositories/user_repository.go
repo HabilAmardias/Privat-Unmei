@@ -113,6 +113,14 @@ func (ur *UserRepositoryImpl) AddNewUser(ctx context.Context, user *entity.User)
 	INSERT INTO users (name, email, password_hash, profile_image, status)
 	VALUES
 	($1, $2, $3, $4, $5)
+	ON CONFLICT (email)
+	DO UPDATE SET
+		name = EXCLUDED.name,
+		password_hash = EXCLUDED.password_hash,
+		profile_image = EXCLUDED.profile_image,
+		status = EXCLUDED.status,
+		deleted_at = NULL
+	WHERE users.deleted_at IS NOT NULL
 	RETURNING id;
 	`
 	row := driver.QueryRow(query,

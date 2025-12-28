@@ -18,6 +18,52 @@ func CreateChatRepository(db *db.CustomDB) *ChatRepositoryImpl {
 	return &ChatRepositoryImpl{db}
 }
 
+func (chr *ChatRepositoryImpl) DeleteMentorChatrooms(ctx context.Context, mentorID string) error {
+	var driver RepoDriver = chr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE chatrooms
+	SET
+		deleted_at = CURRENT_TIMESTAMP,
+		updated_at = CURRENT_TIMESTAMP
+	WHERE mentor_id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, mentorID)
+	if err != nil {
+		return customerrors.NewError(
+			"something went wrong",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (chr *ChatRepositoryImpl) DeleteUserMessages(ctx context.Context, userID string) error {
+	var driver RepoDriver = chr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE messages
+	SET
+		deleted_at = CURRENT_TIMESTAMP,
+		updated_at = CURRENT_TIMESTAMP
+	WHERE sender_id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, userID)
+	if err != nil {
+		return customerrors.NewError(
+			"something went wrong",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (chr *ChatRepositoryImpl) UpdateMentorLastRead(ctx context.Context, chatroomID string) error {
 	var driver RepoDriver = chr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {

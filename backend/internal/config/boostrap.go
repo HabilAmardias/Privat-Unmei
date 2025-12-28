@@ -43,7 +43,7 @@ func Bootstrap(db *db.CustomDB, rc *redis.Client, logger logger.CustomLogger, ap
 	jwtUtil := utils.CreateJWTUtil()
 	googleUtil := utils.CreateGoogleUtil()
 
-	mentorService := services.CreateMentorService(transactionManager, userRepo, mentorRepo, topicRepo, courseCategoryRepo, mentorAvailabilityRepo, courseRequestRepo, courseRepo, paymentRepo, adminRepo, bcryptUtil, jwtUtil, cloudinaryUtil, gomailUtil, logger)
+	mentorService := services.CreateMentorService(transactionManager, userRepo, mentorRepo, topicRepo, courseCategoryRepo, mentorAvailabilityRepo, courseRequestRepo, courseRepo, paymentRepo, adminRepo, chatRepo, bcryptUtil, jwtUtil, cloudinaryUtil, gomailUtil, logger)
 	adminService := services.CreateAdminService(userRepo, adminRepo, studentRepo, mentorRepo, transactionManager, cloudinaryUtil, bcryptUtil, jwtUtil, gomailUtil)
 	studentService := services.CreateStudentService(userRepo, studentRepo, adminRepo, transactionManager, bcryptUtil, gomailUtil, cloudinaryUtil, jwtUtil, googleUtil)
 	courseCategoryService := services.CreateCourseCategoryService(userRepo, adminRepo, courseCategoryRepo, transactionManager)
