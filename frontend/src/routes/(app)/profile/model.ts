@@ -3,6 +3,7 @@ export type StudentProfile = {
 	bio: string;
 	profile_image: string;
 	public_id: string;
+	status: 'verified' | 'unverified';
 };
 
 export type StudentOrders = {

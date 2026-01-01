@@ -2,7 +2,7 @@ import { error, fail, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { controller } from './controller';
 
-export const load: PageServerLoad = async ({ fetch, cookies }) => {
+export const load: PageServerLoad = async ({ fetch }) => {
 	const [profile, orders] = await Promise.all([
 		controller.getProfile(fetch),
 		controller.getOrders(fetch)
@@ -10,8 +10,11 @@ export const load: PageServerLoad = async ({ fetch, cookies }) => {
 	if (!profile.success) {
 		throw error(profile.status, { message: profile.message });
 	}
-	const userStatus = cookies.get('status');
-	return { profile: profile.resBody.data, orders: orders.resBody, userStatus };
+	return {
+		profile: profile.resBody.data,
+		orders: orders.resBody,
+		userStatus: profile.resBody.data.status
+	};
 };
 
 export const actions = {

@@ -64,6 +64,7 @@ type (
 		PublicID     string
 		Bio          string
 		ProfileImage string
+		Status       string
 	}
 	RefreshTokenParam struct {
 		UserID string

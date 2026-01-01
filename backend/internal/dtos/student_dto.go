@@ -42,5 +42,6 @@ type (
 		PublicID     string `json:"public_id"`
 		Bio          string `json:"bio"`
 		ProfileImage string `json:"profile_image"`
+		Status       string `json:"status"`
 	}
 )

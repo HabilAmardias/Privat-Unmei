@@ -332,6 +332,39 @@ func (sh *StudentHandlerImpl) Verify(ctx *gin.Context) {
 	})
 }
 
+func (sh *StudentHandlerImpl) GoogleVerify(ctx *gin.Context) {
+	token, err := getAuthenticationToken(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.VerifyStudentParam{
+		Token: token,
+		ID:    claim.Subject,
+	}
+	authToken, refreshToken, status, err := sh.ss.GoogleVerify(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	domain := os.Getenv("COOKIE_DOMAIN")
+	secure := os.Getenv("ENVIRONMENT_OPTION") == constants.Production
+	ctx.SetCookie(constants.AUTH_COOKIE_KEY, authToken, int(constants.AUTH_AGE), "/", domain, secure, true)
+	ctx.SetCookie(constants.REFRESH_COOKIE_KEY, refreshToken, int(constants.REFRESH_AGE), "/", domain, secure, true)
+	ctx.SetCookie("status", status, int(constants.AUTH_AGE), "/", domain, secure, true)
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.MessageResponse{
+			Message: "Successfully Verified",
+		},
+	})
+}
+
 func (sh *StudentHandlerImpl) Login(ctx *gin.Context) {
 	domain := os.Getenv("COOKIE_DOMAIN")
 	var req dtos.LoginStudentReq
