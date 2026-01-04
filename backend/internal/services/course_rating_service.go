@@ -99,8 +99,13 @@ func (crs *CourseRatingServiceImpl) AddReview(ctx context.Context, param entity.
 		if err := crs.mr.FindByID(ctx, course.MentorID, mentor, true); err != nil {
 			return err
 		}
-		*updateMentor.RatingCount = mentor.RatingCount + 1
-		*updateMentor.TotalRating = float64(mentor.TotalRating) + float64(param.Rating)
+
+		newRatingCount := mentor.RatingCount + 1
+		updateMentor.RatingCount = &newRatingCount
+
+		newTotalRating := float64(mentor.TotalRating) + float64(param.Rating)
+		updateMentor.TotalRating = &newTotalRating
+
 		if err := crs.mr.UpdateMentor(ctx, course.MentorID, updateMentor); err != nil {
 			return err
 		}
