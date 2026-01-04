@@ -11,6 +11,7 @@
 	import Textarea from '$lib/components/form/Textarea.svelte';
 	import Button from '$lib/components/button/Button.svelte';
 	import NavigationButton from '$lib/components/button/NavigationButton.svelte';
+	import { Star } from '@lucide/svelte';
 
 	let { data }: PageProps = $props();
 	const View = new CourseDetailView(data.reviews, data.detail);
@@ -171,13 +172,16 @@
 			<ScrollArea orientation="vertical" viewportClasses="h-[400px] max-h-[400px]">
 				<ul class="flex flex-col gap-4 md:grid md:grid-cols-3">
 					{#each View.reviews as r (r.id)}
-						<li>
+						<li class="flex flex-col gap-2 rounded-lg bg-[var(--tertiary-color)] p-2">
 							<div class="flex w-full justify-between">
-								<p>{r.name}</p>
-								<p>{r.rating}</p>
+								<p class="font-bold text-[var(--primary-color)]">{r.name}</p>
+								<div>
+									<Star class="fill-current text-[var(--primary-color)]" />
+									<p class="font-bold text-[var(--primary-color)]">{r.rating}</p>
+								</div>
 							</div>
-							<p>{r.feedback}</p>
-							<p class="text-end">{r.created_at}</p>
+							<p class="text-[var(--secondary-color)]">{r.feedback}</p>
+							<p class="text-end text-[var(--secondary-color)]">{View.getDate(r.created_at)}</p>
 						</li>
 					{/each}
 				</ul>

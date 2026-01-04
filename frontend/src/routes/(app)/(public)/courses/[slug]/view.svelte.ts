@@ -45,6 +45,9 @@ export class CourseDetailView {
 		}
 		return s.charAt(0).toUpperCase() + s.slice(1);
 	}
+	getDate(s: string) {
+		return s.split('T')[0];
+	}
 	onPageChange = () => {
 		this.paginationForm?.requestSubmit();
 	};
@@ -73,6 +76,7 @@ export class CourseDetailView {
 				this.totalRow += 1;
 				const now = new SvelteDate().toDateString();
 				if (this.reviews.length < this.limit) {
+					console.log('adding review....');
 					this.reviews.push({
 						id: result.data?.id,
 						course_id: result.data?.course_id,
