@@ -175,7 +175,7 @@
 						<li class="flex flex-col gap-2 rounded-lg bg-[var(--tertiary-color)] p-2">
 							<div class="flex w-full justify-between">
 								<p class="font-bold text-[var(--primary-color)]">{r.name}</p>
-								<div>
+								<div class="flex items-center gap-2">
 									<Star class="fill-current text-[var(--primary-color)]" />
 									<p class="font-bold text-[var(--primary-color)]">{r.rating}</p>
 								</div>
