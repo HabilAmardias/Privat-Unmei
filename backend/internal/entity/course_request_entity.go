@@ -113,6 +113,7 @@ type (
 	StudentCourseRequestDetailQuery struct {
 		CourseRequestID     string
 		CourseName          string
+		CourseID            int
 		MentorName          string
 		MentorID            string
 		MentorPublicID      string
@@ -126,5 +127,9 @@ type (
 		NumberOfParticipant int
 		ExpiredAt           *time.Time
 		Schedules           []CourseRequestSchedule
+	}
+	IsReviewedParam struct {
+		CourseID  int
+		StudentID string
 	}
 )

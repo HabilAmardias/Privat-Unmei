@@ -80,6 +80,7 @@ type (
 	StudentCourseRequestDetailRes struct {
 		CourseRequestID     string              `json:"course_request_id"`
 		CourseName          string              `json:"course_name"`
+		CourseID            int                 `json:"course_id"`
 		MentorID            string              `json:"mentor_id"`
 		MentorName          string              `json:"mentor_name"`
 		MentorPublicID      string              `json:"mentor_public_id"`
@@ -96,5 +97,8 @@ type (
 	}
 	OperationalCostRes struct {
 		Cost float64 `json:"operational_cost"`
+	}
+	IsReviewedRes struct {
+		IsReviewed bool `json:"is_reviewed"`
 	}
 )

@@ -4,6 +4,8 @@ import { SvelteDate } from 'svelte/reactivity';
 import { DismissToast } from '$lib/utils/helper';
 import type { RequestDetail } from './model';
 import { Banknote, BookMarked, CalendarCheck, Check, X } from '@lucide/svelte';
+import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
 
 export class RequestDetailView {
 	mentorID = $state<string>('');
@@ -11,12 +13,24 @@ export class RequestDetailView {
 	status = $state<string>('');
 	now = $state<SvelteDate>(new SvelteDate());
 	expiredAt = $state<string | null>('');
+	feedback = $state<string>('');
+	feedbackErr = $derived.by<Error | undefined>(() => {
+		if (this.feedback.length < 15) {
+			return new Error('Feedback must at least contain 15 characters');
+		}
+		return undefined;
+	});
+	reviewDisabled = $derived.by<boolean>(() => {
+		return this.feedbackErr ? true : false;
+	});
 	expiredIn = $derived.by<string | null>(() => {
 		if (this.expiredAt) {
 			return this.getTimeDifference(this.expiredAt, this.now);
 		}
 		return null;
 	});
+	star = $state<number>(1);
+	courseID = $state<number>(0);
 
 	statuses = [
 		{ id: 'reserved', label: 'Reserved', icon: BookMarked },
@@ -30,6 +44,7 @@ export class RequestDetailView {
 		this.mentorID = d.mentor_id;
 		this.status = d.status;
 		this.expiredAt = d.expired_at;
+		this.courseID = d.course_id;
 	}
 	convertToDate = (datetime: string) => {
 		const date = new SvelteDate(datetime);
@@ -72,4 +87,18 @@ export class RequestDetailView {
 
 		return `${hours}h ${minutes}m`;
 	}
+	onCreateReview = (args: EnhancementArgs) => {
+		const loadID = CreateToast('loading', 'loading....');
+		args.formData.append('id', `${this.courseID}`);
+		return async ({ result }: EnhancementReturn) => {
+			DismissToast(loadID);
+			if (result.type === 'success') {
+				CreateToast('success', 'successfully create review');
+				goto(resolve('/(app)/profile'));
+			}
+			if (result.type === 'failure') {
+				CreateToast('error', result.data?.message);
+			}
+		};
+	};
 }

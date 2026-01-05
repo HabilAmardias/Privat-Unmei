@@ -48,23 +48,6 @@ export const actions = {
 			reviews: resBody.data
 		};
 	},
-	createReview: async ({ fetch, request, params }) => {
-		if (!params.slug) {
-			return fail(404, { message: 'course not found' });
-		}
-		const { success, message, status, resBody } = await controller.createReview(
-			fetch,
-			request,
-			params.slug
-		);
-		if (!success) {
-			return fail(status, { message });
-		}
-		return {
-			id: resBody.data.id,
-			course_id: parseInt(params.slug)
-		};
-	},
 	messageMentor: async ({ fetch, request }) => {
 		const { success, status, message, resBody } = await controller.messageMentor(fetch, request);
 		if (!success) {

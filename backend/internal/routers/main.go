@@ -120,6 +120,7 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		c.RBACCacheRepository,
 		c.Logger,
 	), c.CourseRatingHandler.AddReview)
+	v1.GET("/courses/:id/reviews/me", c.CourseRatingHandler.IsCourseReviewed)
 	v1.GET("/verify/send", c.StudentHandler.SendVerificationEmail)
 	v1.PATCH("/courses/:id", middlewares.AuthorizationMiddleware(
 		constants.UpdateOwnPermission,

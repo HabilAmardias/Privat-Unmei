@@ -7,6 +7,8 @@
 	import NavigationButton from '$lib/components/button/NavigationButton.svelte';
 	import { onMount } from 'svelte';
 	import { SvelteDate } from 'svelte/reactivity';
+	import RatingGroup from '$lib/components/rating/RatingGroup.svelte';
+	import Textarea from '$lib/components/form/Textarea.svelte';
 
 	let { data }: PageProps = $props();
 	const View = new RequestDetailView(data.detail);
@@ -134,7 +136,7 @@
 	<div class="flex flex-col gap-4">
 		<p class="font-bold text-[var(--tertiary-color)]">Schedules:</p>
 		{#if data.detail.schedules}
-			<ScrollArea orientation="vertical" viewportClasses="h-[500px] max-h-[500px]">
+			<ScrollArea orientation="vertical" viewportClasses="max-h-[500px]">
 				<ul class="flex flex-col gap-4">
 					{#each data.detail.schedules as sch (sch.date)}
 						<li class="rounded-lg bg-[var(--tertiary-color)] p-4 text-[var(--secondary-color)]">
@@ -148,4 +150,25 @@
 			<b class="text-[var(--tertiary-color)]">No schedules found</b>
 		{/if}
 	</div>
+	{#if View.status === 'completed' && !data.isReviewed}
+		<h3 class="text-xl font-bold text-[var(--tertiary-color)]">Write Review</h3>
+		<form
+			use:enhance={View.onCreateReview}
+			class="flex flex-col gap-4"
+			action="?/createReview"
+			method="post"
+		>
+			<RatingGroup bind:value={View.star} name="rating" />
+			<Textarea
+				err={View.feedbackErr}
+				bind:value={View.feedback}
+				name="feedback"
+				id="feedback"
+				placeholder="please insert feedback"
+			>
+				<p class="font-bold text-[var(--tertiary-color)]">Feedback:</p>
+			</Textarea>
+			<Button full disabled={View.reviewDisabled} type="submit">Submit</Button>
+		</form>
+	{/if}
 </div>

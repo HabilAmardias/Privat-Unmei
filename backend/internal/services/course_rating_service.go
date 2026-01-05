@@ -118,3 +118,22 @@ func (crs *CourseRatingServiceImpl) AddReview(ctx context.Context, param entity.
 	}
 	return rating.ID, nil
 }
+
+func (crs *CourseRatingServiceImpl) IsAlreadyReviewed(ctx context.Context, param entity.IsReviewedParam) (bool, error) {
+	rating := new(entity.CourseRating)
+	if err := crs.crr.FindByCourseIDAndStudentID(ctx, param.CourseID, param.StudentID, rating); err != nil {
+		var parsedErr *customerrors.CustomError
+		if !errors.As(err, &parsedErr) {
+			return false, customerrors.NewError(
+				"something went wrong",
+				errors.New("cannot parse error"),
+				customerrors.CommonErr,
+			)
+		}
+		if parsedErr.ErrCode != customerrors.ItemNotExist {
+			return false, err
+		}
+		return false, nil
+	}
+	return true, nil
+}

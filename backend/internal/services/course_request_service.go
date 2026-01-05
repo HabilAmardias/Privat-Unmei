@@ -123,6 +123,7 @@ func (crs *CourseRequestServiceImpl) StudentCourseRequestDetail(ctx context.Cont
 	res := &entity.StudentCourseRequestDetailQuery{
 		CourseRequestID:     courseRequest.ID,
 		CourseName:          course.Title,
+		CourseID:            course.ID,
 		MentorName:          userMentor.Name,
 		MentorPublicID:      userMentor.PublicID,
 		TotalPrice:          payment.TotalPrice,

@@ -141,26 +141,6 @@
 		</div>
 	</div>
 	<h2 class="text-xl font-bold text-[var(--tertiary-color)]">Reviews</h2>
-	{#if data.profile}
-		<form
-			use:enhance={View.onCreateReview}
-			class="flex flex-col gap-4"
-			action="?/createReview"
-			method="post"
-		>
-			<RatingGroup bind:value={View.star} name="rating" />
-			<Textarea
-				err={View.feedbackErr}
-				bind:value={View.feedback}
-				name="feedback"
-				id="feedback"
-				placeholder="please insert feedback"
-			>
-				<p class="font-bold text-[var(--tertiary-color)]">Feedback:</p>
-			</Textarea>
-			<Button full disabled={View.reviewDisabled} type="submit">Submit</Button>
-		</form>
-	{/if}
 	<div>
 		{#if View.isLoading}
 			<Loading />
