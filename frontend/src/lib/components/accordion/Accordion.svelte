@@ -28,7 +28,7 @@
 			</Accordion.Header>
 			<Accordion.Content class="accordion-content overflow-hidden">
 				<div class="pb-4">
-					{item.content}
+					{@html item.content}
 				</div>
 			</Accordion.Content>
 		</Accordion.Item>

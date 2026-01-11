@@ -16,7 +16,7 @@ export function IsTokenExpired(token: string | undefined) {
 }
 
 export function IsAlphaOnly(str: string) {
-	const reg = /^[a-zA-Z]+$/;
+	const reg = /^[a-zA-Z\s]+$/;
 	return reg.test(str);
 }
 

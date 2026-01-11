@@ -36,16 +36,30 @@
 			orientation="vertical"
 			viewportClasses="h-[550px] max-h-[550px] md:h-[500px] md:max-h-[500px]"
 		>
-			<ul class="flex gap-4">
+			<ul class="flex flex-col gap-4">
 				{#each View.chats as ch (ch.id)}
 					<li class="w-full rounded-lg bg-[var(--tertiary-color)] p-2">
 						<Link href={`/manager/mentor/messages/${ch.id}`}>
-							<div class="flex items-center gap-4">
-								<CldImage src={ch.profile_image} width={70} height={70} className="rounded-full" />
-								<div>
-									<p class="text-[var(--primary-color)]">{ch.username}</p>
-									<p class="text-[var(--secondary-color)]">{ch.public_id}</p>
+							<div class="flex justify-between">
+								<div class="flex items-center gap-4">
+									<CldImage
+										src={ch.profile_image}
+										width={70}
+										height={70}
+										className="rounded-full"
+									/>
+									<div>
+										<p class="text-[var(--primary-color)]">{ch.username}</p>
+										<p class="text-[var(--secondary-color)]">{ch.public_id}</p>
+									</div>
 								</div>
+								{#if ch.unread_count > 0}
+									<div class="my-auto rounded-full bg-[var(--primary-color)] p-2 px-4">
+										<p class="text-[var(--tertiary-color)]">
+											{ch.unread_count}
+										</p>
+									</div>
+								{/if}
 							</div>
 						</Link>
 					</li>

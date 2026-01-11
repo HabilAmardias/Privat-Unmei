@@ -41,6 +41,7 @@ func (crh *CourseRequestHandlerImpl) StudentCourseRequestDetail(ctx *gin.Context
 	res := dtos.StudentCourseRequestDetailRes{
 		CourseRequestID:     param.CourseRequestID,
 		CourseName:          detail.CourseName,
+		CourseID:            detail.CourseID,
 		MentorName:          detail.MentorName,
 		MentorID:            detail.MentorID,
 		MentorPublicID:      detail.MentorPublicID,

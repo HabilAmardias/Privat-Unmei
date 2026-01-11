@@ -11,6 +11,7 @@ import (
 	"privat-unmei/internal/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis_rate/v10"
 	"github.com/gorilla/websocket"
 	"github.com/redis/go-redis/v9"
 )
@@ -34,6 +35,7 @@ func Bootstrap(db *db.CustomDB, rc *redis.Client, logger logger.CustomLogger, ap
 	discountRepo := repositories.CreateDiscountRepository(db)
 	additionalCostRepo := repositories.CreateAdditionalCostRepository(db)
 	rbaccache := cache.CreateRBACCache(rc)
+	limiter := redis_rate.NewLimiter(rc)
 
 	bcryptUtil := utils.CreateBcryptUtil()
 	gomailUtil := utils.CreateGomailUtil()
@@ -41,7 +43,7 @@ func Bootstrap(db *db.CustomDB, rc *redis.Client, logger logger.CustomLogger, ap
 	jwtUtil := utils.CreateJWTUtil()
 	googleUtil := utils.CreateGoogleUtil()
 
-	mentorService := services.CreateMentorService(transactionManager, userRepo, mentorRepo, topicRepo, courseCategoryRepo, mentorAvailabilityRepo, courseRequestRepo, courseRepo, paymentRepo, adminRepo, bcryptUtil, jwtUtil, cloudinaryUtil, gomailUtil, logger)
+	mentorService := services.CreateMentorService(transactionManager, userRepo, mentorRepo, topicRepo, courseCategoryRepo, mentorAvailabilityRepo, courseRequestRepo, courseRepo, paymentRepo, adminRepo, chatRepo, bcryptUtil, jwtUtil, cloudinaryUtil, gomailUtil, logger)
 	adminService := services.CreateAdminService(userRepo, adminRepo, studentRepo, mentorRepo, transactionManager, cloudinaryUtil, bcryptUtil, jwtUtil, gomailUtil)
 	studentService := services.CreateStudentService(userRepo, studentRepo, adminRepo, transactionManager, bcryptUtil, gomailUtil, cloudinaryUtil, jwtUtil, googleUtil)
 	courseCategoryService := services.CreateCourseCategoryService(userRepo, adminRepo, courseCategoryRepo, transactionManager)
@@ -82,6 +84,7 @@ func Bootstrap(db *db.CustomDB, rc *redis.Client, logger logger.CustomLogger, ap
 		RBACCacheRepository:   rbaccache,
 		TokenUtil:             jwtUtil,
 		Logger:                logger,
+		Limiter:               limiter,
 	}
 	cfg.Setup()
 }

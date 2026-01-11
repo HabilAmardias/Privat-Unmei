@@ -2,15 +2,46 @@ import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
 import { CreateToast, DismissToast } from '$lib/utils/helper';
 import { SvelteDate } from 'svelte/reactivity';
 import type { RequestDetail } from './model';
+import { Banknote, BookMarked, CalendarCheck, Check, X } from '@lucide/svelte';
 
 export class RequestDetailView {
 	confirmDialogOpen = $state<boolean>(false);
 	acceptDialogOpen = $state<boolean>(false);
 	rejectDialogOpen = $state<boolean>(false);
 	paymentDetailDialogOpen = $state<boolean>(false);
+	detailState = $state<'detail' | 'payment'>('detail');
+	status = $state<string>('');
+	now = $state<SvelteDate>(new SvelteDate());
+	expiredAt = $state<string | null>('');
+	expiredIn = $derived.by<string | null>(() => {
+		if (this.expiredAt) {
+			return this.getTimeDifference(this.expiredAt, this.now);
+		}
+		return null;
+	});
 	studentID = $state<string>('');
+
+	statuses = [
+		{ id: 'reserved', label: 'Reserved', icon: BookMarked },
+		{ id: 'pending', label: 'Pending Payment', icon: Banknote },
+		{ id: 'scheduled', label: 'Scheduled', icon: CalendarCheck },
+		{ id: 'completed', label: 'Completed', icon: Check },
+		{ id: 'cancelled', label: 'Cancelled', icon: X }
+	];
 	constructor(d: RequestDetail) {
 		this.studentID = d.student_id;
+		this.status = d.status;
+		this.expiredAt = d.expired_at;
+	}
+	getTimeDifference(dbDate: string, now: SvelteDate) {
+		const date = new SvelteDate(dbDate);
+		const diffInMs = date.valueOf() - now.valueOf();
+
+		const totalMinutes = Math.floor(diffInMs / (1000 * 60));
+		const hours = Math.floor(totalMinutes / 60);
+		const minutes = totalMinutes % 60;
+
+		return `${hours}h ${minutes}m`;
 	}
 	onReject = () => {
 		return async ({ result, update }: EnhancementReturn) => {
@@ -50,7 +81,7 @@ export class RequestDetailView {
 	};
 	convertToDate = (datetime: string) => {
 		const date = new SvelteDate(datetime);
-		return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+		return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 	};
 	convertToDatetime = (input: string) => {
 		const [date, tz] = input.split('T');

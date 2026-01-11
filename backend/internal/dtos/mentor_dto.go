@@ -67,7 +67,7 @@ type (
 	}
 	LoginMentorReq struct {
 		Email    string `json:"email" binding:"required,email"`
-		Password string `json:"password" binding:"required,containsany=!@#?,min=8"`
+		Password string `json:"password" binding:"required"`
 	}
 	LoginMentorRes struct {
 		Token string `json:"token"`

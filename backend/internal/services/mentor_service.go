@@ -24,6 +24,7 @@ type MentorServiceImpl struct {
 	cr  *repositories.CourseRepositoryImpl
 	pr  *repositories.PaymentRepositoryImpl
 	ar  *repositories.AdminRepositoryImpl
+	chr *repositories.ChatRepositoryImpl
 	bu  *utils.BcryptUtil
 	ju  *utils.JWTUtil
 	cu  *utils.CloudinaryUtil
@@ -42,13 +43,14 @@ func CreateMentorService(
 	cr *repositories.CourseRepositoryImpl,
 	pr *repositories.PaymentRepositoryImpl,
 	ar *repositories.AdminRepositoryImpl,
+	chr *repositories.ChatRepositoryImpl,
 	bu *utils.BcryptUtil,
 	ju *utils.JWTUtil,
 	cu *utils.CloudinaryUtil,
 	gu *utils.GomailUtil,
 	lg logger.CustomLogger,
 ) *MentorServiceImpl {
-	return &MentorServiceImpl{tmr, ur, mr, tr, ccr, car, crr, cr, pr, ar, bu, ju, cu, gu, lg}
+	return &MentorServiceImpl{tmr, ur, mr, tr, ccr, car, crr, cr, pr, ar, chr, bu, ju, cu, gu, lg}
 }
 
 func (ms *MentorServiceImpl) GetMyPaymentMethod(ctx context.Context, param entity.GetMyPaymentMethodParam) (*[]entity.GetMentorPaymentMethodQuery, error) {
@@ -340,6 +342,12 @@ func (ms *MentorServiceImpl) DeleteMentor(ctx context.Context, param entity.Dele
 			return err
 		}
 		if err := ms.car.DeleteAvailability(ctx, param.ID); err != nil {
+			return err
+		}
+		if err := ms.chr.DeleteUserMessages(ctx, param.ID); err != nil {
+			return err
+		}
+		if err := ms.chr.DeleteMentorChatrooms(ctx, param.ID); err != nil {
 			return err
 		}
 		if err := ms.mr.DeleteMentor(ctx, mentor.ID); err != nil {

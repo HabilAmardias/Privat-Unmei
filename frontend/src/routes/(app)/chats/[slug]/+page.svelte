@@ -11,6 +11,7 @@
 	import { Send } from '@lucide/svelte';
 	import SentinelContainer from '$lib/components/container/SentinelContainer.svelte';
 	import Loading from '$lib/components/loader/Loading.svelte';
+	import { beforeNavigate, goto } from '$app/navigation';
 
 	const { data, params }: PageProps = $props();
 
@@ -18,7 +19,7 @@
 
 	onMount(() => {
 		View.handleInitialScroll();
-		const url = `ws://localhost:8080/ws/v1/chatrooms/${params.slug}/messages`;
+		const url = `/ws/v1/chatrooms/${params.slug}/messages`;
 		const socket = new WebSocket(url);
 		socket.onopen = () => {
 			console.log('Connection estabilished');
@@ -37,8 +38,15 @@
 			socket.close();
 		};
 	});
+	beforeNavigate(View.onNavigate);
 </script>
 
+<form
+	bind:this={View.updateLastReadForm}
+	use:enhance={View.onUpdateLastRead}
+	action="?/updateLastRead"
+	method="POST"
+></form>
 <form
 	bind:this={View.getMessageForm}
 	use:enhance={View.onGetMessage}

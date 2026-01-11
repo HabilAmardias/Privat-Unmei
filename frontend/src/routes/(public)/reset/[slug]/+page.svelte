@@ -27,7 +27,7 @@
 			View.setIsLoading(false);
 			if (result.type === 'success') {
 				CreateToast('success', 'successfully reset password');
-				await goto('/login', { replaceState: true });
+				await goto('/logout', { replaceState: true });
 			}
 			if (result.type === 'failure') {
 				CreateToast('error', result.data?.message);

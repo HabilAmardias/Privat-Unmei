@@ -1,31 +1,7 @@
-import type { Fetch, CookiesData, SameSite } from '$lib/types';
-import { FetchData } from '$lib/utils';
+import type { CookiesData, SameSite } from '$lib/types';
 
 class CookieController {
-	async refresh(fetch: Fetch): Promise<{
-		success: boolean;
-		cookiesData?: CookiesData[];
-		message: string;
-		status: number;
-	}> {
-		const url = 'http://localhost:8080/api/v1/refresh';
-		const { success, res, status, message } = await FetchData(fetch, url);
-		if (!success) {
-			return {
-				success,
-				status,
-				message
-			};
-		}
-		const cookiesData = this.#getCookies(res!);
-		return {
-			success: true,
-			status,
-			cookiesData,
-			message: 'successfully refresh token'
-		};
-	}
-	#getCookies(res: Response) {
+	GetCookies(res: Response) {
 		const out: CookiesData[] = [];
 		const setCookies = res.headers.getSetCookie();
 		setCookies.forEach((val) => {

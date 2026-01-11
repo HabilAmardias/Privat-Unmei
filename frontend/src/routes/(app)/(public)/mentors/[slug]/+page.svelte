@@ -58,27 +58,29 @@
 			</div>
 		{/if}
 	</div>
-	<div class="flex flex-col gap-4">
+	<div class="grid grid-cols-2 gap-4 rounded-lg bg-[var(--tertiary-color)] p-4">
 		<div>
-			<p class="font-bold text-[var(--tertiary-color)]">Experience:</p>
-			<p>{data.profile.years_of_experience} Year</p>
+			<p class="font-bold text-[var(--primary-color)]">Experience:</p>
+			<p class="text-[var(--secondary-color)]">{data.profile.years_of_experience} Year</p>
 		</div>
 		<div>
-			<p class="font-bold text-[var(--tertiary-color)]">Campus:</p>
-			<p>{data.profile.campus}</p>
+			<p class="font-bold text-[var(--primary-color)]">Campus:</p>
+			<p class="text-[var(--secondary-color)]">{data.profile.campus}</p>
 		</div>
 		<div>
-			<p class="font-bold text-[var(--tertiary-color)]">Degree:</p>
-			<p>{View.capitalizeFirstLetter(data.profile.degree)}</p>
+			<p class="font-bold text-[var(--primary-color)]">Degree:</p>
+			<p class="text-[var(--secondary-color)]">{View.capitalizeFirstLetter(data.profile.degree)}</p>
 		</div>
 		<div>
-			<p class="font-bold text-[var(--tertiary-color)]">Major:</p>
-			<p>{data.profile.major}</p>
+			<p class="font-bold text-[var(--primary-color)]">Major:</p>
+			<p class="text-[var(--secondary-color)]">{data.profile.major}</p>
 		</div>
 	</div>
-	<div class="flex flex-col">
-		<p class="font-bold text-[var(--tertiary-color)]">Bio:</p>
-		<p>{data.profile.bio}</p>
+	<p class="font-bold text-[var(--tertiary-color)]">Bio:</p>
+	<div class="h-[200px] rounded-lg bg-[var(--tertiary-color)] p-4">
+		<ScrollArea orientation="vertical" viewportClasses="h-[200px] max-h-[200px]">
+			<p class="text-[var(--secondary-color)]">{data.profile.bio}</p>
+		</ScrollArea>
 	</div>
 	<div class="flex flex-col gap-4">
 		<p class="font-bold text-[var(--tertiary-color)]">Schedules:</p>

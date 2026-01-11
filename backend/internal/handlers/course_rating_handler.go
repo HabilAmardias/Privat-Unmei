@@ -20,6 +20,39 @@ func CreateCourseRatingHandler(crs *services.CourseRatingServiceImpl) *CourseRat
 	return &CourseRatingHandlerImpl{crs}
 }
 
+func (crh *CourseRatingHandlerImpl) IsCourseReviewed(ctx *gin.Context) {
+	courseIDStr := ctx.Param("id")
+	courseID, err := strconv.Atoi(courseIDStr)
+	if err != nil {
+		ctx.Error(customerrors.NewError(
+			"invalid course credential",
+			err,
+			customerrors.InvalidAction,
+		))
+		return
+	}
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.IsReviewedParam{
+		StudentID: claim.Subject,
+		CourseID:  courseID,
+	}
+	reviewed, err := crh.crs.IsAlreadyReviewed(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.IsReviewedRes{
+			IsReviewed: reviewed,
+		},
+	})
+}
+
 func (crh *CourseRatingHandlerImpl) GetCourseReview(ctx *gin.Context) {
 	courseIDStr := ctx.Param("id")
 	courseID, err := strconv.Atoi(courseIDStr)

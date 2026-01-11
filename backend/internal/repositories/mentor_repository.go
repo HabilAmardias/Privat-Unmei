@@ -195,7 +195,15 @@ func (mr *MentorRepositoryImpl) AddNewMentor(ctx context.Context, mentor *entity
 	}
 	query := `
 	INSERT INTO mentors(id, years_of_experience, degree, major, campus)
-	VALUES ($1, $2, $3, $4, $5);
+	VALUES ($1, $2, $3, $4, $5)
+	ON CONFLICT (id)
+	DO UPDATE SET
+		years_of_experience = EXCLUDED.years_of_experience,
+		degree = EXCLUDED.degree,
+		major = EXCLUDED.major,
+		campus = EXCLUDED.campus,
+		deleted_at = NULL
+	WHERE mentors.deleted_at IS NOT NULL;
 	`
 	_, err := driver.Exec(
 		query,

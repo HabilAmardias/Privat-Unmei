@@ -18,6 +18,96 @@ func CreateChatRepository(db *db.CustomDB) *ChatRepositoryImpl {
 	return &ChatRepositoryImpl{db}
 }
 
+func (chr *ChatRepositoryImpl) DeleteMentorChatrooms(ctx context.Context, mentorID string) error {
+	var driver RepoDriver = chr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE chatrooms
+	SET
+		deleted_at = CURRENT_TIMESTAMP,
+		updated_at = CURRENT_TIMESTAMP
+	WHERE mentor_id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, mentorID)
+	if err != nil {
+		return customerrors.NewError(
+			"something went wrong",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (chr *ChatRepositoryImpl) DeleteUserMessages(ctx context.Context, userID string) error {
+	var driver RepoDriver = chr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE messages
+	SET
+		deleted_at = CURRENT_TIMESTAMP,
+		updated_at = CURRENT_TIMESTAMP
+	WHERE sender_id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, userID)
+	if err != nil {
+		return customerrors.NewError(
+			"something went wrong",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (chr *ChatRepositoryImpl) UpdateMentorLastRead(ctx context.Context, chatroomID string) error {
+	var driver RepoDriver = chr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE chatrooms
+	SET
+		last_read_by_mentor = CURRENT_TIMESTAMP
+	WHERE id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, chatroomID)
+	if err != nil {
+		return customerrors.NewError(
+			"something went wrong",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (chr *ChatRepositoryImpl) UpdateStudentLastRead(ctx context.Context, chatroomID string) error {
+	var driver RepoDriver = chr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE chatrooms
+	SET
+		last_read_by_student = CURRENT_TIMESTAMP
+	WHERE id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, chatroomID)
+	if err != nil {
+		return customerrors.NewError(
+			"something went wrong",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (chr *ChatRepositoryImpl) CreateChatroom(ctx context.Context, mentorID string, userID string, chatroom *entity.Chatroom) error {
 	var driver RepoDriver
 	driver = chr.DB
@@ -125,10 +215,19 @@ func (chr *ChatRepositoryImpl) GetUserChatrooms(ctx context.Context, userID stri
 		ch.mentor_id,
 		u.name,
 		u.public_id,
-		u.profile_image
+		u.profile_image,
+		COALESCE(COUNT(m.id), 0) as unread_count
 	FROM chatrooms ch
 	JOIN users u ON u.id = ch.mentor_id
-	WHERE ch.student_id = $1 AND ch.deleted_at IS NULL AND u.deleted_at IS NULL
+	LEFT JOIN messages m ON 
+		m.chatroom_id = ch.id 
+		AND m.created_at > ch.last_read_by_student 
+		AND m.deleted_at IS NULL
+	WHERE 
+		ch.student_id = $1 
+		AND ch.deleted_at IS NULL 
+		AND u.deleted_at IS NULL 
+	GROUP BY ch.id, ch.mentor_id, u.name, u.public_id, u.profile_image
 	ORDER BY ch.updated_at DESC
 	LIMIT $2
 	OFFSET $3
@@ -140,10 +239,20 @@ func (chr *ChatRepositoryImpl) GetUserChatrooms(ctx context.Context, userID stri
 			ch.student_id,
 			u.name,
 			u.public_id,
-			u.profile_image
+			u.profile_image,
+			COALESCE(COUNT(m.id), 0) as unread_count
 		FROM chatrooms ch
 		JOIN users u ON u.id = ch.student_id
-		WHERE ch.mentor_id = $1 AND ch.deleted_at IS NULL AND u.deleted_at IS NULL
+		LEFT JOIN messages m ON 
+			m.chatroom_id = ch.id 
+			AND m.created_at > ch.last_read_by_mentor 
+			AND m.deleted_at IS NULL
+		WHERE 
+			ch.mentor_id = $1 
+			AND ch.deleted_at IS NULL 
+			AND u.deleted_at IS NULL 
+			
+		GROUP BY ch.id, ch.student_id, u.name, u.public_id, u.profile_image
 		ORDER BY ch.updated_at DESC
 		LIMIT $2
 		OFFSET $3
@@ -166,6 +275,7 @@ func (chr *ChatRepositoryImpl) GetUserChatrooms(ctx context.Context, userID stri
 			&item.Username,
 			&item.UserPublicID,
 			&item.UserProfileImage,
+			&item.UnreadCount,
 		); err != nil {
 			return customerrors.NewError(
 				"failed to get chatrooms",

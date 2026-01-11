@@ -123,6 +123,7 @@ func (crs *CourseRequestServiceImpl) StudentCourseRequestDetail(ctx context.Cont
 	res := &entity.StudentCourseRequestDetailQuery{
 		CourseRequestID:     courseRequest.ID,
 		CourseName:          course.Title,
+		CourseID:            course.ID,
 		MentorName:          userMentor.Name,
 		MentorPublicID:      userMentor.PublicID,
 		TotalPrice:          payment.TotalPrice,
@@ -491,12 +492,11 @@ func (crs *CourseRequestServiceImpl) HandleCourseRequest(ctx context.Context, pa
 			if err := crs.pr.FindPaymentByRequestID(ctx, param.CourseRequestID, payment); err != nil {
 				return err
 			}
-			layout := "02-01-06 15:04:05"
 			go func() {
 				emailParam := entity.SendEmailParams{
 					Receiver:  userStudent.Email,
 					Subject:   "Payment Detail",
-					EmailBody: constants.PaymentInfoEmailBody(course.Title, user.Name, user.PublicID, payment.PaymentMethodName, payment.AccountNumber, payment.TotalPrice, courseRequest.ExpiredAt.Format(layout)),
+					EmailBody: constants.PaymentInfoEmailBody(course.Title, user.Name, user.PublicID, payment.PaymentMethodName, payment.AccountNumber, payment.TotalPrice, courseRequest.ExpiredAt.String()),
 				}
 				if err := crs.gu.SendEmail(emailParam); err != nil {
 					log.Println(err.Error())

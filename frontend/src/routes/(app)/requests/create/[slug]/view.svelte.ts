@@ -29,6 +29,13 @@ export class CreateRequestView {
 		this.getDiscountForm?.requestSubmit();
 	}, 500);
 
+	bookDisabled = $derived.by<boolean>(() => {
+		if (this.schedules.length === 0 || !this.selectedPayment || this.participant <= 0) {
+			return true;
+		}
+		return false;
+	});
+
 	constructor(d: CourseDetail, p: MentorPaymentInfo[], cost: number, discount: number) {
 		this.maxSession = d.max_total_session;
 		this.price = d.price;

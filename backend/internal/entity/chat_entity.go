@@ -42,11 +42,17 @@ type (
 		Username         string
 		UserPublicID     string
 		UserProfileImage string
+		UnreadCount      int
 	}
 	GetChatroomParam struct {
 		UserID       string
 		SecondUserID string
 		Role         int
+	}
+	UpdateLastReadParam struct {
+		UserID     string
+		Role       int
+		ChatroomID string
 	}
 	GetChatroomInfoParam struct {
 		ChatroomID string

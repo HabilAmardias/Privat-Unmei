@@ -1,5 +1,5 @@
 import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
-import { CreateToast, debounce, DismissToast } from '$lib/utils/helper';
+import { CreateToast, debounce, DismissToast, IsAlphaOnly } from '$lib/utils/helper';
 import { MAX_BIO_LENGTH } from '$lib/utils/constants';
 import { dayofWeeks } from './constants';
 import {
@@ -22,6 +22,15 @@ export class UpdateMentorProfileView {
 	});
 	profileImage = $state<FileList>();
 	name = $state<string | undefined>();
+	nameErr = $derived.by<Error | undefined>(() => {
+		if (!IsAlphaOnly(this.name!)) {
+			return new Error('name can only consist of alphabets');
+		}
+		if (this.name?.replaceAll(' ', '').length === 0) {
+			return new Error('please insert a valid name');
+		}
+		return undefined;
+	});
 	bio = $state<string | undefined>();
 	bioErr = $derived.by<Error | undefined>(() => {
 		if (this.bio && this.bio.length > MAX_BIO_LENGTH) {
@@ -129,6 +138,7 @@ export class UpdateMentorProfileView {
 			!this.campus ||
 			!this.degree ||
 			!this.major ||
+			this.nameErr ||
 			this.yoeErr
 		) {
 			return true;

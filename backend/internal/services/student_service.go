@@ -83,6 +83,7 @@ func (us *StudentServiceImpl) GetStudentProfile(ctx context.Context, param entit
 	profile.Bio = user.Bio
 	profile.ProfileImage = user.ProfileImage
 	profile.PublicID = user.PublicID
+	profile.Status = user.Status
 
 	return profile, nil
 }
@@ -119,17 +120,26 @@ func (us *StudentServiceImpl) ChangePassword(ctx context.Context, param entity.S
 }
 
 func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code string) (string, string, string, error) {
-	generateAuthAndRefreshToken := func(userID string) (string, string, error) {
-		authToken, err := us.ju.GenerateJWT(userID, constants.StudentRole, constants.ForLogin, constants.VerifiedStatus, constants.AUTH_AGE)
+	generateAuthAndRefreshToken := func(userID string, status string) (string, string, error) {
+		usedFor := constants.ForLogin
+		if status != constants.VerifiedStatus {
+			usedFor = constants.ForVerification
+		}
+		authToken, err := us.ju.GenerateJWT(userID, constants.StudentRole, usedFor, status, constants.AUTH_AGE)
 		if err != nil {
 			return "", "", err
 		}
-		refreshToken, err := us.ju.GenerateJWT(userID, constants.StudentRole, constants.ForRefresh, constants.VerifiedStatus, constants.REFRESH_AGE)
+		refreshToken, err := us.ju.GenerateJWT(userID, constants.StudentRole, constants.ForRefresh, status, constants.REFRESH_AGE)
 		if err != nil {
 			return "", "", err
 		}
 		return authToken, refreshToken, nil
 	}
+
+	var (
+		authToken    string
+		refreshToken string
+	)
 
 	oauthToken, err := us.goauth.Config.Exchange(context.Background(), code)
 	if err != nil {
@@ -201,23 +211,27 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 			newUser := &entity.User{
 				Email:        email,
 				Name:         strings.Split(email, "@")[0],
-				Status:       constants.VerifiedStatus,
+				Status:       constants.UnverifiedStatus,
 				Password:     hashed,
 				ProfileImage: constants.DefaultAvatar,
 			}
-			if err := us.ur.AddNewUser(ctx, newUser); err != nil {
+			if err := us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+				if err := us.ur.AddNewUser(ctx, newUser); err != nil {
+					return err
+				}
+				authToken, refreshToken, err = generateAuthAndRefreshToken(newUser.ID, newUser.Status)
+				if err != nil {
+					return err
+				}
+				newStudent := &entity.Student{
+					ID:          newUser.ID,
+					VerifyToken: &authToken,
+				}
+				return us.sr.AddNewStudent(ctx, newStudent)
+			}); err != nil {
 				return "", "", "", err
 			}
-			newStudent := &entity.Student{
-				ID: newUser.ID,
-			}
-			if err := us.sr.AddNewStudent(ctx, newStudent); err != nil {
-				return "", "", "", err
-			}
-			authToken, refreshToken, err := generateAuthAndRefreshToken(newUser.ID)
-			if err != nil {
-				return "", "", "", err
-			}
+
 			return authToken, refreshToken, newUser.Status, nil
 		}
 		return "", "", "", err
@@ -225,9 +239,14 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 	if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
 		return "", "", "", err
 	}
-	authToken, refreshToken, err := generateAuthAndRefreshToken(user.ID)
+	authToken, refreshToken, err = generateAuthAndRefreshToken(user.ID, user.Status)
 	if err != nil {
 		return "", "", "", err
+	}
+	if user.Status != constants.VerifiedStatus {
+		if err := us.sr.UpdateVerifyToken(ctx, user.ID, &authToken); err != nil {
+			return "", "", "", err
+		}
 	}
 	return authToken, refreshToken, user.Status, nil
 }
@@ -351,7 +370,7 @@ func (us *StudentServiceImpl) ResetPassword(ctx context.Context, param entity.Re
 		return us.ur.FindByID(ctx, param.ID, user)
 	})
 	g.Go(func() error {
-		return us.sr.FindByID(ctx, user.ID, student)
+		return us.sr.FindByID(ctx, param.ID, student)
 	})
 	if err := g.Wait(); err != nil {
 		return err
@@ -411,6 +430,50 @@ func (us *StudentServiceImpl) SendResetTokenEmail(ctx context.Context, email str
 	})
 }
 
+func (us *StudentServiceImpl) GoogleVerify(ctx context.Context, param entity.VerifyStudentParam) (string, string, string, error) {
+	g, ctx := errgroup.WithContext(ctx)
+
+	user := new(entity.User)
+	student := new(entity.Student)
+
+	g.Go(func() error {
+		return us.ur.FindByID(ctx, param.ID, user)
+	})
+	g.Go(func() error {
+		return us.sr.FindByID(ctx, param.ID, student)
+	})
+	if err := g.Wait(); err != nil {
+		return "", "", "", err
+	}
+	if student.VerifyToken == nil || param.Token != *student.VerifyToken {
+		return "", "", "", customerrors.NewError(
+			"invalid credential",
+			errors.New("invalid verify token"),
+			customerrors.Unauthenticate,
+		)
+	}
+	if err := us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := us.ur.UpdateUserStatus(ctx, constants.VerifiedStatus, user.ID); err != nil {
+			return err
+		}
+		if err := us.sr.UpdateVerifyToken(ctx, student.ID, nil); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return "", "", "", err
+	}
+	authToken, err := us.ju.GenerateJWT(param.ID, constants.StudentRole, constants.ForLogin, user.Status, constants.AUTH_AGE)
+	if err != nil {
+		return "", "", "", err
+	}
+	refreshToken, err := us.ju.GenerateJWT(param.ID, constants.StudentRole, constants.ForRefresh, user.Status, constants.REFRESH_AGE)
+	if err != nil {
+		return "", "", "", err
+	}
+	return authToken, refreshToken, user.Status, nil
+}
+
 func (us *StudentServiceImpl) Verify(ctx context.Context, param entity.VerifyStudentParam) error {
 	g, ctx := errgroup.WithContext(ctx)
 
@@ -421,7 +484,7 @@ func (us *StudentServiceImpl) Verify(ctx context.Context, param entity.VerifyStu
 		return us.ur.FindByID(ctx, param.ID, user)
 	})
 	g.Go(func() error {
-		return us.sr.FindByID(ctx, user.ID, student)
+		return us.sr.FindByID(ctx, param.ID, student)
 	})
 	if err := g.Wait(); err != nil {
 		return err

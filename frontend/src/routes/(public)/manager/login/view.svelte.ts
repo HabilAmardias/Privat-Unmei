@@ -10,17 +10,11 @@ export class ManagerAuthView {
 		return undefined;
 	});
 	password = $state<string>('');
-	passwordError = $derived.by<Error | undefined>(() => {
-		if (this.password && !this.#validatePassword(this.password)) {
-			return new Error('need at least 8 chars with 1 special char');
-		}
-		return undefined;
-	});
 	isLoading = $state<boolean>(false);
 	isDesktop = $state<boolean>(false);
 
 	loginDisabled = $derived.by<boolean>(() => {
-		if (!this.email || !this.password || this.emailError || this.passwordError || this.isLoading) {
+		if (!this.email || !this.password || this.emailError || this.isLoading) {
 			return true;
 		}
 		return false;
@@ -28,15 +22,6 @@ export class ManagerAuthView {
 	#validateEmail(email: string) {
 		const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		return pattern.test(email);
-	}
-	#validatePassword(password: string) {
-		const minLength = password.length >= 8;
-		const hasSpecialChar =
-			password.includes('!') ||
-			password.includes('@') ||
-			password.includes('#') ||
-			password.includes('?');
-		return minLength && hasSpecialChar;
 	}
 	setIsLoading(b: boolean) {
 		this.isLoading = b;

@@ -9,7 +9,7 @@ type (
 	}
 	LoginStudentReq struct {
 		Email    string `json:"email" binding:"required,email"`
-		Password string `json:"password" binding:"required,containsany=!@#?,min=8"`
+		Password string `json:"password" binding:"required"`
 	}
 
 	LoginStudentRes struct {
@@ -42,5 +42,6 @@ type (
 		PublicID     string `json:"public_id"`
 		Bio          string `json:"bio"`
 		ProfileImage string `json:"profile_image"`
+		Status       string `json:"status"`
 	}
 )

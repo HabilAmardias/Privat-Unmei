@@ -3,15 +3,20 @@ import type { PageServerLoad } from './$types';
 import { controller } from './controller';
 
 export const load: PageServerLoad = async ({ fetch, params }) => {
-	const { success, message, status, resBody } = await controller.getRequestDetail(
+	const requestDetailRes = await controller.getRequestDetail(fetch, params.slug);
+	if (!requestDetailRes.success) {
+		throw error(requestDetailRes.status, { message: requestDetailRes.message });
+	}
+	const isReviewedRes = await controller.isCourseReviewed(
 		fetch,
-		params.slug
+		requestDetailRes.resBody.data.course_id
 	);
-	if (!success) {
-		throw error(status, { message });
+	if (!isReviewedRes.success) {
+		throw error(isReviewedRes.status, { message: isReviewedRes.message });
 	}
 	return {
-		detail: resBody.data
+		detail: requestDetailRes.resBody.data,
+		isReviewed: isReviewedRes.resBody.data.is_reviewed
 	};
 };
 
@@ -22,5 +27,18 @@ export const actions = {
 			return fail(status, { message });
 		}
 		throw redirect(303, `/chats/${resBody.data.id}`);
+	},
+	createReview: async ({ fetch, request, params }) => {
+		if (!params.slug) {
+			return fail(404, { message: 'course not found' });
+		}
+		const { success, message, status, resBody } = await controller.createReview(fetch, request);
+		if (!success) {
+			return fail(status, { message });
+		}
+		return {
+			id: resBody.data.id,
+			course_id: parseInt(params.slug)
+		};
 	}
 } satisfies Actions;

@@ -1,10 +1,12 @@
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { controller } from './controller';
 import type { PageServerLoad } from './$types';
+import { Production } from '$lib/utils/constants';
+import { PUBLIC_ENVIRONMENT_OPTION } from '$env/static/public';
 
 export const load: PageServerLoad = ({ cookies }) => {
-	if (cookies.get('auth_token')) {
-		redirect(303, '/courses');
+	if (cookies.get('auth_token') || cookies.get('refresh_token')) {
+		throw redirect(303, '/courses');
 	}
 };
 
@@ -20,10 +22,11 @@ export const actions = {
 		cookiesData?.forEach((c) => {
 			cookies.set(c.key, c.value, {
 				path: c.path,
-				domain: c.domain,
 				httpOnly: c.httpOnly,
 				maxAge: c.maxAge,
-				sameSite: c.sameSite
+				domain: c.domain,
+				sameSite: c.sameSite,
+				secure: PUBLIC_ENVIRONMENT_OPTION === Production
 			});
 		});
 		return { success, userStatus };
@@ -43,7 +46,14 @@ export const actions = {
 		const redirectUrl = res?.headers.get('Location');
 		if (redirectUrl) {
 			cookiesData.forEach((val) => {
-				cookies.set(val.key, val.value, { path: val.path });
+				cookies.set(val.key, val.value, {
+					path: val.path,
+					httpOnly: val.httpOnly,
+					maxAge: val.maxAge,
+					domain: val.domain,
+					sameSite: val.sameSite,
+					secure: PUBLIC_ENVIRONMENT_OPTION === Production
+				});
 			});
 			redirect(303, redirectUrl);
 		}

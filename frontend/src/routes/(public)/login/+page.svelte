@@ -15,6 +15,8 @@
 	import CldImage from '$lib/components/image/CldImage.svelte';
 	import { PrivatUnmeiLogo } from '$lib/utils/constants';
 	import { CreateToast, DismissToast } from '$lib/utils/helper';
+	import Dialog from '$lib/components/dialog/Dialog.svelte';
+	import TAC from './TAC.svelte';
 
 	const View = new AuthView();
 
@@ -80,6 +82,14 @@
 	}
 </script>
 
+{#snippet TACDialogTitle()}
+	Terms and Condition
+{/snippet}
+
+{#snippet TACDialogDescription()}
+	<p class="text-justify text-[var(--secondary-color)]"></p>
+{/snippet}
+
 <svelte:head>
 	<title>Login - Privat Unmei</title>
 	<meta name="description" content="Login - Privat Unmei" />
@@ -136,6 +146,20 @@
 					name="repeat-password"
 					bind:value={View.repeatPassword}
 				/>
+				<Dialog
+					bind:open={View.openDialog}
+					buttonText="Terms and Condition"
+					buttonClass="text-[var(--tertiary-color)] hover:text-[var(--primary-color)] cursor-pointer"
+					title={TACDialogTitle}
+					description={TACDialogDescription}
+				>
+					<TAC
+						onClick={() => {
+							View.agreed = true;
+							View.openDialog = false;
+						}}
+					/>
+				</Dialog>
 				<Button disabled={View.registerDisabled} full={true} type="submit" formAction="?/register"
 					>Register</Button
 				>
@@ -161,7 +185,6 @@
 					bind:value={View.email}
 				/>
 				<InputSecret
-					err={View.passwordError}
 					id="password"
 					placeholder="Password"
 					name="password"

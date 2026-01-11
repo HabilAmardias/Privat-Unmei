@@ -23,6 +23,7 @@ const (
 	ExpiredInterval         = 24 * time.Hour
 	NoRating                = 0
 	MaxLimit                = 25
+	Production              = "PROD"
 )
 
 const (

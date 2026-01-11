@@ -40,7 +40,8 @@ func (sh *StudentHandlerImpl) RefreshToken(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	ctx.SetCookie(constants.AUTH_COOKIE_KEY, token, int(constants.AUTH_AGE), "/", domain, false, true)
+	secure := os.Getenv("ENVIRONMENT_OPTION") == constants.Production
+	ctx.SetCookie(constants.AUTH_COOKIE_KEY, token, int(constants.AUTH_AGE), "/", domain, secure, true)
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
 		Data: dtos.MessageResponse{
@@ -101,7 +102,8 @@ func (sh *StudentHandlerImpl) GoogleLogin(ctx *gin.Context) {
 	b := make([]byte, 16)
 	rand.Read(b)
 	state := base64.RawURLEncoding.EncodeToString(b)
-	ctx.SetCookie("oauthstate", state, int(30*time.Minute), "/", domain, true, false)
+	secure := os.Getenv("ENVIRONMENT_OPTION") == constants.Production
+	ctx.SetCookie("oauthstate", state, int(30*time.Minute), "/", domain, secure, true)
 	url := sh.ss.GoogleLogin(state)
 
 	ctx.Redirect(http.StatusTemporaryRedirect, url)
@@ -141,9 +143,10 @@ func (sh *StudentHandlerImpl) GoogleLoginCallback(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	ctx.SetCookie(constants.AUTH_COOKIE_KEY, authToken, int(constants.AUTH_AGE), "/", domain, false, true)
-	ctx.SetCookie(constants.REFRESH_COOKIE_KEY, refreshToken, int(constants.REFRESH_AGE), "/", domain, false, true)
-	ctx.SetCookie("status", userStatus, int(constants.REFRESH_AGE), "/", domain, false, true)
+	secure := os.Getenv("ENVIRONMENT_OPTION") == constants.Production
+	ctx.SetCookie(constants.AUTH_COOKIE_KEY, authToken, int(constants.AUTH_AGE), "/", domain, secure, true)
+	ctx.SetCookie(constants.REFRESH_COOKIE_KEY, refreshToken, int(constants.REFRESH_AGE), "/", domain, secure, true)
+	ctx.SetCookie("status", userStatus, int(constants.REFRESH_AGE), "/", domain, secure, true)
 	ctx.Redirect(http.StatusTemporaryRedirect, clientURL+"/google-callback")
 }
 
@@ -329,6 +332,39 @@ func (sh *StudentHandlerImpl) Verify(ctx *gin.Context) {
 	})
 }
 
+func (sh *StudentHandlerImpl) GoogleVerify(ctx *gin.Context) {
+	token, err := getAuthenticationToken(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.VerifyStudentParam{
+		Token: token,
+		ID:    claim.Subject,
+	}
+	authToken, refreshToken, status, err := sh.ss.GoogleVerify(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	domain := os.Getenv("COOKIE_DOMAIN")
+	secure := os.Getenv("ENVIRONMENT_OPTION") == constants.Production
+	ctx.SetCookie(constants.AUTH_COOKIE_KEY, authToken, int(constants.AUTH_AGE), "/", domain, secure, true)
+	ctx.SetCookie(constants.REFRESH_COOKIE_KEY, refreshToken, int(constants.REFRESH_AGE), "/", domain, secure, true)
+	ctx.SetCookie("status", status, int(constants.AUTH_AGE), "/", domain, secure, true)
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.MessageResponse{
+			Message: "Successfully Verified",
+		},
+	})
+}
+
 func (sh *StudentHandlerImpl) Login(ctx *gin.Context) {
 	domain := os.Getenv("COOKIE_DOMAIN")
 	var req dtos.LoginStudentReq
@@ -345,9 +381,10 @@ func (sh *StudentHandlerImpl) Login(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	ctx.SetCookie(constants.AUTH_COOKIE_KEY, *authToken, int(constants.AUTH_AGE), "/", domain, false, true)
-	ctx.SetCookie(constants.REFRESH_COOKIE_KEY, *refreshToken, int(constants.REFRESH_AGE), "/", domain, false, true)
-	ctx.SetCookie("status", *status, int(constants.AUTH_AGE), "/", domain, false, true)
+	secure := os.Getenv("ENVIRONMENT_OPTION") == constants.Production
+	ctx.SetCookie(constants.AUTH_COOKIE_KEY, *authToken, int(constants.AUTH_AGE), "/", domain, secure, true)
+	ctx.SetCookie(constants.REFRESH_COOKIE_KEY, *refreshToken, int(constants.REFRESH_AGE), "/", domain, secure, true)
+	ctx.SetCookie("status", *status, int(constants.AUTH_AGE), "/", domain, secure, true)
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
 		Data: dtos.LoginStudentRes{

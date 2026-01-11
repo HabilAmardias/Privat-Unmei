@@ -1,4 +1,5 @@
 import type { Fetch, HTTPMethod } from '$lib/types';
+import { PUBLIC_BASE_URL } from '$env/static/public';
 
 export async function FetchData(
 	fetch: Fetch,
@@ -6,11 +7,10 @@ export async function FetchData(
 	method?: HTTPMethod,
 	body?: BodyInit
 ) {
-	const res = await fetch(url, {
+	const fullURL = `${PUBLIC_BASE_URL}${url}`;
+	const res = await fetch(fullURL, {
 		method,
-		body,
-		credentials: 'include',
-		redirect: 'manual'
+		body
 	});
 	if (!res.ok && res.status !== 307) {
 		const resBody = await res.json();

@@ -5,6 +5,7 @@
 	import AlertDialog from '$lib/components/dialog/AlertDialog.svelte';
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/button/Button.svelte';
+	import NavigationButton from '$lib/components/button/NavigationButton.svelte';
 
 	let { data }: PageProps = $props();
 	const View = new RequestDetailView(data.detail);
@@ -59,72 +60,104 @@
 					{description}>Confirm Payment</AlertDialog
 				>
 			{/if}
+			<form method="POST" action="?/messageStudent" use:enhance={View.onMessageStudent}>
+				<Button type="submit">Message</Button>
+			</form>
 		</div>
 	</div>
-	<div class="flex flex-col gap-2">
-		<div class="flex gap-2">
-			<p class="font-bold text-[var(--tertiary-color)]">Student Name:</p>
-			<p>{data.detail.student_name}</p>
-		</div>
-		<div class="flex gap-2">
-			<p class="font-bold text-[var(--tertiary-color)]">Student Public ID:</p>
-			<p>{data.detail.student_public_id}</p>
-		</div>
-		<div class="flex gap-2">
-			<p class="font-bold text-[var(--tertiary-color)]">Participant:</p>
-			<p>{data.detail.number_of_participant}</p>
-		</div>
-		<div class="flex gap-2">
-			<p class="font-bold text-[var(--tertiary-color)]">Session:</p>
-			<p>{data.detail.number_of_sessions}</p>
-		</div>
-		<div class="flex gap-2">
-			<p class="font-bold text-[var(--tertiary-color)]">Status:</p>
-			<p>{View.capitalizeFirstLetter(data.detail.status)}</p>
-		</div>
-		{#if data.detail.expired_at}
-			<div class="flex gap-2">
-				<p class="font-bold text-[var(--tertiary-color)]">Expired At:</p>
-				<p>{View.convertToDatetime(data.detail.expired_at)}</p>
+	<div class="grid grid-cols-5 gap-4 rounded-lg bg-[var(--tertiary-color)] p-4 text-center">
+		{#each View.statuses as st}
+			<div class="flex flex-col items-center gap-2">
+				<st.icon
+					class={st.id === View.status
+						? 'text-[var(--primary-color)]'
+						: 'text-[var(--secondary-color)]'}
+				/>
+				<p
+					class={st.id === View.status
+						? 'text-xs text-[var(--primary-color)]'
+						: 'text-xs text-[var(--secondary-color)]'}
+				>
+					{st.label}
+				</p>
 			</div>
-		{/if}
-		<form method="POST" action="?/messageStudent" use:enhance={View.onMessageStudent}>
-			<Button type="submit">Message</Button>
-		</form>
+		{/each}
 	</div>
-	<h2 class="text-lg font-bold text-[var(--tertiary-color)]">Payment Info</h2>
-	<div class="grid grid-cols-2 gap-4 text-center md:flex md:justify-between">
-		<div>
-			<p class="font-bold text-[var(--tertiary-color)]">Payment Method:</p>
-			<p>{data.detail.payment_method}</p>
-		</div>
-		<div>
-			<p class="font-bold text-[var(--tertiary-color)]">Account Number:</p>
-			<p>{data.detail.account_number}</p>
-		</div>
-		<div>
-			<p class="font-bold text-[var(--tertiary-color)]">Subtotal:</p>
-			<p>
-				{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(
-					data.detail.subtotal
-				)}
-			</p>
-		</div>
-		<div>
-			<p class="font-bold text-[var(--tertiary-color)]">Operational Cost:</p>
-			<p>
-				{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(
-					data.detail.operational_cost
-				)}
-			</p>
-		</div>
-		<div>
-			<p class="font-bold text-[var(--tertiary-color)]">Total Price:</p>
-			<p>
-				{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(
-					data.detail.total_price
-				)}
-			</p>
+	<div>
+		<NavigationButton
+			menus={[
+				{
+					header: 'Detail',
+					onClick: () => (View.detailState = 'detail')
+				},
+				{
+					header: 'Payment',
+					onClick: () => (View.detailState = 'payment')
+				}
+			]}
+		/>
+		<div
+			class="grid h-[250px] grid-cols-2 gap-4 rounded-lg rounded-tl-none bg-[var(--tertiary-color)] p-2 text-center"
+		>
+			{#if View.detailState === 'detail'}
+				<div>
+					<p class="font-bold text-[var(--primary-color)]">Student Name:</p>
+					<p class="text-[var(--secondary-color)]">{data.detail.student_name}</p>
+				</div>
+				<div>
+					<p class="font-bold text-[var(--primary-color)]">Student Public ID:</p>
+					<p class="text-[var(--secondary-color)]">{data.detail.student_public_id}</p>
+				</div>
+				<div>
+					<p class="font-bold text-[var(--primary-color)]">Participant:</p>
+					<p class="text-[var(--secondary-color)]">{data.detail.number_of_participant}</p>
+				</div>
+				<div>
+					<p class="font-bold text-[var(--primary-color)]">Session:</p>
+					<p class="text-[var(--secondary-color)]">{data.detail.number_of_sessions}</p>
+				</div>
+				{#if data.detail.expired_at}
+					<div>
+						<p class="font-bold text-[var(--primary-color)]">Expired In:</p>
+						<p class="text-[var(--secondary-color)]">
+							{View.expiredIn}
+						</p>
+					</div>
+				{/if}
+			{:else}
+				<div>
+					<p class="font-bold text-[var(--primary-color)]">Payment Method:</p>
+					<p class="text-[var(--secondary-color)]">{data.detail.payment_method}</p>
+				</div>
+				<div>
+					<p class="font-bold text-[var(--primary-color)]">Account Number:</p>
+					<p class="text-[var(--secondary-color)]">{data.detail.account_number}</p>
+				</div>
+				<div>
+					<p class="font-bold text-[var(--primary-color)]">Subtotal:</p>
+					<p class="text-[var(--secondary-color)]">
+						{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(
+							data.detail.subtotal
+						)}
+					</p>
+				</div>
+				<div>
+					<p class="font-bold text-[var(--primary-color)]">Operational Cost:</p>
+					<p class="text-[var(--secondary-color)]">
+						{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(
+							data.detail.operational_cost
+						)}
+					</p>
+				</div>
+				<div>
+					<p class="font-bold text-[var(--primary-color)]">Total Price:</p>
+					<p class="text-[var(--secondary-color)]">
+						{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(
+							data.detail.total_price
+						)}
+					</p>
+				</div>
+			{/if}
 		</div>
 	</div>
 	<div class="flex flex-col gap-4">

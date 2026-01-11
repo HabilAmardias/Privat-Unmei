@@ -1,6 +1,5 @@
 import type { EnhancementArgs, EnhancementReturn, PaginatedResponse } from '$lib/types';
 import { CreateToast, DismissToast } from '$lib/utils/helper';
-import { SvelteDate } from 'svelte/reactivity';
 import type { CourseDetail, CourseReview, StudentProfile } from './model';
 
 export class CourseDetailView {
@@ -11,18 +10,11 @@ export class CourseDetailView {
 	totalRow = $state<number>(15);
 	paginationForm = $state<HTMLFormElement>();
 	star = $state<number>(1);
-	feedback = $state<string>('');
+
 	profile = $state<StudentProfile>();
 	mentorID = $state<string>('');
-	feedbackErr = $derived.by<Error | undefined>(() => {
-		if (this.feedback.length < 15) {
-			return new Error('Feedback must at least contain 15 characters');
-		}
-		return undefined;
-	});
-	reviewDisabled = $derived.by<boolean>(() => {
-		return this.feedbackErr ? true : false;
-	});
+
+	detailState = $state<'description' | 'detail'>('description');
 
 	constructor(d: PaginatedResponse<CourseReview>, c: CourseDetail, p?: StudentProfile) {
 		this.reviews = d.entries;
@@ -43,6 +35,9 @@ export class CourseDetailView {
 		}
 		return s.charAt(0).toUpperCase() + s.slice(1);
 	}
+	getDate(s: string) {
+		return s.split('T')[0];
+	}
 	onPageChange = () => {
 		this.paginationForm?.requestSubmit();
 	};
@@ -62,31 +57,7 @@ export class CourseDetailView {
 			}
 		};
 	};
-	onCreateReview = () => {
-		const loadID = CreateToast('loading', 'loading....');
-		return async ({ result }: EnhancementReturn) => {
-			DismissToast(loadID);
-			if (result.type === 'success') {
-				CreateToast('success', 'successfully create review');
-				this.totalRow += 1;
-				const now = new SvelteDate().toDateString();
-				if (this.reviews.length < this.limit) {
-					this.reviews.push({
-						id: result.data?.id,
-						course_id: result.data?.course_id,
-						student_id: this.profile!.id,
-						name: this.profile!.name,
-						rating: this.star,
-						feedback: this.feedback,
-						created_at: now
-					});
-				}
-			}
-			if (result.type === 'failure') {
-				CreateToast('error', result.data?.message);
-			}
-		};
-	};
+
 	onMessageMentor = (args: EnhancementArgs) => {
 		const loadID = CreateToast('loading', 'loading....');
 		args.formData.append('id', this.mentorID);

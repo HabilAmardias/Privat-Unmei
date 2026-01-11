@@ -13,6 +13,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis_rate/v10"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -34,6 +35,7 @@ type RouteConfig struct {
 	RBACCacheRepository   *cache.RBACCacheRepository
 	TokenUtil             *utils.JWTUtil
 	Logger                logger.CustomLogger
+	Limiter               *redis_rate.Limiter
 }
 
 func (c *RouteConfig) Setup() {
@@ -74,6 +76,7 @@ func (c *RouteConfig) Setup() {
 
 func (c *RouteConfig) SetupPublicRoute() {
 	v1 := c.App.Group("/api/v1")
+	v1.Use(middlewares.RateLimiterMiddleware(c.Limiter))
 	v1.GET("/healthcheck", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, dtos.Response{
 			Success: true,
@@ -91,6 +94,7 @@ func (c *RouteConfig) SetupPublicRoute() {
 	v1.GET("/courses/most-bought", c.CourseHandler.MostBoughtCourses)
 	v1.GET("/auth/google", c.StudentHandler.GoogleLogin)
 	v1.GET("/auth/google/callback", c.StudentHandler.GoogleLoginCallback)
+	v1.GET("/auth/google/verify", middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForVerification), c.StudentHandler.GoogleVerify)
 	v1.GET("/courses", c.CourseHandler.ListCourse)
 	v1.GET("/courses/:id", c.CourseHandler.CourseDetail)
 	v1.GET("/courses/:id/topics", c.CourseHandler.CourseTopics)
@@ -105,6 +109,7 @@ func (c *RouteConfig) SetupPublicRoute() {
 
 func (c *RouteConfig) SetupPrivateRoute() {
 	v1 := c.App.Group("/api/v1")
+	v1.Use(middlewares.RateLimiterMiddleware(c.Limiter))
 	v1.Use(middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForLogin))
 	v1.GET("/discounts/final-discount/:participant", c.DiscountHandler.GetDiscount)
 	v1.GET("/additional-cost/operational", c.AdditionalCostHandler.GetOperationalCost)
@@ -115,6 +120,7 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		c.RBACCacheRepository,
 		c.Logger,
 	), c.CourseRatingHandler.AddReview)
+	v1.GET("/courses/:id/reviews/me", c.CourseRatingHandler.IsCourseReviewed)
 	v1.GET("/verify/send", c.StudentHandler.SendVerificationEmail)
 	v1.PATCH("/courses/:id", middlewares.AuthorizationMiddleware(
 		constants.UpdateOwnPermission,
@@ -305,6 +311,7 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		c.RBACCacheRepository,
 		c.Logger,
 	), c.CourseRequestHandler.StudentCourseRequestDetail)
+	v1.GET("/chatrooms/me/:id/last-read", c.ChatHandler.UpdateLastRead)
 	v1.GET("/chatrooms/users/:id", c.ChatHandler.GetChatroom)
 	v1.GET("/chatrooms/me", c.ChatHandler.GetUserChatrooms)
 	v1.GET("/chatrooms/:id", c.ChatHandler.GetChatroomInfo)

@@ -7,6 +7,7 @@ export type RequestSchedule = {
 export type RequestDetail = {
 	course_request_id: string;
 	course_name: string;
+	course_id: number;
 	mentor_name: string;
 	mentor_id: string;
 	mentor_public_id: string;
@@ -24,4 +25,12 @@ export type RequestDetail = {
 
 export type ChatroomID = {
 	id: number;
+};
+
+export type CreateReview = {
+	id: number;
+};
+
+export type IsReviewed = {
+	is_reviewed: boolean;
 };

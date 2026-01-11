@@ -6,7 +6,7 @@
 	import { onMount } from 'svelte';
 	import { HomeView } from './view.svelte';
 	import Accordion from '$lib/components/accordion/Accordion.svelte';
-	import { faqItems } from './model';
+	import { faqItems } from './constants';
 	import AnimatedContainer from '$lib/components/container/AnimatedContainer.svelte';
 
 	const View = new HomeView();
@@ -41,9 +41,8 @@
 				/>
 			</div>
 			<p class="text-center">
-				Lorem ipsum dolor, sit amet consectetur adipisicing elit. Amet odio nesciunt sequi
-				voluptatum rerum quae. Est ex voluptatem nobis odit, quis eos obcaecati cum consectetur
-				aspernatur sit nisi impedit at!
+				Find the right private tutor for your learning goals, anytime, anywhere. Browse qualified
+				tutors, courses, compare profiles, and book courses online, offline or hybrid with ease.
 			</p>
 
 			<div class="flex justify-center gap-4">
@@ -58,39 +57,38 @@
 	</AnimatedContainer>
 	<div class="flex flex-col gap-4">
 		<AnimatedContainer>
-			<h3 class="text-center text-2xl font-medium text-[var(--tertiary-color)]">Lorem ipsum</h3>
+			<h3 class="text-center text-2xl font-medium text-[var(--tertiary-color)]">
+				Why Choose PrivatUnmei?
+			</h3>
 		</AnimatedContainer>
 		<div class="flex flex-col gap-8 md:flex-row">
 			<AnimatedContainer>
 				<div class="flex flex-col gap-4">
 					<Book size={View.iconsSize} class="text-[var(--tertiary-color)]" />
-					<h4 class="text-xl text-[var(--tertiary-color)]">lorem ipsum</h4>
+					<h4 class="text-xl text-[var(--tertiary-color)]">Find Courses and Tutors Easily</h4>
 					<p class="text-justify">
-						Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolores deleniti, obcaecati
-						maxime cupiditate, facere iure et nam, quidem itaque magni in rerum cumque earum
-						provident mollitia animi ducimus expedita possimus.
+						Search courses by subject and lesson type. Discover tutors that match your learning
+						needs in just a few clicks.
 					</p>
 				</div>
 			</AnimatedContainer>
 			<AnimatedContainer>
 				<div class="flex flex-col gap-4">
 					<Pencil size={View.iconsSize} class="text-[var(--tertiary-color)]" />
-					<h4 class="text-xl text-[var(--tertiary-color)]">lorem ipsum</h4>
+					<h4 class="text-xl text-[var(--tertiary-color)]">Flexible Learning</h4>
 					<p class="text-justify">
-						Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolores deleniti, obcaecati
-						maxime cupiditate, facere iure et nam, quidem itaque magni in rerum cumque earum
-						provident mollitia animi ducimus expedita possimus.
+						Choose between online, offline or hybrid lessons based on your preference. Learn at your
+						own pace with schedules that fit your routine.
 					</p>
 				</div>
 			</AnimatedContainer>
 			<AnimatedContainer>
 				<div class="flex flex-col gap-4">
 					<CalendarFold size={View.iconsSize} class="text-[var(--tertiary-color)]" />
-					<h4 class="text-xl text-[var(--tertiary-color)]">lorem ipsum</h4>
+					<h4 class="text-xl text-[var(--tertiary-color)]">Simple Booking</h4>
 					<p class="text-justify">
-						Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolores deleniti, obcaecati
-						maxime cupiditate, facere iure et nam, quidem itaque magni in rerum cumque earum
-						provident mollitia animi ducimus expedita possimus.
+						Book lessons directly through the app with clear pricing and schedules. No complicated
+						process, just choose, book, and learn.
 					</p>
 				</div>
 			</AnimatedContainer>

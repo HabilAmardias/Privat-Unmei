@@ -29,6 +29,30 @@ func CreateChatHandler(chs *services.ChatServiceImpl, upg *websocket.Upgrader, r
 	return &ChatHandlerImpl{chs, upg, rc, lg}
 }
 
+func (chh *ChatHandlerImpl) UpdateLastRead(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	chatroomID := ctx.Param("id")
+	param := entity.UpdateLastReadParam{
+		UserID:     claim.Subject,
+		Role:       claim.Role,
+		ChatroomID: chatroomID,
+	}
+	if err := chh.chs.UpdateLastRead(ctx, param); err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.MessageResponse{
+			Message: "Successfully update chatroom last message",
+		},
+	})
+}
+
 func (chh *ChatHandlerImpl) GetChatroom(ctx *gin.Context) {
 	claim, err := getAuthenticationPayload(ctx)
 	if err != nil {

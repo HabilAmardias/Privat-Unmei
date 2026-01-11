@@ -99,8 +99,13 @@ func (crs *CourseRatingServiceImpl) AddReview(ctx context.Context, param entity.
 		if err := crs.mr.FindByID(ctx, course.MentorID, mentor, true); err != nil {
 			return err
 		}
-		*updateMentor.RatingCount = mentor.RatingCount + 1
-		*updateMentor.TotalRating = float64(mentor.TotalRating) + float64(param.Rating)
+
+		newRatingCount := mentor.RatingCount + 1
+		updateMentor.RatingCount = &newRatingCount
+
+		newTotalRating := float64(mentor.TotalRating) + float64(param.Rating)
+		updateMentor.TotalRating = &newTotalRating
+
 		if err := crs.mr.UpdateMentor(ctx, course.MentorID, updateMentor); err != nil {
 			return err
 		}
@@ -112,4 +117,23 @@ func (crs *CourseRatingServiceImpl) AddReview(ctx context.Context, param entity.
 		return 0, err
 	}
 	return rating.ID, nil
+}
+
+func (crs *CourseRatingServiceImpl) IsAlreadyReviewed(ctx context.Context, param entity.IsReviewedParam) (bool, error) {
+	rating := new(entity.CourseRating)
+	if err := crs.crr.FindByCourseIDAndStudentID(ctx, param.CourseID, param.StudentID, rating); err != nil {
+		var parsedErr *customerrors.CustomError
+		if !errors.As(err, &parsedErr) {
+			return false, customerrors.NewError(
+				"something went wrong",
+				errors.New("cannot parse error"),
+				customerrors.CommonErr,
+			)
+		}
+		if parsedErr.ErrCode != customerrors.ItemNotExist {
+			return false, err
+		}
+		return false, nil
+	}
+	return true, nil
 }

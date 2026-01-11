@@ -95,6 +95,7 @@
 			<div class="flex flex-col md:flex-row md:items-center md:gap-4">
 				<p class="font-bold text-[var(--tertiary-color)]">Name:</p>
 				<Input
+					err={View.nameErr}
 					bind:value={View.name}
 					type="text"
 					placeholder="Input mentor name"

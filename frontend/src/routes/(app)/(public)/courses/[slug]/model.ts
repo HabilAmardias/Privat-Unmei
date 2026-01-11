@@ -33,10 +33,6 @@ export type CourseDetail = {
 	description: string;
 };
 
-export type CreateReview = {
-	id: number;
-};
-
 export type StudentProfile = {
 	id: string;
 	name: string;

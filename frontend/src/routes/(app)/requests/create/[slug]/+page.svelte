@@ -131,24 +131,17 @@
 			</div>
 		</div>
 		<div class="flex flex-col gap-4 md:grid md:grid-cols-2">
-			<div class="flex items-center gap-4">
+			<div class="flex flex-col gap-4">
 				<div>
 					{#if View.dateErr}
 						<p class="text-red-500">{View.dateErr.message}</p>
 					{/if}
 					<Datepicker dows={data.dows} onChange={View.onCalendarValueChange} />
 				</div>
-				<div class="flex items-center gap-4">
-					<Input
-						type="time"
-						bind:value={View.selectedStartTime}
-						name="start_time"
-						id="start_time"
-					/>
-					<Button type="button" disabled={View.disableAddSchedule} onClick={View.addSchedule}
-						>Add</Button
-					>
-				</div>
+				<Input type="time" bind:value={View.selectedStartTime} name="start_time" id="start_time" />
+				<Button full type="button" disabled={View.disableAddSchedule} onClick={View.addSchedule}
+					>Add</Button
+				>
 			</div>
 			{#if View.schedules.length >= 0}
 				<ScrollArea orientation="vertical" viewportClasses="h-[200px] max-h-[200px]">
@@ -210,6 +203,7 @@
 			action="?/createRequest"
 			bind:open={View.openCreateRequestDialog}
 			enhancement={View.onCreateRequest}
+			buttonDisabled={View.bookDisabled}
 			title={createRequestTitle}
 			full
 			{description}>Create</AlertDialog

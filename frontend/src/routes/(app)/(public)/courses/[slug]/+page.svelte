@@ -10,6 +10,8 @@
 	import RatingGroup from '$lib/components/rating/RatingGroup.svelte';
 	import Textarea from '$lib/components/form/Textarea.svelte';
 	import Button from '$lib/components/button/Button.svelte';
+	import NavigationButton from '$lib/components/button/NavigationButton.svelte';
+	import { Star } from '@lucide/svelte';
 
 	let { data }: PageProps = $props();
 	const View = new CourseDetailView(data.reviews, data.detail);
@@ -24,7 +26,7 @@
 <div class="flex flex-col gap-4 p-4">
 	<div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
 		<h1 class="text-2xl font-bold text-[var(--tertiary-color)]">{data.detail.title}</h1>
-		<div class="flex gap-2">
+		<div class="flex flex-col gap-2">
 			<div class="w-fit rounded-lg bg-[var(--tertiary-color)] p-2">
 				<p class="font-bold text-[var(--secondary-color)]">
 					{new Intl.NumberFormat('id-ID', { currency: 'IDR', style: 'currency' }).format(
@@ -32,64 +34,93 @@
 					)} / session
 				</p>
 			</div>
+		</div>
+	</div>
+	{#if data.profile}
+		<div class="w-fit rounded-lg bg-[var(--tertiary-color)] p-2">
+			<Link href={`/requests/create/${data.detail.id}`}>Buy Course</Link>
+		</div>
+	{/if}
+
+	<div>
+		<NavigationButton
+			menus={[
+				{
+					header: 'Description',
+					onClick: () => (View.detailState = 'description')
+				},
+				{
+					header: 'Detail',
+					onClick: () => (View.detailState = 'detail')
+				}
+			]}
+		/>
+		<div
+			class="flex h-[150px] flex-col gap-2 rounded-lg rounded-tl-none bg-[var(--tertiary-color)] p-4"
+		>
+			{#if View.detailState === 'detail'}
+				<div class="flex gap-2">
+					<p class="font-bold text-[var(--primary-color)]">Method:</p>
+					<p class="text-[var(--secondary-color)]">
+						{View.capitalizeFirstLetter(data.detail.method)}
+					</p>
+				</div>
+				<div class="flex gap-2">
+					<p class="font-bold text-[var(--primary-color)]">Domicile:</p>
+					<p class="text-[var(--secondary-color)]">{data.detail.domicile}</p>
+				</div>
+				<div class="flex items-center gap-2">
+					<p class="font-bold text-[var(--primary-color)]">Per Session Duration:</p>
+					<p class="text-[var(--secondary-color)]">
+						{data.detail.session_duration_minutes} Minutes
+					</p>
+				</div>
+
+				<div class="flex gap-2">
+					<p class="font-bold text-[var(--primary-color)]">Categories:</p>
+					<ScrollArea orientation="horizontal" viewportClasses="max-w-[200px]">
+						<ul class="flex gap-4">
+							{#each data.courseCategories as cc, i (cc.id)}
+								<li
+									class="w-fit rounded-lg bg-[var(--tertiary-color)] text-[var(--secondary-color)]"
+								>
+									<p>{cc.name}</p>
+								</li>
+							{/each}
+						</ul>
+					</ScrollArea>
+				</div>
+			{:else}
+				<ScrollArea orientation="vertical" viewportClasses="h-[150px] max-h-[150px]">
+					<p class="text-justify text-[var(--secondary-color)]">{data.detail.description}</p>
+				</ScrollArea>
+			{/if}
+		</div>
+	</div>
+
+	<p class="font-bold text-[var(--tertiary-color)]">Mentor</p>
+	<div class="flex items-center gap-4 rounded-md bg-[var(--tertiary-color)] p-2">
+		<CldImage
+			src={data.detail.mentor_profile_image}
+			width={50}
+			height={50}
+			className="rounded-full"
+		/>
+		<div>
+			<Link href={`/mentors/${data.detail.mentor_id}`}>
+				<p class="font-bold text-[var(--primary-color)] hover:text-[var(--secondary-color)]">
+					{data.detail.mentor_name}
+				</p>
+			</Link>
+			<p class="text-[var(--secondary-color)]">{data.detail.mentor_public_id}</p>
 			{#if data.profile}
 				<form method="POST" action="?/messageMentor" use:enhance={View.onMessageMentor}>
-					<Button type="submit">Message</Button>
+					<Button withPadding={false} withBg={false} type="submit">Message</Button>
 				</form>
 			{/if}
 		</div>
 	</div>
-	<ScrollArea orientation="horizontal" viewportClasses="max-w-[300px]">
-		<ul class="flex gap-4">
-			{#each data.courseCategories as cc, i (cc.id)}
-				<li class="w-fit rounded-lg bg-[var(--tertiary-color)] p-2 text-[var(--secondary-color)]">
-					<p>{cc.name}</p>
-				</li>
-			{/each}
-		</ul>
-	</ScrollArea>
-	<div class="flex flex-col gap-2">
-		<div class="flex gap-2">
-			<p class="font-bold text-[var(--tertiary-color)]">Method:</p>
-			<p>{View.capitalizeFirstLetter(data.detail.method)}</p>
-		</div>
-		<div class="flex gap-2">
-			<p class="font-bold text-[var(--tertiary-color)]">Domicile:</p>
-			<p>{data.detail.domicile}</p>
-		</div>
-		<div class="flex items-center gap-2">
-			<p class="font-bold text-[var(--tertiary-color)]">Per Session Duration (minutes):</p>
-			<p>{data.detail.session_duration_minutes}</p>
-		</div>
-	</div>
-	<div class="flex flex-col gap-2">
-		<div class="flex flex-col">
-			<p class="font-bold text-[var(--tertiary-color)]">Description</p>
-			<p>{data.detail.description}</p>
-		</div>
-		{#if data.profile}
-			<div class="w-fit rounded-lg bg-[var(--tertiary-color)] p-2">
-				<Link href={`/requests/create/${data.detail.id}`}>Buy Course</Link>
-			</div>
-		{/if}
-	</div>
-	<Link href={`/mentors/${data.detail.mentor_id}`}>
-		<p class="font-bold text-[var(--tertiary-color)]">Mentor</p>
-		<div
-			class="hover:-translate-y-0.25 flex transform items-center gap-4 rounded-md bg-[var(--tertiary-color)] p-2 transition-transform"
-		>
-			<CldImage
-				src={data.detail.mentor_profile_image}
-				width={50}
-				height={50}
-				className="rounded-full"
-			/>
-			<div>
-				<p class="font-bold text-[var(--primary-color)]">{data.detail.mentor_name}</p>
-				<p class="text-[var(--secondary-color)]">{data.detail.mentor_public_id}</p>
-			</div>
-		</div>
-	</Link>
+
 	<div class="flex flex-col gap-4">
 		<div class="flex flex-col gap-4">
 			<p class="font-bold text-[var(--tertiary-color)]">Topics</p>
@@ -110,26 +141,6 @@
 		</div>
 	</div>
 	<h2 class="text-xl font-bold text-[var(--tertiary-color)]">Reviews</h2>
-	{#if data.profile}
-		<form
-			use:enhance={View.onCreateReview}
-			class="flex flex-col gap-4"
-			action="?/createReview"
-			method="post"
-		>
-			<RatingGroup bind:value={View.star} name="rating" />
-			<Textarea
-				err={View.feedbackErr}
-				bind:value={View.feedback}
-				name="feedback"
-				id="feedback"
-				placeholder="please insert feedback"
-			>
-				<p class="font-bold text-[var(--tertiary-color)]">Feedback:</p>
-			</Textarea>
-			<Button full disabled={View.reviewDisabled} type="submit">Submit</Button>
-		</form>
-	{/if}
 	<div>
 		{#if View.isLoading}
 			<Loading />
@@ -141,13 +152,16 @@
 			<ScrollArea orientation="vertical" viewportClasses="h-[400px] max-h-[400px]">
 				<ul class="flex flex-col gap-4 md:grid md:grid-cols-3">
 					{#each View.reviews as r (r.id)}
-						<li>
+						<li class="flex flex-col gap-2 rounded-lg bg-[var(--tertiary-color)] p-2">
 							<div class="flex w-full justify-between">
-								<p>{r.name}</p>
-								<p>{r.rating}</p>
+								<p class="font-bold text-[var(--primary-color)]">{r.name}</p>
+								<div class="flex items-center gap-2">
+									<Star class="fill-current text-[var(--primary-color)]" />
+									<p class="font-bold text-[var(--primary-color)]">{r.rating}</p>
+								</div>
 							</div>
-							<p>{r.feedback}</p>
-							<p class="text-end">{r.created_at}</p>
+							<p class="text-[var(--secondary-color)]">{r.feedback}</p>
+							<p class="text-end text-[var(--secondary-color)]">{View.getDate(r.created_at)}</p>
 						</li>
 					{/each}
 				</ul>

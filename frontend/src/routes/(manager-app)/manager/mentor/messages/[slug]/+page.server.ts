@@ -42,6 +42,18 @@ export const actions = {
 			messages: resBody.data
 		};
 	},
+	updateLastRead: async ({ fetch, params }) => {
+		if (!params.slug) {
+			return fail(404, { message: 'no data found' });
+		}
+		const { success, message, status } = await controller.updateLastRead(fetch, params.slug);
+		if (!success) {
+			throw error(status, { message });
+		}
+		return {
+			success
+		};
+	},
 	sendMessage: async ({ fetch, request, params }) => {
 		if (!params.slug) {
 			return fail(404, { message: 'no data found' });

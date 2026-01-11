@@ -4,4 +4,5 @@ export type Chatroom = {
 	username: string;
 	public_id: string;
 	profile_image: string;
+	unread_count: number;
 };
