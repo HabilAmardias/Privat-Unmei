@@ -1,12 +1,24 @@
-FROM alpine:latest
+FROM golang:1.24 AS build-stage
+
+WORKDIR /app
+
+COPY ./backend/go.mod ./backend/go.sum ./
+ENV GOPROXY=https://goproxy.io,direct
+RUN go mod download
+
+COPY ./backend .
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o privat-unmei-migrate cmd/db/main.go
+
+FROM alpine:latest AS release-stage
 
 WORKDIR /
 
-COPY --from=golang:1.24 /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=build-stage /usr/share/zoneinfo /usr/share/zoneinfo
 
-COPY privat-unmei-migrate /privat-unmei-migrate
-COPY .env /.env
-COPY db/migrations ./db/migrations 
-COPY db/seeds ./db/seeds 
+COPY --from=build-stage /app/privat-unmei-migrate privat-unmei-migrate
+COPY --from=build-stage /app/.env .env
+COPY --from=build-stage /app/db/migrations ./db/migrations 
+COPY --from=build-stage /app/db/seeds ./db/seeds 
 
 ENTRYPOINT [ "/bin/sh", "-c", "/privat-unmei-migrate"]
