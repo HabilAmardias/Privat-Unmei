@@ -29,6 +29,6 @@ COPY --from=builder /app/package.json .
 EXPOSE 4173
 ENV NODE_ENV=production
 ENV PORT=4173
-ENV ORIGIN=http://habilog.xyz
+ENV ORIGIN=https://privatunmei.id
 
 CMD ["node", "build"]

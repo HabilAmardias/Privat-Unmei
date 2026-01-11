@@ -2,11 +2,11 @@ FROM golang:1.24 AS build-stage
 
 WORKDIR /app
 
-COPY ./backend/go.mod ./backend/go.sum ./
+COPY go.mod go.sum ./
 ENV GOPROXY=https://goproxy.io,direct
 RUN go mod download
 
-COPY ./backend .
+COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o privat-unmei-cron cmd/cron/main.go
 
