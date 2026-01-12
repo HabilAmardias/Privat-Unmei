@@ -44,6 +44,7 @@ func (mh *MentorHandlerImpl) GetMyCourses(ctx *gin.Context) {
 		},
 		Search:         req.Search,
 		CourseCategory: req.CourseCategory,
+		IsProtected:    true,
 	}
 	if param.Limit <= 0 || param.Limit > constants.MaxLimit {
 		param.Limit = constants.DefaultLimit
