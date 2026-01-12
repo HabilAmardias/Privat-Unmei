@@ -203,7 +203,7 @@ func (cs *CourseServiceImpl) MentorListCourse(ctx context.Context, param entity.
 		if err := cs.ur.FindByID(ctx, param.MentorID, user); err != nil {
 			return err
 		}
-		if user.Status != constants.VerifiedStatus {
+		if param.IsProtected && user.Status != constants.VerifiedStatus {
 			return customerrors.NewError(
 				"please verify your account",
 				errors.New("unverified account"),

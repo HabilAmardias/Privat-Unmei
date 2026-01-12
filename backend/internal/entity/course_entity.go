@@ -53,6 +53,7 @@ type (
 	MentorListCourseParam struct {
 		PaginatedParam
 		MentorID       string
+		IsProtected    bool
 		Search         *string
 		CourseCategory *int
 	}
