@@ -21,6 +21,8 @@ type StudentServiceImpl struct {
 	ur     *repositories.UserRepositoryImpl
 	sr     *repositories.StudentRepositoryImpl
 	ar     *repositories.AdminRepositoryImpl
+	crr    *repositories.CourseRequestRepositoryImpl
+	chr    *repositories.ChatRepositoryImpl
 	tmr    *repositories.TransactionManagerRepositories
 	bu     *utils.BcryptUtil
 	gu     *utils.GomailUtil
@@ -33,6 +35,8 @@ func CreateStudentService(
 	ur *repositories.UserRepositoryImpl,
 	sr *repositories.StudentRepositoryImpl,
 	ar *repositories.AdminRepositoryImpl,
+	crr *repositories.CourseRequestRepositoryImpl,
+	chr *repositories.ChatRepositoryImpl,
 	tmr *repositories.TransactionManagerRepositories,
 	bu *utils.BcryptUtil,
 	gu *utils.GomailUtil,
@@ -40,11 +44,51 @@ func CreateStudentService(
 	ju *utils.JWTUtil,
 	goauth *utils.GoogleOauth,
 ) *StudentServiceImpl {
-	return &StudentServiceImpl{ur, sr, ar, tmr, bu, gu, cu, ju, goauth}
+	return &StudentServiceImpl{ur, sr, ar, crr, chr, tmr, bu, gu, cu, ju, goauth}
 }
 
 func (us *StudentServiceImpl) GoogleLogin(oauthState string) string {
 	return us.goauth.Config.AuthCodeURL(oauthState)
+}
+
+func (us *StudentServiceImpl) DeleteStudent(ctx context.Context, param entity.DeleteStudentParam) error {
+	userAdmin := new(entity.User)
+	userStudent := new(entity.User)
+	admin := new(entity.Admin)
+	student := new(entity.Student)
+
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		return us.ur.FindByID(ctx, param.AdminID, userAdmin)
+	})
+	g.Go(func() error {
+		return us.ar.FindByID(ctx, param.AdminID, admin)
+	})
+	g.Go(func() error {
+		return us.ur.FindByID(ctx, param.StudentID, userStudent)
+	})
+	g.Go(func() error {
+		return us.sr.FindByID(ctx, param.StudentID, student)
+	})
+	if err := g.Wait(); err != nil {
+		return err
+	}
+	return us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := us.chr.DeleteUserMessages(ctx, param.StudentID); err != nil {
+			return err
+		}
+		if err := us.chr.DeleteStudentChatrooms(ctx, param.StudentID); err != nil {
+			return err
+		}
+		if err := us.crr.DeleteAllStudentOrders(ctx, param.StudentID); err != nil {
+			return err
+		}
+		if err := us.sr.DeleteStudent(ctx, param.StudentID); err != nil {
+			return err
+		}
+		return us.ur.DeleteUser(ctx, param.StudentID)
+	})
 }
 
 func (us *StudentServiceImpl) RefreshToken(ctx context.Context, param entity.RefreshTokenParam) (string, error) {
@@ -309,7 +353,7 @@ func (us *StudentServiceImpl) GetStudentList(ctx context.Context, param entity.L
 		return us.ar.FindByID(ctx, param.AdminID, admin)
 	})
 	g.Go(func() error {
-		return us.sr.GetStudentList(ctx, totalRow, param.Limit, param.Page, students)
+		return us.sr.GetStudentList(ctx, totalRow, param.Limit, param.Page, students, param.Search)
 	})
 	if err := g.Wait(); err != nil {
 		return nil, nil, err

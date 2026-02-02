@@ -17,6 +17,7 @@ type (
 	}
 	GetStudentListReq struct {
 		PaginatedReq
+		Search *string `json:"search" binding:"omitempty"`
 	}
 	AdminIDRes struct {
 		ID string `json:"id"`

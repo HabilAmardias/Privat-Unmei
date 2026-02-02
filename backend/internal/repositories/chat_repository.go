@@ -18,6 +18,29 @@ func CreateChatRepository(db *db.CustomDB) *ChatRepositoryImpl {
 	return &ChatRepositoryImpl{db}
 }
 
+func (chr *ChatRepositoryImpl) DeleteStudentChatrooms(ctx context.Context, studentID string) error {
+	var driver RepoDriver = chr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE chatrooms
+	SET
+		deleted_at = CURRENT_TIMESTAMP,
+		updated_at = CURRENT_TIMESTAMP
+	WHERE student_id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, studentID)
+	if err != nil {
+		return customerrors.NewError(
+			"something went wrong",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (chr *ChatRepositoryImpl) DeleteMentorChatrooms(ctx context.Context, mentorID string) error {
 	var driver RepoDriver = chr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {

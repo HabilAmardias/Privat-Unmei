@@ -24,6 +24,27 @@ func CreateStudentHandler(ss *services.StudentServiceImpl) *StudentHandlerImpl {
 	return &StudentHandlerImpl{ss}
 }
 
+func (sh *StudentHandlerImpl) DeleteStudent(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	id := ctx.Param("id")
+	param := entity.DeleteStudentParam{
+		AdminID:   claim.Subject,
+		StudentID: id,
+	}
+	if err := sh.ss.DeleteStudent(ctx, param); err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data:    dtos.DeleteStudentRes{ID: id},
+	})
+}
+
 func (sh *StudentHandlerImpl) RefreshToken(ctx *gin.Context) {
 	domain := os.Getenv("COOKIE_DOMAIN")
 	claim, err := getRefreshPayload(ctx)
@@ -207,6 +228,7 @@ func (sh *StudentHandlerImpl) GetStudentList(ctx *gin.Context) {
 			Page:  req.Page,
 		},
 		AdminID: claim.Subject,
+		Search:  req.Search,
 	}
 	if param.Limit <= 0 || param.Limit > constants.MaxLimit {
 		param.Limit = constants.DefaultLimit

@@ -18,6 +18,27 @@ func CreateCourseRequestRepository(db *db.CustomDB) *CourseRequestRepositoryImpl
 	return &CourseRequestRepositoryImpl{db}
 }
 
+func (cr *CourseRequestRepositoryImpl) DeleteAllStudentOrders(ctx context.Context, id string) error {
+	var driver RepoDriver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE course_requests
+	SET deleted_at = CURRENT_TIMESTAMP
+	WHERE student_id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, id)
+	if err != nil {
+		return customerrors.NewError(
+			"something went wrong",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (cr *CourseRequestRepositoryImpl) DeleteAllMentorOrders(ctx context.Context, id string) error {
 	var driver RepoDriver = cr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
