@@ -1,8 +1,40 @@
 import type { Fetch, PaginatedResponse, ServerResponse } from '$lib/types';
 import { FetchData } from '$lib/utils';
-import type { adminProfile, mentorList } from './model';
+import type { adminProfile, mentorList, studentList } from './model';
 
-class MentorManagerController {
+class UsersManagerController {
+	async deleteStudent(fetch: Fetch, req: Request) {
+		const formData = await req.formData();
+		const studentID = formData.get('id');
+		if (!studentID) {
+			return { success: false, message: 'no student selected', status: 400 };
+		}
+		const url = `/api/v1/students/${studentID}`;
+		const { success, message, status } = await FetchData(fetch, url, 'DELETE');
+		return { success, message, status };
+	}
+	async getStudents(fetch: Fetch, req?: Request) {
+		let url = '/api/v1/students?';
+		const queries: string[] = [];
+		if (req) {
+			const formData = await req.formData();
+			const search = formData.get('search');
+			const page = formData.get('page');
+			if (search) {
+				queries.push(`search=${search}`);
+			}
+			if (page) {
+				queries.push(`page=${page}`);
+			}
+			url += queries.join('&');
+		}
+		const { success, message, res, status } = await FetchData(fetch, url, 'GET');
+		if (!success) {
+			return { success, message, status };
+		}
+		const resBody: ServerResponse<PaginatedResponse<studentList>> = await res?.json();
+		return { success, message, status, resBody };
+	}
 	async deleteMentor(fetch: Fetch, req: Request) {
 		const formData = await req.formData();
 		const mentorID = formData.get('id');
@@ -50,4 +82,4 @@ class MentorManagerController {
 	}
 }
 
-export const controller = new MentorManagerController();
+export const controller = new UsersManagerController();

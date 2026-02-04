@@ -34,6 +34,10 @@ type (
 	UpdateStudentRes struct {
 		ID string `json:"id"`
 	}
+	GetStudentListReq struct {
+		PaginatedReq
+		Search *string `form:"search" binding:"omitempty"`
+	}
 	StudentProfileRes struct {
 		ID           string `json:"id"`
 		Name         string `json:"name"`

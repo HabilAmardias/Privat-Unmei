@@ -5,7 +5,7 @@
 	import { goto } from '$app/navigation';
 	import Link from '$lib/components/button/Link.svelte';
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
-	import { Banknote, House, List, LogOut, Menu, Percent, User } from '@lucide/svelte';
+	import { Banknote, Book, House, List, LogOut, Menu, Percent, User, User2, UserCircle, UserIcon } from '@lucide/svelte';
 	import Button from '$lib/components/button/Button.svelte';
 	import Menubar from '$lib/components/menubar/Menubar.svelte';
 	import MenuItem from '$lib/components/menubar/MenuItem.svelte';
@@ -51,11 +51,11 @@
 				<p class="duration-300 ease-in-out {View.menuOpen ? 'opacity-100' : 'opacity-0'}">Home</p>
 			</div>
 		</Link>
-		<Link href="/manager/admin/mentors">
+		<Link href="/manager/admin/users">
 			<div class="flex flex-col items-center gap-1">
 				<User />
 				<p class="duration-300 ease-in-out {View.menuOpen ? 'opacity-100' : 'opacity-0'}">
-					Mentors
+					Users
 				</p>
 			</div>
 		</Link>
@@ -105,10 +105,10 @@
 			</Link>
 		</MenuItem>
 		<MenuItem>
-			<Link href="/manager/admin/mentors">
+			<Link href="/manager/admin/users">
 				<div class="flex flex-col items-center gap-1">
 					<User />
-					<p>Mentors</p>
+					<p>Users</p>
 				</div>
 			</Link>
 		</MenuItem>

@@ -8,7 +8,6 @@
 	import type { PageProps } from './$types';
 	import Search from '$lib/components/search/Search.svelte';
 	import { enhance } from '$app/forms';
-	import FileInput from '$lib/components/form/FileInput.svelte';
 	import { CloudUpload, X } from '@lucide/svelte';
 	import ScrollArea from '$lib/components/scrollarea/ScrollArea.svelte';
 

@@ -13,3 +13,10 @@ export type adminProfile = {
 	profile_image: string;
 	status: 'verified' | 'unverified';
 };
+
+export type studentList = {
+	id: string;
+	name: string;
+	public_id: string;
+	status: string;
+};

@@ -15,10 +15,7 @@ type (
 	AdminUpdatePasswordReq struct {
 		Password string `json:"password" binding:"required,containsany=!@#?,min=8"`
 	}
-	GetStudentListReq struct {
-		PaginatedReq
-		Search *string `json:"search" binding:"omitempty"`
-	}
+
 	AdminIDRes struct {
 		ID string `json:"id"`
 	}
