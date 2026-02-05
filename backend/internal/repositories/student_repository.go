@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/db"
 	"privat-unmei/internal/entity"
@@ -17,12 +18,35 @@ func CreateStudentRepository(db *db.CustomDB) *StudentRepositoryImpl {
 	return &StudentRepositoryImpl{db}
 }
 
-func (sr *StudentRepositoryImpl) GetStudentList(ctx context.Context, totalRow *int64, limit int, page int, students *[]entity.ListStudentQuery) error {
+func (sr *StudentRepositoryImpl) DeleteStudent(ctx context.Context, studentID string) error {
+	var driver RepoDriver = sr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE students
+	SET deleted_at = CURRENT_TIMESTAMP
+	WHERE id = $1 AND deleted_at IS NULL
+	`
+	_, err := driver.Exec(query, studentID)
+	if err != nil {
+		return customerrors.NewError(
+			"something went wrong",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (sr *StudentRepositoryImpl) GetStudentList(ctx context.Context, totalRow *int64, limit int, page int, students *[]entity.ListStudentQuery, search *string) error {
 	var driver RepoDriver
 	driver = sr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
 	}
+	args := []any{}
+	countArgs := []any{}
 	countQuery := `
 	SELECT count(*)
 	FROM users u
@@ -33,16 +57,19 @@ func (sr *StudentRepositoryImpl) GetStudentList(ctx context.Context, totalRow *i
 	SELECT
 		s.id, 
 		u.name, 
-		u.public_id, 
-		u.bio, 
-		u.profile_image, 
+		u.public_id,
 		u.status
 	FROM users u
 	JOIN students s ON s.id = u.id
 	WHERE u.deleted_at IS NULL AND s.deleted_at IS NULL
 	`
-	row := driver.QueryRow(countQuery)
-	if err := row.Scan(totalRow); err != nil {
+	if search != nil {
+		args = append(args, "%"+*search+"%")
+		countArgs = append(countArgs, "%"+*search+"%")
+		query += fmt.Sprintf(" AND (u.name ILIKE $%d OR u.public_id ILIKE $%d)", len(args), len(args))
+		countQuery += fmt.Sprintf(" AND (u.name ILIKE $%d OR u.public_id ILIKE $%d)", len(countArgs), len(countArgs))
+	}
+	if err := driver.QueryRow(countQuery, countArgs...).Scan(totalRow); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return customerrors.NewError(
 				"user not found",
@@ -56,13 +83,10 @@ func (sr *StudentRepositoryImpl) GetStudentList(ctx context.Context, totalRow *i
 			customerrors.DatabaseExecutionError,
 		)
 	}
-	args := []any{}
 	args = append(args, limit)
+	query += fmt.Sprintf(` LIMIT $%d`, len(args))
 	args = append(args, limit*(page-1))
-	query += ` 
-		LIMIT $1
-		OFFSET $2
-	`
+	query += fmt.Sprintf(` OFFSET $%d`, len(args))
 
 	rows, err := driver.Query(query, args...)
 	if err != nil {
@@ -79,8 +103,6 @@ func (sr *StudentRepositoryImpl) GetStudentList(ctx context.Context, totalRow *i
 			&student.ID,
 			&student.Name,
 			&student.PublicID,
-			&student.Bio,
-			&student.ProfileImage,
 			&student.Status,
 		); err != nil {
 			return customerrors.NewError(

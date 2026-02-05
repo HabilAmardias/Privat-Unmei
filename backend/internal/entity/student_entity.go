@@ -34,16 +34,15 @@ type (
 		ID    string
 	}
 	ListStudentQuery struct {
-		ID           string
-		Name         string
-		PublicID     string
-		Bio          string
-		ProfileImage string
-		Status       string
+		ID       string
+		Name     string
+		PublicID string
+		Status   string
 	}
 	ListStudentParam struct {
 		PaginatedParam
 		AdminID string
+		Search  *string
 	}
 	UpdateStudentParam struct {
 		ID           string
@@ -69,5 +68,9 @@ type (
 	RefreshTokenParam struct {
 		UserID string
 		Role   int
+	}
+	DeleteStudentParam struct {
+		AdminID   string
+		StudentID string
 	}
 )

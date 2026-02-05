@@ -39,6 +39,6 @@ export const actions = {
 		if (!success) {
 			return fail(status, { message });
 		}
-		throw redirect(303, '/manager/admin/mentors');
+		throw redirect(303, '/manager/admin/users');
 	}
 } satisfies Actions;

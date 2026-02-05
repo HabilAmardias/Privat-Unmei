@@ -22,12 +22,10 @@ type (
 		NewPassword string `json:"new_password" binding:"required,containsany=!@#?,min=8"`
 	}
 	ListStudentRes struct {
-		ID           string `json:"id"`
-		Name         string `json:"name"`
-		PublicID     string `json:"public_id"`
-		Bio          string `json:"bio"`
-		ProfileImage string `json:"profile_image"`
-		Status       string `json:"status"`
+		ID       string `json:"id"`
+		Name     string `json:"name"`
+		PublicID string `json:"public_id"`
+		Status   string `json:"status"`
 	}
 	UpdateStudentReq struct {
 		Name *string `form:"name"`
@@ -36,6 +34,10 @@ type (
 	UpdateStudentRes struct {
 		ID string `json:"id"`
 	}
+	GetStudentListReq struct {
+		PaginatedReq
+		Search *string `form:"search" binding:"omitempty"`
+	}
 	StudentProfileRes struct {
 		ID           string `json:"id"`
 		Name         string `json:"name"`
@@ -43,5 +45,8 @@ type (
 		Bio          string `json:"bio"`
 		ProfileImage string `json:"profile_image"`
 		Status       string `json:"status"`
+	}
+	DeleteStudentRes struct {
+		ID string `json:"id"`
 	}
 )

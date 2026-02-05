@@ -425,6 +425,13 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		c.RBACCacheRepository,
 		c.Logger,
 	), c.AdminHandler.AdminProfile)
+	v1.DELETE("/students/:id", middlewares.AuthorizationMiddleware(
+		constants.DeleteAllPermission,
+		constants.StudentResource,
+		c.RBACRepository,
+		c.RBACCacheRepository,
+		c.Logger,
+	), c.StudentHandler.DeleteStudent)
 }
 
 func (c *RouteConfig) SetupWebsocketRoute() {
