@@ -30,7 +30,7 @@ func CreateChatHandler(chs *services.ChatServiceImpl, upg *websocket.Upgrader, r
 }
 
 func (chh *ChatHandlerImpl) UpdateLastRead(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -54,7 +54,7 @@ func (chh *ChatHandlerImpl) UpdateLastRead(ctx *gin.Context) {
 }
 
 func (chh *ChatHandlerImpl) GetChatroom(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -80,7 +80,7 @@ func (chh *ChatHandlerImpl) GetChatroom(ctx *gin.Context) {
 }
 
 func (chh *ChatHandlerImpl) ConnectChatChannel(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -119,7 +119,7 @@ func (chh *ChatHandlerImpl) ConnectChatChannel(ctx *gin.Context) {
 
 func (chh *ChatHandlerImpl) GetChatroomInfo(ctx *gin.Context) {
 	chatroomID := ctx.Param("id")
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -146,7 +146,7 @@ func (chh *ChatHandlerImpl) GetUserChatrooms(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -194,7 +194,7 @@ func (chh *ChatHandlerImpl) SendMessage(ctx *gin.Context) {
 		return
 	}
 	chatroomID := ctx.Param("id")
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -240,7 +240,7 @@ func (chh *ChatHandlerImpl) GetMessages(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return

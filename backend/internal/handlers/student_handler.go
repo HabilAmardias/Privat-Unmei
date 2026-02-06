@@ -25,7 +25,7 @@ func CreateStudentHandler(ss *services.StudentServiceImpl) *StudentHandlerImpl {
 }
 
 func (sh *StudentHandlerImpl) DeleteStudent(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -47,7 +47,7 @@ func (sh *StudentHandlerImpl) DeleteStudent(ctx *gin.Context) {
 
 func (sh *StudentHandlerImpl) RefreshToken(ctx *gin.Context) {
 	domain := os.Getenv("COOKIE_DOMAIN")
-	claim, err := getRefreshPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_REFRESH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -72,7 +72,7 @@ func (sh *StudentHandlerImpl) RefreshToken(ctx *gin.Context) {
 }
 
 func (sh *StudentHandlerImpl) GetStudentProfile(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -97,7 +97,7 @@ func (sh *StudentHandlerImpl) ChangePassword(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -172,7 +172,7 @@ func (sh *StudentHandlerImpl) GoogleLoginCallback(ctx *gin.Context) {
 }
 
 func (sh *StudentHandlerImpl) UpdateStudentProfile(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -217,7 +217,7 @@ func (sh *StudentHandlerImpl) GetStudentList(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -259,12 +259,12 @@ func (sh *StudentHandlerImpl) GetStudentList(ctx *gin.Context) {
 }
 
 func (sh *StudentHandlerImpl) SendVerificationEmail(ctx *gin.Context) {
-	claims, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
-	if err := sh.ss.SendVerificationEmail(ctx, claims.Subject); err != nil {
+	if err := sh.ss.SendVerificationEmail(ctx, claim.Subject); err != nil {
 		ctx.Error(err)
 		return
 	}
@@ -287,7 +287,7 @@ func (sh *StudentHandlerImpl) ResetPassword(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -333,7 +333,7 @@ func (sh *StudentHandlerImpl) Verify(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -360,7 +360,7 @@ func (sh *StudentHandlerImpl) GoogleVerify(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return

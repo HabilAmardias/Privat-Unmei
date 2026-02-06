@@ -30,7 +30,7 @@ func (cch *CourseCategoryHandlerImpl) DeleteCategory(ctx *gin.Context) {
 		))
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -67,7 +67,7 @@ func (cch *CourseCategoryHandlerImpl) UpdateCategory(ctx *gin.Context) {
 		))
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -95,7 +95,7 @@ func (cch *CourseCategoryHandlerImpl) CreateCategory(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return

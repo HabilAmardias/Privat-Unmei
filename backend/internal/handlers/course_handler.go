@@ -33,7 +33,7 @@ func (ch *CourseHandlerImpl) UpdateCourse(ctx *gin.Context) {
 		))
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -382,7 +382,7 @@ func (ch *CourseHandlerImpl) MentorListCourse(ctx *gin.Context) {
 }
 
 func (ch *CourseHandlerImpl) DeleteCourse(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -424,7 +424,7 @@ func (ch *CourseHandlerImpl) DeleteCourse(ctx *gin.Context) {
 }
 
 func (ch *CourseHandlerImpl) AddNewCourse(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return

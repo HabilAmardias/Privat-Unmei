@@ -22,7 +22,7 @@ func CreatePaymentHandler(ps *services.PaymentServiceImpl) *PaymentHandlerImpl {
 
 func (ph *PaymentHandlerImpl) GetMentorPaymentMethod(ctx *gin.Context) {
 	id := ctx.Param("id")
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -96,7 +96,7 @@ func (ph *PaymentHandlerImpl) GetAllPaymentMethod(ctx *gin.Context) {
 }
 
 func (ph *PaymentHandlerImpl) UpdatePaymentMethod(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -129,7 +129,7 @@ func (ph *PaymentHandlerImpl) UpdatePaymentMethod(ctx *gin.Context) {
 }
 
 func (ph *PaymentHandlerImpl) DeletePaymentMethod(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -160,7 +160,7 @@ func (ph *PaymentHandlerImpl) DeletePaymentMethod(ctx *gin.Context) {
 }
 
 func (ph *PaymentHandlerImpl) CreatePaymentMethod(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return

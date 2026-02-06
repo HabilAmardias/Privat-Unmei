@@ -104,7 +104,7 @@ func (c *RouteConfig) SetupPublicRoute() {
 	v1.GET("/mentors/:id/availability", c.MentorHandler.GetMentorAvailability)
 	v1.GET("/mentors/:id/courses", c.CourseHandler.MentorListCourse)
 	v1.GET("/courses/:id/reviews", c.CourseRatingHandler.GetCourseReview)
-	v1.GET("/refresh", middlewares.RefreshAuthMiddleware(c.TokenUtil), c.StudentHandler.RefreshToken)
+	v1.GET("/refresh", middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForRefresh), c.StudentHandler.RefreshToken)
 }
 
 func (c *RouteConfig) SetupPrivateRoute() {
