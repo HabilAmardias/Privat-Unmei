@@ -27,5 +27,3 @@ Start Production Server
 ``` 
 go run backend/main.go -release
 ```
-### ERD Visualization
-![ERD Visualization](privat_unmei_db.png)
