@@ -16,6 +16,7 @@ const (
 	CTX_REFRESH_PAYLOAD_KEY = "refresh_payload"
 	CTX_AUTH_PAYLOAD_KEY    = "auth_payload"
 	CTX_AUTH_TOKEN_KEY      = "auth_token"
+	CTX_LOGIN_TOKEN_KEY     = "login_token"
 	DefaultAvatar           = "https://res.cloudinary.com/dk8rlicon/image/upload/v1753881263/default-avatar-icon-of-social-media-user-vector_j8obqd.jpg"
 	AvatarFolder            = "Avatars/"
 	ResumeFolder            = "Resumes/"
@@ -29,12 +30,14 @@ const (
 const (
 	AUTH_AGE    = 15 * time.Minute   // 15 minutes
 	REFRESH_AGE = 3 * 24 * time.Hour // 3 days
-	RESET_AGE   = 15 * time.Minute
+	RESET_AGE   = 15 * time.Minute   // 15 minutes
+	LOGIN_AGE   = 60 * time.Second   // 60 seconds
 )
 
 const (
 	AUTH_COOKIE_KEY    = "auth_token"
 	REFRESH_COOKIE_KEY = "refresh_token"
+	LOGIN_COOKIE_KEY   = "login_token"
 )
 
 const (
@@ -65,8 +68,9 @@ const (
 const (
 	ForVerification = iota + 1 // 1
 	ForReset
-	ForLogin
+	ForAuth
 	ForRefresh
+	ForLogin
 )
 
 const (

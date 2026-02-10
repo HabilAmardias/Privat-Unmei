@@ -85,6 +85,8 @@ func (c *RouteConfig) SetupPublicRoute() {
 	})
 	v1.POST("/register", middlewares.CaptchaMiddleware(), c.StudentHandler.Register)
 	v1.POST("/login", c.StudentHandler.Login)
+	v1.POST("/login-callback", middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForLogin), c.StudentHandler.LoginCallback)
+	v1.GET("/resend-otp", middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForLogin), c.StudentHandler.ResendOTP)
 	v1.GET("/verify", middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForVerification), c.StudentHandler.Verify)
 	v1.POST("/reset-password/send", c.StudentHandler.SendResetTokenEmail)
 	v1.POST("/reset-password/reset", middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForReset), c.StudentHandler.ResetPassword)
@@ -110,7 +112,7 @@ func (c *RouteConfig) SetupPublicRoute() {
 func (c *RouteConfig) SetupPrivateRoute() {
 	v1 := c.App.Group("/api/v1")
 	v1.Use(middlewares.RateLimiterMiddleware(c.Limiter))
-	v1.Use(middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForLogin))
+	v1.Use(middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForAuth))
 	v1.GET("/discounts/final-discount/:participant", c.DiscountHandler.GetDiscount)
 	v1.GET("/additional-cost/operational", c.AdditionalCostHandler.GetOperationalCost)
 	v1.POST("/courses/:id/reviews", middlewares.AuthorizationMiddleware(
@@ -436,6 +438,6 @@ func (c *RouteConfig) SetupPrivateRoute() {
 
 func (c *RouteConfig) SetupWebsocketRoute() {
 	r := c.App.Group("/ws/v1")
-	r.Use(middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForLogin))
+	r.Use(middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForAuth))
 	r.GET("/chatrooms/:id/messages", c.ChatHandler.ConnectChatChannel)
 }

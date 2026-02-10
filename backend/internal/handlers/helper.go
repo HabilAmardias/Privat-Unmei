@@ -5,7 +5,6 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
-	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 	"regexp"
@@ -57,8 +56,8 @@ func getAuthenticationPayload(ctx *gin.Context, key string) (*entity.CustomClaim
 	return customClaims, nil
 }
 
-func getAuthenticationToken(ctx *gin.Context) (string, error) {
-	val, ok := ctx.Get(constants.CTX_AUTH_TOKEN_KEY)
+func getAuthenticationToken(ctx *gin.Context, key string) (string, error) {
+	val, ok := ctx.Get(key)
 	if !ok {
 		return "", customerrors.NewError(
 			"user credential identification failed",

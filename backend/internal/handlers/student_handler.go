@@ -282,7 +282,7 @@ func (sh *StudentHandlerImpl) ResetPassword(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	token, err := getAuthenticationToken(ctx)
+	token, err := getAuthenticationToken(ctx, constants.CTX_AUTH_TOKEN_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -328,7 +328,7 @@ func (sh *StudentHandlerImpl) SendResetTokenEmail(ctx *gin.Context) {
 }
 
 func (sh *StudentHandlerImpl) Verify(ctx *gin.Context) {
-	token, err := getAuthenticationToken(ctx)
+	token, err := getAuthenticationToken(ctx, constants.CTX_AUTH_TOKEN_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -355,7 +355,7 @@ func (sh *StudentHandlerImpl) Verify(ctx *gin.Context) {
 }
 
 func (sh *StudentHandlerImpl) GoogleVerify(ctx *gin.Context) {
-	token, err := getAuthenticationToken(ctx)
+	token, err := getAuthenticationToken(ctx, constants.CTX_AUTH_TOKEN_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -389,6 +389,7 @@ func (sh *StudentHandlerImpl) GoogleVerify(ctx *gin.Context) {
 
 func (sh *StudentHandlerImpl) Login(ctx *gin.Context) {
 	domain := os.Getenv("COOKIE_DOMAIN")
+	clientURL := os.Getenv("CLIENT_DOMAIN")
 	var req dtos.LoginStudentReq
 	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
 		ctx.Error(err)
@@ -398,19 +399,77 @@ func (sh *StudentHandlerImpl) Login(ctx *gin.Context) {
 		Email:    req.Email,
 		Password: req.Password,
 	}
-	authToken, refreshToken, status, err := sh.ss.Login(ctx, param)
+	loginToken, err := sh.ss.Login(ctx, param)
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
 	secure := os.Getenv("ENVIRONMENT_OPTION") == constants.Production
-	ctx.SetCookie(constants.AUTH_COOKIE_KEY, *authToken, int(constants.AUTH_AGE), "/", domain, secure, true)
-	ctx.SetCookie(constants.REFRESH_COOKIE_KEY, *refreshToken, int(constants.REFRESH_AGE), "/", domain, secure, true)
-	ctx.SetCookie("status", *status, int(constants.AUTH_AGE), "/", domain, secure, true)
+	ctx.SetCookie(constants.LOGIN_COOKIE_KEY, loginToken, int(constants.LOGIN_AGE), "/", domain, secure, true)
+	ctx.Redirect(http.StatusTemporaryRedirect, clientURL+"/login-callback")
+}
+
+func (sh *StudentHandlerImpl) LoginCallback(ctx *gin.Context) {
+	domain := os.Getenv("COOKIE_DOMAIN")
+	claim, err := getAuthenticationPayload(ctx, constants.LOGIN_COOKIE_KEY)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	token, err := getAuthenticationToken(ctx, constants.CTX_LOGIN_TOKEN_KEY)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	var req dtos.LoginCallbackReq
+	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.LoginCallbackParam{
+		UserID:     claim.Subject,
+		OTP:        req.OTP,
+		LoginToken: token,
+	}
+	authToken, refreshToken, status, err := sh.ss.LoginCallback(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	secure := os.Getenv("ENVIRONMENT_OPTION") == constants.Production
+	ctx.SetCookie(constants.AUTH_COOKIE_KEY, authToken, int(constants.AUTH_AGE), "/", domain, secure, true)
+	ctx.SetCookie(constants.REFRESH_COOKIE_KEY, refreshToken, int(constants.REFRESH_AGE), "/", domain, secure, true)
+	ctx.SetCookie(constants.AUTH_COOKIE_KEY, status, int(constants.REFRESH_AGE), "/", domain, secure, true)
+
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
 		Data: dtos.LoginStudentRes{
-			Status: *status,
+			Status: status,
+		},
+	})
+}
+
+func (sh *StudentHandlerImpl) ResendOTP(ctx *gin.Context) {
+	domain := os.Getenv("COOKIE_DOMAIN")
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.ResendOTPParam{
+		UserID: claim.Subject,
+	}
+	loginToken, err := sh.ss.ResendOTP(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	secure := os.Getenv("ENVIRONMENT_OPTION") == constants.Production
+	ctx.SetCookie(constants.LOGIN_COOKIE_KEY, loginToken, int(constants.LOGIN_AGE), "/", domain, secure, true)
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.MessageResponse{
+			Message: "Success",
 		},
 	})
 }

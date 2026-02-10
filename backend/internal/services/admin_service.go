@@ -185,7 +185,7 @@ func (as *AdminServiceImpl) Login(ctx context.Context, param entity.AdminLoginPa
 				customerrors.InvalidAction,
 			)
 		}
-		atoken, err := as.ju.GenerateJWT(admin.ID, constants.AdminRole, constants.ForLogin, user.Status, constants.AUTH_AGE)
+		atoken, err := as.ju.GenerateJWT(admin.ID, constants.AdminRole, constants.ForAuth, user.Status, constants.AUTH_AGE)
 		if err != nil {
 			return err
 		}
