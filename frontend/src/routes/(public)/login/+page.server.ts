@@ -12,10 +12,7 @@ export const load: PageServerLoad = ({ cookies }) => {
 
 export const actions = {
 	login: async ({ request, cookies, fetch }) => {
-		const { cookiesData, success, message, status, userStatus } = await controller.login(
-			request,
-			fetch
-		);
+		const { cookiesData, success, message, status } = await controller.login(request, fetch);
 		if (!success) {
 			return fail(status, { message });
 		}
@@ -29,7 +26,7 @@ export const actions = {
 				secure: PUBLIC_ENVIRONMENT_OPTION === Production
 			});
 		});
-		return { success, userStatus };
+		return { success };
 	},
 	register: async ({ request, fetch }) => {
 		const { success, message, status } = await controller.register(request, fetch);

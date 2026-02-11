@@ -389,7 +389,6 @@ func (sh *StudentHandlerImpl) GoogleVerify(ctx *gin.Context) {
 
 func (sh *StudentHandlerImpl) Login(ctx *gin.Context) {
 	domain := os.Getenv("COOKIE_DOMAIN")
-	clientURL := os.Getenv("CLIENT_DOMAIN")
 	var req dtos.LoginStudentReq
 	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
 		ctx.Error(err)
@@ -406,7 +405,12 @@ func (sh *StudentHandlerImpl) Login(ctx *gin.Context) {
 	}
 	secure := os.Getenv("ENVIRONMENT_OPTION") == constants.Production
 	ctx.SetCookie(constants.LOGIN_COOKIE_KEY, loginToken, int(constants.LOGIN_AGE), "/", domain, secure, true)
-	ctx.Redirect(http.StatusTemporaryRedirect, clientURL+"/login-callback")
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.MessageResponse{
+			Message: "Success",
+		},
+	})
 }
 
 func (sh *StudentHandlerImpl) LoginCallback(ctx *gin.Context) {
