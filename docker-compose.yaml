@@ -14,16 +14,15 @@ services:
     network_mode: host
   redis:
     image: redis:latest
+    env_file: ./backend/.env
     restart: unless-stopped
     volumes:
       - redis-data:/data
-    command: redis-server --requirepass $$REDIS_PASSWORD
+    command: redis-server --requirepass ${REDIS_PASSWORD}
     depends_on:
       database:
         condition: service_healthy
     network_mode: host
-    env_file:
-      - backend/.env
   migrate:
     build:
       context: ./backend
