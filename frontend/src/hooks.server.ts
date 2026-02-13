@@ -70,12 +70,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const refreshToken = event.cookies.get('refresh_token');
 	if (!IsTokenExpired(refreshToken) && IsTokenExpired(authToken)) {
 		const url = `${PUBLIC_BASE_URL}/api/v1/refresh`;
-		const res = await fetch(url, {
-			headers: {
-				Cookie: `refresh_token=${refreshToken}; auth_token=${authToken}`
-			},
-			credentials: 'include'
-		});
+		const res = await event.fetch(url);
 		if (res.status !== 200 && !event.route.id?.includes('/(public)')) {
 			const resBody: ServerResponse<MessageResponse> = await res.json();
 			if (resBody.data.message === SESSION_EXPIRED) {
