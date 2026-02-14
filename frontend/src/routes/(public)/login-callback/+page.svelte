@@ -6,15 +6,21 @@
     import Card from "$lib/components/card/Card.svelte";
 	import PinInput from "$lib/components/form/PinInput.svelte";
 	import CldImage from "$lib/components/image/CldImage.svelte";
+	import { onMount } from "svelte";
 
     const View = new LoginCallbackView()
+	onMount(()=>{
+		View.startTimer()
+		return () => {
+			clearInterval(View.interval)
+			View.interval = undefined
+		}
+	})
 </script>
 
-<!-- TODO: Refine OTP Page Design and Add timer to resend OTP -->
-
 <svelte:head>
-	<title>Login - Privat Unmei</title>
-	<meta name="description" content="Login - Privat Unmei" />
+	<title>Login Code - Privat Unmei</title>
+	<meta name="description" content="Enter the Code" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </svelte:head>
 
@@ -34,7 +40,7 @@
 			class="flex flex-col gap-4"
 		>
             <PinInput bind:value={View.otp}/>
-			<Button formAction="?/resendOTP" withBg={false} textColor="dark">Resend Code</Button>
+			<Button disabled={View.resendOTPDisabled} formAction="?/resendOTP" withBg={false} textColor="dark">Resend Code {View.countdownDisplay}</Button>
 			<Button disabled={View.loginDisabled} type="submit" full={true}>Submit</Button>
 		</form>
 	</Card>
