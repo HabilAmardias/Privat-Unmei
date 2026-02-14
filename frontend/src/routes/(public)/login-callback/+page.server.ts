@@ -1,12 +1,15 @@
-import { fail, type Actions } from '@sveltejs/kit';
+import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { controller } from './controller';
-import { Production } from '$lib/utils/constants';
+import { Production, SESSION_EXPIRED } from '$lib/utils/constants';
 import { PUBLIC_ENVIRONMENT_OPTION, PUBLIC_COOKIE_DOMAIN } from '$env/static/public';
 
 export const actions = {
-	login: async ({ fetch, request, cookies }) => {
+	submitOTP: async ({ fetch, request, cookies }) => {
 		const { success, message, status, cookiesData } = await controller.login(fetch, request);
 		if (!success) {
+			if (message === SESSION_EXPIRED) {
+				throw redirect(303, '/logout');
+			}
 			return fail(status, { message });
 		}
 		cookiesData?.forEach((c) => {

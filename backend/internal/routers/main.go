@@ -85,18 +85,18 @@ func (c *RouteConfig) SetupPublicRoute() {
 	})
 	v1.POST("/register", middlewares.CaptchaMiddleware(), c.StudentHandler.Register)
 	v1.POST("/login", c.StudentHandler.Login)
-	v1.POST("/login-callback", middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForLogin), c.StudentHandler.LoginCallback)
-	v1.GET("/resend-otp", middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForLogin), c.StudentHandler.ResendOTP)
-	v1.GET("/verify", middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForVerification), c.StudentHandler.Verify)
+	v1.POST("/login-callback", middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForLogin, constants.LOGIN_COOKIE_KEY, constants.CTX_LOGIN_PAYLOAD_KEY, constants.CTX_LOGIN_TOKEN_KEY), c.StudentHandler.LoginCallback)
+	v1.GET("/resend-otp", middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForLogin, constants.LOGIN_COOKIE_KEY, constants.CTX_LOGIN_PAYLOAD_KEY, constants.CTX_LOGIN_TOKEN_KEY), c.StudentHandler.ResendOTP)
+	v1.GET("/verify", middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForVerification, constants.AUTH_COOKIE_KEY, constants.CTX_AUTH_PAYLOAD_KEY, constants.CTX_AUTH_TOKEN_KEY), c.StudentHandler.Verify)
 	v1.POST("/reset-password/send", c.StudentHandler.SendResetTokenEmail)
-	v1.POST("/reset-password/reset", middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForReset), c.StudentHandler.ResetPassword)
+	v1.POST("/reset-password/reset", middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForReset, constants.AUTH_COOKIE_KEY, constants.CTX_AUTH_PAYLOAD_KEY, constants.CTX_AUTH_TOKEN_KEY), c.StudentHandler.ResetPassword)
 	v1.POST("/admin/login", c.AdminHandler.Login)
 	v1.POST("/mentor/login", c.MentorHandler.Login)
 	v1.GET("/course-categories", c.CourseCategoryHandler.GetCategoriesList)
 	v1.GET("/courses/most-bought", c.CourseHandler.MostBoughtCourses)
 	v1.GET("/auth/google", c.StudentHandler.GoogleLogin)
 	v1.GET("/auth/google/callback", c.StudentHandler.GoogleLoginCallback)
-	v1.GET("/auth/google/verify", middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForVerification), c.StudentHandler.GoogleVerify)
+	v1.GET("/auth/google/verify", middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForVerification, constants.AUTH_COOKIE_KEY, constants.CTX_AUTH_PAYLOAD_KEY, constants.CTX_AUTH_TOKEN_KEY), c.StudentHandler.GoogleVerify)
 	v1.GET("/courses", c.CourseHandler.ListCourse)
 	v1.GET("/courses/:id", c.CourseHandler.CourseDetail)
 	v1.GET("/courses/:id/topics", c.CourseHandler.CourseTopics)
@@ -106,13 +106,13 @@ func (c *RouteConfig) SetupPublicRoute() {
 	v1.GET("/mentors/:id/availability", c.MentorHandler.GetMentorAvailability)
 	v1.GET("/mentors/:id/courses", c.CourseHandler.MentorListCourse)
 	v1.GET("/courses/:id/reviews", c.CourseRatingHandler.GetCourseReview)
-	v1.GET("/refresh", middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForRefresh), c.StudentHandler.RefreshToken)
+	v1.GET("/refresh", middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForRefresh, constants.REFRESH_COOKIE_KEY, constants.CTX_REFRESH_PAYLOAD_KEY, constants.CTX_REFRESH_TOKEN_KEY), c.StudentHandler.RefreshToken)
 }
 
 func (c *RouteConfig) SetupPrivateRoute() {
 	v1 := c.App.Group("/api/v1")
 	v1.Use(middlewares.RateLimiterMiddleware(c.Limiter))
-	v1.Use(middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForAuth))
+	v1.Use(middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForAuth, constants.AUTH_COOKIE_KEY, constants.CTX_AUTH_PAYLOAD_KEY, constants.CTX_AUTH_TOKEN_KEY))
 	v1.GET("/discounts/final-discount/:participant", c.DiscountHandler.GetDiscount)
 	v1.GET("/additional-cost/operational", c.AdditionalCostHandler.GetOperationalCost)
 	v1.POST("/courses/:id/reviews", middlewares.AuthorizationMiddleware(
@@ -438,6 +438,6 @@ func (c *RouteConfig) SetupPrivateRoute() {
 
 func (c *RouteConfig) SetupWebsocketRoute() {
 	r := c.App.Group("/ws/v1")
-	r.Use(middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForAuth))
+	r.Use(middlewares.AuthenticationMiddleware(c.TokenUtil, constants.ForAuth, constants.AUTH_COOKIE_KEY, constants.CTX_AUTH_PAYLOAD_KEY, constants.CTX_AUTH_TOKEN_KEY))
 	r.GET("/chatrooms/:id/messages", c.ChatHandler.ConnectChatChannel)
 }

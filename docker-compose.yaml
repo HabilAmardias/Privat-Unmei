@@ -11,10 +11,10 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-    network_mode: host
+    ports:
+      - 5433:5432
   redis:
     image: redis:latest
-    env_file: ./backend/.env
     restart: unless-stopped
     volumes:
       - redis-data:/data
@@ -22,96 +22,97 @@ services:
     depends_on:
       database:
         condition: service_healthy
-    network_mode: host
-  migrate:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.migrate
-    env_file:
-      - backend/.env
-    restart: "no"
-    depends_on:
-      database:
-        condition: service_healthy
-    network_mode: host
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.web
-    depends_on:
-      database:
-        condition: service_healthy
-    env_file:
-      - backend/.env
-    restart: unless-stopped
-    network_mode: host
-  cron:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.cron
-    env_file:
-      - backend/.env
-    restart: unless-stopped
-    depends_on:
-      - backend
-    network_mode: host
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    env_file:
-      - frontend/.env
-    depends_on:
-      - cron
-    network_mode: host
-  postgres-exporter:
-    image: prometheuscommunity/postgres-exporter
-    container_name: postgres-exporter
-    restart: always
-    env_file:
-      - backend/.env
-    depends_on:
-      database:
-        condition: service_healthy
-    network_mode: host
-  loki:
-    image: grafana/loki:latest
-    restart: unless-stopped
-    command: -config.file=/etc/loki/loki-config.yaml
-    volumes:
-      - ./backend/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
-      - loki-data:/loki
-    network_mode: host
-  promtail:
-    image: grafana/promtail:latest
-    restart: unless-stopped
-    user: root
-    volumes:
-      - ./backend/promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    depends_on:
-      - loki
-    command: -config.file=/etc/promtail/promtail-config.yaml
-    network_mode: host
-  prometheus:
-    image: prom/prometheus:latest
-    restart: unless-stopped
-    container_name: prometheus
-    volumes:
-      - ./backend/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml:ro
-    depends_on:
-      - postgres-exporter
-      - backend
-    network_mode: host
-  grafana:
-    image: grafana/grafana
-    restart: unless-stopped
-    depends_on:
-      - loki
-      - prometheus
-    volumes:
-      - grafana-storage:/var/lib/grafana
-    network_mode: host
+    ports:
+      - 6378:6379
+  # migrate:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile.migrate
+  #   env_file:
+  #     - backend/.env
+  #   restart: "no"
+  #   depends_on:
+  #     database:
+  #       condition: service_healthy
+  #   network_mode: host
+  # backend:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile.web
+  #   depends_on:
+  #     database:
+  #       condition: service_healthy
+  #   env_file:
+  #     - backend/.env
+  #   restart: unless-stopped
+  #   network_mode: host
+  # cron:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile.cron
+  #   env_file:
+  #     - backend/.env
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - backend
+  #   network_mode: host
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   env_file:
+  #     - frontend/.env
+  #   depends_on:
+  #     - cron
+  #   network_mode: host
+  # postgres-exporter:
+  #   image: prometheuscommunity/postgres-exporter
+  #   container_name: postgres-exporter
+  #   restart: always
+  #   env_file:
+  #     - backend/.env
+  #   depends_on:
+  #     database:
+  #       condition: service_healthy
+  #   network_mode: host
+  # loki:
+  #   image: grafana/loki:latest
+  #   restart: unless-stopped
+  #   command: -config.file=/etc/loki/loki-config.yaml
+  #   volumes:
+  #     - ./backend/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+  #     - loki-data:/loki
+  #   network_mode: host
+  # promtail:
+  #   image: grafana/promtail:latest
+  #   restart: unless-stopped
+  #   user: root
+  #   volumes:
+  #     - ./backend/promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml:ro
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #   depends_on:
+  #     - loki
+  #   command: -config.file=/etc/promtail/promtail-config.yaml
+  #   network_mode: host
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   restart: unless-stopped
+  #   container_name: prometheus
+  #   volumes:
+  #     - ./backend/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml:ro
+  #   depends_on:
+  #     - postgres-exporter
+  #     - backend
+  #   network_mode: host
+  # grafana:
+  #   image: grafana/grafana
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - loki
+  #     - prometheus
+  #   volumes:
+  #     - grafana-storage:/var/lib/grafana
+  #   network_mode: host
 
 volumes:
   privat-unmei-data:

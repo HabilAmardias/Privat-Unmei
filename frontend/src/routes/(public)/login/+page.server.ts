@@ -3,10 +3,11 @@ import { controller } from './controller';
 import type { PageServerLoad } from './$types';
 import { Production } from '$lib/utils/constants';
 import { PUBLIC_ENVIRONMENT_OPTION } from '$env/static/public';
+import { IsTokenExpired } from '$lib/utils/helper';
 
 export const load: PageServerLoad = ({ cookies }) => {
-	if (cookies.get('auth_token') || cookies.get('refresh_token')) {
-		throw redirect(303, '/courses');
+	if (!IsTokenExpired(cookies.get('auth_token')) || !IsTokenExpired(cookies.get('refresh_token'))) {
+		throw redirect(303, '/home');
 	}
 };
 

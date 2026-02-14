@@ -1,5 +1,8 @@
 import { IsAlphaOnly } from '$lib/utils/helper';
-
+import type { EnhancementArgs, EnhancementReturn } from '$lib/types';
+import { CreateToast, DismissToast } from '$lib/utils/helper';
+import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
 export class AuthView {
 	login = $state<boolean>(true);
 	openDialog = $state<boolean>(false);
@@ -98,4 +101,24 @@ export class AuthView {
 	setIsDesktop(b: boolean) {
 		this.isDesktop = b;
 	}
+	onLoginSubmit = (args: EnhancementArgs) => {
+		if (args.action.search === '?/login') {
+			this.setIsLoading(true);
+			const loadID = CreateToast('loading', 'logging in....');
+			return async ({ result, update }: EnhancementReturn) => {
+				if (result.type === 'success') {
+					await goto(resolve('/login-callback'), { replaceState: true });
+					this.setIsLoading(false);
+					DismissToast(loadID);
+					CreateToast('success', 'login success');
+				}
+				if (result.type === 'failure') {
+					this.setIsLoading(false);
+					DismissToast(loadID);
+					CreateToast('error', result.data?.message);
+				}
+				update();
+			};
+		}
+	};
 }

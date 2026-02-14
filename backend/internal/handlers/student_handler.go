@@ -415,7 +415,7 @@ func (sh *StudentHandlerImpl) Login(ctx *gin.Context) {
 
 func (sh *StudentHandlerImpl) LoginCallback(ctx *gin.Context) {
 	domain := os.Getenv("COOKIE_DOMAIN")
-	claim, err := getAuthenticationPayload(ctx, constants.LOGIN_COOKIE_KEY)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_LOGIN_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -443,7 +443,7 @@ func (sh *StudentHandlerImpl) LoginCallback(ctx *gin.Context) {
 	secure := os.Getenv("ENVIRONMENT_OPTION") == constants.Production
 	ctx.SetCookie(constants.AUTH_COOKIE_KEY, authToken, int(constants.AUTH_AGE), "/", domain, secure, true)
 	ctx.SetCookie(constants.REFRESH_COOKIE_KEY, refreshToken, int(constants.REFRESH_AGE), "/", domain, secure, true)
-	ctx.SetCookie(constants.AUTH_COOKIE_KEY, status, int(constants.REFRESH_AGE), "/", domain, secure, true)
+	ctx.SetCookie("status", status, int(constants.REFRESH_AGE), "/", domain, secure, true)
 
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
@@ -455,7 +455,7 @@ func (sh *StudentHandlerImpl) LoginCallback(ctx *gin.Context) {
 
 func (sh *StudentHandlerImpl) ResendOTP(ctx *gin.Context) {
 	domain := os.Getenv("COOKIE_DOMAIN")
-	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_LOGIN_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return

@@ -13,6 +13,11 @@ export class LoginCallbackView {
 		return async ({ result }: EnhancementReturn) => {
 			DismissToast(loadID);
 			if (result.type === 'success') {
+				if (args.action.search === '?/resendOTP') {
+					CreateToast('success', 'success');
+					return;
+				}
+				CreateToast('success', 'login success');
 				await goto(resolve('/(app)/(public)/home'), { replaceState: true });
 			}
 			if (result.type === 'failure') {

@@ -559,45 +559,45 @@ func (us *StudentServiceImpl) Login(ctx context.Context, param entity.StudentLog
 	user := new(entity.User)
 	student := new(entity.Student)
 	loginToken := ""
-
-	if err := us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		if err := us.ur.FindByEmail(ctx, param.Email, user); err != nil {
-			var parsedErr *customerrors.CustomError
-			if !errors.As(err, &parsedErr) {
-				return customerrors.NewError(
-					"something went wrong",
-					errors.New("cannot parse error"),
-					customerrors.CommonErr,
-				)
-			}
-			if parsedErr.ErrCode == customerrors.ItemNotExist {
-				return customerrors.NewError(
-					"invalid email or password",
-					parsedErr.ErrLog,
-					customerrors.InvalidAction,
-				)
-			}
-			return err
+	if err := us.ur.FindByEmail(ctx, param.Email, user); err != nil {
+		var parsedErr *customerrors.CustomError
+		if !errors.As(err, &parsedErr) {
+			return "", customerrors.NewError(
+				"something went wrong",
+				errors.New("cannot parse error"),
+				customerrors.CommonErr,
+			)
 		}
-		if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
-			return err
-		}
-		if match := us.bu.ComparePassword(param.Password, user.Password); !match {
-			return customerrors.NewError(
+		if parsedErr.ErrCode == customerrors.ItemNotExist {
+			return "", customerrors.NewError(
 				"invalid email or password",
-				errors.New("password does not match"),
+				parsedErr.ErrLog,
 				customerrors.InvalidAction,
 			)
 		}
-		otp, err := us.ogu.GenerateOTP()
-		if err != nil {
-			return err
-		}
-		loginToken, err = us.ju.GenerateJWT(user.ID, constants.StudentRole, constants.ForLogin, user.Status, constants.LOGIN_AGE)
-		if err != nil {
-			return err
-		}
-		now := time.Now()
+		return "", err
+	}
+	if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
+		return "", err
+	}
+	if match := us.bu.ComparePassword(param.Password, user.Password); !match {
+		return "", customerrors.NewError(
+			"invalid email or password",
+			errors.New("password does not match"),
+			customerrors.InvalidAction,
+		)
+	}
+	otp, err := us.ogu.GenerateOTP()
+	if err != nil {
+		return "", err
+	}
+	loginToken, err = us.ju.GenerateJWT(user.ID, constants.StudentRole, constants.ForLogin, user.Status, constants.LOGIN_AGE)
+	if err != nil {
+		return "", err
+	}
+	now := time.Now()
+
+	if err := us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := us.sr.UpdateOTP(ctx, user.ID, &now, &otp); err != nil {
 			return err
 		}
@@ -609,11 +609,11 @@ func (us *StudentServiceImpl) Login(ctx context.Context, param entity.StudentLog
 	}); err != nil {
 		return "", err
 	}
-	// TODO: Add Email Body for OTP Email
 	go func() {
 		if err := us.gu.SendEmail(entity.SendEmailParams{
-			Receiver: user.Email,
-			Subject:  "One Time Password for Login - Privat Unmei",
+			Receiver:  user.Email,
+			Subject:   "One Time Password for Login - Privat Unmei",
+			EmailBody: constants.OTPEmailBody(otp),
 		}); err != nil {
 			log.Println(err)
 		}
@@ -624,6 +624,7 @@ func (us *StudentServiceImpl) Login(ctx context.Context, param entity.StudentLog
 func (us *StudentServiceImpl) LoginCallback(ctx context.Context, param entity.LoginCallbackParam) (string, string, string, error) {
 	user := new(entity.User)
 	student := new(entity.Student)
+	now := time.Now()
 
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error {
@@ -637,7 +638,7 @@ func (us *StudentServiceImpl) LoginCallback(ctx context.Context, param entity.Lo
 	}
 	if student.OTP == nil || *student.OTP != param.OTP {
 		return "", "", "", customerrors.NewError(
-			"unauthorized",
+			"invalid code",
 			errors.New("invalid OTP"),
 			customerrors.Unauthenticate,
 		)
@@ -647,6 +648,13 @@ func (us *StudentServiceImpl) LoginCallback(ctx context.Context, param entity.Lo
 			"unauthorized",
 			errors.New("invalid token"),
 			customerrors.Unauthenticate,
+		)
+	}
+	if student.OTPLastUpdatedAt.Add(constants.OTP_DURATION).Before(now) {
+		return "", "", "", customerrors.NewError(
+			"Code Expired",
+			fmt.Errorf("OTP Expired"),
+			customerrors.InvalidAction,
 		)
 	}
 	if err := us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
@@ -695,10 +703,10 @@ func (us *StudentServiceImpl) ResendOTP(ctx context.Context, param entity.Resend
 		)
 	}
 
-	if student.OTPLastUpdatedAt.Add(constants.LOGIN_AGE).After(now) {
+	if student.OTPLastUpdatedAt.Add(constants.OTP_DURATION / 2).After(now) {
 		return "", customerrors.NewError(
 			"please try again later",
-			fmt.Errorf("%d seconds not passed yet", int(constants.LOGIN_AGE)),
+			fmt.Errorf("need to wait to send otp again"),
 			customerrors.InvalidAction,
 		)
 	}
@@ -708,6 +716,9 @@ func (us *StudentServiceImpl) ResendOTP(ctx context.Context, param entity.Resend
 		return "", err
 	}
 	loginToken, err := us.ju.GenerateJWT(param.UserID, constants.StudentRole, constants.ForLogin, user.Status, constants.LOGIN_AGE)
+	if err != nil {
+		return "", err
+	}
 
 	if err := us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
 		if err := us.sr.UpdateLoginToken(ctx, param.UserID, &loginToken); err != nil {
@@ -718,12 +729,11 @@ func (us *StudentServiceImpl) ResendOTP(ctx context.Context, param entity.Resend
 	}); err != nil {
 		return "", err
 	}
-
-	// TODO: Add Email Body for OTP Email
 	go func() {
 		if err := us.gu.SendEmail(entity.SendEmailParams{
-			Receiver: user.Email,
-			Subject:  "One Time Password for Login - Privat Unmei",
+			Receiver:  user.Email,
+			Subject:   "One Time Password for Login - Privat Unmei",
+			EmailBody: constants.OTPEmailBody(otp),
 		}); err != nil {
 			log.Println(err)
 		}
