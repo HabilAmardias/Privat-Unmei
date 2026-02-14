@@ -5,12 +5,15 @@ import { PUBLIC_ENVIRONMENT_OPTION, PUBLIC_COOKIE_DOMAIN } from '$env/static/pub
 import { controller } from './controller';
 
 export const load: PageServerLoad = async ({ cookies }) => {
+	const status = cookies.get('status');
 	const authToken = cookies.get('auth_token');
 	const refreshToken = cookies.get('refresh_token');
-	const status = cookies.get('status');
-	if (!authToken || !refreshToken || !status) {
+	const verifyToken = cookies.get('verify_token');
+
+	if ((!authToken || !refreshToken || !verifyToken) && !status) {
 		throw error(401, { message: 'Login failed' });
 	}
+
 	const cookiesOption = {
 		path: '/',
 		secure: PUBLIC_ENVIRONMENT_OPTION === Production,
@@ -33,10 +36,7 @@ export const actions = {
 			httpOnly: true,
 			domain: PUBLIC_COOKIE_DOMAIN
 		};
-		cookies.delete('auth_token', cookiesOption);
-		cookies.delete('refresh_token', cookiesOption);
-		cookies.delete('status', cookiesOption);
-		cookies.delete('role', cookiesOption);
+		cookies.delete('verify_token', cookiesOption);
 		cookiesData?.forEach((c) => {
 			cookies.set(c.key, c.value, {
 				path: c.path,

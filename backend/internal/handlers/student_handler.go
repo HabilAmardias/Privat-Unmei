@@ -165,8 +165,14 @@ func (sh *StudentHandlerImpl) GoogleLoginCallback(ctx *gin.Context) {
 		return
 	}
 	secure := os.Getenv("ENVIRONMENT_OPTION") == constants.Production
-	ctx.SetCookie(constants.AUTH_COOKIE_KEY, authToken, int(constants.AUTH_AGE), "/", domain, secure, true)
-	ctx.SetCookie(constants.REFRESH_COOKIE_KEY, refreshToken, int(constants.REFRESH_AGE), "/", domain, secure, true)
+	authKey := constants.AUTH_COOKIE_KEY
+	if userStatus != constants.VerifiedStatus {
+		authKey = constants.VERIFICATION_COOKIE_KEY
+	}
+	if userStatus == constants.VerifiedStatus {
+		ctx.SetCookie(constants.REFRESH_COOKIE_KEY, refreshToken, int(constants.REFRESH_AGE), "/", domain, secure, true)
+	}
+	ctx.SetCookie(authKey, authToken, int(constants.AUTH_AGE), "/", domain, secure, true)
 	ctx.SetCookie("status", userStatus, int(constants.REFRESH_AGE), "/", domain, secure, true)
 	ctx.Redirect(http.StatusTemporaryRedirect, clientURL+"/google-callback")
 }
@@ -282,12 +288,12 @@ func (sh *StudentHandlerImpl) ResetPassword(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	token, err := getAuthenticationToken(ctx, constants.CTX_AUTH_TOKEN_KEY)
+	token, err := getAuthenticationToken(ctx, constants.CTX_RESET_TOKEN_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_RESET_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -328,12 +334,12 @@ func (sh *StudentHandlerImpl) SendResetTokenEmail(ctx *gin.Context) {
 }
 
 func (sh *StudentHandlerImpl) Verify(ctx *gin.Context) {
-	token, err := getAuthenticationToken(ctx, constants.CTX_AUTH_TOKEN_KEY)
+	token, err := getAuthenticationToken(ctx, constants.CTX_VERIFICATION_TOKEN_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_VERIFICATION_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -355,12 +361,12 @@ func (sh *StudentHandlerImpl) Verify(ctx *gin.Context) {
 }
 
 func (sh *StudentHandlerImpl) GoogleVerify(ctx *gin.Context) {
-	token, err := getAuthenticationToken(ctx, constants.CTX_AUTH_TOKEN_KEY)
+	token, err := getAuthenticationToken(ctx, constants.CTX_VERIFICATION_TOKEN_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_VERIFICATION_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return

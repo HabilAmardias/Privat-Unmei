@@ -173,13 +173,17 @@ func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code stri
 		if status != constants.VerifiedStatus {
 			usedFor = constants.ForVerification
 		}
+		refreshToken := ""
+
 		authToken, err := us.ju.GenerateJWT(userID, constants.StudentRole, usedFor, status, constants.AUTH_AGE)
 		if err != nil {
 			return "", "", err
 		}
-		refreshToken, err := us.ju.GenerateJWT(userID, constants.StudentRole, constants.ForRefresh, status, constants.REFRESH_AGE)
-		if err != nil {
-			return "", "", err
+		if status == constants.VerifiedStatus {
+			refreshToken, err = us.ju.GenerateJWT(userID, constants.StudentRole, constants.ForRefresh, status, constants.REFRESH_AGE)
+			if err != nil {
+				return "", "", err
+			}
 		}
 		return authToken, refreshToken, nil
 	}

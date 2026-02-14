@@ -33,6 +33,10 @@ class GoogleCallbackController {
 						data.key = key;
 						data.value = val;
 						break;
+					case 'verify_token':
+						data.key = key;
+						data.value = val;
+						break;
 					case 'status':
 						data.key = key;
 						data.value = val;
