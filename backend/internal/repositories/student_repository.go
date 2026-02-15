@@ -8,6 +8,7 @@ import (
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/db"
 	"privat-unmei/internal/entity"
+	"time"
 )
 
 type StudentRepositoryImpl struct {
@@ -16,6 +17,50 @@ type StudentRepositoryImpl struct {
 
 func CreateStudentRepository(db *db.CustomDB) *StudentRepositoryImpl {
 	return &StudentRepositoryImpl{db}
+}
+
+func (sr *StudentRepositoryImpl) UpdateLoginToken(ctx context.Context, studentID string, loginToken *string) error {
+	var driver RepoDriver = sr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE students
+	SET login_token = $1, updated_at = NOW()
+	WHERE id = $2 AND deleted_at IS NULL
+	`
+
+	_, err := driver.Exec(query, loginToken, studentID)
+	if err != nil {
+		return customerrors.NewError(
+			"something went wrong",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (sr *StudentRepositoryImpl) UpdateOTP(ctx context.Context, studentID string, lastUpdateOTP *time.Time, otp *int64) error {
+	var driver RepoDriver = sr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	UPDATE students
+	SET otp = $1, otp_last_updated_at = $2, updated_at = NOW()
+	WHERE id = $3 AND deleted_at IS NULL
+	`
+
+	_, err := driver.Exec(query, otp, lastUpdateOTP, studentID)
+	if err != nil {
+		return customerrors.NewError(
+			"something went wrong",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
 }
 
 func (sr *StudentRepositoryImpl) DeleteStudent(ctx context.Context, studentID string) error {
@@ -163,7 +208,7 @@ func (sr *StudentRepositoryImpl) FindByID(ctx context.Context, id string, studen
 		driver = tx
 	}
 	query := `
-	SELECT id, verify_token, reset_token, created_at, updated_at, deleted_at
+	SELECT id, verify_token, reset_token, login_token, otp, otp_last_updated_at, created_at, updated_at, deleted_at
 	FROM students
 	WHERE id = $1 AND deleted_at IS NULL
 	`
@@ -172,6 +217,9 @@ func (sr *StudentRepositoryImpl) FindByID(ctx context.Context, id string, studen
 		&student.ID,
 		&student.VerifyToken,
 		&student.ResetToken,
+		&student.LoginToken,
+		&student.OTP,
+		&student.OTPLastUpdatedAt,
 		&student.CreatedAt,
 		&student.UpdatedAt,
 		&student.DeletedAt,

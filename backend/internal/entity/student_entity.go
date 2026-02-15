@@ -7,12 +7,15 @@ import (
 
 type (
 	Student struct {
-		ID          string
-		VerifyToken *string
-		ResetToken  *string
-		CreatedAt   time.Time
-		UpdatedAt   time.Time
-		DeletedAt   *time.Time
+		ID               string
+		VerifyToken      *string
+		ResetToken       *string
+		LoginToken       *string
+		OTP              *int64
+		OTPLastUpdatedAt *time.Time
+		CreatedAt        time.Time
+		UpdatedAt        time.Time
+		DeletedAt        *time.Time
 	}
 	StudentRegisterParam struct {
 		Name     string
@@ -72,5 +75,13 @@ type (
 	DeleteStudentParam struct {
 		AdminID   string
 		StudentID string
+	}
+	LoginCallbackParam struct {
+		UserID     string
+		OTP        int64
+		LoginToken string
+	}
+	ResendOTPParam struct {
+		UserID string
 	}
 )

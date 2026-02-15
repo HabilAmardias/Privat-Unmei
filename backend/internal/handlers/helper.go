@@ -5,7 +5,6 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
-	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
 	"regexp"
@@ -35,9 +34,9 @@ func ValidateCategories(categories []int) error {
 	return nil
 }
 
-func getRefreshPayload(ctx *gin.Context) (*entity.CustomClaim, error) {
+func getAuthenticationPayload(ctx *gin.Context, key string) (*entity.CustomClaim, error) {
 
-	claims, ok := ctx.Get(constants.CTX_REFRESH_PAYLOAD_KEY)
+	claims, ok := ctx.Get(key)
 	if !ok {
 		return nil, customerrors.NewError(
 			"user credential identification failed",
@@ -57,30 +56,8 @@ func getRefreshPayload(ctx *gin.Context) (*entity.CustomClaim, error) {
 	return customClaims, nil
 }
 
-func getAuthenticationPayload(ctx *gin.Context) (*entity.CustomClaim, error) {
-
-	claims, ok := ctx.Get(constants.CTX_AUTH_PAYLOAD_KEY)
-	if !ok {
-		return nil, customerrors.NewError(
-			"user credential identification failed",
-			errors.New("cannot find authentication claim"),
-			customerrors.CommonErr,
-		)
-	}
-
-	customClaims, ok := claims.(*entity.CustomClaim)
-	if !ok {
-		return nil, customerrors.NewError(
-			"user credential identification failed",
-			errors.New("cannot parse authentication claim"),
-			customerrors.CommonErr,
-		)
-	}
-	return customClaims, nil
-}
-
-func getAuthenticationToken(ctx *gin.Context) (string, error) {
-	val, ok := ctx.Get(constants.CTX_AUTH_TOKEN_KEY)
+func getAuthenticationToken(ctx *gin.Context, key string) (string, error) {
+	val, ok := ctx.Get(key)
 	if !ok {
 		return "", customerrors.NewError(
 			"user credential identification failed",

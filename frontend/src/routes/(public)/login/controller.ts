@@ -1,5 +1,4 @@
-import type { Fetch, ServerResponse } from '$lib/types';
-import type { LoginResponse } from './model';
+import type { Fetch } from '$lib/types';
 import type { CookiesData, SameSite } from '$lib/types';
 import { FetchData } from '$lib/utils';
 
@@ -59,7 +58,6 @@ class AuthController {
 		cookiesData?: CookiesData[];
 		success: boolean;
 		message: string;
-		userStatus?: 'verified' | 'unverified';
 		status: number;
 	}> {
 		const formData = await req.formData();
@@ -106,14 +104,12 @@ class AuthController {
 				status
 			};
 		}
-		const resBody: ServerResponse<LoginResponse> = await res?.json();
 		const cookiesData = this.#getCookies(res!);
 		return {
 			cookiesData,
 			success: true,
 			message: 'successfully login',
-			status: res!.status,
-			userStatus: resBody.data.status
+			status: res!.status
 		};
 	}
 	#validateEmail(email: string) {
@@ -148,6 +144,10 @@ class AuthController {
 						data.value = val;
 						break;
 					case 'auth_token':
+						data.key = key;
+						data.value = val;
+						break;
+					case 'login_token':
 						data.key = key;
 						data.value = val;
 						break;

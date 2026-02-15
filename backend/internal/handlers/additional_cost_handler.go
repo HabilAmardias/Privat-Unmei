@@ -21,7 +21,7 @@ func CreateAdditionalCostHandler(acs *services.AdditionalCostServiceImpl) *Addit
 }
 
 func (ach *AdditionalCostHandlerImpl) GetOperationalCost(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -48,7 +48,7 @@ func (ach *AdditionalCostHandlerImpl) GetAllAdditionalCost(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -89,7 +89,7 @@ func (ach *AdditionalCostHandlerImpl) GetAllAdditionalCost(ctx *gin.Context) {
 }
 
 func (ach *AdditionalCostHandlerImpl) DeleteCost(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -120,7 +120,7 @@ func (ach *AdditionalCostHandlerImpl) DeleteCost(ctx *gin.Context) {
 }
 
 func (ach *AdditionalCostHandlerImpl) UpdateCostAmount(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -157,7 +157,7 @@ func (ach *AdditionalCostHandlerImpl) UpdateCostAmount(ctx *gin.Context) {
 }
 
 func (ach *AdditionalCostHandlerImpl) CreateNewAdditionalCost(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return

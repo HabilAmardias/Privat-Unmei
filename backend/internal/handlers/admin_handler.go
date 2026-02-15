@@ -21,7 +21,7 @@ func CreateAdminHandler(as *services.AdminServiceImpl) *AdminHandlerImpl {
 }
 
 func (ah *AdminHandlerImpl) AdminProfile(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -42,7 +42,7 @@ func (ah *AdminHandlerImpl) AdminProfile(ctx *gin.Context) {
 }
 
 func (ah *AdminHandlerImpl) ChangePassword(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -69,7 +69,7 @@ func (ah *AdminHandlerImpl) ChangePassword(ctx *gin.Context) {
 }
 
 func (ah *AdminHandlerImpl) VerifyAdmin(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return

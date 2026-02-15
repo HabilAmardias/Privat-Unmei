@@ -1,40 +1,15 @@
 package middlewares
 
 import (
-	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
-func RefreshAuthMiddleware(tokenUtil *utils.JWTUtil) gin.HandlerFunc {
+func AuthenticationMiddleware(tokenUtil *utils.JWTUtil, usedFor int, cookieKey string, payloadKey string, tokenKey string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		refreshToken, err := ctx.Cookie(constants.REFRESH_COOKIE_KEY)
-		if err != nil {
-			ctx.Error(customerrors.NewError(
-				"credentials does not found",
-				err,
-				customerrors.Unauthenticate,
-			))
-			ctx.Abort()
-			return
-		}
-		payload, err := tokenUtil.VerifyJWT(refreshToken, constants.ForRefresh)
-		if err != nil {
-			ctx.Error(err)
-			ctx.Abort()
-			return
-		}
-
-		ctx.Set(constants.CTX_REFRESH_PAYLOAD_KEY, payload)
-		ctx.Next()
-	}
-}
-
-func AuthenticationMiddleware(tokenUtil *utils.JWTUtil, usedFor int) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		accessToken, err := ctx.Cookie(constants.AUTH_COOKIE_KEY)
+		accessToken, err := ctx.Cookie(cookieKey)
 		if err != nil {
 			ctx.Error(customerrors.NewError(
 				"credentials does not found",
@@ -51,8 +26,8 @@ func AuthenticationMiddleware(tokenUtil *utils.JWTUtil, usedFor int) gin.Handler
 			return
 		}
 
-		ctx.Set(constants.CTX_AUTH_PAYLOAD_KEY, payload)
-		ctx.Set(constants.CTX_AUTH_TOKEN_KEY, accessToken)
+		ctx.Set(payloadKey, payload)
+		ctx.Set(tokenKey, accessToken)
 		ctx.Next()
 	}
 }

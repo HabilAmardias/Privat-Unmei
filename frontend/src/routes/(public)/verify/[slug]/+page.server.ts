@@ -23,9 +23,9 @@ export const load: PageServerLoad = async ({ cookies, params, fetch }) => {
 		httpOnly: true,
 		domain: PUBLIC_COOKIE_DOMAIN
 	};
-	cookies.set('auth_token', params.slug, cookiesOption);
+	cookies.set('verify_token', params.slug, cookiesOption);
 	const { success, message, status } = await controller.verify(fetch);
-	cookies.delete('auth_token', cookiesOption);
+	cookies.delete('verify_token', cookiesOption);
 	if (!success) {
 		throw error(status, { message });
 	}

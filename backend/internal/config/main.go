@@ -58,7 +58,7 @@ func Run() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	log.Println("Shutdown Server ...")
+	zl.Infoln("Shutdown Server....")
 	timeoutEnv := os.Getenv("GRACEFUL_TIMEOUT")
 	timeout, err := strconv.Atoi(timeoutEnv)
 	if err != nil {
@@ -68,10 +68,10 @@ func Run() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
 	defer cancel()
 	if err := server.Shutdown(ctx); err != nil {
-		log.Println("Server Shutdown:", err)
+		zl.Infoln("Server Shutdown:", err)
 	}
 
 	<-ctx.Done()
-	log.Printf("timeout of %d seconds.\n", timeout)
-	log.Println("Server exiting")
+	zl.Infof("timeout of %d seconds.\n", timeout)
+	zl.Infoln("Server exiting")
 }

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"privat-unmei/internal/customerrors"
@@ -36,6 +37,13 @@ func (ju *JWTUtil) VerifyJWT(tokenStr string, usedFor int) (*entity.CustomClaim,
 		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Name}),
 	)
 	if err != nil {
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			return nil, customerrors.NewError(
+				"session expired",
+				err,
+				customerrors.Unauthenticate,
+			)
+		}
 		return nil, customerrors.NewError(
 			"Failed to authorize",
 			err,
@@ -49,27 +57,11 @@ func (ju *JWTUtil) VerifyJWT(tokenStr string, usedFor int) (*entity.CustomClaim,
 			customerrors.Unauthenticate,
 		)
 	}
-
 	claim, ok := token.Claims.(*entity.CustomClaim)
 	if !ok {
 		return nil, customerrors.NewError(
 			"Failed to authorize",
 			fmt.Errorf("failed to get jwt claim"),
-			customerrors.Unauthenticate,
-		)
-	}
-	exp, expErr := claim.GetExpirationTime()
-	if expErr != nil {
-		return nil, customerrors.NewError(
-			"Failed to authorize",
-			expErr,
-			customerrors.Unauthenticate,
-		)
-	}
-	if float64(time.Now().Unix()) > float64(exp.Time.Unix()) {
-		return nil, customerrors.NewError(
-			"session expired",
-			fmt.Errorf("jwt is expired"),
 			customerrors.Unauthenticate,
 		)
 	}

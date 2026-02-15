@@ -11,3 +11,4 @@ export const mentorRole = '2';
 export const ErrorLogo =
 	'https://res.cloudinary.com/dk8rlicon/image/upload/v1766627882/Error_Page_Hero_jwjd04.png';
 export const Production = 'PROD';
+export const SESSION_EXPIRED = 'session expired';

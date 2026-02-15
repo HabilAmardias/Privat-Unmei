@@ -251,7 +251,7 @@ func (ms *MentorServiceImpl) Login(ctx context.Context, param entity.LoginMentor
 				customerrors.InvalidAction,
 			)
 		}
-		loginToken, err := ms.ju.GenerateJWT(mentor.ID, constants.MentorRole, constants.ForLogin, user.Status, constants.AUTH_AGE)
+		loginToken, err := ms.ju.GenerateJWT(mentor.ID, constants.MentorRole, constants.ForAuth, user.Status, constants.AUTH_AGE)
 		if err != nil {
 			return err
 		}

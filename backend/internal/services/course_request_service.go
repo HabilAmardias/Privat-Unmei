@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
+	"privat-unmei/internal/logger"
 	"privat-unmei/internal/repositories"
 	"privat-unmei/internal/utils"
 	"time"
@@ -28,6 +28,7 @@ type CourseRequestServiceImpl struct {
 	acr *repositories.AdditionalCostRepositoryImpl
 	tmr *repositories.TransactionManagerRepositories
 	gu  *utils.GomailUtil
+	lg  logger.CustomLogger
 }
 
 func CreateCourseRequestService(
@@ -43,8 +44,9 @@ func CreateCourseRequestService(
 	acr *repositories.AdditionalCostRepositoryImpl,
 	tmr *repositories.TransactionManagerRepositories,
 	gu *utils.GomailUtil,
+	lg logger.CustomLogger,
 ) *CourseRequestServiceImpl {
-	return &CourseRequestServiceImpl{crr, cr, csr, mar, ur, sr, mr, pr, dr, acr, tmr, gu}
+	return &CourseRequestServiceImpl{crr, cr, csr, mar, ur, sr, mr, pr, dr, acr, tmr, gu, lg}
 }
 
 func (crs *CourseRequestServiceImpl) StudentCourseRequestDetail(ctx context.Context, param entity.StudentCourseRequestDetailParam) (*entity.StudentCourseRequestDetailQuery, error) {
@@ -499,10 +501,10 @@ func (crs *CourseRequestServiceImpl) HandleCourseRequest(ctx context.Context, pa
 					EmailBody: constants.PaymentInfoEmailBody(course.Title, user.Name, user.PublicID, payment.PaymentMethodName, payment.AccountNumber, payment.TotalPrice, courseRequest.ExpiredAt.String()),
 				}
 				if err := crs.gu.SendEmail(emailParam); err != nil {
-					log.Println(err.Error())
+					crs.lg.Errorln(err)
 					return
 				}
-				log.Println("Send Email Success")
+				crs.lg.Infoln("Send Email Success")
 			}()
 		}
 		return nil
@@ -688,10 +690,10 @@ func (crs *CourseRequestServiceImpl) CreateReservation(ctx context.Context, para
 				EmailBody: constants.RequestDetailEmailBody(course.Title, user.Name, user.PublicID, param.NumberOfParticipant, totalPrice),
 			}
 			if err := crs.gu.SendEmail(emailParam); err != nil {
-				log.Println(err.Error())
+				crs.lg.Errorln(err)
 				return
 			}
-			log.Println("Send Email Success")
+			crs.lg.Infoln("Send Email Success")
 		}()
 
 		return nil

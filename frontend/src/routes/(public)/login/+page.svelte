@@ -60,26 +60,7 @@
 		};
 	}
 
-	function onLoginSubmit(args: EnhancementArgs) {
-		if (args.action.search === '?/login') {
-			View.setIsLoading(true);
-			const loadID = CreateToast('loading', 'logging in....');
-			return async ({ result, update }: EnhancementReturn) => {
-				if (result.type === 'success') {
-					await goto('/home', { replaceState: true });
-					View.setIsLoading(false);
-					DismissToast(loadID);
-					CreateToast('success', 'login success');
-				}
-				if (result.type === 'failure') {
-					View.setIsLoading(false);
-					DismissToast(loadID);
-					CreateToast('error', result.data?.message);
-				}
-				update();
-			};
-		}
-	}
+	
 </script>
 
 {#snippet TACDialogTitle()}
@@ -175,7 +156,7 @@
 	{:else}
 		<Card>
 			<h2 class="mb-3 text-2xl font-bold text-[var(--tertiary-color)]">Login</h2>
-			<form use:enhance={onLoginSubmit} action="?/login" method="post" class="flex flex-col gap-4">
+			<form use:enhance={View.onLoginSubmit} action="?/login" method="post" class="flex flex-col gap-4">
 				<Input
 					err={View.emailError}
 					type="email"

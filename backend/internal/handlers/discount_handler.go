@@ -31,7 +31,7 @@ func (dh *DiscountHandlerImpl) GetDiscount(ctx *gin.Context) {
 		))
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -59,7 +59,7 @@ func (dh *DiscountHandlerImpl) GetAllDiscount(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -109,7 +109,7 @@ func (dh *DiscountHandlerImpl) DeleteDiscount(ctx *gin.Context) {
 		))
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -140,7 +140,7 @@ func (dh *DiscountHandlerImpl) UpdateDiscountAmount(ctx *gin.Context) {
 		))
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -173,7 +173,7 @@ func (dh *DiscountHandlerImpl) CreateNewDiscount(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return

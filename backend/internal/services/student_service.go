@@ -4,15 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
+	"privat-unmei/internal/logger"
 	"privat-unmei/internal/repositories"
 	"privat-unmei/internal/utils"
 	"strings"
+	"time"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -28,7 +30,9 @@ type StudentServiceImpl struct {
 	gu     *utils.GomailUtil
 	cu     *utils.CloudinaryUtil
 	ju     *utils.JWTUtil
+	ogu    *utils.OTPGenUtil
 	goauth *utils.GoogleOauth
+	lg     logger.CustomLogger
 }
 
 func CreateStudentService(
@@ -42,9 +46,11 @@ func CreateStudentService(
 	gu *utils.GomailUtil,
 	cu *utils.CloudinaryUtil,
 	ju *utils.JWTUtil,
+	ogu *utils.OTPGenUtil,
 	goauth *utils.GoogleOauth,
+	lg logger.CustomLogger,
 ) *StudentServiceImpl {
-	return &StudentServiceImpl{ur, sr, ar, crr, chr, tmr, bu, gu, cu, ju, goauth}
+	return &StudentServiceImpl{ur, sr, ar, crr, chr, tmr, bu, gu, cu, ju, ogu, goauth, lg}
 }
 
 func (us *StudentServiceImpl) GoogleLogin(oauthState string) string {
@@ -97,7 +103,7 @@ func (us *StudentServiceImpl) RefreshToken(ctx context.Context, param entity.Ref
 		return "", err
 	}
 
-	token, err := us.ju.GenerateJWT(param.UserID, param.Role, constants.ForLogin, user.Status, constants.AUTH_AGE)
+	token, err := us.ju.GenerateJWT(param.UserID, param.Role, constants.ForAuth, user.Status, constants.AUTH_AGE)
 	if err != nil {
 		return "", err
 	}
@@ -165,17 +171,21 @@ func (us *StudentServiceImpl) ChangePassword(ctx context.Context, param entity.S
 
 func (us *StudentServiceImpl) GoogleLoginCallback(ctx context.Context, code string) (string, string, string, error) {
 	generateAuthAndRefreshToken := func(userID string, status string) (string, string, error) {
-		usedFor := constants.ForLogin
+		usedFor := constants.ForAuth
 		if status != constants.VerifiedStatus {
 			usedFor = constants.ForVerification
 		}
+		refreshToken := ""
+
 		authToken, err := us.ju.GenerateJWT(userID, constants.StudentRole, usedFor, status, constants.AUTH_AGE)
 		if err != nil {
 			return "", "", err
 		}
-		refreshToken, err := us.ju.GenerateJWT(userID, constants.StudentRole, constants.ForRefresh, status, constants.REFRESH_AGE)
-		if err != nil {
-			return "", "", err
+		if status == constants.VerifiedStatus {
+			refreshToken, err = us.ju.GenerateJWT(userID, constants.StudentRole, constants.ForRefresh, status, constants.REFRESH_AGE)
+			if err != nil {
+				return "", "", err
+			}
 		}
 		return authToken, refreshToken, nil
 	}
@@ -507,7 +517,7 @@ func (us *StudentServiceImpl) GoogleVerify(ctx context.Context, param entity.Ver
 	}); err != nil {
 		return "", "", "", err
 	}
-	authToken, err := us.ju.GenerateJWT(param.ID, constants.StudentRole, constants.ForLogin, user.Status, constants.AUTH_AGE)
+	authToken, err := us.ju.GenerateJWT(param.ID, constants.StudentRole, constants.ForAuth, user.Status, constants.AUTH_AGE)
 	if err != nil {
 		return "", "", "", err
 	}
@@ -551,56 +561,190 @@ func (us *StudentServiceImpl) Verify(ctx context.Context, param entity.VerifyStu
 	})
 }
 
-func (us *StudentServiceImpl) Login(ctx context.Context, param entity.StudentLoginParam) (*string, *string, *string, error) {
+func (us *StudentServiceImpl) Login(ctx context.Context, param entity.StudentLoginParam) (string, error) {
 	user := new(entity.User)
 	student := new(entity.Student)
-	authToken := new(string)
-	refreshToken := new(string)
-	status := new(string)
+	loginToken := ""
+	if err := us.ur.FindByEmail(ctx, param.Email, user); err != nil {
+		var parsedErr *customerrors.CustomError
+		if !errors.As(err, &parsedErr) {
+			return "", customerrors.NewError(
+				"something went wrong",
+				errors.New("cannot parse error"),
+				customerrors.CommonErr,
+			)
+		}
+		if parsedErr.ErrCode == customerrors.ItemNotExist {
+			return "", customerrors.NewError(
+				"invalid email or password",
+				parsedErr.ErrLog,
+				customerrors.InvalidAction,
+			)
+		}
+		return "", err
+	}
+	if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
+		return "", err
+	}
+	if match := us.bu.ComparePassword(param.Password, user.Password); !match {
+		return "", customerrors.NewError(
+			"invalid email or password",
+			errors.New("password does not match"),
+			customerrors.InvalidAction,
+		)
+	}
+	otp, err := us.ogu.GenerateOTP()
+	if err != nil {
+		return "", err
+	}
+	loginToken, err = us.ju.GenerateJWT(user.ID, constants.StudentRole, constants.ForLogin, user.Status, constants.LOGIN_AGE)
+	if err != nil {
+		return "", err
+	}
+	now := time.Now()
 
 	if err := us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
-		if err := us.ur.FindByEmail(ctx, param.Email, user); err != nil {
-			var parsedErr *customerrors.CustomError
-			if !errors.As(err, &parsedErr) {
-				return customerrors.NewError(
-					"something went wrong",
-					errors.New("cannot parse error"),
-					customerrors.CommonErr,
-				)
-			}
-			if parsedErr.ErrCode == customerrors.ItemNotExist {
-				return customerrors.NewError(
-					"invalid email or password",
-					parsedErr.ErrLog,
-					customerrors.InvalidAction,
-				)
-			}
+		if err := us.sr.UpdateOTP(ctx, user.ID, &now, &otp); err != nil {
 			return err
 		}
-		if err := us.sr.FindByID(ctx, user.ID, student); err != nil {
+		if err := us.sr.UpdateLoginToken(ctx, user.ID, &loginToken); err != nil {
 			return err
 		}
-		if match := us.bu.ComparePassword(param.Password, user.Password); !match {
-			return customerrors.NewError("invalid email or password", errors.New("password does not match"), customerrors.InvalidAction)
-		}
-		atoken, err := us.ju.GenerateJWT(student.ID, constants.StudentRole, constants.ForLogin, user.Status, constants.AUTH_AGE)
-		if err != nil {
-			return err
-		}
-		rtoken, err := us.ju.GenerateJWT(student.ID, constants.StudentRole, constants.ForRefresh, user.Status, constants.REFRESH_AGE)
-		if err != nil {
-			return err
-		}
-		*authToken = atoken
-		*refreshToken = rtoken
-		*status = user.Status
-
 		return nil
 
 	}); err != nil {
-		return nil, nil, nil, err
+		return "", err
 	}
-	return authToken, refreshToken, status, nil
+	go func() {
+		if err := us.gu.SendEmail(entity.SendEmailParams{
+			Receiver:  user.Email,
+			Subject:   "One Time Password for Login - Privat Unmei",
+			EmailBody: constants.OTPEmailBody(otp),
+		}); err != nil {
+			us.lg.Errorln(err)
+		}
+	}()
+	return loginToken, nil
+}
+
+func (us *StudentServiceImpl) LoginCallback(ctx context.Context, param entity.LoginCallbackParam) (string, string, string, error) {
+	user := new(entity.User)
+	student := new(entity.Student)
+	now := time.Now()
+
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		return us.ur.FindByID(ctx, param.UserID, user)
+	})
+	g.Go(func() error {
+		return us.sr.FindByID(ctx, param.UserID, student)
+	})
+	if err := g.Wait(); err != nil {
+		return "", "", "", err
+	}
+	if student.OTP == nil || *student.OTP != param.OTP {
+		return "", "", "", customerrors.NewError(
+			"invalid code",
+			errors.New("invalid OTP"),
+			customerrors.Unauthenticate,
+		)
+	}
+	if student.LoginToken == nil || *student.LoginToken != param.LoginToken {
+		return "", "", "", customerrors.NewError(
+			"unauthorized",
+			errors.New("invalid token"),
+			customerrors.Unauthenticate,
+		)
+	}
+	if student.OTPLastUpdatedAt.Add(constants.OTP_DURATION).Before(now) {
+		return "", "", "", customerrors.NewError(
+			"Code Expired",
+			fmt.Errorf("OTP Expired"),
+			customerrors.InvalidAction,
+		)
+	}
+	if err := us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := us.sr.UpdateLoginToken(ctx, param.UserID, nil); err != nil {
+			return err
+		}
+		return us.sr.UpdateOTP(ctx, param.UserID, nil, nil)
+	}); err != nil {
+		return "", "", "", err
+	}
+	authToken, err := us.ju.GenerateJWT(user.ID, constants.StudentRole, constants.ForAuth, user.Status, constants.AUTH_AGE)
+	if err != nil {
+		return "", "", "", err
+	}
+	refreshToken, err := us.ju.GenerateJWT(user.ID, constants.StudentRole, constants.ForRefresh, user.Status, constants.REFRESH_AGE)
+	if err != nil {
+		return "", "", "", err
+	}
+	return authToken, refreshToken, user.Status, nil
+}
+
+func (us *StudentServiceImpl) ResendOTP(ctx context.Context, param entity.ResendOTPParam) (string, error) {
+	user := new(entity.User)
+	student := new(entity.Student)
+	now := time.Now()
+
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		return us.ur.FindByID(ctx, param.UserID, user)
+	})
+
+	g.Go(func() error {
+		return us.sr.FindByID(ctx, param.UserID, student)
+	})
+
+	if err := g.Wait(); err != nil {
+		return "", err
+	}
+
+	if student.OTPLastUpdatedAt == nil {
+		return "", customerrors.NewError(
+			"unauthorized",
+			errors.New("no otp last updated at"),
+			customerrors.Unauthenticate,
+		)
+	}
+
+	if student.OTPLastUpdatedAt.Add(constants.OTP_DURATION / 2).After(now) {
+		return "", customerrors.NewError(
+			"please try again later",
+			fmt.Errorf("need to wait to send otp again"),
+			customerrors.InvalidAction,
+		)
+	}
+
+	otp, err := us.ogu.GenerateOTP()
+	if err != nil {
+		return "", err
+	}
+	loginToken, err := us.ju.GenerateJWT(param.UserID, constants.StudentRole, constants.ForLogin, user.Status, constants.LOGIN_AGE)
+	if err != nil {
+		return "", err
+	}
+
+	if err := us.tmr.WithTransaction(ctx, func(ctx context.Context) error {
+		if err := us.sr.UpdateLoginToken(ctx, param.UserID, &loginToken); err != nil {
+			return err
+		}
+		now := time.Now()
+		return us.sr.UpdateOTP(ctx, param.UserID, &now, &otp)
+	}); err != nil {
+		return "", err
+	}
+	go func() {
+		if err := us.gu.SendEmail(entity.SendEmailParams{
+			Receiver:  user.Email,
+			Subject:   "One Time Password for Login - Privat Unmei",
+			EmailBody: constants.OTPEmailBody(otp),
+		}); err != nil {
+			us.lg.Errorln(err)
+		}
+	}()
+	return loginToken, nil
 }
 
 func (us *StudentServiceImpl) Register(ctx context.Context, param entity.StudentRegisterParam) error {
@@ -660,10 +804,10 @@ func (us *StudentServiceImpl) Register(ctx context.Context, param entity.Student
 				EmailBody: constants.VerificationEmailBody(token),
 			}
 			if err := us.gu.SendEmail(param); err != nil {
-				log.Println(err.Error())
+				us.lg.Errorln(err)
 				return
 			}
-			log.Println("Send Email Success")
+			us.lg.Infoln("Send Email Success")
 		}()
 
 		return nil

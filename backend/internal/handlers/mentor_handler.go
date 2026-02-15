@@ -26,7 +26,7 @@ func CreateMentorHandler(ms *services.MentorServiceImpl, cs *services.CourseServ
 }
 
 func (mh *MentorHandlerImpl) GetMyCourses(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -100,7 +100,7 @@ func (mh *MentorHandlerImpl) GetMyCourses(ctx *gin.Context) {
 }
 
 func (mh *MentorHandlerImpl) GetMyPaymentMethod(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -124,7 +124,7 @@ func (mh *MentorHandlerImpl) GetMyPaymentMethod(ctx *gin.Context) {
 }
 
 func (mh *MentorHandlerImpl) GetMyAvailability(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -185,7 +185,7 @@ func (mh *MentorHandlerImpl) GetDOWAvailability(ctx *gin.Context) {
 		))
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -209,7 +209,7 @@ func (mh *MentorHandlerImpl) GetDOWAvailability(ctx *gin.Context) {
 }
 
 func (mh *MentorHandlerImpl) GetMyProfile(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -252,7 +252,7 @@ func (mh *MentorHandlerImpl) ChangePassword(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -373,7 +373,7 @@ func (mh *MentorHandlerImpl) DeleteMentor(ctx *gin.Context) {
 		))
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -426,7 +426,7 @@ func (mh *MentorHandlerImpl) UpdateMentorForAdmin(ctx *gin.Context) {
 }
 
 func (mh *MentorHandlerImpl) UpdateMentor(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -561,7 +561,7 @@ func (mh *MentorHandlerImpl) AddNewMentor(ctx *gin.Context) {
 		))
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return

@@ -3,19 +3,17 @@ import { controller } from './controller';
 import type { PageServerLoad } from './$types';
 import { Production } from '$lib/utils/constants';
 import { PUBLIC_ENVIRONMENT_OPTION } from '$env/static/public';
+import { IsTokenExpired } from '$lib/utils/helper';
 
 export const load: PageServerLoad = ({ cookies }) => {
-	if (cookies.get('auth_token') || cookies.get('refresh_token')) {
-		throw redirect(303, '/courses');
+	if (!IsTokenExpired(cookies.get('auth_token')) || !IsTokenExpired(cookies.get('refresh_token'))) {
+		throw redirect(303, '/home');
 	}
 };
 
 export const actions = {
 	login: async ({ request, cookies, fetch }) => {
-		const { cookiesData, success, message, status, userStatus } = await controller.login(
-			request,
-			fetch
-		);
+		const { cookiesData, success, message, status } = await controller.login(request, fetch);
 		if (!success) {
 			return fail(status, { message });
 		}
@@ -29,7 +27,7 @@ export const actions = {
 				secure: PUBLIC_ENVIRONMENT_OPTION === Production
 			});
 		});
-		return { success, userStatus };
+		return { success };
 	},
 	register: async ({ request, fetch }) => {
 		const { success, message, status } = await controller.register(request, fetch);

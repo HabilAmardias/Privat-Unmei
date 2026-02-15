@@ -49,4 +49,7 @@ type (
 	DeleteStudentRes struct {
 		ID string `json:"id"`
 	}
+	LoginCallbackReq struct {
+		OTP int64 `json:"otp" binding:"required,gte=100000,lte=999999"`
+	}
 )

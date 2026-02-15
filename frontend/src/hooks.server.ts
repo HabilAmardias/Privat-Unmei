@@ -1,8 +1,9 @@
-import { error, type Handle, type HandleFetch } from '@sveltejs/kit';
+import { error, redirect, type Handle, type HandleFetch } from '@sveltejs/kit';
 import { IsTokenExpired } from '$lib/utils/helper';
 import { PUBLIC_BASE_URL, PUBLIC_ENVIRONMENT_OPTION } from '$env/static/public';
 import { controller } from './controller';
-import { Production } from '$lib/utils/constants';
+import { Production, SESSION_EXPIRED } from '$lib/utils/constants';
+import type { MessageResponse, ServerResponse } from '$lib/types';
 
 export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 	if (request.url.startsWith(PUBLIC_BASE_URL)) {
@@ -16,27 +17,34 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 				},
 				credentials: 'include'
 			});
-			if (res.status !== 200) {
-				if (!event.route.id?.includes('/(public)')) {
-					throw error(res.status, { message: 'unauthorized' });
+			if (res.status !== 200 && !event.route.id?.includes('/(public)')) {
+				const resBody: ServerResponse<MessageResponse> = await res.json();
+				if (resBody.data.message === SESSION_EXPIRED) {
+					throw redirect(
+						303,
+						event.route.id?.includes('/(manager-app)') ? '/manager/logout' : '/logout'
+					);
 				}
-			} else {
-				const cookiesData = controller.GetCookies(res);
-				cookiesData.forEach((val) => {
-					event.cookies.set(val.key, val.value, {
-						path: val.path,
-						httpOnly: val.httpOnly,
-						domain: val.domain,
-						maxAge: val.maxAge,
-						sameSite: val.sameSite,
-						secure: PUBLIC_ENVIRONMENT_OPTION === Production
-					});
-				});
+				throw error(res.status, { message: 'unauthorized' });
 			}
+			const cookiesData = controller.GetCookies(res);
+			cookiesData.forEach((val) => {
+				event.cookies.set(val.key, val.value, {
+					path: val.path,
+					httpOnly: val.httpOnly,
+					domain: val.domain,
+					maxAge: val.maxAge,
+					sameSite: val.sameSite,
+					secure: PUBLIC_ENVIRONMENT_OPTION === Production
+				});
+			});
 		}
 		if (IsTokenExpired(refreshToken) && IsTokenExpired(authToken)) {
 			if (!event.route.id?.includes('/(public)')) {
-				throw error(401, { message: 'unauthorized' });
+				throw redirect(
+					303,
+					event.route.id?.includes('/(manager-app)') ? '/manager/logout' : '/logout'
+				);
 			}
 		}
 		const newAuthToken = event.cookies.get('auth_token') || authToken;
@@ -60,31 +68,37 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 export const handle: Handle = async ({ event, resolve }) => {
 	const authToken = event.cookies.get('auth_token');
 	const refreshToken = event.cookies.get('refresh_token');
-
 	if (!IsTokenExpired(refreshToken) && IsTokenExpired(authToken)) {
 		const url = `${PUBLIC_BASE_URL}/api/v1/refresh`;
 		const res = await event.fetch(url);
-		if (res.status !== 200) {
-			if (!event.route.id?.includes('/(public)')) {
-				throw error(res.status, { message: 'unauthorized' });
+		if (res.status !== 200 && !event.route.id?.includes('/(public)')) {
+			const resBody: ServerResponse<MessageResponse> = await res.json();
+			if (resBody.data.message === SESSION_EXPIRED) {
+				throw redirect(
+					303,
+					event.route.id?.includes('/(manager-app)') ? '/manager/logout' : '/logout'
+				);
 			}
-		} else {
-			const cookiesData = controller.GetCookies(res);
-			cookiesData.forEach((val) => {
-				event.cookies.set(val.key, val.value, {
-					path: val.path,
-					httpOnly: val.httpOnly,
-					maxAge: val.maxAge,
-					domain: val.domain,
-					sameSite: val.sameSite,
-					secure: PUBLIC_ENVIRONMENT_OPTION === Production
-				});
-			});
+			throw error(res.status, { message: 'unauthorized' });
 		}
+		const cookiesData = controller.GetCookies(res);
+		cookiesData.forEach((val) => {
+			event.cookies.set(val.key, val.value, {
+				path: val.path,
+				httpOnly: val.httpOnly,
+				domain: val.domain,
+				maxAge: val.maxAge,
+				sameSite: val.sameSite,
+				secure: PUBLIC_ENVIRONMENT_OPTION === Production
+			});
+		});
 	}
 	if (IsTokenExpired(refreshToken) && IsTokenExpired(authToken)) {
 		if (!event.route.id?.includes('/(public)')) {
-			throw error(401, { message: 'unauthorized' });
+			throw redirect(
+				303,
+				event.route.id?.includes('/(manager-app)') ? '/manager/logout' : '/logout'
+			);
 		}
 	}
 	return resolve(event);

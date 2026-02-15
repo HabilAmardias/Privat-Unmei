@@ -45,7 +45,7 @@
 				<b class="mx-auto self-center text-[var(--tertiary-color)]">No mentors found</b>
 			</div>
 		{:else}
-			<ScrollArea orientation="vertical" viewportClasses="h-[400px] max-h-[300px]">
+			<ScrollArea orientation="vertical" viewportClasses="h-[400px] max-h-[400px]">
 				<ul class="flex flex-col gap-4 md:grid md:grid-cols-3">
 					{#each data.mentors.entries as m (m.id)}
 						<li class=" transition-transform hover:-translate-y-1">

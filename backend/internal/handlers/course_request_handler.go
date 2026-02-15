@@ -24,7 +24,7 @@ func CreateCourseRequestHandler(cos *services.CourseRequestServiceImpl) *CourseR
 
 func (crh *CourseRequestHandlerImpl) StudentCourseRequestDetail(ctx *gin.Context) {
 	id := ctx.Param("id")
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -75,7 +75,7 @@ func (crh *CourseRequestHandlerImpl) StudentCourseRequestList(ctx *gin.Context) 
 		ctx.Error(err)
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -139,7 +139,7 @@ func (crh *CourseRequestHandlerImpl) StudentCourseRequestList(ctx *gin.Context) 
 
 func (crh *CourseRequestHandlerImpl) MentorCourseRequestDetail(ctx *gin.Context) {
 	id := ctx.Param("id")
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -189,7 +189,7 @@ func (crh *CourseRequestHandlerImpl) MentorCourseRequestList(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -245,7 +245,7 @@ func (crh *CourseRequestHandlerImpl) MentorCourseRequestList(ctx *gin.Context) {
 }
 
 func (crh *CourseRequestHandlerImpl) ConfirmPayment(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -268,7 +268,7 @@ func (crh *CourseRequestHandlerImpl) ConfirmPayment(ctx *gin.Context) {
 }
 
 func (crh *CourseRequestHandlerImpl) RejectCourseRequest(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -292,7 +292,7 @@ func (crh *CourseRequestHandlerImpl) RejectCourseRequest(ctx *gin.Context) {
 }
 
 func (crh *CourseRequestHandlerImpl) AcceptCourseRequest(ctx *gin.Context) {
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -325,7 +325,7 @@ func (crh *CourseRequestHandlerImpl) CreateReservation(ctx *gin.Context) {
 		))
 		return
 	}
-	claim, err := getAuthenticationPayload(ctx)
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
 	if err != nil {
 		ctx.Error(err)
 		return

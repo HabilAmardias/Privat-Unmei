@@ -24,7 +24,7 @@ export const load: PageServerLoad = ({ cookies, params }) => {
 		httpOnly: true,
 		domain: PUBLIC_COOKIE_DOMAIN
 	};
-	cookies.set('auth_token', params.slug, cookiesOption);
+	cookies.set('reset_token', params.slug, cookiesOption);
 	return { returnHome: false };
 };
 
@@ -40,7 +40,7 @@ export const actions = {
 			httpOnly: true,
 			domain: PUBLIC_COOKIE_DOMAIN
 		};
-		cookies.delete('auth_token', cookiesOption);
+		cookies.delete('reset_token', cookiesOption);
 		return { success: true };
 	}
 } satisfies Actions;
