@@ -15,6 +15,10 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 		const url = `${PUBLIC_BASE_URL}/api/v1/refresh`;
 		const res = await fetch(url, {
 			method: 'GET',
+			headers: {
+				...Object.fromEntries(request.headers),
+				Cookie: `auth_token=${authToken}; refresh_token=${refreshToken}`
+			},
 			credentials: 'include'
 		});
 		if (res.ok) {
@@ -31,7 +35,17 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 			});
 		}
 	}
-	return fetch(request);
+	const requestCookies: Array<string> = [];
+	event.cookies.getAll().forEach((c) => {
+		requestCookies.push(`${c.name}=${c.value}`);
+	});
+	event.request.headers.getSetCookie();
+	return fetch(request, {
+		headers: {
+			...Object.fromEntries(request.headers),
+			Cookie: requestCookies.join('; ')
+		}
+	});
 };
 
 export const handle: Handle = async ({ event, resolve }) => {
