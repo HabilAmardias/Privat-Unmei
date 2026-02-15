@@ -48,7 +48,6 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 		redirect: 'manual',
 		duplex: 'half'
 	});
-	console.log(newReq.headers);
 	return fetch(newReq);
 };
 
