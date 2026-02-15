@@ -39,13 +39,17 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 	event.cookies.getAll().forEach((c) => {
 		requestCookies.push(`${c.name}=${c.value}`);
 	});
-	event.request.headers.getSetCookie();
-	return fetch(request, {
+	const newReq = new Request(request, {
 		headers: {
 			...Object.fromEntries(request.headers),
-			Cookie: requestCookies.join('; ')
-		}
+			Cookie: requestCookies.join(';')
+		},
+		credentials: 'include',
+		redirect: 'manual',
+		duplex: 'half'
 	});
+	console.log(newReq.headers);
+	return fetch(newReq);
 };
 
 export const handle: Handle = async ({ event, resolve }) => {
