@@ -6,11 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"privat-unmei/internal/constants"
 	"privat-unmei/internal/customerrors"
 	"privat-unmei/internal/entity"
+	"privat-unmei/internal/logger"
 	"privat-unmei/internal/repositories"
 	"privat-unmei/internal/utils"
 	"strings"
@@ -32,6 +32,7 @@ type StudentServiceImpl struct {
 	ju     *utils.JWTUtil
 	ogu    *utils.OTPGenUtil
 	goauth *utils.GoogleOauth
+	lg     logger.CustomLogger
 }
 
 func CreateStudentService(
@@ -47,8 +48,9 @@ func CreateStudentService(
 	ju *utils.JWTUtil,
 	ogu *utils.OTPGenUtil,
 	goauth *utils.GoogleOauth,
+	lg logger.CustomLogger,
 ) *StudentServiceImpl {
-	return &StudentServiceImpl{ur, sr, ar, crr, chr, tmr, bu, gu, cu, ju, ogu, goauth}
+	return &StudentServiceImpl{ur, sr, ar, crr, chr, tmr, bu, gu, cu, ju, ogu, goauth, lg}
 }
 
 func (us *StudentServiceImpl) GoogleLogin(oauthState string) string {
@@ -619,7 +621,7 @@ func (us *StudentServiceImpl) Login(ctx context.Context, param entity.StudentLog
 			Subject:   "One Time Password for Login - Privat Unmei",
 			EmailBody: constants.OTPEmailBody(otp),
 		}); err != nil {
-			log.Println(err)
+			us.lg.Errorln(err)
 		}
 	}()
 	return loginToken, nil
@@ -739,7 +741,7 @@ func (us *StudentServiceImpl) ResendOTP(ctx context.Context, param entity.Resend
 			Subject:   "One Time Password for Login - Privat Unmei",
 			EmailBody: constants.OTPEmailBody(otp),
 		}); err != nil {
-			log.Println(err)
+			us.lg.Errorln(err)
 		}
 	}()
 	return loginToken, nil
@@ -802,10 +804,10 @@ func (us *StudentServiceImpl) Register(ctx context.Context, param entity.Student
 				EmailBody: constants.VerificationEmailBody(token),
 			}
 			if err := us.gu.SendEmail(param); err != nil {
-				log.Println(err.Error())
+				us.lg.Errorln(err)
 				return
 			}
-			log.Println("Send Email Success")
+			us.lg.Infoln("Send Email Success")
 		}()
 
 		return nil

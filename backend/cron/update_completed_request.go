@@ -2,7 +2,6 @@ package cronApp
 
 import (
 	"context"
-	"log"
 )
 
 func (crc *CourseRequestCron) UpdateCompletedRequest() {
@@ -16,6 +15,6 @@ func (crc *CourseRequestCron) UpdateCompletedRequest() {
 		}
 		return nil
 	}); err != nil {
-		log.Println(err.Error())
+		crc.lg.Errorln(err)
 	}
 }

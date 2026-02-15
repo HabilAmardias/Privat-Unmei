@@ -2,7 +2,6 @@ package cronApp
 
 import (
 	"context"
-	"log"
 	"privat-unmei/internal/db"
 	"privat-unmei/internal/logger"
 	"privat-unmei/internal/repositories"
@@ -13,6 +12,7 @@ type CourseRequestCron struct {
 	csr *repositories.CourseScheduleRepositoryImpl
 	cr  *repositories.CourseRepositoryImpl
 	tmr *repositories.TransactionManagerRepositories
+	lg  logger.CustomLogger
 }
 
 func NewCourseRequestCron(db *db.CustomDB, logger logger.CustomLogger) *CourseRequestCron {
@@ -20,7 +20,7 @@ func NewCourseRequestCron(db *db.CustomDB, logger logger.CustomLogger) *CourseRe
 	csr := repositories.CreateCourseScheduleRepository(db)
 	cr := repositories.CreateCourseRepository(db)
 	tmr := repositories.CreateTransactionManager(db, logger)
-	return &CourseRequestCron{crr, csr, cr, tmr}
+	return &CourseRequestCron{crr, csr, cr, tmr, logger}
 }
 
 func (crc *CourseRequestCron) UpdateExpiredRequest() {
@@ -34,13 +34,12 @@ func (crc *CourseRequestCron) UpdateExpiredRequest() {
 			return err
 		}
 		if len(*ids) > 0 {
-			log.Println(*ids)
 			if err := crc.csr.CancelExpiredSchedule(ctx, *ids); err != nil {
 				return err
 			}
 		}
 		return nil
 	}); err != nil {
-		log.Println(err.Error())
+		crc.lg.Errorln(err)
 	}
 }
