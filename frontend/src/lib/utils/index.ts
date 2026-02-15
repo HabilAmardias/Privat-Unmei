@@ -10,7 +10,8 @@ export async function FetchData(
 	const fullURL = `${PUBLIC_BASE_URL}${url}`;
 	const res = await fetch(fullURL, {
 		method,
-		body
+		body,
+		credentials: 'include'
 	});
 	if (!res.ok && res.status !== 307) {
 		const resBody = await res.json();
