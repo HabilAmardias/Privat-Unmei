@@ -277,6 +277,7 @@ func (cr *CourseRepositoryImpl) GetMostBoughtCourses(ctx context.Context, course
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
 	}
+	// TODO: cache this with redis
 	sqlQuery := `
 		SELECT
 			c.id,

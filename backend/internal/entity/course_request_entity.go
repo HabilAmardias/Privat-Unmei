@@ -132,4 +132,15 @@ type (
 		CourseID  int
 		StudentID string
 	}
+
+	MonthlyMentorCostQuery struct {
+		MentorName   string
+		MentorEmail  string
+		TotalCost    float64
+		TotalSession int64
+	}
+	MonthlySessionReportQuery struct {
+		Month        int
+		TotalSession int64
+	}
 )
