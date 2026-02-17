@@ -101,4 +101,26 @@ type (
 	IsReviewedRes struct {
 		IsReviewed bool `json:"is_reviewed"`
 	}
+	MonthlyMentorReportRes struct {
+		MentorName   string  `json:"name"`
+		MentorEmail  string  `json:"email"`
+		TotalCost    float64 `json:"total_cost"`
+		TotalSession int64   `json:"total_session"`
+	}
+	MonthlyIncomeReportRes struct {
+		TotalSession int64   `json:"total_session"`
+		TotalCost    float64 `json:"total_cost"`
+	}
+	MonthlyCostReportRes struct {
+		Month     int     `json:"month"`
+		TotalCost float64 `json:"total_cost"`
+	}
+	MonthlySessionReportRes struct {
+		Month        int   `json:"month"`
+		TotalSession int64 `json:"total_session"`
+	}
+	HistoryIncomeReportRes struct {
+		SessionReport []MonthlySessionReportRes `json:"session_report"`
+		CostReport    []MonthlyCostReportRes    `json:"cost_report"`
+	}
 )

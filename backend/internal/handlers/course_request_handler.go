@@ -9,6 +9,7 @@ import (
 	"privat-unmei/internal/entity"
 	"privat-unmei/internal/services"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -20,6 +21,93 @@ type CourseRequestHandlerImpl struct {
 
 func CreateCourseRequestHandler(cos *services.CourseRequestServiceImpl) *CourseRequestHandlerImpl {
 	return &CourseRequestHandlerImpl{cos}
+}
+
+func (crh *CourseRequestHandlerImpl) GetIncomeHistoryReport(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.GetAdminMonthlyReportParam{
+		AdminID: claim.Subject,
+	}
+	costReport, sessionReport, err := crh.cos.GetIncomeHistoryReport(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	costRes := new([]dtos.MonthlyCostReportRes)
+	sessionRes := new([]dtos.MonthlySessionReportRes)
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		for _, e := range *costReport {
+			*costRes = append(*costRes, dtos.MonthlyCostReportRes(e))
+		}
+		wg.Done()
+	}()
+	go func() {
+		for _, e := range *sessionReport {
+			*sessionRes = append(*sessionRes, dtos.MonthlySessionReportRes(e))
+		}
+		wg.Done()
+	}()
+	wg.Wait()
+
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data: dtos.HistoryIncomeReportRes{
+			SessionReport: *sessionRes,
+			CostReport:    *costRes,
+		},
+	})
+}
+
+func (crh *CourseRequestHandlerImpl) GetThisMonthIncomeReport(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.GetAdminMonthlyReportParam{
+		AdminID: claim.Subject,
+	}
+	totalSession, totalCost, err := crh.cos.GetThisMonthIncomeReport(ctx, param)
+	res := dtos.MonthlyIncomeReportRes{
+		TotalSession: *totalSession,
+		TotalCost:    *totalCost,
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data:    res,
+	})
+}
+
+func (crh *CourseRequestHandlerImpl) GetThisMonthMentorReport(ctx *gin.Context) {
+	claim, err := getAuthenticationPayload(ctx, constants.CTX_AUTH_PAYLOAD_KEY)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	param := entity.GetAdminMonthlyReportParam{
+		AdminID: claim.Subject,
+	}
+	reports, err := crh.cos.GetThisMonthMentorReport(ctx, param)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	var res []dtos.MonthlyMentorReportRes
+	for _, e := range *reports {
+		res = append(res, dtos.MonthlyMentorReportRes(e))
+	}
+	ctx.JSON(http.StatusOK, dtos.Response{
+		Success: true,
+		Data:    res,
+	})
 }
 
 func (crh *CourseRequestHandlerImpl) StudentCourseRequestDetail(ctx *gin.Context) {

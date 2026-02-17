@@ -434,6 +434,27 @@ func (c *RouteConfig) SetupPrivateRoute() {
 		c.RBACCacheRepository,
 		c.Logger,
 	), c.StudentHandler.DeleteStudent)
+	v1.GET("/admins/reports/mentor-report", middlewares.AuthorizationMiddleware(
+		constants.ReadAllPermission,
+		constants.CourseRequestResource,
+		c.RBACRepository,
+		c.RBACCacheRepository,
+		c.Logger,
+	), c.CourseRequestHandler.GetThisMonthMentorReport)
+	v1.GET("/admins/reports/income-report", middlewares.AuthorizationMiddleware(
+		constants.ReadAllPermission,
+		constants.CourseRequestResource,
+		c.RBACRepository,
+		c.RBACCacheRepository,
+		c.Logger,
+	), c.CourseRequestHandler.GetThisMonthIncomeReport)
+	v1.GET("/admins/reports/history-report", middlewares.AuthorizationMiddleware(
+		constants.ReadAllPermission,
+		constants.CourseRequestResource,
+		c.RBACRepository,
+		c.RBACCacheRepository,
+		c.Logger,
+	), c.CourseRequestHandler.GetIncomeHistoryReport)
 }
 
 func (c *RouteConfig) SetupWebsocketRoute() {

@@ -23,6 +23,7 @@ type CourseRequestServiceImpl struct {
 	ur  *repositories.UserRepositoryImpl
 	sr  *repositories.StudentRepositoryImpl
 	mr  *repositories.MentorRepositoryImpl
+	ar  *repositories.AdminRepositoryImpl
 	pr  *repositories.PaymentRepositoryImpl
 	dr  *repositories.DiscountRepositoryImpl
 	acr *repositories.AdditionalCostRepositoryImpl
@@ -39,6 +40,7 @@ func CreateCourseRequestService(
 	ur *repositories.UserRepositoryImpl,
 	sr *repositories.StudentRepositoryImpl,
 	mr *repositories.MentorRepositoryImpl,
+	ar *repositories.AdminRepositoryImpl,
 	pr *repositories.PaymentRepositoryImpl,
 	dr *repositories.DiscountRepositoryImpl,
 	acr *repositories.AdditionalCostRepositoryImpl,
@@ -46,7 +48,74 @@ func CreateCourseRequestService(
 	gu *utils.GomailUtil,
 	lg logger.CustomLogger,
 ) *CourseRequestServiceImpl {
-	return &CourseRequestServiceImpl{crr, cr, csr, mar, ur, sr, mr, pr, dr, acr, tmr, gu, lg}
+	return &CourseRequestServiceImpl{crr, cr, csr, mar, ur, sr, mr, ar, pr, dr, acr, tmr, gu, lg}
+}
+
+func (crs *CourseRequestServiceImpl) GetIncomeHistoryReport(ctx context.Context, param entity.GetAdminMonthlyReportParam) (*[]entity.MonthlyCostReportQuery, *[]entity.MonthlySessionReportQuery, error) {
+	admin := new(entity.Admin)
+	sessionReports := new([]entity.MonthlySessionReportQuery)
+	costReports := new([]entity.MonthlyCostReportQuery)
+
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		return crs.ar.FindByID(ctx, param.AdminID, admin)
+	})
+	g.Go(func() error {
+		return crs.crr.GetMonthlySessionReport(ctx, sessionReports)
+	})
+	g.Go(func() error {
+		return crs.crr.GetMonthlyCostReport(ctx, costReports)
+	})
+
+	if err := g.Wait(); err != nil {
+		return nil, nil, err
+	}
+
+	return costReports, sessionReports, nil
+}
+
+func (crs *CourseRequestServiceImpl) GetThisMonthIncomeReport(ctx context.Context, param entity.GetAdminMonthlyReportParam) (*int64, *float64, error) {
+	admin := new(entity.Admin)
+	totalSession := new(int64)
+	totalCost := new(float64)
+
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		return crs.ar.FindByID(ctx, param.AdminID, admin)
+	})
+	g.Go(func() error {
+		return crs.crr.GetThisMonthSessions(ctx, totalSession)
+	})
+	g.Go(func() error {
+		return crs.crr.GetThisMonthOperationalCost(ctx, totalCost)
+	})
+
+	if err := g.Wait(); err != nil {
+		return nil, nil, err
+	}
+
+	return totalSession, totalCost, nil
+}
+
+func (crs *CourseRequestServiceImpl) GetThisMonthMentorReport(ctx context.Context, param entity.GetAdminMonthlyReportParam) (*[]entity.MonthlyMentorReportQuery, error) {
+	admin := new(entity.Admin)
+	reports := new([]entity.MonthlyMentorReportQuery)
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		return crs.ar.FindByID(ctx, param.AdminID, admin)
+	})
+	g.Go(func() error {
+		return crs.crr.GetThisMonthMentorReport(ctx, reports)
+	})
+
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
+
+	return reports, nil
 }
 
 func (crs *CourseRequestServiceImpl) StudentCourseRequestDetail(ctx context.Context, param entity.StudentCourseRequestDetailParam) (*entity.StudentCourseRequestDetailQuery, error) {

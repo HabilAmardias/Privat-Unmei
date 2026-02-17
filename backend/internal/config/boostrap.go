@@ -50,7 +50,7 @@ func Bootstrap(db *db.CustomDB, rc *redis.Client, logger logger.CustomLogger, ap
 	courseCategoryService := services.CreateCourseCategoryService(userRepo, adminRepo, courseCategoryRepo, transactionManager)
 	courseService := services.CreateCourseService(courseRepo, courseCategoryRepo, topicRepo, userRepo, mentorRepo, transactionManager, courseRequestRepo)
 	courseRatingService := services.CreateCourseRatingService(courseRepo, courseRatingRepo, courseRequestRepo, mentorRepo, transactionManager)
-	courseRequestService := services.CreateCourseRequestService(courseRequestRepo, courseRepo, courseScheduleRepo, mentorAvailabilityRepo, userRepo, studentRepo, mentorRepo, paymentRepo, discountRepo, additionalCostRepo, transactionManager, gomailUtil, logger)
+	courseRequestService := services.CreateCourseRequestService(courseRequestRepo, courseRepo, courseScheduleRepo, mentorAvailabilityRepo, userRepo, studentRepo, mentorRepo, adminRepo, paymentRepo, discountRepo, additionalCostRepo, transactionManager, gomailUtil, logger)
 	chatService := services.CreateChatService(chatRepo, userRepo, studentRepo, mentorRepo, transactionManager)
 	paymentService := services.CreatePaymentService(paymentRepo, adminRepo, userRepo, mentorRepo, transactionManager)
 	discountService := services.CreateDiscountService(discountRepo, userRepo, adminRepo, transactionManager)

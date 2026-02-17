@@ -18,6 +18,51 @@ func CreateCourseRequestRepository(db *db.CustomDB) *CourseRequestRepositoryImpl
 	return &CourseRequestRepositoryImpl{db}
 }
 
+func (cr *CourseRequestRepositoryImpl) GetMonthlyCostReport(ctx context.Context, reports *[]entity.MonthlyCostReportQuery) error {
+	var driver RepoDriver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	SELECT
+		COALESCE(SUM(p.operational_cost), 0),
+		EXTRACT(MONTH from p.created_at) as month_report
+	FROM payments p
+	JOIN course_requests cr ON p.course_request_id = cr.id
+	WHERE
+		p.deleted_at IS NULL AND
+		EXTRACT(YEAR FROM p.created_at) = EXTRACT(YEAR FROM CURRENT_TIMESTAMP) AND
+		cr.deleted_at IS NULL AND
+		cr.status IN ('scheduled', 'completed')
+	GROUP BY month_report
+	ORDER BY month_report ASC
+	`
+	rows, err := driver.Query(query)
+	if err != nil {
+		return customerrors.NewError(
+			"something went wrong",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var item entity.MonthlyCostReportQuery
+		if err := rows.Scan(
+			&item.TotalCost,
+			&item.Month,
+		); err != nil {
+			return customerrors.NewError(
+				"something went wrong",
+				err,
+				customerrors.DatabaseExecutionError,
+			)
+		}
+		*reports = append(*reports, item)
+	}
+	return nil
+}
+
 func (cr *CourseRequestRepositoryImpl) GetMonthlySessionReport(ctx context.Context, reports *[]entity.MonthlySessionReportQuery) error {
 	var driver RepoDriver = cr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
@@ -34,8 +79,7 @@ func (cr *CourseRequestRepositoryImpl) GetMonthlySessionReport(ctx context.Conte
 		EXTRACT(YEAR FROM created_at) = EXTRACT(YEAR FROM CURRENT_TIMESTAMP)
 	GROUP BY
 		month_report
-	ORDER BY
-		month_report
+	ORDER BY month_report ASC
 	`
 	rows, err := driver.Query(query)
 	if err != nil {
@@ -63,7 +107,7 @@ func (cr *CourseRequestRepositoryImpl) GetMonthlySessionReport(ctx context.Conte
 	return nil
 }
 
-func (cr *CourseRequestRepositoryImpl) GetThisMonthMentorCost(ctx context.Context, costs *[]entity.MonthlyMentorCostQuery) error {
+func (cr *CourseRequestRepositoryImpl) GetThisMonthMentorReport(ctx context.Context, reports *[]entity.MonthlyMentorReportQuery) error {
 	var driver RepoDriver = cr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
 		driver = tx
@@ -100,7 +144,7 @@ func (cr *CourseRequestRepositoryImpl) GetThisMonthMentorCost(ctx context.Contex
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var item entity.MonthlyMentorCostQuery
+		var item entity.MonthlyMentorReportQuery
 		if err := rows.Scan(
 			&item.MentorName,
 			&item.MentorEmail,
@@ -113,7 +157,7 @@ func (cr *CourseRequestRepositoryImpl) GetThisMonthMentorCost(ctx context.Contex
 				customerrors.DatabaseExecutionError,
 			)
 		}
-		*costs = append(*costs, item)
+		*reports = append(*reports, item)
 	}
 	return nil
 }
