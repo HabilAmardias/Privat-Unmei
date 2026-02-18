@@ -37,21 +37,21 @@ func (crh *CourseRequestHandlerImpl) GetIncomeHistoryReport(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	costRes := new([]dtos.MonthlyCostReportRes)
-	sessionRes := new([]dtos.MonthlySessionReportRes)
+	costRes := []dtos.MonthlyCostReportRes{}
+	sessionRes := []dtos.MonthlySessionReportRes{}
 
 	var wg sync.WaitGroup
 	wg.Add(2)
 
 	go func() {
 		for _, e := range *costReport {
-			*costRes = append(*costRes, dtos.MonthlyCostReportRes(e))
+			costRes = append(costRes, dtos.MonthlyCostReportRes(e))
 		}
 		wg.Done()
 	}()
 	go func() {
 		for _, e := range *sessionReport {
-			*sessionRes = append(*sessionRes, dtos.MonthlySessionReportRes(e))
+			sessionRes = append(sessionRes, dtos.MonthlySessionReportRes(e))
 		}
 		wg.Done()
 	}()
@@ -60,8 +60,8 @@ func (crh *CourseRequestHandlerImpl) GetIncomeHistoryReport(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, dtos.Response{
 		Success: true,
 		Data: dtos.HistoryIncomeReportRes{
-			SessionReport: *sessionRes,
-			CostReport:    *costRes,
+			SessionReport: sessionRes,
+			CostReport:    costRes,
 		},
 	})
 }
@@ -100,7 +100,7 @@ func (crh *CourseRequestHandlerImpl) GetThisMonthMentorReport(ctx *gin.Context) 
 		ctx.Error(err)
 		return
 	}
-	var res []dtos.MonthlyMentorReportRes
+	res := []dtos.MonthlyMentorReportRes{}
 	for _, e := range *reports {
 		res = append(res, dtos.MonthlyMentorReportRes(e))
 	}

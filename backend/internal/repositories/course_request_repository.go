@@ -133,6 +133,7 @@ func (cr *CourseRequestRepositoryImpl) GetThisMonthMentorReport(ctx context.Cont
 		c.deleted_at IS NULL AND
 		m.deleted_at IS NULL AND
 		u.deleted_at IS NULL
+	GROUP BY u.email, u.name
 	`
 	rows, err := driver.Query(query)
 	if err != nil {

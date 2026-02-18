@@ -11,14 +11,21 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 	const authToken = event.cookies.get('auth_token');
 	const refreshToken = event.cookies.get('refresh_token');
 
+	const requestCookies: Array<string> = [];
+	event.cookies.getAll().forEach((c) => {
+		requestCookies.push(`${c.name}=${c.value}`);
+	});
+
+	const newHeader: HeadersInit = {
+		...Object.fromEntries(request.headers),
+		Cookie: requestCookies.join(';')
+	};
+
 	if (!IsTokenExpired(refreshToken) && IsTokenExpired(authToken)) {
 		const url = `${PUBLIC_BASE_URL}/api/v1/refresh`;
 		const res = await fetch(url, {
 			method: 'GET',
-			headers: {
-				...Object.fromEntries(request.headers),
-				Cookie: `auth_token=${authToken}; refresh_token=${refreshToken}`
-			},
+			headers: newHeader,
 			credentials: 'include'
 		});
 		if (res.ok) {
@@ -35,15 +42,9 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 			});
 		}
 	}
-	const requestCookies: Array<string> = [];
-	event.cookies.getAll().forEach((c) => {
-		requestCookies.push(`${c.name}=${c.value}`);
-	});
+
 	const newReq = new Request(request, {
-		headers: {
-			...Object.fromEntries(request.headers),
-			Cookie: requestCookies.join(';')
-		},
+		headers: newHeader,
 		credentials: 'include',
 		redirect: 'manual',
 		duplex: 'half'
