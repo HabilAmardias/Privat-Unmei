@@ -125,7 +125,7 @@
 										{c.name}
 									</td>
 									<td class="text-center">
-										{c.amount}
+										{new Intl.NumberFormat("id-ID", {style: "currency", currency:"IDR"}).format(c.amount)}
 									</td>
 									<td>
 										<div class="flex items-center justify-center gap-4">
@@ -239,7 +239,7 @@
 										{d.number_of_participant}
 									</td>
 									<td class="text-center">
-										{d.amount}
+										{new Intl.NumberFormat("id-ID", {style: "currency", currency:"IDR"}).format(d.amount)}
 									</td>
 									<td>
 										<div class="flex items-center justify-center gap-4">
