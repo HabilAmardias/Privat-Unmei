@@ -34,7 +34,7 @@ export class RequestDetailView {
 
 	statuses = [
 		{ id: 'reserved', label: 'Reserved', icon: BookMarked },
-		{ id: 'pending', label: 'Pending Payment', icon: Banknote },
+		{ id: 'pending payment', label: 'Pending Payment', icon: Banknote },
 		{ id: 'scheduled', label: 'Scheduled', icon: CalendarCheck },
 		{ id: 'completed', label: 'Completed', icon: Check },
 		{ id: 'cancelled', label: 'Cancelled', icon: X }
