@@ -84,7 +84,7 @@
 		</Button>
 	</nav>
 	<main class="flex flex-1 pb-24 md:pb-0">
-		<ScrollArea class="flex-1" orientation="vertical" viewportClasses="h-full max-h-[850px]">
+		<ScrollArea class="flex-1" orientation="vertical" viewportClasses="h-full">
 			{@render children()}
 		</ScrollArea>
 	</main>

@@ -89,7 +89,7 @@
 		{:else if !View.payments || View.payments.length === 0}
 			<b class="mx-auto self-center text-[var(--tertiary-color)]">No payments found</b>
 		{:else}
-			<ScrollArea orientation="vertical" class="flex-1" viewportClasses="max-h-[500px]">
+			<ScrollArea orientation="vertical" viewportClasses="h-[60dvh] max-h-[60dvh]">
 				<table class="w-full table-fixed border-separate border-spacing-4">
 					<thead>
 						<tr>

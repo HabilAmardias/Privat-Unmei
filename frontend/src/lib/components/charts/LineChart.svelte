@@ -42,5 +42,5 @@
 </script>
 
 <div class="w-full">
-  <canvas {@attach drawGraph}></canvas>
+  <canvas class="w-full" {@attach drawGraph}></canvas>
 </div>

@@ -10,7 +10,7 @@
     const View = new AdminDashboardView(data.historyReport, data.incomeReport, data.mentorReport)
 </script>
 
-<div class="h-dvh flex flex-col gap-8 p-4">
+<div class="flex-1 flex flex-col gap-8 p-4">
     <div class="flex justify-center gap-8">
         <div class="text-center">
             <h3 class="text-[var(--tertiary-color)] font-bold text-xl">This Month Session:</h3>
@@ -23,8 +23,8 @@
     </div>
     <h2 class="text-[var(--tertiary-color)] font-bold text-2xl">This Month Mentor Report</h2>
     {#if View.mentorReports.length > 0}
-        <ScrollArea orientation="vertical" class="flex-1" viewportClasses="max-h-[300px]">
-            <table class="w-full table-fixed border-spacing-4 border-2 border-[var(--tertiary-color)] border-collapse">
+        <ScrollArea orientation="both" viewportClasses="h-[30dvh] max-h-[30dvh] w-[90dvw] max-w-[90dvw]">
+            <table class="w-full border-spacing-4 border-2 border-[var(--tertiary-color)] border-collapse">
                 <thead>
                     <tr class="border-2 border-[var(--tertiary-color)] border-collapse" >
                         <td class="text-center font-bold text-[var(--tertiary-color)]">Name</td>

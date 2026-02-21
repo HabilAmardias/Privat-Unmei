@@ -63,7 +63,7 @@
 				<b class="mx-auto self-center text-[var(--tertiary-color)]">No courses found</b>
 			</div>
 		{:else}
-			<ScrollArea orientation="vertical" viewportClasses="h-[400px] max-h-[400px]">
+			<ScrollArea orientation="vertical" viewportClasses="h-[50dvh] max-h-[50dvh] md:h-[70dvh] md:max-h-[70dvh]">
 				<ul class="flex flex-col gap-4 md:grid md:grid-cols-3">
 					{#each View.courses as c (c.id)}
 						<li class="transition-transform hover:-translate-y-1">

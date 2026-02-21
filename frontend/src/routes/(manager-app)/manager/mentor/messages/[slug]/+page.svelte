@@ -65,7 +65,7 @@
 	<ScrollArea
 		bind:viewportRef={View.viewPortRef}
 		orientation="vertical"
-		viewportClasses="h-[550px] max-h-[550px] md:h-[500px] md:max-h-[500px]"
+		viewportClasses="h-[60dvh] max-h-[60dvh]"
 	>
 		{#if View.isLoading}
 			<div>

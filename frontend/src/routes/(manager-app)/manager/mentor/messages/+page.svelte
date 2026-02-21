@@ -22,19 +22,19 @@
 <div class="flex h-full w-full flex-col gap-4 p-4">
 	<h1 class="text-2xl font-bold text-[var(--tertiary-color)]">Chats</h1>
 	{#if View.isLoading}
-		<div class="h-[550px] max-h-[550px] md:h-[500px] md:max-h-[500px]">
+		<div class=" h-[70dvh] max-h-[70dvh]">
 			<Loading />
 		</div>
 	{:else if View.chats.length === 0 || !View.chats}
 		<div
-			class="flex h-[550px] max-h-[550px] items-center justify-center md:h-[500px] md:max-h-[500px]"
+			class="flex items-center justify-center h-[70dvh] max-h-[70dvh]"
 		>
 			<b class="font-bold text-[var(--tertiary-color)]">No Chats Found</b>
 		</div>
 	{:else}
 		<ScrollArea
 			orientation="vertical"
-			viewportClasses="h-[550px] max-h-[550px] md:h-[500px] md:max-h-[500px]"
+			viewportClasses="h-[70dvh] max-h-[70dvh]"
 		>
 			<ul class="flex flex-col gap-4">
 				{#each View.chats as ch (ch.id)}

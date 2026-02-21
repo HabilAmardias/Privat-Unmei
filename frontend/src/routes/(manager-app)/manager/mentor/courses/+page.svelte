@@ -66,8 +66,8 @@
 		{:else if !View.courses || View.courses.length === 0}
 			<b class="mx-auto self-center text-[var(--tertiary-color)]">No courses found</b>
 		{:else}
-			<ScrollArea orientation="vertical" class="flex-1" viewportClasses="max-h-[500px]">
-				<table class="w-full table-fixed border-separate border-spacing-4">
+			<ScrollArea orientation="both" class="flex-1" viewportClasses="max-h-[500px] max-w-[90dvw]">
+				<table class="w-full border-separate border-spacing-4">
 					<thead>
 						<tr>
 							<th class="text-[var(--tertiary-color)]">Name</th>

@@ -110,8 +110,8 @@
 			{:else if !View.costs || View.costs.length === 0}
 				<b class="mx-auto self-center text-[var(--tertiary-color)]">No Cost found</b>
 			{:else}
-				<ScrollArea orientation="vertical" class="flex-1" viewportClasses="max-h-[500px]">
-					<table class="w-full table-fixed border-separate border-spacing-4">
+				<ScrollArea orientation="both" viewportClasses="w-[90dvw] max-w-[90dvw] h-[60dvh] max-h-[60dvh]">
+					<table class="w-full border-separate border-spacing-4">
 						<thead>
 							<tr>
 								<th class="text-[var(--tertiary-color)]">Name</th>
@@ -224,8 +224,8 @@
 			{:else if !View.discounts || View.discounts.length === 0}
 				<b class="mx-auto self-center text-[var(--tertiary-color)]">No Discount found</b>
 			{:else}
-				<ScrollArea orientation="vertical" class="flex-1" viewportClasses="max-h-[500px]">
-					<table class="w-full table-fixed border-separate border-spacing-4">
+				<ScrollArea orientation="both" viewportClasses="w-[90dvw] max-w-[90dvw] h-[60dvh] max-h-[60dvh]">
+					<table class="w-full border-separate border-spacing-4">
 						<thead>
 							<tr>
 								<th class="text-[var(--tertiary-color)]">Number Of Participant</th>

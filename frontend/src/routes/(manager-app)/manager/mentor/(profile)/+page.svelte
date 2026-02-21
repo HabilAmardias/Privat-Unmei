@@ -53,18 +53,17 @@
 				width={View.size}
 				src={data.profile.profile_image}
 			/>
-			<div class="flex w-full items-center justify-between">
-				<div class="flex flex-col gap-1">
-					<p class="font-bold text-[var(--tertiary-color)]">{data.profile.name}</p>
+			<div class="flex w-full flex-col gap-1">
+				<p class="font-bold text-[var(--tertiary-color)]">{data.profile.name}</p>
 					<p>{data.profile.public_id}</p>
 					<Button type="button" onClick={() => (View.openChangePassword = true)}
 						>Change Password</Button
 					>
-				</div>
+					<div class="h-fit w-fit rounded-lg bg-[var(--tertiary-color)] p-2">
+						<Link href="/manager/mentor/update">Update</Link>
+					</div>
 			</div>
-			<div class="h-fit w-fit rounded-lg bg-[var(--tertiary-color)] p-2">
-				<Link href="/manager/mentor/update">Update</Link>
-			</div>
+			
 		</div>
 		<div class="grid grid-cols-2 gap-4 md:flex md:justify-between">
 			<div>

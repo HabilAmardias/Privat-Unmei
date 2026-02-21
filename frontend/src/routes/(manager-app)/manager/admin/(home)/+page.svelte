@@ -30,7 +30,7 @@
 </svelte:head>
 
 {#if View.isEdit}
-	<div class="flex h-dvh w-full items-center justify-center">
+	<div class="flex w-full items-center justify-center">
 		<Card>
 			<h2 class="mb-3 text-2xl font-bold text-[var(--tertiary-color)]">Change Password</h2>
 			<form
@@ -77,11 +77,12 @@
 				</div>
 				<p class="text-md">{data.profile.email}</p>
 				<Button onClick={() => View.switchForm()}>Change Password</Button>
+				<div class="bg-[var(--tertiary-color)] rounded-md p-2 w-fit">
+					<Link href="/manager/admin/dashboard" theme="light">Dashboard</Link>
+				</div>
 			</div>
-			<div class="ml-auto bg-[var(--tertiary-color)] rounded-lg p-2">
-				<Link href="/manager/admin/dashboard" theme="light">Dashboard</Link>
-			</div>
-		</div>
+			
+		</div>	
 		<div class="flex flex-col gap-2">
 			<b class="text-xl text-[var(--tertiary-color)]">Bio:</b>
 			<p class="text-justify">{data.profile.bio}</p>

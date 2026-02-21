@@ -24,13 +24,13 @@
 	{#if View.isLoading}
 		<Loading />
 	{:else if View.chats.length === 0 || !View.chats}
-		<div class="flex h-[480px] max-h-[480px] items-center justify-center">
+		<div class="flex h-[70dvh] items-center justify-center">
 			<b class="font-bold text-[var(--tertiary-color)]">No Chats Found</b>
 		</div>
 	{:else}
 		<ScrollArea
 			orientation="vertical"
-			viewportClasses="h-[480px] max-h-[480px]"
+			viewportClasses="h-[70dvh] max-h-[70dvh]"
 		>
 			<ul class="flex flex-col gap-4">
 				{#each View.chats as ch (ch.id)}
