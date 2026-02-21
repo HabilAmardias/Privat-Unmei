@@ -7,6 +7,7 @@
 	import { enhance } from '$app/forms';
 	import InputSecret from '$lib/components/form/InputSecret.svelte';
 	import { onMount } from 'svelte';
+	import Link from '$lib/components/button/Link.svelte';
 
 	let { data }: PageProps = $props();
 	const View = new adminProfileView();
@@ -29,7 +30,7 @@
 </svelte:head>
 
 {#if View.isEdit}
-	<div class="flex h-dvh w-full items-center justify-center">
+	<div class="flex w-full items-center justify-center">
 		<Card>
 			<h2 class="mb-3 text-2xl font-bold text-[var(--tertiary-color)]">Change Password</h2>
 			<form
@@ -71,13 +72,17 @@
 				className="rounded-full"
 			/>
 			<div class="flex flex-col gap-1">
-				<div class="flex gap-1">
+				<div class="flex">
 					<b class="text-xl text-[var(--tertiary-color)]">{data.profile.name}</b>
 				</div>
 				<p class="text-md">{data.profile.email}</p>
 				<Button onClick={() => View.switchForm()}>Change Password</Button>
+				<div class="bg-[var(--tertiary-color)] rounded-md p-2 w-fit">
+					<Link href="/manager/admin/dashboard" theme="light">Dashboard</Link>
+				</div>
 			</div>
-		</div>
+			
+		</div>	
 		<div class="flex flex-col gap-2">
 			<b class="text-xl text-[var(--tertiary-color)]">Bio:</b>
 			<p class="text-justify">{data.profile.bio}</p>

@@ -108,7 +108,7 @@
 	<div class="flex flex-col gap-4">
 		<p class="font-bold text-[var(--tertiary-color)]">Topics:</p>
 		{#if data.topics}
-			<ScrollArea orientation="vertical" viewportClasses="max-h-[300px]">
+			<ScrollArea orientation="vertical" viewportClasses="max-h-[50dvh]">
 				<ul class="flex flex-col gap-4">
 					{#each data.topics as t, i (i)}
 						<li class="rounded-lg bg-[var(--tertiary-color)] p-4 text-[var(--secondary-color)]">

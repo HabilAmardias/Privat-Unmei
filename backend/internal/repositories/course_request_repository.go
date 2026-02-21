@@ -18,6 +18,203 @@ func CreateCourseRequestRepository(db *db.CustomDB) *CourseRequestRepositoryImpl
 	return &CourseRequestRepositoryImpl{db}
 }
 
+func (cr *CourseRequestRepositoryImpl) GetMonthlyCostReport(ctx context.Context, reports *[]entity.MonthlyCostReportQuery) error {
+	var driver RepoDriver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	SELECT
+		COALESCE(SUM(p.operational_cost), 0),
+		EXTRACT(MONTH from p.created_at) as month_report
+	FROM payments p
+	JOIN course_requests cr ON p.course_request_id = cr.id
+	WHERE
+		p.deleted_at IS NULL AND
+		EXTRACT(YEAR FROM p.created_at) = EXTRACT(YEAR FROM CURRENT_TIMESTAMP) AND
+		cr.deleted_at IS NULL AND
+		cr.status IN ('scheduled', 'completed')
+	GROUP BY month_report
+	ORDER BY month_report ASC
+	`
+	rows, err := driver.Query(query)
+	if err != nil {
+		return customerrors.NewError(
+			"something went wrong",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var item entity.MonthlyCostReportQuery
+		if err := rows.Scan(
+			&item.TotalCost,
+			&item.Month,
+		); err != nil {
+			return customerrors.NewError(
+				"something went wrong",
+				err,
+				customerrors.DatabaseExecutionError,
+			)
+		}
+		*reports = append(*reports, item)
+	}
+	return nil
+}
+
+func (cr *CourseRequestRepositoryImpl) GetMonthlySessionReport(ctx context.Context, reports *[]entity.MonthlySessionReportQuery) error {
+	var driver RepoDriver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	query := `
+	SELECT 
+		COALESCE(SUM(number_of_sessions), 0),
+		EXTRACT(MONTH FROM created_at) as month_report
+	FROM course_requests
+	WHERE
+		deleted_at IS NULL AND
+		status IN ('scheduled', 'completed') AND
+		EXTRACT(YEAR FROM created_at) = EXTRACT(YEAR FROM CURRENT_TIMESTAMP)
+	GROUP BY
+		month_report
+	ORDER BY month_report ASC
+	`
+	rows, err := driver.Query(query)
+	if err != nil {
+		return customerrors.NewError(
+			"something went wrong",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var item entity.MonthlySessionReportQuery
+		if err := rows.Scan(
+			&item.TotalSession,
+			&item.Month,
+		); err != nil {
+			return customerrors.NewError(
+				"something went wrong",
+				err,
+				customerrors.DatabaseExecutionError,
+			)
+		}
+		*reports = append(*reports, item)
+	}
+	return nil
+}
+
+func (cr *CourseRequestRepositoryImpl) GetThisMonthMentorReport(ctx context.Context, reports *[]entity.MonthlyMentorReportQuery) error {
+	var driver RepoDriver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+	// TODO: Cache this with redis
+	query := `
+	SELECT
+		u.name,
+		u.email,
+		COALESCE(SUM(cr.number_of_sessions), 0),
+		COALESCE(SUM(p.operational_cost), 0)
+	FROM payments p
+	JOIN course_requests cr ON p.course_request_id = cr.id
+	JOIN courses c ON cr.course_id = c.id
+	JOIN mentors m ON c.mentor_id = m.id
+	JOIN users u ON u.id = m.id
+	WHERE
+		p.deleted_at IS NULL AND
+		EXTRACT(MONTH FROM p.created_at) = EXTRACT(MONTH FROM CURRENT_TIMESTAMP) AND
+		EXTRACT(YEAR FROM p.created_at) = EXTRACT(YEAR FROM CURRENT_TIMESTAMP) AND
+		cr.deleted_at IS NULL AND
+		cr.status IN ('scheduled', 'completed') AND
+		c.deleted_at IS NULL AND
+		m.deleted_at IS NULL AND
+		u.deleted_at IS NULL
+	GROUP BY u.email, u.name
+	`
+	rows, err := driver.Query(query)
+	if err != nil {
+		return customerrors.NewError(
+			"something went wrong",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var item entity.MonthlyMentorReportQuery
+		if err := rows.Scan(
+			&item.MentorName,
+			&item.MentorEmail,
+			&item.TotalSession,
+			&item.TotalCost,
+		); err != nil {
+			return customerrors.NewError(
+				"something went wrong",
+				err,
+				customerrors.DatabaseExecutionError,
+			)
+		}
+		*reports = append(*reports, item)
+	}
+	return nil
+}
+
+func (cr *CourseRequestRepositoryImpl) GetThisMonthSessions(ctx context.Context, totalSession *int64) error {
+	var driver RepoDriver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+
+	query := `
+	SELECT COALESCE(SUM(number_of_sessions), 0)
+	FROM course_requests
+	WHERE
+		deleted_at IS NULL AND
+		status IN ('scheduled', 'completed') AND
+		EXTRACT(MONTH FROM created_at) = EXTRACT(MONTH FROM CURRENT_TIMESTAMP) AND
+		EXTRACT(YEAR FROM created_at) = EXTRACT(YEAR FROM CURRENT_TIMESTAMP)
+	`
+	if err := driver.QueryRow(query).Scan(totalSession); err != nil {
+		return customerrors.NewError(
+			"something went wrong",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
+func (cr *CourseRequestRepositoryImpl) GetThisMonthOperationalCost(ctx context.Context, totalCost *float64) error {
+	var driver RepoDriver = cr.DB
+	if tx := GetTransactionFromContext(ctx); tx != nil {
+		driver = tx
+	}
+
+	query := `
+	SELECT COALESCE(SUM(p.operational_cost), 0)
+	FROM payments p
+	JOIN course_requests cr ON p.course_request_id = cr.id
+	WHERE
+		p.deleted_at IS NULL AND
+		cr.deleted_at IS NULL AND
+		cr.status IN ('scheduled', 'completed') AND
+		EXTRACT(MONTH FROM p.created_at) = EXTRACT(MONTH FROM CURRENT_TIMESTAMP) AND
+		EXTRACT(YEAR FROM p.created_at) = EXTRACT(YEAR FROM CURRENT_TIMESTAMP)
+	`
+	if err := driver.QueryRow(query).Scan(totalCost); err != nil {
+		return customerrors.NewError(
+			"something went wrong",
+			err,
+			customerrors.DatabaseExecutionError,
+		)
+	}
+	return nil
+}
+
 func (cr *CourseRequestRepositoryImpl) DeleteAllStudentOrders(ctx context.Context, id string) error {
 	var driver RepoDriver = cr.DB
 	if tx := GetTransactionFromContext(ctx); tx != nil {
@@ -106,6 +303,7 @@ func (cr *CourseRequestRepositoryImpl) StudentCourseRequestList(
 	}
 	args := []any{studentID}
 	countArgs := []any{studentID}
+	// TODO: cache 1st page of this with redis
 	query := `
 	SELECT
 		cr.id,
@@ -225,6 +423,7 @@ func (cr *CourseRequestRepositoryImpl) MentorCourseRequestList(
 	}
 	args := []any{mentorID}
 	countArgs := []any{mentorID}
+	// TODO: cache 1st page of this with redis
 	query := `
 	SELECT
 		cr.id,

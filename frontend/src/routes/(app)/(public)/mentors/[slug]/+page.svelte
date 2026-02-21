@@ -100,7 +100,7 @@
 	</div>
 
 	<h3 class="font-bold text-[var(--tertiary-color)]">Courses:</h3>
-	<ScrollArea orientation="vertical" viewportClasses="h-[500px] max-h-[500px]">
+	<ScrollArea orientation="vertical" viewportClasses="h-[50dvh] max-h-[50dvh]">
 		{#if View.isLoading}
 			<Loading />
 		{:else if View.courses.length === 0}

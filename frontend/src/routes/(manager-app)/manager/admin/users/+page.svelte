@@ -88,7 +88,7 @@
 			{:else if !View.students || View.students.length === 0}
 				<b class="mx-auto self-center text-[var(--tertiary-color)]">No students found</b>
 			{:else}
-				<ScrollArea orientation="vertical" class="flex-1" viewportClasses="w-full max-h-[500px]">
+				<ScrollArea orientation="both" viewportClasses="w-[80dvw] max-w-[80dvw] h-[50dvh] max-h-[50dvh]">
 					<table class="w-full border-separate border-spacing-4">
 						<thead>
 							<tr>
@@ -174,7 +174,7 @@
 		{:else if !View.mentors || View.mentors.length === 0}
 			<b class="mx-auto self-center text-[var(--tertiary-color)]">No mentors found</b>
 		{:else}
-			<ScrollArea orientation="vertical" class="flex-1" viewportClasses="w-full max-h-[500px]">
+			<ScrollArea orientation="both" viewportClasses="w-[80dvw] max-w-[80dvw] h-[50dvh] max-h-[50dvh]">
 				<table class="w-full border-separate border-spacing-4">
 					<thead>
 						<tr>
