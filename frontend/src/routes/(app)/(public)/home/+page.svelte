@@ -19,7 +19,7 @@
 	<ScrollArea orientation="vertical" viewportClasses="h-[40dvh] w-[80dvw] max-w-[80dvw]">
 		<ul class="flex flex-col gap-4 md:grid md:grid-cols-3">
 			{#each data.mostBought as c (c.id)}
-				<li class="w-fit transition-transform hover:-translate-y-1">
+				<li class="transition-transform hover:-translate-y-1">
 					<Link href={`/courses/${c.id}`}>
 						<div
 							class="flex h-[100px] flex-col justify-between rounded-lg bg-[var(--tertiary-color)] p-4"
@@ -50,7 +50,7 @@
 	<ScrollArea orientation="vertical" viewportClasses="h-[40dvh] w-[80dvw] max-w-[80dvw]">
 		<ul class="flex flex-col gap-4 md:grid md:grid-cols-3">
 			{#each data.courses.entries as c (c.id)}
-				<li class="w-fit transition-transform hover:-translate-y-1">
+				<li class="transition-transform hover:-translate-y-1">
 					<Link href={`/courses/${c.id}`}>
 						<div
 							class="flex h-[100px] flex-col justify-between rounded-lg bg-[var(--tertiary-color)] p-4"
@@ -81,7 +81,7 @@
 	<ScrollArea orientation="vertical" viewportClasses="h-[40dvh] w-[80dvw] max-w-[80dvw]">
 		<ul class="flex flex-col gap-4 md:grid md:grid-cols-3">
 			{#each data.mentors.entries as m (m.id)}
-				<li class="w-fit transition-transform hover:-translate-y-1">
+				<li class="transition-transform hover:-translate-y-1">
 					<Link href={`/mentors/${m.id}`}>
 						<div class="flex h-[100px] gap-4 rounded-lg bg-[var(--tertiary-color)] p-4">
 							<CldImage src={m.profile_image} width={70} height={70} className="rounded-full" />
